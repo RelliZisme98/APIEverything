@@ -3,23 +3,69 @@
  * Traffic violation lookup (phạt nguội) for Vietnam.
  *
  * Strategy:
- *   1. Try phatnguoi.vn API (no key, may have CORS)
- *   2. On failure → provide direct links to official sites
+ *   1. Cloudflare Worker proxy (https://phatnguoi-proxy.*.workers.dev)
+ *      → Bypasses CORS on production domains
+ *   2. Direct phatnguoi.vn (works on localhost if CORS not enforced)
+ *   3. Fallback → show links to official sites
+ *
+ * HOW TO CONFIGURE PROXY:
+ *   Deploy cloudflare-worker/phatnguoi-proxy.js to Cloudflare Workers,
+ *   then set your Worker URL in config.js:
+ *     TRAFFIC_PROXY_URL: 'https://phatnguoi-proxy.YOUR_SUBDOMAIN.workers.dev'
  */
+
+import APP_CONFIG from '../../config.js';
+
+/**
+ * Worker proxy URL — read from config.js.
+ * Empty string means "try direct API then fallback to links".
+ */
+const PROXY_URL = APP_CONFIG.TRAFFIC_PROXY_URL?.trim() || '';
+const DIRECT_URL = 'https://api.phatnguoi.vn/phat-nguoi';
 
 /**
  * Lookup traffic violations by license plate.
- * @param {string} plate     – Biển số xe (e.g. "51F-123.45" or "51F12345")
+ * @param {string} plate       – Biển số xe (e.g. "51F-123.45" or "51F12345")
  * @param {string} vehicleType – "car" | "motorbike"
- * @returns {Promise<{success, data, error, links}>}
+ * @returns {Promise<{success, data, error, links, source}>}
  */
 export async function lookupTrafficViolation(plate, vehicleType = 'car') {
-  // Normalise plate (remove spaces, dots)
-  const normalised = plate.replace(/[\s.-]/g, '').toUpperCase();
+  const normalised = plate.replace(/[\s.\-]/g, '').toUpperCase();
+  const links = buildLinks(plate, vehicleType);
 
-  // ── Attempt 1: phatnguoi.vn unofficial API ──
+  // ── Attempt 1: Cloudflare Worker proxy (if configured) ──
+  if (PROXY_URL) {
+    try {
+      const res = await fetch(`${PROXY_URL}/phat-nguoi`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bien_so: normalised }),
+        signal: AbortSignal.timeout(10000),
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        if (json && (json.data || json.result)) {
+          return {
+            success: true,
+            data: json.data || json.result || [],
+            links,
+            source: 'proxy',
+          };
+        }
+        // API responded but no violations found
+        if (json && json.data !== undefined) {
+          return { success: true, data: [], links, source: 'proxy' };
+        }
+      }
+    } catch (e) {
+      console.warn('[Traffic] Proxy failed:', e.message);
+    }
+  }
+
+  // ── Attempt 2: Direct API (may work on localhost) ──
   try {
-    const res = await fetch('https://api.phatnguoi.vn/phat-nguoi', {
+    const res = await fetch(DIRECT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ bien_so: normalised }),
@@ -28,30 +74,21 @@ export async function lookupTrafficViolation(plate, vehicleType = 'car') {
 
     if (res.ok) {
       const json = await res.json();
-      // phatnguoi.vn returns { data: [...] } or { message: "..." }
-      if (json && (json.data || json.result)) {
-        const violations = json.data || json.result || [];
-        return { success: true, data: violations, links: buildLinks(plate, vehicleType) };
+      if (json && (json.data !== undefined || json.result !== undefined)) {
+        return {
+          success: true,
+          data: json.data || json.result || [],
+          links,
+          source: 'direct',
+        };
       }
     }
   } catch (e) {
-    // CORS or network error — fall through
-    console.info('[Traffic] Primary API unavailable, using fallback links.');
+    console.info('[Traffic] Direct API unavailable (CORS expected on production).');
   }
 
-  // ── Attempt 2: csgt.vn public query (CORS likely blocked, catch silently) ──
-  try {
-    const url = `https://www.csgt.vn/tra-cuu-phuong-tien-vi-pham.html?bsx=${encodeURIComponent(normalised)}`;
-    // We can't read the response due to CORS, but the URL is valid for opening
-  } catch { /* ignore */ }
-
   // ── Fallback: return links only ──
-  return {
-    success: false,
-    data: [],
-    error: 'cors',
-    links: buildLinks(plate, vehicleType),
-  };
+  return { success: false, data: [], error: 'cors', links, source: 'fallback' };
 }
 
 /**
