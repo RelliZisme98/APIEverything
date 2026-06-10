@@ -1,0 +1,7 @@
+# Cloudflare Assets — exclude từ upload
+.git/
+.wrangler/
+node_modules/
+cloudflare-worker/
+*.log
+*.map
