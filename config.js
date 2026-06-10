@@ -24,17 +24,10 @@ const APP_CONFIG = {
   GOLD_API_KEY: 'goldapi-e662baae3dbf2a06936d59d2e8559150-io',
 
   // ── Tra cứu phạt nguội (CORS Proxy) ──────────────────────
-  // API CSGT bị chặn CORS từ browser. Cần deploy Cloudflare Worker
-  // để bypass. Xem hướng dẫn trong: cloudflare-worker/phatnguoi-proxy.js
-  //
-  // Điền 1 trong 2 cách:
-  //   Cách 1 — workers.dev URL (mặc định sau khi deploy):
-  //     'https://phatnguoi-proxy.lechinhdai98.workers.dev'
-  //   Cách 2 — Custom domain (thêm trong Worker → Settings → Triggers):
-  //     'https://proxy.rellia.org'
-  //
-  // Để trống → chỉ hiển thị link tra cứu thủ công.
-  TRAFFIC_PROXY_URL: 'everything.rellia.org',
+  // Dùng Cloudflare Pages Function (file: functions/phat-nguoi.js)
+  // Tự động available tại: https://everything.rellia.org/phat-nguoi
+  // Không cần Worker riêng — push code lên là tự deploy.
+  TRAFFIC_PROXY_URL: 'https://everything.rellia.org',
 
   // ── Tỷ giá USD/VND dự phòng ──────────────────────────────
   // ✅ Tỷ giá thực tế được tự động lấy từ open.er-api.com khi khởi động.
