@@ -90,8 +90,8 @@ function buildLinks(plate, vehicleType) {
   return [
     {
       name:  '🏛️ Cổng CSGT (Chính thức)',
-      url:   'https://www.csgt.vn/tra-cuu-phuong-tien-vi-pham.html',
-      note:  'Trang chính thức của Cảnh sát giao thông',
+      url:   'https://csgt.bocongan.gov.vn/tra-cuu-phat-nguoi',
+      note:  'Trang chính thức của Cảnh sát giao thông (Yêu cầu VNeID)',
       badge: 'official',
     },
     {
