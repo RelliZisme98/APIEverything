@@ -1,0 +1,56 @@
+/* ═══════════════════════════════════════════
+   SETTINGS MODAL
+   ═══════════════════════════════════════════ */
+
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: #0d1424;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  animation: fade-in-up 0.25s ease both;
+}
+
+.modal h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.modal > p {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+/* ── Form groups ── */
+.form-group          { margin-bottom: 16px; }
+.form-group label    { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+.form-hint           { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
+.form-hint a         { color: var(--accent-blue); text-decoration: none; }
+.form-hint a:hover   { text-decoration: underline; }
+
+/* ── Actions row ── */
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-save { flex: 2; }

@@ -1,0 +1,40 @@
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS – CSS Custom Properties
+   ═══════════════════════════════════════════ */
+
+:root {
+  /* Background */
+  --bg-primary:   #070b14;
+  --bg-secondary: #0d1424;
+  --bg-card:      rgba(255, 255, 255, 0.04);
+  --bg-card-hover:rgba(255, 255, 255, 0.07);
+
+  /* Borders */
+  --border:       rgba(255, 255, 255, 0.08);
+  --border-glow:  rgba(99, 179, 237, 0.3);
+
+  /* Text */
+  --text-primary:   #e8f0fe;
+  --text-secondary: #8899aa;
+  --text-muted:     #556070;
+
+  /* Accent colors */
+  --accent-blue:   #60a5fa;
+  --accent-purple: #a78bfa;
+  --accent-cyan:   #22d3ee;
+  --accent-green:  #34d399;
+  --accent-red:    #f87171;
+  --accent-yellow: #fbbf24;
+  --accent-orange: #fb923c;
+
+  /* Shadows / Glows */
+  --glow-blue:   0 0 20px rgba(96, 165, 250, 0.15);
+  --glow-purple: 0 0 20px rgba(167, 139, 250, 0.15);
+
+  /* Radii */
+  --radius:    16px;
+  --radius-sm: 10px;
+
+  /* Gradients */
+  --gradient-brand: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+}

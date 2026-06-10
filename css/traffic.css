@@ -1,0 +1,151 @@
+/* ═══════════════════════════════════════════
+   TRAFFIC VIOLATION LOOKUP
+   ═══════════════════════════════════════════ */
+
+/* ── Search form ── */
+.traffic-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.traffic-select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  padding: 8px 12px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  flex-shrink: 0;
+}
+
+.traffic-select:focus { border-color: var(--border-glow); }
+.traffic-select option { background: #0d1424; }
+
+/* ── Plate input ── */
+.plate-input {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── Result states ── */
+.traffic-loading {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.traffic-clean {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(52, 211, 153, 0.08);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+}
+
+.traffic-clean-icon { font-size: 32px; }
+.traffic-clean-text { font-size: 14px; font-weight: 600; color: var(--accent-green); }
+.traffic-clean-sub  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* ── Violation card ── */
+.violation-card {
+  background: rgba(248, 113, 113, 0.06);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.violation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.violation-plate {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-red);
+  background: rgba(248, 113, 113, 0.1);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+.violation-status {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+
+.status-unpaid { background: rgba(251,191,36,0.15); color: var(--accent-yellow); border: 1px solid rgba(251,191,36,0.25); }
+.status-paid   { background: rgba(52,211,153,0.15);  color: var(--accent-green);  border: 1px solid rgba(52,211,153,0.25); }
+
+.violation-row {
+  display: flex;
+  gap: 6px;
+  font-size: 12px;
+  margin-bottom: 5px;
+  align-items: flex-start;
+}
+
+.violation-label { color: var(--text-muted); min-width: 100px; flex-shrink: 0; }
+.violation-value { color: var(--text-primary); font-weight: 500; }
+
+.violation-fine {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-red);
+  margin-top: 8px;
+}
+
+/* ── Fallback links ── */
+.traffic-links  { display: grid; gap: 8px; }
+.traffic-links-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+
+.traffic-link-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.traffic-link-item:hover { background: rgba(255, 255, 255, 0.06); border-color: var(--border-glow); }
+
+.traffic-link-name { font-size: 13px; font-weight: 600; }
+.traffic-link-note { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+.badge-official    { font-size: 10px; color: var(--accent-green);  background: rgba(52,211,153,0.12); padding: 2px 6px; border-radius: 10px; }
+.badge-third-party { font-size: 10px; color: var(--accent-blue);   background: rgba(96,165,250,0.12); padding: 2px 6px; border-radius: 10px; }
+
+/* ── Tips ── */
+.plate-tip {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: rgba(255,255,255,0.02);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--accent-blue);
+}

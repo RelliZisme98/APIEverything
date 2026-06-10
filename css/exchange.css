@@ -1,0 +1,41 @@
+/* ═══════════════════════════════════════════
+   EXCHANGE RATE TABLE
+   ═══════════════════════════════════════════ */
+
+.fx-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.fx-table tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.15s;
+}
+
+.fx-table tr:last-child { border-bottom: none; }
+.fx-table tr:hover      { background: rgba(255,255,255,0.025); }
+
+.fx-table td { padding: 10px 4px; font-size: 13px; }
+
+.fx-pair {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fx-flag    { font-size: 18px; }
+.fx-sym     { font-weight: 600; color: var(--text-primary); }
+.fx-name    { font-size: 11px; color: var(--text-muted); }
+
+.fx-rate {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  color: var(--accent-cyan);
+  text-align: right;
+}
+
+.fx-label {
+  text-align: right;
+  font-size: 11px;
+  color: var(--text-muted);
+}

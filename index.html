@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rellia's Dashboard – Everything you need to know</title>
+  <meta name="description"
+    content="Theo dõi giá vàng, tỷ giá ngoại tệ, giá xăng, tiền điện tử và thời tiết Việt Nam theo thời gian thực." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+
+  <!-- ── CSS – load order matters ── -->
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/animations.css" />
+  <link rel="stylesheet" href="css/skeleton.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/ticker.css" />
+  <link rel="stylesheet" href="css/cards.css" />
+  <link rel="stylesheet" href="css/crypto.css" />
+  <link rel="stylesheet" href="css/weather.css" />
+  <link rel="stylesheet" href="css/gold.css" />
+  <link rel="stylesheet" href="css/gas.css" />
+  <link rel="stylesheet" href="css/exchange.css" />
+  <link rel="stylesheet" href="css/modal.css" />
+  <!-- ── New feature CSS ── -->
+  <link rel="stylesheet" href="css/traffic.css" />
+  <link rel="stylesheet" href="css/calendar.css" />
+  <link rel="stylesheet" href="css/power-outage.css" />
+</head>
+
+<body>
+
+  <!-- ═══════════════ TICKER TAPE ═══════════════ -->
+  <div class="ticker-wrap" id="tickerWrap">
+    <div class="ticker-label">📡 LIVE</div>
+    <div id="tickerTrack" class="ticker-track">
+      <span class="ticker-item"><span class="symbol">⏳</span> <span class="val">Đang tải dữ liệu...</span></span>
+      <span class="ticker-item"><span class="symbol">⏳</span> <span class="val">Đang tải dữ liệu...</span></span>
+      <span class="ticker-item"><span class="symbol">⏳</span> <span class="val">Đang tải dữ liệu...</span></span>
+    </div>
+  </div>
+
+  <!-- ═══════════════ HEADER ═══════════════ -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon">📊</div>
+      <div>
+        <div class="logo-text">Rellia<span> Đại</span></div>
+        <div class="logo-sub">Tất cả thông tin cần thiết hàng ngày </div>
+      </div>
+    </div>
+
+    <div class="header-meta">
+      <div class="clock">🕐 <span id="clockDisplay">--:--:--</span></div>
+      <button class="refresh-btn" id="refreshBtn" onclick="refreshAll()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="23 4 23 10 17 10" />
+          <polyline points="1 20 1 14 7 14" />
+          <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+        </svg>
+        Làm mới
+      </button>
+      <button class="btn-primary" onclick="openSettingsModal()">⚙️ Cài đặt API</button>
+    </div>
+  </header>
+
+  <!-- ═══════════════ MAIN ═══════════════ -->
+  <main>
+
+    <!-- ── Crypto Grid ── -->
+    <div class="section-heading">
+      💎 Tiền Điện Tử
+      <small style="font-size:10px;color:var(--accent-green);margin-left:4px;">(CoinGecko · Miễn phí)</small>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">🪙</span> Top Crypto Theo Vốn Hóa</div>
+        <span class="card-badge badge-live"><span class="status-dot dot-green"></span>LIVE</span>
+      </div>
+      <div id="cryptoGrid" class="crypto-grid">
+        <div class="skeleton skel-card"></div>
+        <div class="skeleton skel-card"></div>
+        <div class="skeleton skel-card"></div>
+        <div class="skeleton skel-card"></div>
+        <div class="skeleton skel-card"></div>
+        <div class="skeleton skel-card"></div>
+      </div>
+    </div>
+
+    <!-- ── Weather · Gold · Gas ── -->
+    <div class="row-3" style="margin-bottom:20px;">
+
+      <!-- Weather -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">☀️</span> Thời Tiết</div>
+          <span class="card-badge badge-manual" id="weatherBadge">
+            <span class="status-dot dot-yellow"></span>ĐANG TẢI
+          </span>
+        </div>
+        <!-- Quick city chips -->
+        <div class="weather-chips-wrap">
+          <div class="weather-chips-label">⚡ Thành phố nhanh</div>
+          <div class="weather-chips" id="weatherQuickCities"></div>
+        </div>
+        <!-- City search -->
+        <div class="weather-search">
+          <input class="field-input" id="cityInput" type="text" placeholder="Nhập tên thành phố..."
+            value="Ho Chi Minh City" />
+          <button class="btn-primary" onclick="loadWeather()">Tìm</button>
+        </div>
+        <!-- Dynamic content -->
+        <div id="weatherContent">
+          <div class="skeleton skel-line" style="width:80%;margin-top:8px;"></div>
+          <div class="skeleton skel-line" style="width:60%;"></div>
+          <div class="skeleton skel-big" style="margin-top:12px;"></div>
+        </div>
+      </div>
+
+      <!-- Gold -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">🏅</span> Giá Vàng</div>
+          <span class="card-badge badge-live"><span class="status-dot dot-green"></span>LIVE</span>
+        </div>
+        <div id="goldContent">
+          <div class="skeleton skel-big"></div>
+          <div class="skeleton skel-line" style="margin-top:10px;width:50%;"></div>
+        </div>
+      </div>
+
+      <!-- Gas -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">⛽</span> Giá Xăng Dầu VN</div>
+          <span class="card-badge badge-manual"><span class="status-dot dot-yellow"></span>CẬP NHẬT</span>
+        </div>
+        <div class="gas-grid" id="gasGrid"></div>
+        <div class="gas-updated" id="gasUpdated"></div>
+      </div>
+
+    </div>
+
+    <!-- ── Exchange Rates · Market Stats ── -->
+    <div class="row-2" style="margin-bottom:20px;">
+
+      <!-- FX Table -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">💱</span> Tỷ Giá Ngoại Tệ → VND</div>
+          <span class="card-badge badge-live"><span class="status-dot dot-green"></span>LIVE</span>
+        </div>
+        <table class="fx-table">
+          <tbody id="fxBody">
+            <tr>
+              <td colspan="3">
+                <div class="skeleton skel-line"></div>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="3">
+                <div class="skeleton skel-line"></div>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="3">
+                <div class="skeleton skel-line"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="api-note" style="margin-top:10px;">
+          <small id="fxSourceNote">Nguồn: Frankfurter (ECB) / ExchangeRate API · Tỷ giá có thể chênh lệch với ngân hàng
+            thương mại</small>
+        </div>
+      </div>
+
+      <!-- Market Stats -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">📈</span> Thống Kê Thị Trường</div>
+          <span class="card-badge badge-live"><span class="status-dot dot-green"></span>LIVE</span>
+        </div>
+        <div id="marketStats">
+          <div class="skeleton skel-line"></div>
+          <div class="skeleton skel-line"></div>
+          <div class="skeleton skel-line"></div>
+          <div class="skeleton skel-line"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Detailed Crypto Table ── -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">📋</span> Bảng Chi Tiết Crypto (Top 15)</div>
+        <span class="card-badge badge-live"><span class="status-dot dot-green"></span>LIVE</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table id="cryptoTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Tên</th>
+              <th style="text-align:right;">Giá (USD)</th>
+              <th style="text-align:right;">24h</th>
+              <th style="text-align:right;">7 ngày</th>
+              <th style="text-align:right;">Vốn Hóa</th>
+              <th style="text-align:right;">KL 24h</th>
+            </tr>
+          </thead>
+          <tbody id="cryptoTableBody">
+            <tr>
+              <td colspan="7">
+                <div class="skeleton skel-line" style="margin:10px 0;"></div>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="7">
+                <div class="skeleton skel-line" style="margin:10px 0;"></div>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="7">
+                <div class="skeleton skel-line" style="margin:10px 0;"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- ── NEW SECTION: Calendar · Traffic · Power Outage ── -->
+    <!-- ══════════════════════════════════════════════════════ -->
+
+    <div class="section-heading" style="margin-top:8px;">
+      🛠️ Tiện Ích Hàng Ngày
+    </div>
+
+    <!-- Row: Calendar + Traffic -->
+    <div class="row-2" style="margin-bottom:20px;">
+
+      <!-- 📅 Lịch Âm Dương -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">📅</span> Lịch Âm Dương</div>
+          <span class="card-badge badge-live"><span class="status-dot dot-green"></span>TỰ TÍNH</span>
+        </div>
+        <div id="calendarContent">
+          <div class="skeleton skel-big"></div>
+          <div class="skeleton skel-line" style="margin-top:10px;"></div>
+          <div class="skeleton skel-line" style="width:70%;"></div>
+        </div>
+      </div>
+
+      <!-- 🚔 Phạt Nguội -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">🚔</span> Tra Cứu Phạt Nguội</div>
+          <span class="card-badge badge-needkey"><span class="status-dot dot-yellow"></span>CSGT</span>
+        </div>
+
+        <!-- Search form -->
+        <div class="traffic-form">
+          <select class="traffic-select" id="trafficTypeSelect">
+            <option value="car">🚗 Ô tô</option>
+            <option value="motorbike">🏍️ Xe máy</option>
+          </select>
+          <input class="field-input plate-input" id="trafficPlateInput" type="text" placeholder="VD: 51F-123.45"
+            maxlength="12" />
+          <button class="btn-primary" id="trafficSearchBtn">Tra cứu</button>
+        </div>
+
+        <div class="plate-tip">
+          💡 Nhập biển số ô tô hoặc xe máy để kiểm tra vi phạm giao thông chưa xử lý.
+          Ví dụ: <strong>51F12345</strong> hoặc <strong>51F-123.45</strong>
+        </div>
+
+        <!-- Dynamic results -->
+        <div id="trafficResult" style="margin-top:14px;"></div>
+      </div>
+
+    </div>
+
+    <!-- Row: Power Outage (full width) -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-header">
+        <div class="card-title"><span class="icon">⚡</span> Lịch Cúp Điện Theo Khu Vực</div>
+        <span class="card-badge badge-manual"><span class="status-dot dot-yellow"></span>LINK EVN</span>
+      </div>
+      <div id="powerContent"></div>
+    </div>
+
+  </main>
+
+  <!-- ═══════════════ SETTINGS MODAL ═══════════════ -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+      <h2>⚙️ Cài Đặt API Keys</h2>
+
+      <!-- Config file hint -->
+      <div style="background:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,0.2);
+                  border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:12px;
+                  color:var(--text-secondary);line-height:1.6;">
+        📝 <strong>Cách nhanh nhất:</strong> Mở file
+        <code style="background:rgba(255,255,255,0.08);padding:1px 6px;border-radius:4px;
+                     font-family:'JetBrains Mono',monospace;color:var(--accent-cyan);">config.js</code>
+        ở thư mục gốc dự án và điền key vào đó — không cần nhập lại mỗi lần.
+        <br />Key trong <code
+          style="background:rgba(255,255,255,0.08);padding:1px 6px;border-radius:4px;">config.js</code>
+        luôn được ưu tiên hơn key nhập ở đây.
+      </div>
+
+      <!-- OWM Key -->
+      <div class="form-group">
+        <label>
+          🌤️ OpenWeatherMap API Key
+          <span id="owmKeyStatus" style="font-size:10px;font-weight:400;margin-left:6px;"></span>
+        </label>
+        <input class="field-input" type="text" id="modalOwmKey" placeholder="Ví dụ: a1b2c3d4e5f6..." />
+        <div class="form-hint">
+          Miễn phí tại <a href="https://openweathermap.org/api" target="_blank">openweathermap.org/api</a> · 60 req/min
+        </div>
+      </div>
+
+      <!-- Gold Key -->
+      <div class="form-group">
+        <label>
+          🏅 GoldAPI Key (giá vàng thế giới)
+          <span id="goldKeyStatus" style="font-size:10px;font-weight:400;margin-left:6px;"></span>
+        </label>
+        <input class="field-input" type="text" id="modalGoldKey" placeholder="Ví dụ: goldapi-xxx..." />
+        <div class="form-hint">
+          Miễn phí tại <a href="https://www.goldapi.io/" target="_blank">goldapi.io</a> · 100 req/ngày
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary"
+          onclick="document.getElementById('settingsModal').classList.remove('open')">Hủy</button>
+        <button class="btn-primary btn-save" onclick="saveAllKeys()">💾 Lưu &amp; Áp Dụng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ FOOTER ═══════════════ -->
+  <footer>
+    <p>
+      📡 Rellia Đại Dashboard · Dữ liệu từ
+      <a href="https://www.coingecko.com" target="_blank">CoinGecko</a>,
+      <a href="https://www.frankfurter.app" target="_blank">Frankfurter (ECB)</a>,
+      <a href="https://openweathermap.org" target="_blank">OpenWeatherMap</a>,
+      <a href="https://www.goldapi.io" target="_blank">GoldAPI</a>
+    </p>
+    <p style="margin-top:6px;">Chỉ mang tính tham khảo · Không phải lời khuyên tài chính</p>
+  </footer>
+
+  <!-- ── ES Module entry ── -->
+  <script type="module" src="js/main.js"></script>
+
+</body>
+
+</html>

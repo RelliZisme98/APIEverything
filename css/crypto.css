@@ -1,0 +1,132 @@
+/* ═══════════════════════════════════════════
+   CRYPTO – Grid cards & Detail table
+   ═══════════════════════════════════════════ */
+
+/* ── Grid ── */
+.crypto-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.crypto-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  transition: background 0.25s, border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+  cursor: default;
+}
+
+.crypto-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--border-glow);
+  transform: translateY(-2px);
+  box-shadow: var(--glow-blue);
+}
+
+.crypto-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.crypto-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.crypto-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+
+.crypto-sym      { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.crypto-fullname { font-size: 10px; color: var(--text-muted); }
+
+.crypto-change {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 7px;
+  border-radius: 20px;
+}
+
+.change-up { background: rgba(52,211,153,0.12);  color: var(--accent-green); }
+.change-dn { background: rgba(248,113,113,0.12); color: var(--accent-red); }
+
+.crypto-price {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.crypto-vol {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ── Detail table ── */
+#cryptoTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+#cryptoTable thead th {
+  padding: 10px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+#cryptoTable thead th:not(:first-child):not(:nth-child(2)) {
+  text-align: right;
+}
+
+#cryptoTable tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.2s;
+}
+
+#cryptoTable tbody tr:hover { background: rgba(255, 255, 255, 0.03); }
+
+#cryptoTable tbody td { padding: 10px 8px; }
+
+.ct-rank { color: var(--text-muted); font-size: 12px; }
+
+.ct-coin {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ct-coin img {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+}
+
+.ct-coin-name { font-weight: 600; font-size: 13px; }
+.ct-coin-sym  { font-size: 10px; color: var(--text-muted); }
+
+.ct-num {
+  text-align: right;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+}
+
+.ct-num-sm {
+  text-align: right;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+}

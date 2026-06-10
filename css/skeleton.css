@@ -1,0 +1,41 @@
+/* ═══════════════════════════════════════════
+   SKELETON LOADING STATES
+   ═══════════════════════════════════════════ */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+.skel-line {
+  height: 14px;
+  margin-bottom: 8px;
+}
+
+.skel-line-sm {
+  height: 10px;
+  margin-bottom: 6px;
+}
+
+.skel-big {
+  height: 32px;
+  width: 60%;
+}
+
+.skel-circle {
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+}
+
+.skel-card {
+  height: 100px;
+  border-radius: var(--radius-sm);
+}

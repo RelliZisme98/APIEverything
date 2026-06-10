@@ -1,0 +1,57 @@
+/* ═══════════════════════════════════════════
+   GAS PRICE LIST
+   ═══════════════════════════════════════════ */
+
+.gas-grid { display: grid; gap: 10px; }
+
+.gas-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.gas-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.gas-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gas-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.gas-name { font-size: 13px; font-weight: 600; }
+.gas-sub  { font-size: 11px; color: var(--text-muted); }
+
+.gas-right { text-align: right; }
+
+.gas-price-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.gas-price-unit {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.gas-updated {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 10px;
+}
