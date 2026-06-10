@@ -170,9 +170,9 @@ export function renderPowerOutage(containerId = 'powerContent') {
 
 /**
  * Search power outage by selected province (+ optional address).
- * @param {boolean} open – whether to open URL in new tab (true on btn click)
+ * @param {boolean} open – whether to open URL in new tab (defaults to false)
  */
-export function searchPowerOutage(open = true) {
+export function searchPowerOutage(open = false) {
   const province = document.getElementById('powerProvinceSelect')?.value;
   const address  = document.getElementById('powerAddressInput')?.value?.trim();
   const result   = document.getElementById('powerSearchResult');
@@ -202,10 +202,21 @@ export function searchPowerOutage(open = true) {
           ${address ? `<div class="power-found-addr">📍 ${address}</div>` : ''}
         </div>
       </div>
-      <a class="power-found-btn" href="${fullUrl}" target="_blank" rel="noopener"
-         style="border-color:${unit.color};color:${unit.color};">
-        Xem lịch cúp điện ${province} →
-      </a>
+      
+      <div style="display:flex; gap:10px; margin-bottom:12px;">
+        <a class="power-found-btn" href="${fullUrl}" target="_blank" rel="noopener"
+           style="border-color:${unit.color};color:${unit.color};flex:1;text-align:center;">
+          Mở trang web trong tab mới ↗️
+        </a>
+      </div>
+
+      <div class="iframe-container" style="background:#fff; height:500px;">
+        <iframe src="${fullUrl}" style="width:100%;height:100%;border:none;" sandbox="allow-scripts allow-forms allow-same-origin allow-popups"></iframe>
+      </div>
+      
+      <div style="font-size:11px;color:var(--text-muted);margin-top:8px;text-align:center;line-height:1.4;">
+        ℹ️ Một số đơn vị điện lực (như EVNHANOI) có thể chặn hiển thị do chính sách bảo mật chống clickjacking (X-Frame-Options). Nếu khung trên trống, vui lòng click nút mở trang web ở trên.
+      </div>
     </div>
   `;
 
