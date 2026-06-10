@@ -12,6 +12,14 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
+/** Health check — mở https://everything.rellia.org/phat-nguoi trong browser để test */
+export async function onRequestGet() {
+  return new Response(JSON.stringify({ status: 'ok', service: 'phatnguoi-proxy' }), {
+    status:  200,
+    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
+  });
+}
+
 /** Handle CORS preflight */
 export async function onRequestOptions() {
   return new Response(null, { status: 204, headers: CORS_HEADERS });
@@ -24,7 +32,10 @@ export async function onRequestPost({ request }) {
 
     const upstream = await fetch('https://api.phatnguoi.vn/phat-nguoi', {
       method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent':   'Mozilla/5.0',
+      },
       body,
     });
 
