@@ -156,13 +156,40 @@ async function refreshAll() {
   state.lastUpdate = new Date();
 }
 
-// ════════════════════════════════════════════════════════════
-// WINDOW HANDLERS (for HTML onclick)
-// ════════════════════════════════════════════════════════════
+function openSettingsModal() {
+  const modal = document.getElementById('settingsModal');
+  if (!modal) return;
+
+  const goldInput = document.getElementById('modalGoldKey');
+  if (goldInput) {
+    goldInput.value = state.goldKey;
+  }
+
+  modal.classList.add('open');
+}
+
+function saveAllKeys() {
+  const goldInput = document.getElementById('modalGoldKey');
+  if (goldInput) {
+    const goldKey = goldInput.value.trim();
+    state.goldKey = goldKey;
+    localStorage.setItem('gold_api_key', goldKey);
+  }
+
+  const modal = document.getElementById('settingsModal');
+  if (modal) {
+    modal.classList.remove('open');
+  }
+
+  refreshAll();
+}
+
 window.refreshAll        = refreshAll;
 window.loadWeather       = loadWeather;
 window.searchPowerOutage = searchPowerOutage;
 window.switchGoldUnit    = switchGoldUnit;
+window.openSettingsModal = openSettingsModal;
+window.saveAllKeys       = saveAllKeys;
 window.selectCity        = (city) => {
   const inp = document.getElementById('cityInput');
   if (inp) inp.value = city;

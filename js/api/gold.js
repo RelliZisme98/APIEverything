@@ -15,14 +15,16 @@ import { state, CONFIG } from '../store/state.js';
  * @returns {Promise<{price: number, source: string}>}
  */
 export async function fetchGoldPrice() {
-  // ── Strategy 1: metals.live (free, no key) ──
+  // ── Strategy 1: PAX Gold via CoinGecko (free, no key, highly reliable peg to XAU spot) ──
   try {
-    const res  = await fetch('https://api.metals.live/v1/spot');
+    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=pax-gold&vs_currencies=usd', {
+      signal: AbortSignal.timeout(6000),
+    });
     if (res.ok) {
       const data = await res.json();
-      const price = extractGoldPrice(data);
+      const price = data?.['pax-gold']?.usd;
       if (price) {
-        state.goldData = { price, source: 'metals.live' };
+        state.goldData = { price, source: 'CoinGecko (PAXG)' };
         return state.goldData;
       }
     }

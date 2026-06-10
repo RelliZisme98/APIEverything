@@ -1,105 +1,96 @@
 /**
  * api/traffic.js
  * Traffic violation lookup (phạt nguội) for Vietnam.
- *
- * Strategy:
- *   1. Cloudflare Worker proxy (https://phatnguoi-proxy.*.workers.dev)
- *      → Bypasses CORS on production domains
- *   2. Direct phatnguoi.vn (works on localhost if CORS not enforced)
- *   3. Fallback → show links to official sites
- *
- * HOW TO CONFIGURE PROXY:
- *   Deploy cloudflare-worker/phatnguoi-proxy.js to Cloudflare Workers,
- *   then set your Worker URL in config.js:
- *     TRAFFIC_PROXY_URL: 'https://phatnguoi-proxy.YOUR_SUBDOMAIN.workers.dev'
  */
 
 import APP_CONFIG from '../../config.js';
 
-/**
- * Worker proxy URL — read from config.js.
- * Empty string means "try direct API then fallback to links".
- */
-const PROXY_URL = APP_CONFIG.TRAFFIC_PROXY_URL?.trim() || '';
+const PROXY_URL  = APP_CONFIG.TRAFFIC_PROXY_URL?.trim().replace(/\/$/, '') || '';
 const DIRECT_URL = 'https://api.phatnguoi.vn/phat-nguoi';
 
-/**
- * Lookup traffic violations by license plate.
- * @param {string} plate       – Biển số xe (e.g. "51F-123.45" or "51F12345")
- * @param {string} vehicleType – "car" | "motorbike"
- * @returns {Promise<{success, data, error, links, source}>}
- */
 export async function lookupTrafficViolation(plate, vehicleType = 'car') {
   const normalised = plate.replace(/[\s.\-]/g, '').toUpperCase();
-  const links = buildLinks(plate, vehicleType);
+  const links      = buildLinks(plate, vehicleType);
 
-  // ── Attempt 1: Cloudflare Worker proxy (if configured) ──
-  if (PROXY_URL) {
-    try {
-      const res = await fetch(`${PROXY_URL}/phat-nguoi`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bien_so: normalised }),
-        signal: AbortSignal.timeout(10000),
-      });
+  console.log('[Traffic] plate:', normalised, '| proxy:', PROXY_URL || 'none');
 
-      if (res.ok) {
-        const json = await res.json();
-        if (json && (json.data || json.result)) {
-          return {
-            success: true,
-            data: json.data || json.result || [],
-            links,
-            source: 'proxy',
-          };
-        }
-        // API responded but no violations found
-        if (json && json.data !== undefined) {
-          return { success: true, data: [], links, source: 'proxy' };
-        }
-      }
-    } catch (e) {
-      console.warn('[Traffic] Proxy failed:', e.message);
-    }
-  }
+  // ── Attempt: via proxy ──
+  const endpoint = PROXY_URL ? `${PROXY_URL}/phat-nguoi` : DIRECT_URL;
 
-  // ── Attempt 2: Direct API (may work on localhost) ──
+  let apiUnavailable = false;
+
   try {
-    const res = await fetch(DIRECT_URL, {
-      method: 'POST',
+    const res = await fetch(endpoint, {
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ bien_so: normalised }),
-      signal: AbortSignal.timeout(8000),
+      body:    JSON.stringify({ bien_so: normalised }),
+      signal:  AbortSignal.timeout(10000),
     });
 
+    console.log('[Traffic] response status:', res.status, 'from', endpoint);
+
     if (res.ok) {
-      const json = await res.json();
-      if (json && (json.data !== undefined || json.result !== undefined)) {
-        return {
-          success: true,
-          data: json.data || json.result || [],
-          links,
-          source: 'direct',
-        };
+      let json;
+      try { json = await res.json(); } catch { /* not JSON */ }
+
+      console.log('[Traffic] response body:', JSON.stringify(json)?.slice(0, 200));
+
+      if (json) {
+        // Handle array response
+        if (Array.isArray(json)) {
+          return { success: true, data: json, links, source: 'api' };
+        }
+        // Handle { data: [...] } or { result: [...] } 
+        const data = json.data ?? json.result ?? json.violations ?? json.items;
+        if (data !== undefined) {
+          return { success: true, data: Array.isArray(data) ? data : [], links, source: 'api' };
+        }
+        // Health check response or unknown format — treat as no violations
+        if (json.status === 'ok' || json.message) {
+          return { success: true, data: [], links, source: 'api' };
+        }
       }
+      // Got 200 but unparseable — treat as no violations
+      return { success: true, data: [], links, source: 'api' };
+    }
+
+    console.warn('[Traffic] non-OK status from proxy:', res.status);
+    if (PROXY_URL) {
+      apiUnavailable = true;
     }
   } catch (e) {
-    console.info('[Traffic] Direct API unavailable (CORS expected on production).');
+    console.warn('[Traffic] fetch error:', e.message);
+    if (PROXY_URL) {
+      apiUnavailable = true;
+    }
   }
 
-  // ── Fallback: return links only ──
-  return { success: false, data: [], error: 'cors', links, source: 'fallback' };
+  // ── If proxy was used but failed, try direct (may be CORS on prod) ──
+  if (PROXY_URL) {
+    try {
+      const res = await fetch(DIRECT_URL, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ bien_so: normalised }),
+        signal:  AbortSignal.timeout(8000),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const data = json?.data ?? json?.result ?? [];
+        return { success: true, data: Array.isArray(data) ? data : [], links, source: 'direct' };
+      }
+    } catch { /* CORS expected on production */ }
+  }
+
+  return { success: false, data: [], error: apiUnavailable ? 'api_unavailable' : 'cors', links, source: 'fallback' };
 }
 
-/**
- * Build direct lookup links for official and third-party sites.
- */
 function buildLinks(plate, vehicleType) {
   const encoded = encodeURIComponent(plate.replace(/[\s]/g, ''));
   return [
     {
       name:  '🏛️ Cổng CSGT (Chính thức)',
-      url:   `https://www.csgt.vn/tra-cuu-phuong-tien-vi-pham.html`,
+      url:   'https://www.csgt.vn/tra-cuu-phuong-tien-vi-pham.html',
       note:  'Trang chính thức của Cảnh sát giao thông',
       badge: 'official',
     },

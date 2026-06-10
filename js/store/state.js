@@ -10,7 +10,7 @@ import APP_CONFIG from '../../config.js';
 
 export const state = {
   owmKey:       APP_CONFIG.OWM_API_KEY?.trim()  || '',
-  goldKey:      APP_CONFIG.GOLD_API_KEY?.trim() || '',
+  goldKey:      APP_CONFIG.GOLD_API_KEY?.trim() || localStorage.getItem('gold_api_key') || '',
   cryptoData:   [],
   fxData:       [],
   weatherData:  null,

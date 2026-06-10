@@ -44,8 +44,11 @@ async function handleTrafficSearch() {
     } else if (result.success && result.data.length === 0) {
       renderTrafficClean(plate, result.links);
     } else {
-      // CORS fallback
-      renderTrafficFallback(plate, result.links);
+      if (result.error === 'api_unavailable') {
+        renderTrafficApiUnavailable(plate, result.links);
+      } else {
+        renderTrafficFallback(plate, result.links);
+      }
     }
   } catch (err) {
     renderTrafficError('⚠️ Có lỗi xảy ra: ' + err.message);
@@ -132,6 +135,23 @@ function renderTrafficFallback(plate, links) {
                 color:var(--text-secondary);">
       ℹ️ Không thể kết nối trực tiếp (giới hạn CORS). Vui lòng tra cứu tại các trang chính thức bên dưới.
       Biển số đã được điền sẵn.
+    </div>
+    ${renderLinksHtml(links, `Tra cứu biển số ${plate.toUpperCase()} tại:`)}
+    <div class="plate-tip">
+      💡 <strong>Mẹo:</strong> Nhập biển số không dấu chấm/gạch, ví dụ: <code>51F12345</code> hoặc <code>51F-123.45</code>
+    </div>
+  `;
+}
+
+function renderTrafficApiUnavailable(plate, links) {
+  const el = document.getElementById('trafficResult');
+  if (!el) return;
+  el.innerHTML = `
+    <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);
+                border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:12px;
+                color:var(--text-secondary);">
+      ⚠️ <strong>Hệ thống tra cứu tự động tạm thời gián đoạn</strong> (API ngưng phản hồi). 
+      Vui lòng tra cứu trực tiếp tại các cổng thông tin chính thức dưới đây. Biển số xe đã được điền sẵn.
     </div>
     ${renderLinksHtml(links, `Tra cứu biển số ${plate.toUpperCase()} tại:`)}
     <div class="plate-tip">
