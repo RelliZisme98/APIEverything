@@ -5,36 +5,10 @@
  */
 
 /**
- * Bootstrap the traffic card — attach event listeners and embed initial iframe.
+ * Bootstrap the traffic card — embed phatnguoi.vn homepage.
  */
 export function initTrafficCard() {
-  const btn   = document.getElementById('trafficSearchBtn');
-  const input = document.getElementById('trafficPlateInput');
-  if (!btn || !input) return;
-
-  btn.addEventListener('click', handleTrafficSearch);
-  input.addEventListener('keydown', e => { if (e.key === 'Enter') handleTrafficSearch(); });
-
-  // Embed the default phatnguoi.vn homepage on load
   renderTrafficIframe('');
-}
-
-function handleTrafficSearch() {
-  const plate = document.getElementById('trafficPlateInput')?.value?.trim();
-
-  if (!plate) {
-    // Reset to phatnguoi.vn homepage if empty
-    renderTrafficIframe('');
-    return;
-  }
-
-  // Basic check for plate format to assist user
-  if (!/^[A-Z0-9\-\.]+$/i.test(plate.replace(/\s/g, ''))) {
-    alert('⚠️ Biển số không hợp lệ. Ví dụ: 51F-123.45 hoặc 51F12345');
-    return;
-  }
-
-  renderTrafficIframe(plate);
 }
 
 function renderTrafficIframe(plate) {
