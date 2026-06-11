@@ -1,12 +1,10 @@
 /**
- * api/news.js — RSS feed reader
- * Primary: allorigins.win/raw (free, no key, returns XML directly, works from browser)
- * Fallback: Cloudflare Function proxy at everything.rellia.org/news-rss
+ * api/news.js — RSS feed reader via Cloudflare Function proxy
+ * Proxy at: everything.rellia.org/news-rss  (deployed with the site)
  */
 import APP_CONFIG from '../../config.js';
 
-const ALLORIGINS = 'https://api.allorigins.win/raw?url=';
-const PROXY_BASE = APP_CONFIG.TRAFFIC_PROXY_URL || 'https://everything.rellia.org';
+const PROXY = (APP_CONFIG.TRAFFIC_PROXY_URL || 'https://everything.rellia.org');
 
 export const FEEDS = {
   vnexpress: {
@@ -29,30 +27,10 @@ export const FEEDS = {
   },
 };
 
-async function fetchRSS(rssUrl) {
-  // 1. allorigins /raw — returns raw XML directly (no JSON wrapper)
-  try {
-    const res = await fetch(`${ALLORIGINS}${encodeURIComponent(rssUrl)}`);
-    if (res.ok) {
-      const text = await res.text();
-      if (text.includes('<item>') || text.includes('<item ')) return text;
-    }
-  } catch (_) { /* fall through to proxy */ }
-
-  // 2. Fallback: Cloudflare Function proxy
-  try {
-    const res = await fetch(`${PROXY_BASE}/news-rss?url=${encodeURIComponent(rssUrl)}`);
-    if (res.ok) return await res.text();
-  } catch (_) { /* give up */ }
-
-  return null;
-}
-
 function stripHTML(str) {
-  return str.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 160);
+  return str.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200);
 }
 
-/** Format pubDate to relative time in Vietnamese */
 export function relativeTime(dateStr) {
   if (!dateStr) return '';
   const diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
@@ -62,30 +40,58 @@ export function relativeTime(dateStr) {
   return `${Math.floor(diff / 86400)} ngày trước`;
 }
 
-/** Fetch and parse RSS for a given source key */
+/** Fetch RSS via Cloudflare proxy (deployed alongside the site) */
 export async function fetchNews(sourceKey = 'vnexpress', limit = 12) {
   const feed = FEEDS[sourceKey];
   if (!feed) return [];
 
   try {
-    const xml = await fetchRSS(feed.url);
-    if (!xml) return [];
+    const res = await fetch(
+      `${PROXY}/news-rss?url=${encodeURIComponent(feed.url)}`,
+      { signal: AbortSignal.timeout(10000) }
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const xml = await res.text();
+    if (!xml.includes('<item')) throw new Error('Invalid RSS');
 
     const parser = new DOMParser();
     const doc    = parser.parseFromString(xml, 'text/xml');
     const items  = Array.from(doc.querySelectorAll('item')).slice(0, limit);
 
-    return items.map(item => ({
-      title:   item.querySelector('title')?.textContent?.trim() ?? '',
-      link:    item.querySelector('link')?.textContent?.trim() ?? '#',
-      pubDate: item.querySelector('pubDate')?.textContent?.trim() ?? '',
-      desc:    stripHTML(item.querySelector('description')?.textContent ?? ''),
-      source:  feed.label,
-      color:   feed.color,
-      logo:    feed.logo,
-    }));
+    return items.map(item => {
+      // Try to extract image from enclosure or media:content
+      const enclosure = item.querySelector('enclosure');
+      const media     = item.getElementsByTagNameNS('http://search.yahoo.com/mrss/', 'content')[0];
+      const img       = enclosure?.getAttribute('url') || media?.getAttribute('url') || '';
+
+      return {
+        title:   item.querySelector('title')?.textContent?.trim()       ?? '',
+        link:    item.querySelector('link')?.textContent?.trim()         ?? '#',
+        pubDate: item.querySelector('pubDate')?.textContent?.trim()      ?? '',
+        desc:    stripHTML(item.querySelector('description')?.textContent ?? ''),
+        img,
+        source:  feed.label,
+        color:   feed.color,
+        logo:    feed.logo,
+      };
+    });
   } catch (err) {
-    console.warn('[News]', sourceKey, err);
+    console.warn('[News]', sourceKey, err.message);
     return [];
+  }
+}
+
+/** Fetch full article content via Cloudflare proxy */
+export async function fetchArticle(articleUrl) {
+  try {
+    const res = await fetch(
+      `${PROXY}/news-article?url=${encodeURIComponent(articleUrl)}`,
+      { signal: AbortSignal.timeout(12000) }
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch (err) {
+    console.warn('[Article]', err.message);
+    return null;
   }
 }
