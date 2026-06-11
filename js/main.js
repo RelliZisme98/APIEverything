@@ -27,6 +27,13 @@ import { renderQuickCities }                    from './components/weather.js';
 import { renderAQI }                            from './components/aqi.js';
 import { renderVNIndex }                        from './components/vnindex.js';
 import { renderNews }                           from './components/news.js';
+// New feature components
+import { renderBankRates }   from './components/bank-rates.js';
+import { renderFuelPrice }   from './components/fuel-price.js';
+import { renderHolidays }    from './components/holidays.js';
+import { renderTaxCalc }     from './components/tax-calc.js';
+import { renderLottery }     from './components/lottery.js';
+import { renderWorldClock, destroyWorldClock } from './components/world-clock.js';
 
 // ── Render Components ──
 import { renderTicker }        from './components/ticker.js';
@@ -187,6 +194,35 @@ async function loadVNIndex() { await renderVNIndex(); }
 // ── News load ──
 async function loadNews() { await renderNews(); }
 
+// ── Lazy-load new features on first visit ──
+const _rendered = new Set();
+const _originalSwitch = window.switchSection;
+window.switchSection = (id) => {
+  // Stop world clock if leaving that section
+  if (!_rendered.has('world-clock') === false && id !== 'world-clock') {
+    // don't destroy — let it keep ticking in background
+  }
+  if (_originalSwitch) _originalSwitch(id);
+  else {
+    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+    const target = document.getElementById('section-' + id);
+    if (target) target.classList.add('active');
+    document.querySelectorAll('.sidebar-nav-item').forEach(item =>
+      item.classList.toggle('active', item.dataset.section === id)
+    );
+    try { document.getElementById('sidebar').classList.remove('open'); } catch {}
+    try { document.getElementById('sidebarOverlay').classList.remove('visible'); } catch {}
+  }
+  if (!_rendered.has(id)) {
+    _rendered.add(id);
+    if (id === 'bank-rates')  renderBankRates();
+    if (id === 'fuel-price')  renderFuelPrice();
+    if (id === 'holidays')    renderHolidays();
+    if (id === 'tax-calc')    renderTaxCalc();
+    if (id === 'lottery')     renderLottery();
+    if (id === 'world-clock') renderWorldClock();
+  }
+};
 
 // ════════════════════════════════════════════════════════════
 // INIT
@@ -197,6 +233,13 @@ document.addEventListener('DOMContentLoaded', () => {
   renderPowerOutage();
   renderQuickCities();
   initTrafficCard();
+  // Pre-render static/no-API sections immediately
+  renderFuelPrice();
+  renderHolidays();
+  renderTaxCalc();
+  _rendered.add('fuel-price');
+  _rendered.add('holidays');
+  _rendered.add('tax-calc');
   refreshAll();
 
   // Auto-refresh every 60 seconds
@@ -208,5 +251,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.aqiToken) loadAQI();
     loadVNIndex();
     loadNews();
+    // Refresh bank rates if rendered
+    if (_rendered.has('bank-rates')) renderBankRates();
   }, 60_000);
 });
+

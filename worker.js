@@ -1,11 +1,6 @@
 /**
  * worker.js — Cloudflare Worker chính
- * Phục vụ static assets VÀ xử lý CORS proxy cho:
- *   - /phat-nguoi  → proxy phatnguoi.vn
- *   - /news-rss    → proxy RSS feeds (VnExpress, Tuổi Trẻ, Dân Trí)
- *   - /news-article → proxy + extract article content
- *   - /vnindex     → proxy VPS stock data
- *   - /power-outage → proxy EVNSPC data
+ * Routes: /phat-nguoi, /news-rss, /news-article, /vnindex, /power-outage, /vcb-rates
  */
 
 const CORS = {
@@ -291,6 +286,41 @@ async function handlePhatNguoi(request) {
   }
 }
 
+// ─── /vcb-rates ─────────────────────────────────────────────────────
+async function handleVCBRates(request) {
+  if (request.method === 'OPTIONS') return preflight();
+  try {
+    const res = await fetch(
+      'https://portal.vietcombank.com.vn/Usercontrols/TVPortal.TyGia/pXml.aspx?b=10',
+      { headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://www.vietcombank.com.vn/' } }
+    );
+    const xml = await res.text();
+
+    // Parse XML to JSON
+    const dateMatch = xml.match(/<DateTime>([^<]+)<\/DateTime>/);
+    const updated   = dateMatch ? dateMatch[1].trim() : '';
+
+    const rates = [];
+    const rateRegex = /<Exrate CurrencyCode="(\w+)" CurrencyName="([^"]+)" Buy="([^"]+)" Transfer="([^"]+)" Sell="([^"]+)" \/>/g;
+    let m;
+    while ((m = rateRegex.exec(xml)) !== null) {
+      rates.push({
+        code:     m[1].trim(),
+        name:     m[2].trim(),
+        buy:      m[3].trim(),
+        transfer: m[4].trim(),
+        sell:     m[5].trim(),
+      });
+    }
+
+    return new Response(JSON.stringify({ updated, rates, source: 'Vietcombank' }), {
+      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=300' },
+    });
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
 // ─── Router ─────────────────────────────────────────────────────────
 export default {
   async fetch(request, env) {
@@ -301,6 +331,7 @@ export default {
     if (pathname === '/news-article')  return handleNewsArticle(request);
     if (pathname === '/vnindex')       return handleVNIndex(request);
     if (pathname === '/power-outage')  return handlePowerOutage(request);
+    if (pathname === '/vcb-rates')     return handleVCBRates(request);
 
     // Serve static assets for everything else
     return env.ASSETS.fetch(request);
