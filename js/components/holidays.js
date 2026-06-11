@@ -9,6 +9,7 @@ const HOLIDAYS_2026 = [
   { date: '2026-04-30', name: 'Ngày Giải phóng 30/4',      type: 'holiday', note: '2 ngày (30/4–1/5)', end: '2026-05-01' },
   { date: '2026-05-01', name: 'Ngày Quốc tế Lao động',     type: 'holiday', note: 'Nghỉ cùng 30/4' },
   { date: '2026-09-02', name: 'Ngày Quốc khánh 2/9',       type: 'holiday', note: '2 ngày nghỉ', end: '2026-09-03' },
+  { date: '2026-11-24', name: 'Ngày Văn hóa Việt Nam',       type: 'holiday', note: '1 ngày nghỉ', icon: '🎭' },
   // Important events
   { date: '2026-02-14', name: 'Valentine',                  type: 'event', icon: '💝' },
   { date: '2026-03-08', name: 'Quốc tế Phụ nữ 8/3',       type: 'event', icon: '🌹' },
@@ -19,6 +20,7 @@ const HOLIDAYS_2026 = [
   // 2027 Tet
   { date: '2027-01-01', name: 'Tết Dương lịch 2027',       type: 'holiday', note: '1 ngày' },
   { date: '2027-02-15', name: 'Nghỉ Tết Nguyên Đán 2027',  type: 'holiday', note: 'Dự kiến 5 ngày', end: '2027-02-21' },
+  { date: '2027-11-24', name: 'Ngày Văn hóa Việt Nam 2027', type: 'holiday', note: '1 ngày nghỉ', icon: '🎭' },
 ];
 
 export function renderHolidays(containerId = 'holidaysContent') {
@@ -37,7 +39,7 @@ export function renderHolidays(containerId = 'holidaysContent') {
   const items = upcoming.map(h => {
     const diff = Math.ceil((h.dateObj - today) / 86400000);
     const isHoliday = h.type === 'holiday';
-    const icon = isHoliday ? '🎌' : (h.icon ?? '📅');
+    const icon = h.icon ?? (isHoliday ? '🎌' : '📅');
     const clr  = isHoliday ? '#f87171' : '#60a5fa';
     const dateStr = h.dateObj.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
 
