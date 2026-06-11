@@ -5,7 +5,7 @@
 /* ── Index card grid ── */
 .vni-index-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   margin-bottom: 14px;
 }
@@ -16,23 +16,30 @@
 .vni-index-card {
   border: 1px solid;
   border-radius: var(--radius-sm);
-  padding: 14px 12px;
-  text-align: center;
+  padding: 14px 14px 10px;
   transition: transform 0.18s, filter 0.18s;
+  position: relative;
 }
 
 .vni-index-card:hover { transform: translateY(-2px); filter: brightness(1.08); }
 
+/* Card header: label + exchange badge */
+.vni-index-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
 .vni-index-label {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 6px;
 }
 
 .vni-index-price {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 800;
   font-family: 'JetBrains Mono', monospace;
   color: var(--text-primary);
@@ -40,8 +47,45 @@
   letter-spacing: -0.5px;
 }
 
-.vni-index-change { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
-.vni-index-exch   { font-size: 10px; color: var(--text-muted); }
+.vni-index-change { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+.vni-index-exch   { font-size: 9px; color: var(--text-muted); background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 10px; font-weight: 600; }
+
+/* OHLV details */
+.vni-index-details {
+  display: flex;
+  gap: 10px;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Mini range bar */
+.vni-range-bar {
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  position: relative;
+  margin-bottom: 6px;
+}
+
+.vni-range-fill {
+  position: absolute;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2px solid;
+  background: var(--bg-card);
+  transform: translateX(-50%);
+}
+
+.vni-index-vol {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
 
 /* ── Disclaimer ── */
 .vni-disclaimer {
@@ -94,12 +138,12 @@
 }
 
 .vni-table td {
-  padding: 8px 10px;
+  padding: 7px 10px;
   border-bottom: 1px solid rgba(255,255,255,0.04);
   vertical-align: middle;
 }
 
-.vni-stock-row:hover td { background: rgba(255,255,255,0.02); }
+.vni-stock-row:hover td { background: rgba(255,255,255,0.025); }
 .vni-table tr:last-child td { border-bottom: none; }
 
 .vni-sym {
@@ -112,6 +156,34 @@
   border-radius: 4px;
 }
 
-.vni-sector { color: var(--text-muted); font-size: 11px; }
-.vni-price  { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
-.vni-vol    { color: var(--text-muted); font-size: 11px; }
+.vni-sector  { color: var(--text-muted); font-size: 11px; }
+.vni-price   { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+.vni-vol     { color: var(--text-muted); font-size: 11px; font-family: 'JetBrains Mono', monospace; }
+.vni-foreign { font-size: 10px; white-space: nowrap; }
+
+/* High/Low with mini range bar */
+.vni-hl-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.vni-high { font-size: 10px; color: #4ade80; font-family: 'JetBrains Mono', monospace; }
+.vni-low  { font-size: 10px; color: #f87171; font-family: 'JetBrains Mono', monospace; }
+
+.vni-stock-range {
+  width: 40px;
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.vni-stock-range div {
+  height: 100%;
+  border-radius: 2px;
+  opacity: 0.8;
+  min-width: 2px;
+  max-width: 100%;
+}

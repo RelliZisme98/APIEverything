@@ -124,13 +124,12 @@ function decode(s) {
 // ─── /vnindex ────────────────────────────────────────────────────────
 const VPS_BASE = 'https://bgapidatafeed.vps.com.vn';
 
-// Yahoo Finance symbols for Vietnam market indices
-const YF_INDICES = [
-  { sym: 'VNINDEX', yf: '%5EVNINDEX.VN', label: 'VN-Index',  exchange: 'HOSE' },
-  // VN30 and HNX not available on Yahoo Finance — use VPS ETF as proxy
-];
+// VN30 basket (official 30 stocks on HOSE)
+const VN30_BASKET = 'ACB,BID,BCM,BVH,CTG,FPT,GAS,GVR,HDB,HPG,MBB,MSN,MWG,PLX,POW,SAB,SSI,STB,TCB,TPB,VCB,VHM,VIB,VIC,VJC,VNM,VPB,VRE,VSH,VGC';
+// HNX top stocks (proxy for HNX-Index)
+const HNX_BASKET = 'ACB,SHB,NVB,VIB,SHS,HUT,TNG,PVC,DXG,SCI,S55,IDJ,PGS,VGS,NHA';
 
-async function fetchYahooQuote(yfSym) {
+async function fetchYahooIndex(yfSym, symName) {
   const res = await fetch(
     `https://query1.finance.yahoo.com/v8/finance/chart/${yfSym}?interval=1d&range=1d`,
     { headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' } }
@@ -138,12 +137,56 @@ async function fetchYahooQuote(yfSym) {
   const d = await res.json();
   const result = d?.chart?.result?.[0];
   if (!result) return null;
-  const meta  = result.meta;
-  const price = meta.regularMarketPrice;
-  const prev  = meta.chartPreviousClose;
+  const meta   = result.meta;
+  const price  = meta.regularMarketPrice;
+  const prev   = meta.chartPreviousClose;
+  const high   = meta.regularMarketDayHigh   ?? price;
+  const low    = meta.regularMarketDayLow    ?? price;
+  const open   = meta.regularMarketOpen      ?? price;
+  const volume = meta.regularMarketVolume    ?? 0;
   const change = price - prev;
-  const changePc = prev ? ((change / prev) * 100) : 0;
-  return { sym: meta.symbol, lastPrice: price, ot: change.toFixed(2), changePc: changePc.toFixed(2) };
+  const pct    = prev ? (change / prev * 100) : 0;
+  return {
+    sym: symName, lastPrice: price, ot: +change.toFixed(2),
+    changePc: +pct.toFixed(2), highPrice: high, lowPrice: low,
+    openPrice: open, lot: volume, r: prev,
+  };
+}
+
+async function fetchVpsBasket(symbols) {
+  const res = await fetch(`${VPS_BASE}/getliststockdata/${symbols}`,
+    { headers: { 'Referer': 'https://banggia.vps.com.vn/' } });
+  return await res.json(); // array of stocks
+}
+
+function basketToIndex(stocks, symName, label) {
+  if (!stocks?.length) return null;
+  const valid = stocks.filter(s => s.lastPrice > 0);
+  if (!valid.length) return null;
+
+  // Simple average of % changes (approximation)
+  const changes = valid.map(s => parseFloat(s.changePc || 0));
+  const avgPct   = changes.reduce((a, b) => a + b, 0) / changes.length;
+
+  // Sum last prices as proxy index level
+  const sumPrice = valid.reduce((a, s) => a + parseFloat(s.lastPrice || 0), 0);
+  const highs    = valid.map(s => parseFloat(s.highPrice || s.lastPrice || 0));
+  const lows     = valid.map(s => parseFloat(s.lowPrice  || s.lastPrice || 0));
+  const volume   = valid.reduce((a, s) => a + parseInt(s.lot || 0), 0);
+
+  return {
+    sym:       symName,
+    lastPrice: +sumPrice.toFixed(2),
+    ot:        +(sumPrice * avgPct / 100).toFixed(2),
+    changePc:  +avgPct.toFixed(2),
+    highPrice: +highs.reduce((a,b)=>a+b,0).toFixed(2),
+    lowPrice:  +lows.reduce((a,b)=>a+b,0).toFixed(2),
+    openPrice: +(sumPrice / (1 + avgPct/100)).toFixed(2),
+    lot:       volume,
+    r:         +(sumPrice / (1 + avgPct/100)).toFixed(2),
+    isBasket:  true,  // flag to indicate it's approximate
+    basketCount: valid.length,
+  };
 }
 
 async function handleVNIndex(request) {
@@ -152,16 +195,30 @@ async function handleVNIndex(request) {
   const type   = params.get('type') ?? 'stocks';
   const custom = params.get('symbols') ?? '';
 
-  // Index data: use Yahoo Finance (VPS doesn't expose index via REST)
+  // ── INDEX: Yahoo Finance for VNINDEX + VPS basket for VN30/HNX ──
   if (type === 'index') {
     try {
-      const results = await Promise.all(
-        YF_INDICES.map(idx => fetchYahooQuote(idx.yf)
-          .then(d => d ? { ...d, sym: idx.sym, exchange: idx.exchange } : null)
-          .catch(() => null))
-      );
-      const valid = results.filter(Boolean);
-      return new Response(JSON.stringify(valid), {
+      const [vnResult, vn30Stocks, hnxStocks] = await Promise.allSettled([
+        fetchYahooIndex('%5EVNINDEX.VN', 'VNINDEX'),
+        fetchVpsBasket(VN30_BASKET),
+        fetchVpsBasket(HNX_BASKET),
+      ]);
+
+      const indices = [];
+
+      if (vnResult.status === 'fulfilled' && vnResult.value) {
+        indices.push(vnResult.value);
+      }
+      if (vn30Stocks.status === 'fulfilled') {
+        const idx = basketToIndex(vn30Stocks.value, 'VN30', 'VN30');
+        if (idx) indices.push(idx);
+      }
+      if (hnxStocks.status === 'fulfilled') {
+        const idx = basketToIndex(hnxStocks.value, 'HNXINDEX', 'HNX-Index');
+        if (idx) indices.push(idx);
+      }
+
+      return new Response(JSON.stringify(indices), {
         headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=60' },
       });
     } catch (err) {
@@ -169,10 +226,12 @@ async function handleVNIndex(request) {
     }
   }
 
-  // Stock data: VPS direct (has CORS * but send via proxy for Referer header)
+  // ── STOCKS: VPS direct ──
   let path;
-  if (type === 'custom' && custom) path = `/getliststockdata/${custom}`;
+  if (type === 'vn30')              path = `/getliststockdata/${VN30_BASKET}`;
+  else if (type === 'custom' && custom) path = `/getliststockdata/${custom}`;
   else                              path = '/getliststockdata/VCB,BID,CTG,TCB,VPB,MBB,HPG,VIC,VHM,VNM,MSN,SAB,GAS,PLX,FPT';
+
 
   try {
     const res = await fetch(VPS_BASE + path, {
