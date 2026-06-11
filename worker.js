@@ -389,6 +389,42 @@ async function handleLottery(request) {
   }
 }
 
+// ─── /football ────────────────────────────────────────────────────────
+// Proxy TheSportsDB for PL + World Cup 2026 data (no API key needed)
+const TSDB_BASE = 'https://www.thesportsdb.com/api/v1/json/3';
+const FOOTBALL_LEAGUES = {
+  wc: { id: '4429', name: 'FIFA World Cup 2026', season: '2026' },
+  pl: { id: '4328', name: 'Premier League',      season: '2025-2026' },
+};
+
+async function handleFootball(request) {
+  if (request.method === 'OPTIONS') return preflight();
+  const { searchParams } = new URL(request.url);
+  const league = searchParams.get('league') ?? 'wc'; // wc | pl
+  const type   = searchParams.get('type')   ?? 'next'; // next | past | table | season
+
+  const lg = FOOTBALL_LEAGUES[league];
+  if (!lg) return cors(JSON.stringify({ error: 'unknown league' }), 400);
+
+  let url;
+  if      (type === 'next')   url = `${TSDB_BASE}/eventsnextleague.php?id=${lg.id}`;
+  else if (type === 'past')   url = `${TSDB_BASE}/eventspastleague.php?id=${lg.id}`;
+  else if (type === 'table')  url = `${TSDB_BASE}/lookuptable.php?l=${lg.id}&s=${lg.season}`;
+  else if (type === 'season') url = `${TSDB_BASE}/eventsseason.php?id=${lg.id}&s=${lg.season}`;
+  else return cors(JSON.stringify({ error: 'unknown type' }), 400);
+
+  try {
+    const res  = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    if (!res.ok) throw new Error(`upstream ${res.status}`);
+    const data = await res.json();
+    return new Response(JSON.stringify({ league, type, leagueName: lg.name, ...data }), {
+      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=120' },
+    });
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
 // ─── Router ─────────────────────────────────────────────────────────
 export default {
   async fetch(request, env) {
@@ -401,6 +437,7 @@ export default {
     if (pathname === '/power-outage')  return handlePowerOutage(request);
     if (pathname === '/vcb-rates')     return handleVCBRates(request);
     if (pathname === '/lottery')       return handleLottery(request);
+    if (pathname === '/football')      return handleFootball(request);
 
     // Serve static assets for everything else
     return env.ASSETS.fetch(request);

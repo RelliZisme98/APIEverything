@@ -1,0 +1,193 @@
+/* ══════════════════════════════════════════════════════
+   FOOTBALL — Fixtures, Results, Standings
+   ══════════════════════════════════════════════════════ */
+
+/* League tabs */
+.fb-league-tabs {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;
+}
+.fb-league-tab {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 16px; border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  color: var(--text-secondary);
+  cursor: pointer; font-size: 13px; font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  transition: all .2s;
+}
+.fb-league-tab:hover { background: rgba(255,255,255,0.06); }
+.fb-league-tab.active { font-weight: 700; }
+
+.fb-badge {
+  font-size: 9px; font-weight: 700; letter-spacing: .04em;
+  padding: 2px 7px; border-radius: 20px;
+  background: rgba(255,255,255,0.07); color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+/* Sub-tabs */
+.fb-tabs {
+  display: flex; gap: 4px; margin-bottom: 16px;
+  border-bottom: 1px solid var(--border); padding-bottom: 10px;
+}
+.fb-tab {
+  padding: 7px 16px; border-radius: 8px; border: 1px solid transparent;
+  background: none; color: var(--text-muted);
+  cursor: pointer; font-size: 13px; font-weight: 500;
+  font-family: 'Inter', sans-serif; transition: all .2s;
+}
+.fb-tab:hover  { background: rgba(255,255,255,0.04); color: var(--text-primary); }
+.fb-tab.active {
+  background: rgba(96,165,250,0.1);
+  border-color: rgba(96,165,250,0.25);
+  color: var(--accent-blue); font-weight: 700;
+}
+
+/* Loading / empty */
+.fb-loading { text-align: center; padding: 32px; color: var(--text-muted); font-size: 14px; }
+.fb-empty   { text-align: center; padding: 32px; color: var(--text-muted); font-size: 14px; }
+
+/* Date group */
+.fb-date-group { margin-bottom: 16px; }
+.fb-date-header {
+  display: flex; justify-content: space-between;
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--text-muted);
+  padding: 6px 10px; background: rgba(255,255,255,0.02);
+  border-radius: 6px; margin-bottom: 6px;
+  border-left: 3px solid var(--border);
+}
+.fb-date-header.fb-today {
+  color: var(--accent-red); border-left-color: var(--accent-red);
+  background: rgba(248,113,113,0.06);
+}
+
+/* Match card */
+.fb-match {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; margin-bottom: 5px;
+  background: rgba(255,255,255,0.02); border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.05);
+  transition: background .2s;
+}
+.fb-match:hover { background: rgba(255,255,255,0.05); }
+.fb-match--live {
+  border-color: rgba(248,113,113,0.3);
+  background: rgba(248,113,113,0.04);
+  animation: fb-pulse 2s ease-in-out infinite;
+}
+@keyframes fb-pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(248,113,113,0); }
+  50%      { box-shadow: 0 0 12px 2px rgba(248,113,113,0.15); }
+}
+
+.fb-match-left  { flex: 1; min-width: 0; }
+.fb-match-center {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 2px; min-width: 80px; text-align: center;
+}
+.fb-match-right { width: 100px; text-align: right; }
+
+.fb-team-row {
+  display: flex; align-items: center; gap: 7px;
+  padding: 2px 0; font-size: 12px; color: var(--text-secondary);
+}
+.fb-team-row:first-child { margin-bottom: 3px; }
+
+.fb-match-badge {
+  width: 18px; height: 18px; object-fit: contain; flex-shrink: 0;
+}
+.fb-match-team { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+.fb-winner { color: var(--text-primary); font-weight: 700; }
+
+.fb-score {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px; font-weight: 800; color: var(--text-primary);
+  background: rgba(255,255,255,0.05);
+  padding: 4px 10px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.fb-score--live {
+  color: var(--accent-red);
+  background: rgba(248,113,113,0.1);
+  border-color: rgba(248,113,113,0.3);
+}
+.fb-time {
+  font-size: 13px; font-weight: 700; color: var(--accent-blue);
+}
+.fb-live-tag {
+  font-size: 10px; font-weight: 800; color: var(--accent-red);
+  letter-spacing: .07em;
+  animation: blink 1.2s step-start infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+.fb-result-tag {
+  font-size: 10px; color: var(--text-muted); margin-top: 2px;
+}
+.fb-group-tag {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  color: var(--accent-yellow); letter-spacing: .06em;
+  background: rgba(251,191,36,0.1); border-radius: 4px;
+  padding: 1px 5px; margin-bottom: 3px;
+}
+.fb-venue {
+  font-size: 10px; color: var(--text-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Standings table */
+.fb-table {
+  width: 100%; border-collapse: collapse; font-size: 12px;
+}
+.fb-table th {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--text-muted);
+  padding: 6px 8px; border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+.fb-table-row { border-bottom: 1px solid rgba(255,255,255,0.03); }
+.fb-table-row:hover { background: rgba(255,255,255,0.03); }
+
+.fb-rank { text-align: center; padding: 8px 6px; font-weight: 700; min-width: 28px; }
+.fb-stat { text-align: center; padding: 8px 6px; color: var(--text-secondary); }
+.fb-pts  { text-align: center; padding: 8px 8px; font-weight: 800; font-size: 13px; }
+
+.fb-team-cell {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 8px; text-align: left; white-space: nowrap;
+}
+.fb-team-badge {
+  width: 22px; height: 22px; object-fit: contain; flex-shrink: 0;
+}
+.fb-team-name { font-weight: 500; font-size: 12px; }
+
+.fb-legend {
+  font-size: 11px; color: var(--text-muted);
+  margin-bottom: 12px; padding: 8px 12px;
+  background: rgba(255,255,255,0.02); border-radius: 8px;
+}
+
+/* Footer */
+.fb-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border);
+  font-size: 11px; color: var(--text-muted);
+}
+.fb-live-badge {
+  display: flex; align-items: center; gap: 6px;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .fb-match { flex-wrap: wrap; gap: 8px; }
+  .fb-match-right { width: auto; font-size: 10px; }
+  .fb-match-team { max-width: 100px; }
+  .fb-league-tab { font-size: 12px; padding: 6px 12px; }
+  .fb-table th, .fb-table td { padding: 6px 4px; font-size: 11px; }
+  .fb-team-name { font-size: 11px; }
+  /* Hide venue on mobile */
+  .fb-match-right { display: none; }
+  .fb-match-center { min-width: 70px; }
+}

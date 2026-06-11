@@ -33,6 +33,7 @@ import { renderHolidays }    from './components/holidays.js';
 import { renderTaxCalc }     from './components/tax-calc.js';
 import { renderLottery }     from './components/lottery.js';
 import { renderWorldClock, destroyWorldClock } from './components/world-clock.js';
+import { renderFootball }    from './components/football.js';
 
 // ── Render Components ──
 import { renderTicker }        from './components/ticker.js';
@@ -219,6 +220,7 @@ window.switchSection = (id) => {
     if (id === 'tax-calc')    renderTaxCalc();
     if (id === 'lottery')     renderLottery();
     if (id === 'world-clock') renderWorldClock();
+    if (id === 'football')    renderFootball();
   }
 };
 

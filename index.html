@@ -35,6 +35,7 @@
   <link rel="stylesheet" href="css/vnindex.css" />
   <link rel="stylesheet" href="css/news.css" />
   <link rel="stylesheet" href="css/new-features.css" />
+  <link rel="stylesheet" href="css/football.css" />
   <link rel="stylesheet" href="css/mobile.css" />
 </head>
 
@@ -152,6 +153,11 @@
         <button class="sidebar-nav-item" data-section="world-clock" onclick="switchSection('world-clock')">
           <span class="nav-icon">🕐</span>
           <span class="nav-label">Đồng Hồ & Hẹn Giờ</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="football" onclick="switchSection('football')">
+          <span class="nav-icon">⚽</span>
+          <span class="nav-label">Bóng Đá</span>
+          <span class="nav-badge" style="background:rgba(251,191,36,.15);color:#fbbf24;border-color:rgba(251,191,36,.3);">WC</span>
         </button>
       </div>
 
@@ -491,6 +497,18 @@
             <div class="card-title"><span class="icon">🌍</span> World Clock · Bấm Giờ · Đếm Ngược</div>
           </div>
           <div id="worldClockContent"></div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: FOOTBALL ════════ -->
+      <section class="content-section" id="section-football">
+        <div class="page-title"><span class="page-icon">⚽</span> Bóng Đá: World Cup 2026 &amp; Premier League</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">🏆</span> Lịch thi đấu · Kết quả · Bảng Xếp Hạng</div>
+            <span class="card-badge" style="background:rgba(251,191,36,.12);color:#fbbf24;border-color:rgba(251,191,36,.25);">LIVE</span>
+          </div>
+          <div id="footballContent"></div>
         </div>
       </section>
 
