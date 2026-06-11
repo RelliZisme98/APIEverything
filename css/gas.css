@@ -49,6 +49,13 @@
   color: var(--text-muted);
 }
 
+.gas-trend {
+  font-size: 10px;
+  font-weight: 600;
+  margin-top: 2px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
 .gas-updated {
   font-size: 11px;
   color: var(--text-muted);
