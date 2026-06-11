@@ -124,14 +124,6 @@ async function loadGold() {
 // WEATHER
 // ════════════════════════════════════════════════════════════
 async function loadWeather(cityOverride) {
-  if (!state.owmKey) {
-    renderWeatherError(
-      'Chưa cấu hình API key. Mở file <code>config.js</code> và điền vào <code>OWM_API_KEY</code>.'
-    );
-    setWeatherBadge(false);
-    return;
-  }
-
   const city = cityOverride
     ?? document.getElementById('cityInput')?.value?.trim()
     ?? 'Ho Chi Minh City';
@@ -165,11 +157,11 @@ async function refreshAll() {
     loadCrypto(),
     loadExchange(),
     loadGold(),
-    state.owmKey ? loadWeather() : Promise.resolve(),
+    loadWeather(),
     loadVNIndex(),
     loadNews(),
+    loadAQI(),
   ]);
-  if (state.aqiToken) loadAQI();
 
   if (btn) btn.classList.remove('spinning');
   state.lastUpdate = new Date();
@@ -245,8 +237,8 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCrypto();
     loadExchange();
     loadGold();
-    if (state.owmKey)   loadWeather();
-    if (state.aqiToken) loadAQI();
+    loadWeather();
+    loadAQI();
     loadVNIndex();
     loadNews();
     // Refresh bank rates if rendered
