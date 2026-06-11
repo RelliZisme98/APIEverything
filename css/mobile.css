@@ -1,0 +1,255 @@
+/* ══════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE — Comprehensive mobile fixes
+   Breakpoints: 900px (tablet), 600px (phone), 400px (small phone)
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Base mobile fixes ──────────────────────────────────────── */
+* { box-sizing: border-box; }
+
+html, body {
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+/* ── Hamburger button ───────────────────────────────────────── */
+.sidebar-toggle {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 200;
+  background: rgba(13, 20, 36, 0.92);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--text-primary);
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 18px;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.4);
+  transition: all .2s;
+}
+.sidebar-toggle:hover {
+  background: rgba(96,165,250,0.15);
+  border-color: rgba(96,165,250,0.3);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TABLET (≤ 900px)
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 900px) {
+
+  /* Sidebar: slide-in drawer */
+  .sidebar {
+    position: fixed;
+    left: -260px;
+    top: 0;
+    height: 100vh;
+    width: 250px;
+    min-width: 250px;
+    transition: left 0.28s cubic-bezier(.4,0,.2,1);
+    z-index: 150;
+    box-shadow: 4px 0 40px rgba(0,0,0,0.5);
+  }
+  .sidebar.open { left: 0; }
+  .sidebar-overlay.visible { display: block; }
+  .sidebar-toggle { display: flex; }
+
+  /* Content: full width */
+  .content-section {
+    padding: 60px 14px 24px;  /* top: leave room for hamburger */
+  }
+
+  .page-title {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+
+  /* Ticker: hide on very small */
+  .ticker-wrap { font-size: 12px; }
+
+  /* Cards */
+  .row-2, .row-3, .row-4 { grid-template-columns: 1fr; }
+
+  /* Card header: wrap if needed */
+  .card-header { flex-wrap: wrap; gap: 8px; }
+  .card-title  { font-size: 13px; }
+
+  /* Crypto grid: 2 cols */
+  .crypto-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* VNIndex: 2 cols */
+  .vni-index-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Tables: horizontal scroll */
+  .table-wrap, [style*="overflow-x:auto"] { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Bank rates table: smaller font */
+  .br-table { font-size: 11px; }
+  .br-table th, .br-table td { padding: 6px 8px; }
+  .br-name { display: none; } /* hide long name on mobile */
+
+  /* Tax calc: single col */
+  .tax-row-2 { grid-template-columns: 1fr !important; }
+  .tax-result-grid { grid-template-columns: 1fr !important; }
+
+  /* World clock: 3 cols */
+  .wc-grid { grid-template-columns: repeat(3, 1fr) !important; }
+  .wc-tools-row { grid-template-columns: 1fr !important; }
+
+  /* Lot chips: wrap */
+  .lot-chips { flex-wrap: wrap; gap: 6px; }
+  .lot-chip  { font-size: 11px; padding: 5px 10px; }
+
+  /* Weather forecast: horizontal scroll */
+  .wf-row { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Footer: smaller */
+  footer { font-size: 11px; padding: 16px 14px; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PHONE (≤ 600px)
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+
+  .content-section { padding: 56px 12px 20px; }
+
+  .page-title { font-size: 16px; gap: 8px; }
+  .page-title .page-icon { font-size: 18px; }
+
+  /* Crypto: 2 cols still ok */
+  .crypto-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .crypto-card { padding: 12px !important; }
+  .crypto-price { font-size: 15px !important; }
+
+  /* VNIndex: 1 col on phone */
+  .vni-index-grid { grid-template-columns: 1fr 1fr !important; }
+  .vni-ohlv-row   { font-size: 10px; }
+
+  /* Tables: tiny */
+  .br-table { font-size: 10px; }
+  .br-flag  { font-size: 13px; }
+
+  /* Gold cards: 1 col */
+  .gold-grid { grid-template-columns: 1fr !important; }
+
+  /* Gas items: tighter */
+  .gas-item { padding: 10px 12px; }
+  .gas-name { font-size: 12px; }
+  .gas-price-val { font-size: 14px !important; }
+
+  /* Holidays hero: stack */
+  .hl-hero { flex-direction: column; gap: 12px; text-align: center; }
+  .hl-hero-countdown { margin-left: 0; }
+  .hl-hero-num { font-size: 36px; }
+
+  /* Tax form */
+  .tax-hero { flex-direction: column; text-align: center; gap: 8px; }
+  .tax-toggle-group { flex-direction: column; }
+  .tax-result-grid { grid-template-columns: 1fr !important; }
+  .tax-result-val  { font-size: 15px !important; }
+  .tax-result-net .tax-result-val { font-size: 22px !important; }
+
+  /* World clock: 2 cols */
+  .wc-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .wc-card { padding: 10px; }
+  .wc-time { font-size: 16px; }
+  .sw-display, .cd-display { font-size: 26px; }
+  .sw-btn { padding: 7px 12px; font-size: 11px; }
+
+  /* Lottery: 1 col chips */
+  .lot-chips { flex-direction: row; flex-wrap: wrap; }
+  .lot-date-nav { flex-wrap: wrap; gap: 6px; justify-content: center; }
+  .lot-nav-btn  { font-size: 11px; padding: 5px 10px; }
+  .lot-num      { min-width: 30px; height: 30px; font-size: 14px; }
+  .lot-num--db  { min-width: 44px; height: 40px; font-size: 20px; }
+  .lot-prize-nums { display: flex; flex-wrap: wrap; gap: 2px; }
+
+  /* Exchange table */
+  .exchange-table { font-size: 11px; }
+  .exchange-table td, .exchange-table th { padding: 6px 8px; }
+
+  /* News */
+  .news-tab { padding: 6px 10px; font-size: 11px; }
+  .news-card { padding: 12px; }
+  .news-title { font-size: 13px; }
+
+  /* Calendar */
+  .cal-grid { gap: 2px; }
+  .cal-cell { min-height: 36px; font-size: 11px; padding: 4px; }
+
+  /* AQI */
+  .aqi-pollutants { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Ticker smaller */
+  .ticker-item { font-size: 11px; }
+
+  /* Sidebar sections */
+  .sidebar-logo-text { font-size: 16px; }
+  .sidebar-clock-time { font-size: 18px; }
+  .sidebar-nav-item { font-size: 12px; padding: 8px 10px; }
+
+  /* Card header badge: shrink */
+  .card-badge { font-size: 9px; padding: 2px 6px; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SMALL PHONE (≤ 400px)
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 400px) {
+
+  .content-section { padding: 52px 10px 16px; }
+
+  /* Crypto: 1 col */
+  .crypto-grid { grid-template-columns: 1fr !important; }
+
+  /* VNIndex 1 col */
+  .vni-index-grid { grid-template-columns: 1fr !important; }
+
+  /* World clock: 2 cols still */
+  .wc-grid  { grid-template-columns: repeat(2,1fr) !important; }
+  .wc-time  { font-size: 14px; }
+  .wc-city  { font-size: 9px; }
+
+  /* Stopwatch/countdown */
+  .sw-display, .cd-display { font-size: 22px; }
+  .cd-input { width: 46px; font-size: 16px; }
+
+  /* Fuel card */
+  .fuel-card { flex-wrap: wrap; gap: 8px; }
+  .fuel-price { font-size: 16px; }
+
+  /* Bank rates: show only code, transfer, sell */
+  .br-table th:nth-child(3),
+  .br-table td:nth-child(3),
+  .br-table th:nth-child(6),
+  .br-table td:nth-child(6) { display: none; }
+}
+
+/* ── Touch improvements ─────────────────────────────────────── */
+@media (hover: none) {
+  /* Bigger tap targets */
+  .sidebar-nav-item { padding: 11px 12px; }
+  .lot-chip         { padding: 8px 14px; }
+  .news-tab         { padding: 8px 14px; }
+  .sw-btn           { min-height: 40px; }
+  .lot-nav-btn      { min-height: 40px; }
+}
+
+/* ── Scrollbar hide on mobile ───────────────────────────────── */
+@media (max-width: 900px) {
+  .sidebar { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent; }
+  .sw-laps { scrollbar-width: thin; }
+}
+
+/* ── Safe area padding (iPhone notch) ──────────────────────── */
+@supports (padding: env(safe-area-inset-bottom)) {
+  @media (max-width: 900px) {
+    footer        { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+    .content-section { padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+  }
+}
