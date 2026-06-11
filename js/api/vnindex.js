@@ -1,33 +1,39 @@
 /**
- * api/vnindex.js — Vietnam Stock Market via Cloudflare Function proxy → VPS
- * Proxy deployed at: everything.rellia.org/vnindex
+ * api/vnindex.js — Vietnam Stock Market
+ * - Stocks (VCB, HPG...): VPS direct (CORS * confirmed) → works from browser
+ * - Index (VNINDEX...): VPS doesn't expose index via getliststockdata → use Cloudflare proxy
  */
 import APP_CONFIG from '../../config.js';
 
+const VPS   = 'https://bgapidatafeed.vps.com.vn';
 const PROXY = (APP_CONFIG.TRAFFIC_PROXY_URL || 'https://everything.rellia.org') + '/vnindex';
 
-/** Fetch index data: VNINDEX, VN30, HNXINDEX, UPCOM */
+/** Fetch market indices. Requires Cloudflare proxy to be deployed. */
 export async function fetchVNIndex() {
   try {
-    const res = await fetch(`${PROXY}?type=index`);
+    const res = await fetch(`${PROXY}?type=index`, { signal: AbortSignal.timeout(5000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    return Array.isArray(data) ? data : null;
+    return Array.isArray(data) && data.length ? data : null;
   } catch (err) {
-    console.warn('[VNIndex]', err);
-    return null;
+    console.warn('[VNIndex] proxy unavailable:', err.message);
+    return null; // Handled gracefully in component
   }
 }
 
-/** Fetch top Vietnamese stocks */
+/** Fetch top bluechip stocks — calls VPS directly (CORS * allowed) */
 export async function fetchTopStocks() {
+  const symbols = 'VCB,BID,CTG,TCB,VPB,MBB,HPG,VIC,VHM,VNM,MSN,SAB,GAS,PLX,FPT';
   try {
-    const res = await fetch(`${PROXY}?type=stocks`);
+    const res = await fetch(`${VPS}/getliststockdata/${symbols}`, {
+      headers: { 'Referer': 'https://banggia.vps.com.vn/' },
+      signal: AbortSignal.timeout(8000),
+    });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    return Array.isArray(data) ? data : null;
+    return Array.isArray(data) && data.length ? data : null;
   } catch (err) {
-    console.warn('[TopStocks]', err);
+    console.warn('[TopStocks]', err.message);
     return null;
   }
 }

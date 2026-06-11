@@ -1,15 +1,3 @@
-/**
- * config.js
- * ════════════════════════════════════════════
- * CẤU HÌNH API KEYS & THÔNG SỐ ỨNG DỤNG
- * ════════════════════════════════════════════
- *
- * ► Điền API key của bạn vào đây để không cần nhập lại mỗi lần.
- * ► Key sẽ được tự động ưu tiên hơn key lưu trong localStorage.
- * ► Để trống ("") nếu bạn không có key hoặc muốn nhập qua giao diện.
- *
- * ⚠️  KHÔNG chia sẻ file này nếu bạn đã điền key thật vào đây.
- */
 
 const APP_CONFIG = {
 

@@ -5,10 +5,10 @@ import { fetchAQI, aqiLevel } from '../api/aqi.js';
 import { state } from '../store/state.js';
 
 const AQI_CITIES = [
-  { label: 'TP.HCM',  station: 'geo:10.7769;106.7009' },  // HCM center — geo fallback (US Consulate offline)
-  { label: 'Hà Nội',  station: '@1437' },                   // Hanoi – Kim Liên station (verified)
-  { label: 'Đà Nẵng', station: '@1584' },                   // Da Nang city (verified, AQI=13)
-  { label: 'Cần Thơ', station: '@13687' },                  // Cần Thơ/Ninh Kiều – KTTV (verified, AQI=26)
+  { label: 'TP.HCM',  station: 'geo:10.7769;106.7009' },  // HCM center — geo (US Consulate offline)
+  { label: 'Hà Nội',  station: '@1583' },                   // Hanoi, Vietnam — AQI ~105 (verified)
+  { label: 'Đà Nẵng', station: '@1584' },                   // Da Nang city (verified)
+  { label: 'Cần Thơ', station: '@13687' },                  // Cần Thơ/Ninh Kiều - KTTV (verified)
   { label: 'Huế',     station: '@5505' },                   // Tp Huế (verified)
 ];
 

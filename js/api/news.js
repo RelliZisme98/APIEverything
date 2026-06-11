@@ -1,12 +1,14 @@
 /**
- * api/news.js — RSS feed reader via Cloudflare Function proxy
- * Proxy: /news-rss?url=... (deployed at everything.rellia.org)
+ * api/news.js — RSS feed reader
+ * Primary: allorigins.win/raw (free, no key, returns XML directly, works from browser)
+ * Fallback: Cloudflare Function proxy at everything.rellia.org/news-rss
  */
 import APP_CONFIG from '../../config.js';
 
+const ALLORIGINS = 'https://api.allorigins.win/raw?url=';
 const PROXY_BASE = APP_CONFIG.TRAFFIC_PROXY_URL || 'https://everything.rellia.org';
 
-const FEEDS = {
+export const FEEDS = {
   vnexpress: {
     label: 'VnExpress',
     url: 'https://vnexpress.net/rss/tin-moi-nhat.rss',
@@ -27,22 +29,51 @@ const FEEDS = {
   },
 };
 
-export { FEEDS };
+async function fetchRSS(rssUrl) {
+  // 1. allorigins /raw — returns raw XML directly (no JSON wrapper)
+  try {
+    const res = await fetch(`${ALLORIGINS}${encodeURIComponent(rssUrl)}`);
+    if (res.ok) {
+      const text = await res.text();
+      if (text.includes('<item>') || text.includes('<item ')) return text;
+    }
+  } catch (_) { /* fall through to proxy */ }
+
+  // 2. Fallback: Cloudflare Function proxy
+  try {
+    const res = await fetch(`${PROXY_BASE}/news-rss?url=${encodeURIComponent(rssUrl)}`);
+    if (res.ok) return await res.text();
+  } catch (_) { /* give up */ }
+
+  return null;
+}
+
+function stripHTML(str) {
+  return str.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 160);
+}
+
+/** Format pubDate to relative time in Vietnamese */
+export function relativeTime(dateStr) {
+  if (!dateStr) return '';
+  const diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
+  if (diff < 60)    return 'Vừa xong';
+  if (diff < 3600)  return `${Math.floor(diff / 60)} phút trước`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`;
+  return `${Math.floor(diff / 86400)} ngày trước`;
+}
 
 /** Fetch and parse RSS for a given source key */
-export async function fetchNews(sourceKey = 'vnexpress', limit = 10) {
+export async function fetchNews(sourceKey = 'vnexpress', limit = 12) {
   const feed = FEEDS[sourceKey];
   if (!feed) return [];
 
   try {
-    const proxyUrl = `${PROXY_BASE}/news-rss?url=${encodeURIComponent(feed.url)}`;
-    const res = await fetch(proxyUrl);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const xml = await res.text();
+    const xml = await fetchRSS(feed.url);
+    if (!xml) return [];
 
     const parser = new DOMParser();
-    const doc = parser.parseFromString(xml, 'text/xml');
-    const items = Array.from(doc.querySelectorAll('item')).slice(0, limit);
+    const doc    = parser.parseFromString(xml, 'text/xml');
+    const items  = Array.from(doc.querySelectorAll('item')).slice(0, limit);
 
     return items.map(item => ({
       title:   item.querySelector('title')?.textContent?.trim() ?? '',
@@ -57,18 +88,4 @@ export async function fetchNews(sourceKey = 'vnexpress', limit = 10) {
     console.warn('[News]', sourceKey, err);
     return [];
   }
-}
-
-function stripHTML(str) {
-  return str.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 160);
-}
-
-/** Format pubDate to relative time in Vietnamese */
-export function relativeTime(dateStr) {
-  if (!dateStr) return '';
-  const diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
-  if (diff < 60)   return 'Vừa xong';
-  if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`;
-  return `${Math.floor(diff / 86400)} ngày trước`;
 }
