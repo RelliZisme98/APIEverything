@@ -113,6 +113,16 @@ function syncDateUI() {
   if (picker) picker.value = toInputDate(d);
 }
 
+// Draw times by region (ICT = UTC+7)
+const DRAW_TIMES = {
+  'mien-bac':   '18:10',
+  'tp-hcm':     '16:10',
+  'da-nang':    '17:10',
+  'dong-nai':   '16:00',
+  'can-tho':    '16:10',
+  'binh-duong': '16:10',
+};
+
 async function fetchAndRender() {
   const region = LOTTERY_REGIONS.find(r => r.id === currentLotteryId);
   if (!region) return;
@@ -121,12 +131,43 @@ async function fetchAndRender() {
 
   el.innerHTML = `<div class="lot-loading">🎱 Đang tải kết quả ${region.label}...</div>`;
 
-  const dateStr = isToday(currentLotteryDate) ? '' : formatDate(currentLotteryDate);
+  const todayRequested = isToday(currentLotteryDate);
+  const dateStr = todayRequested ? '' : formatDate(currentLotteryDate);
   const url = `/lottery?region=${region.id}${dateStr ? '&date=' + dateStr : ''}`;
 
   try {
     const res  = await fetch(url);
     const data = await res.json();
+
+    // ── Date mismatch: minhngoc returned previous day because today not drawn yet ──
+    if (todayRequested && data.prizes?.length) {
+      const returnedDate = (data.date ?? '').replace(/\//g, '-'); // normalize to DD-MM-YYYY
+      const todayFormatted = formatDate(new Date());              // DD-MM-YYYY
+      // minhngoc returns date as DD/MM/YYYY or value="DD-MM-YYYY"
+      const normalizeD = (s) => s.replace(/\//g,'-');
+      if (normalizeD(returnedDate) !== normalizeD(todayFormatted)) {
+        // Results belong to another day — today not drawn yet
+        const drawTime = DRAW_TIMES[currentLotteryId] ?? '18:10';
+        el.innerHTML = `
+          <div class="lot-wrap">
+            <div class="lot-header" style="border-color:${region.color}30;background:${region.color}06;">
+              <span style="color:${region.color};">${region.label}</span>
+              <span class="lot-date">${new Date().toLocaleDateString('vi-VN', { weekday:'long', day:'2-digit', month:'2-digit', year:'numeric' })}</span>
+            </div>
+            <div style="text-align:center;padding:30px;">
+              <div style="font-size:36px;margin-bottom:10px;">⏳</div>
+              <div style="font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">Chưa có kết quả hôm nay</div>
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">
+                Dự kiến quay lúc <strong style="color:${region.color};">${drawTime}</strong> (giờ Việt Nam)
+              </div>
+              <button class="lot-nav-btn" onclick="window.lotNavDate(-1)" style="background:${region.color}12;border-color:${region.color}40;color:${region.color};">
+                ◀ Xem kết quả hôm qua
+              </button>
+            </div>
+          </div>`;
+        return;
+      }
+    }
 
     if (data.error || !data.prizes?.length) {
       const drawDay = region.drawDays.indexOf(currentLotteryDate.getDay()) === -1;
@@ -137,7 +178,7 @@ async function fetchAndRender() {
             <span class="lot-date">${new Date(currentLotteryDate).toLocaleDateString('vi-VN', { weekday:'long', day:'2-digit', month:'2-digit', year:'numeric' })}</span>
           </div>
           <div style="text-align:center;padding:30px;color:var(--text-muted);">
-            ${drawDay ? '📅 Ngày này không có lịch quay xổ số' : '⏳ Chưa có kết quả (chưa đến giờ quay hoặc nguồn chưa cập nhật)'}
+            ${drawDay ? '📅 Ngày này không có lịch quay xổ số' : `⏳ Chưa có kết quả (quay lúc ${DRAW_TIMES[currentLotteryId] ?? '18:10'})`}
           </div>
           <div style="text-align:center;padding-bottom:14px;">
             <a href="https://www.minhngoc.net.vn/${region.id}/" target="_blank" class="lot-link">🔗 Xem tại minhngoc.net.vn</a>
