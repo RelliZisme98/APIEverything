@@ -267,10 +267,10 @@
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.65);
   z-index: 90;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  /* NO backdrop-filter here — it creates a stacking context that
+     blurs the sidebar on mobile even though sidebar z-index is higher */
 }
 
 /* Sidebar scroll: overscroll containment */
@@ -278,7 +278,6 @@
   overscroll-behavior: contain;
 }
 .sidebar-nav {
-  /* Allow scroll within sidebar nav when content overflows */
   overflow-y: auto;
   overflow-x: hidden;
 }
