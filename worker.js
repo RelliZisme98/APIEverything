@@ -321,6 +321,74 @@ async function handleVCBRates(request) {
   }
 }
 
+// ─── /lottery ────────────────────────────────────────────────────────
+// Proxy minhngoc.net.vn JS and parse prize data via regex (no jQuery)
+async function handleLottery(request) {
+  if (request.method === 'OPTIONS') return preflight();
+  const params = new URL(request.url).searchParams;
+  const region = params.get('region') ?? 'mien-bac';
+  const date   = params.get('date');   // DD-MM-YYYY or empty for today
+
+  // Validate region (allow alphanumeric + dash)
+  if (!/^[a-z-]+$/.test(region)) return cors('{"error":"invalid region"}', 400);
+
+  const baseUrl = `https://www.minhngoc.net.vn/getkqxs/${region}`;
+  const scriptUrl = date ? `${baseUrl}/${date}.js` : `${baseUrl}.js`;
+
+  try {
+    const res = await fetch(scriptUrl, {
+      headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://www.minhngoc.net.vn/' }
+    });
+    if (!res.ok) return cors(JSON.stringify({ error: 'not_found', date, region }), 404);
+
+    const js = await res.text();
+
+    // minhngoc script calls: $('#box_kqxs_minhngoc').append('...HTML...')
+    // Extract all appended HTML fragments
+    const htmlFragments = [];
+    const appendRe = /\.append\('([\s\S]+?)'\);/g;
+    let m;
+    while ((m = appendRe.exec(js)) !== null) {
+      // unescape the string
+      htmlFragments.push(m[1].replace(/\\'/g, "'").replace(/\\n/g, '\n').replace(/\\t/g, '\t'));
+    }
+    const html = htmlFragments.join('');
+
+    // Extract date from the HTML
+    const dateMatch = html.match(/Ng[àa]y:\s*(?:<[^>]+>)*([0-9\/]+)/i)
+                   || js.match(/value="(\d{2}-\d{2}-\d{4})" selected/);
+    const drawDate = dateMatch ? dateMatch[1] : (date ?? 'N/A');
+
+    // Extract prizes using regex on the appended HTML
+    const prizes = [];
+    // Pattern: <td class="giaiXl">LABEL</td><td class="giaiX">NUMBERS</td>
+    const prizeRe = /<td[^>]*class="([^"]*giai[^"]*l[^"]*)"[^>]*>([\s\S]*?)<\/td>[\s\S]*?<td[^>]*class="([^"]*giai[^"]*)"[^>]*>([\s\S]*?)<\/td>/gi;
+    while ((m = prizeRe.exec(html)) !== null) {
+      const label = m[2].replace(/<[^>]+>/g, '').replace(/&[a-z]+;/gi, (e) => {
+        const map = {'&agrave;':'à','&igrave;':'ì','&aacute;':'á','&eacute;':'é','&nbsp;':' '};
+        return map[e] ?? e;
+      }).trim();
+      const nums  = m[4].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+      if (label && nums) prizes.push({ label, numbers: nums });
+    }
+
+    // Fallback: simpler pattern
+    if (!prizes.length) {
+      const fallRe = /class="giai(?:db|1|2|3|4|5|6|7)"[^>]*>([\s\S]*?)<\/td>/gi;
+      while ((m = fallRe.exec(html)) !== null) {
+        const nums = m[1].replace(/<[^>]+>/g, '').trim();
+        if (nums) prizes.push({ label: '—', numbers: nums });
+      }
+    }
+
+    return new Response(JSON.stringify({ region, date: drawDate, prizes, raw: prizes.length ? undefined : html.slice(0, 2000) }), {
+      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=120' },
+    });
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
 // ─── Router ─────────────────────────────────────────────────────────
 export default {
   async fetch(request, env) {
@@ -332,6 +400,7 @@ export default {
     if (pathname === '/vnindex')       return handleVNIndex(request);
     if (pathname === '/power-outage')  return handlePowerOutage(request);
     if (pathname === '/vcb-rates')     return handleVCBRates(request);
+    if (pathname === '/lottery')       return handleLottery(request);
 
     // Serve static assets for everything else
     return env.ASSETS.fetch(request);
