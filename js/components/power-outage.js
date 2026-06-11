@@ -1,227 +1,274 @@
 /**
  * components/power-outage.js
- * Power outage card with province-aware smart search
- * that auto-redirects to the correct EVN regional portal.
+ * In-page power outage lookup via Cloudflare proxy → EVNSPC API
+ * Sub-unit dropdowns use static hardcoded data (no proxy needed).
  */
 
-// ─── Province → EVN unit mapping ───────────────────────────────────────────
+import APP_CONFIG from '../../config.js';
+import { EVNSPC_COMPANIES, EVNSPC_SUB_UNITS } from '../data/evnspc-units.js';
 
-/** All 63 provinces mapped to their EVN unit */
-const PROVINCE_MAP = {
-  // ── EVNHCMC ──
-  'TP. Hồ Chí Minh':       { unit: 'EVNHCMC',  url: 'https://cskh.evnhcmc.vn/tracuu/tabid/96/Default.aspx' },
-  'Hồ Chí Minh':            { unit: 'EVNHCMC',  url: 'https://cskh.evnhcmc.vn/tracuu/tabid/96/Default.aspx' },
+const PROXY = APP_CONFIG.TRAFFIC_PROXY_URL || 'https://everything.rellia.org';
 
-  // ── EVNSPC (19 tỉnh miền Nam) ──
-  'Đồng Nai':     { unit: 'EVNSPC', url: 'https://cskh.evnspc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Bình Dương':   { unit: 'EVNSPC', url: 'https://cskh.evnspc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Long An':      { unit: 'EVNSPC', url: 'https://cskh.evnspc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Tiền Giang':   { unit: 'EVNSPC', url: 'https://cskh.evnspc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Bến Tre':      { unit: 'EVNSPC', url: 'https://cskh.evnspc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Vĩnh Long':    { unit: 'EVNSPC', url: 'https://cskh.evnspc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Trà Vinh':     { unit: 'EVNSPC', url: 'https://cskh.evnspc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Hậu Giang':    { unit: 'EVNSPC', url: 'https://cskh.evnspc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Sóc Trăng':    { unit: 'EVNSPC', url: 'https://cskh.evnspc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Bạc Liêu':     { unit: 'EVNSPC', url: 'https://cskh.evnspc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Cà Mau':       { unit: 'EVNSPC', url: 'https://cskh.evnspc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Kiên Giang':   { unit: 'EVNSPC', url: 'https://cskh.evnspc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'An Giang':     { unit: 'EVNSPC', url: 'https://cskh.evnspc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Đồng Tháp':   { unit: 'EVNSPC', url: 'https://cskh.evnspc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Cần Thơ':      { unit: 'EVNSPC', url: 'https://cskh.evnspc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Tây Ninh':     { unit: 'EVNSPC', url: 'https://cskh.evnspc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Bình Phước':   { unit: 'EVNSPC', url: 'https://cskh.evnspc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Bà Rịa - Vũng Tàu': { unit: 'EVNSPC', url: 'https://cskh.evnspc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-
-  // ── EVNHANOI ──
-  'Hà Nội': { unit: 'EVNHANOI', url: 'https://cskh.evnhanoi.com.vn/TraCuu/LichNgungCungCapDien' },
-
-  // ── EVNNPC (19 tỉnh miền Bắc) ──
-  'Hà Giang':     { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Tuyên Quang':  { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Lào Cai':      { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Yên Bái':      { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Thái Nguyên':  { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Phú Thọ':      { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Bắc Kạn':      { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Cao Bằng':     { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Lạng Sơn':     { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Bắc Giang':    { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Bắc Ninh':     { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Quảng Ninh':   { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Hải Phòng':    { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Hải Dương':    { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Hưng Yên':     { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Thái Bình':    { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Nam Định':     { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Hà Nam':       { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Ninh Bình':    { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Vĩnh Phúc':    { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Hòa Bình':     { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Sơn La':       { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Điện Biên':    { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Lai Châu':     { unit: 'EVNNPC', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-
-  // ── EVNCPC (miền Trung + Tây Nguyên) ──
-  'Thanh Hóa':     { unit: 'EVNCPC', url: 'https://cskh.cpc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Nghệ An':       { unit: 'EVNCPC', url: 'https://cskh.cpc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Hà Tĩnh':       { unit: 'EVNCPC', url: 'https://cskh.cpc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Quảng Bình':    { unit: 'EVNCPC', url: 'https://cskh.cpc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Quảng Trị':     { unit: 'EVNCPC', url: 'https://cskh.cpc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Thừa Thiên Huế': { unit: 'EVNCPC', url: 'https://cskh.cpc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Đà Nẵng':       { unit: 'EVNCPC', url: 'https://cskh.cpc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Quảng Nam':     { unit: 'EVNCPC', url: 'https://cskh.cpc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Quảng Ngãi':    { unit: 'EVNCPC', url: 'https://cskh.cpc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Bình Định':     { unit: 'EVNCPC', url: 'https://cskh.cpc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Phú Yên':       { unit: 'EVNCPC', url: 'https://cskh.cpc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Khánh Hòa':     { unit: 'EVNCPC', url: 'https://cskh.cpc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Ninh Thuận':    { unit: 'EVNCPC', url: 'https://cskh.cpc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Bình Thuận':    { unit: 'EVNCPC', url: 'https://cskh.cpc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Kon Tum':       { unit: 'EVNCPC', url: 'https://cskh.cpc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Gia Lai':       { unit: 'EVNCPC', url: 'https://cskh.cpc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Đắk Lắk':      { unit: 'EVNCPC', url: 'https://cskh.cpc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Đắk Nông':     { unit: 'EVNCPC', url: 'https://cskh.cpc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
-  'Lâm Đồng':     { unit: 'EVNCPC', url: 'https://cskh.cpc.vn/TraCuu/TraCuuLichNgungCungCapDien' },
+// ── EVN units cho các vùng khác ────────────────────────────────────────────
+const OTHER_UNITS = {
+  EVNHCMC:  { label: 'EVNHCMC – TP. Hồ Chí Minh',  url: 'https://cskh.evnhcmc.vn/tracuu/tabid/96/Default.aspx',            color: '#34d399' },
+  EVNHANOI: { label: 'EVNHANOI – Hà Nội',            url: 'https://cskh.evnhanoi.com.vn/TraCuu/LichNgungCungCapDien',        color: '#60a5fa' },
+  EVNNPC:   { label: 'EVNNPC – miền Bắc (19 tỉnh)', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien',       color: '#a78bfa' },
+  EVNCPC:   { label: 'EVNCPC – miền Trung & Tây Nguyên', url: 'https://cskh.cpc.vn/TraCuu/TraCuuLichNgungCungCapDien',     color: '#fbbf24' },
 };
 
-const EVN_UNITS = {
-  EVNHCMC:  { icon: '🏙️', label: 'EVNHCMC',  full: 'Điện lực TP. Hồ Chí Minh', color: '#34d399' },
-  EVNSPC:   { icon: '🌴', label: 'EVNSPC',   full: 'Điện lực miền Nam',          color: '#fb923c' },
-  EVNHANOI: { icon: '🏛️', label: 'EVNHANOI', full: 'Điện lực Hà Nội',           color: '#60a5fa' },
-  EVNNPC:   { icon: '🏭', label: 'EVNNPC',   full: 'Điện lực miền Bắc',          color: '#a78bfa' },
-  EVNCPC:   { icon: '⛰️', label: 'EVNCPC',   full: 'Điện lực miền Trung',        color: '#fbbf24' },
-};
+function fmtDate(d) {
+  // dd-mm-yyyy
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  return `${dd}-${mm}-${d.getFullYear()}`;
+}
 
-const ALL_PROVINCES = Object.keys(PROVINCE_MAP).filter((v, i, a) => a.indexOf(v) === i).sort();
+function dateRange(days = 14) {
+  const now = new Date();
+  const end = new Date(now); end.setDate(end.getDate() + days);
+  return { from: fmtDate(now), to: fmtDate(end) };
+}
 
-/**
- * Render the full power outage card with search form.
- */
+// ─────────────────────────────────────────────────────────────────────────────
 export function renderPowerOutage(containerId = 'powerContent') {
   const el = document.getElementById(containerId);
   if (!el) return;
 
+  const { from, to } = dateRange(14);
+
   el.innerHTML = `
-    <!-- ── Smart search ── -->
-    <div class="power-search-box">
-      <div class="power-search-title">🔍 Tra cứu theo khu vực của bạn</div>
-      <div class="power-search-form">
-        <div class="power-search-field">
-          <label class="power-field-label">Tỉnh / Thành phố</label>
-          <select class="power-province-select" id="powerProvinceSelect">
-            <option value="">-- Chọn tỉnh/thành phố --</option>
-            ${ALL_PROVINCES.map(p => `<option value="${p}">${p}</option>`).join('')}
-          </select>
-        </div>
-        <div class="power-search-field">
-          <label class="power-field-label">Địa chỉ / Khu vực (tuỳ chọn)</label>
-          <input class="field-input" id="powerAddressInput"
-                 type="text" placeholder="VD: Quận 1, Phường Bến Nghé..." />
-        </div>
-        <button class="btn-primary power-search-btn" id="powerSearchBtn" onclick="searchPowerOutage()">
-          ⚡ Tra cứu lịch cúp điện
-        </button>
-      </div>
+    <!-- ── Tab switcher ── -->
+    <div class="po-tabs">
+      <button class="po-tab active" id="poTabEvnspc" onclick="poSwitchTab('evnspc')">🌴 EVNSPC (miền Nam)</button>
+      <button class="po-tab" id="poTabOther" onclick="poSwitchTab('other')">🗺️ Vùng khác</button>
     </div>
 
-    <!-- ── Search result ── -->
-    <div id="powerSearchResult"></div>
+    <!-- ══ EVNSPC Panel ══ -->
+    <div id="poPanelEvnspc" class="po-panel">
+      <div class="po-section-label">Tra cứu trực tiếp – dữ liệu từ EVNSPC</div>
 
-    <!-- ── Quick links by region ── -->
-    <div class="power-divider">Hoặc chọn trực tiếp theo đơn vị điện lực</div>
+      <!-- Mode tabs -->
+      <div class="po-mode-tabs">
+        <button class="po-mode-tab active" id="poModeUnit" onclick="poSwitchMode('unit')">Theo đơn vị quản lý</button>
+        <button class="po-mode-tab" id="poModeMakh" onclick="poSwitchMode('makh')">Theo mã khách hàng</button>
+      </div>
 
-    <div class="power-unit-all">
-      ${Object.entries(EVN_UNITS).map(([key, u]) => {
-        // Find a sample URL for this unit
-        const sample = Object.values(PROVINCE_MAP).find(v => v.unit === key);
-        return `
-          <a class="power-unit-card" href="${sample?.url || '#'}" target="_blank" rel="noopener"
-             style="border-color:${u.color}22;">
-            <div class="power-unit-card-icon">${u.icon}</div>
-            <div class="power-unit-card-name" style="color:${u.color};">${u.label}</div>
-            <div class="power-unit-card-full">${u.full}</div>
-          </a>
-        `;
-      }).join('')}
+      <!-- Form: by unit -->
+      <div id="poFormUnit">
+        <div class="po-form-grid">
+          <div class="po-field">
+            <label class="po-label">Công ty Điện lực</label>
+            <select class="po-select" id="poCompanySelect" onchange="poLoadDienLuc()">
+              <option value="">-- Chọn Công ty Điện lực --</option>
+              ${EVNSPC_COMPANIES.map(c => `<option value="${c.ma}">${c.ten}</option>`).join('')}
+            </select>
+          </div>
+          <div class="po-field">
+            <label class="po-label">Điện lực / Huyện</label>
+            <select class="po-select" id="poDienLucSelect">
+              <option value="">-- Chọn Công ty trước --</option>
+            </select>
+          </div>
+          <div class="po-field">
+            <label class="po-label">Từ ngày</label>
+            <input class="po-input" type="date" id="poFromDate" value="${new Date().toISOString().split('T')[0]}" />
+          </div>
+          <div class="po-field">
+            <label class="po-label">Đến ngày</label>
+            <input class="po-input" type="date" id="poToDate" value="${new Date(Date.now()+14*86400000).toISOString().split('T')[0]}" />
+          </div>
+        </div>
+        <button class="po-search-btn" onclick="poSearchByUnit()">⚡ Tra cứu lịch cúp điện</button>
+      </div>
+
+      <!-- Form: by customer ID -->
+      <div id="poFormMakh" style="display:none;">
+        <div class="po-form-grid">
+          <div class="po-field" style="grid-column:1/-1;">
+            <label class="po-label">Mã khách hàng <span style="color:var(--text-muted);font-weight:400;">(in trên hóa đơn tiền điện)</span></label>
+            <input class="po-input" type="text" id="poMaKHInput" placeholder="VD: PE0012345678" />
+          </div>
+          <div class="po-field">
+            <label class="po-label">Từ ngày</label>
+            <input class="po-input" type="date" id="poFromDateMakh" value="${new Date().toISOString().split('T')[0]}" />
+          </div>
+          <div class="po-field">
+            <label class="po-label">Đến ngày</label>
+            <input class="po-input" type="date" id="poToDateMakh" value="${new Date(Date.now()+14*86400000).toISOString().split('T')[0]}" />
+          </div>
+        </div>
+        <button class="po-search-btn" onclick="poSearchByMakh()">⚡ Tra cứu theo mã khách hàng</button>
+      </div>
+
+      <!-- Result area -->
+      <div id="poResult"></div>
     </div>
 
-    <!-- ── Hotline & tips ── -->
-    <div class="power-bottom-row">
-      <div class="power-hotline">
-        <span style="font-size:22px;">📞</span>
-        <div>
-          <div class="power-hotline-num">19001006</div>
-          <div class="power-hotline-label">Hotline EVN 24/7 · Miễn phí</div>
-        </div>
+    <!-- ══ Other regions panel ══ -->
+    <div id="poPanelOther" class="po-panel" style="display:none;">
+      <div class="po-section-label">Chọn đơn vị điện lực theo khu vực</div>
+      <div class="po-other-grid">
+        ${Object.entries(OTHER_UNITS).map(([key, u]) => `
+          <a class="po-other-card" href="${u.url}" target="_blank" rel="noopener" style="border-color:${u.color}30;background:${u.color}08;">
+            <div class="po-other-card-title" style="color:${u.color};">${u.label}</div>
+            <div class="po-other-card-sub">Mở trang tra cứu chính thức ↗</div>
+          </a>`).join('')}
       </div>
-      <div class="power-tip-box" style="flex:1;">
-        <div class="power-tip-title">💡 Gợi ý</div>
-        <ul class="power-tip-list">
-          <li>📱 Tải app <strong>CSKH EVN</strong> để nhận thông báo tự động</li>
-          <li>📧 Đăng ký SMS/email tại cổng CSKH của đơn vị điện lực khu vực</li>
-          <li>🌐 Tra cứu theo mã khách hàng điện (in trên hóa đơn tiền điện)</li>
-        </ul>
-      </div>
-    </div>
-  `;
-
-  document.getElementById('powerProvinceSelect')
-    ?.addEventListener('change', () => searchPowerOutage(false));
-}
-
-/**
- * Search power outage by selected province (+ optional address).
- * @param {boolean} open – whether to open URL in new tab (defaults to false)
- */
-export function searchPowerOutage(open = false) {
-  const province = document.getElementById('powerProvinceSelect')?.value;
-  const address  = document.getElementById('powerAddressInput')?.value?.trim();
-  const result   = document.getElementById('powerSearchResult');
-  if (!result) return;
-
-  if (!province) {
-    result.innerHTML = '';
-    return;
-  }
-
-  const match = PROVINCE_MAP[province];
-  if (!match) {
-    result.innerHTML = `<div class="error-msg" style="margin:10px 0;">⚠️ Chưa có thông tin cho tỉnh/thành này.</div>`;
-    return;
-  }
-
-  const unit = EVN_UNITS[match.unit];
-  const fullUrl = match.url;
-
-  result.innerHTML = `
-    <div class="power-found-card animate-fade-in-up">
-      <div class="power-found-header">
-        <span class="power-found-icon">${unit.icon}</span>
-        <div>
-          <div class="power-found-unit" style="color:${unit.color};">${unit.label}</div>
-          <div class="power-found-area">${unit.full} · phụ trách ${province}</div>
-          ${address ? `<div class="power-found-addr">📍 ${address}</div>` : ''}
-        </div>
-      </div>
-      
-      <div style="display:flex; gap:10px; margin-bottom:12px;">
-        <a class="power-found-btn" href="${fullUrl}" target="_blank" rel="noopener"
-           style="border-color:${unit.color};color:${unit.color};flex:1;text-align:center;">
-          Mở trang web trong tab mới ↗️
-        </a>
-      </div>
-
-      <div class="iframe-container" style="background:#fff; height:500px;">
-        <iframe src="${fullUrl}" style="width:100%;height:100%;border:none;" sandbox="allow-scripts allow-forms allow-same-origin allow-popups"></iframe>
-      </div>
-      
-      <div style="font-size:11px;color:var(--text-muted);margin-top:8px;text-align:center;line-height:1.4;">
-        ℹ️ Một số đơn vị điện lực (như EVNHANOI) có thể chặn hiển thị do chính sách bảo mật chống clickjacking (X-Frame-Options). Nếu khung trên trống, vui lòng click nút mở trang web ở trên.
+      <div class="po-hotline">
+        <span>📞</span>
+        <div><div class="po-hotline-num">19001006</div><div class="po-hotline-sub">Hotline EVN 24/7 · Miễn phí</div></div>
       </div>
     </div>
   `;
 
-  if (open) window.open(fullUrl, '_blank', 'noopener');
+  // Expose globals
+  window.poSwitchTab    = poSwitchTab;
+  window.poSwitchMode   = poSwitchMode;
+  window.poLoadDienLuc  = poLoadDienLuc;
+  window.poSearchByUnit = poSearchByUnit;
+  window.poSearchByMakh = poSearchByMakh;
 }
 
-/** Legacy export for onclick compatibility */
-export function selectPowerRegion() {} // no-op – replaced by smart search
+// ── Tab switcher ──────────────────────────────────────────────────────────
+function poSwitchTab(tab) {
+  document.getElementById('poPanelEvnspc').style.display = tab === 'evnspc' ? '' : 'none';
+  document.getElementById('poPanelOther').style.display  = tab === 'other'  ? '' : 'none';
+  document.getElementById('poTabEvnspc').classList.toggle('active', tab === 'evnspc');
+  document.getElementById('poTabOther').classList.toggle('active',  tab === 'other');
+}
+
+// ── Mode switcher ─────────────────────────────────────────────────────────
+function poSwitchMode(mode) {
+  document.getElementById('poFormUnit').style.display  = mode === 'unit' ? '' : 'none';
+  document.getElementById('poFormMakh').style.display  = mode === 'makh' ? '' : 'none';
+  document.getElementById('poModeUnit').classList.toggle('active', mode === 'unit');
+  document.getElementById('poModeMakh').classList.toggle('active', mode === 'makh');
+}
+
+// ── Load sub-dropdown: Điện lực theo Công ty (từ dữ liệu tĩnh) ──────────
+function poLoadDienLuc() {
+  const maCty  = document.getElementById('poCompanySelect')?.value;
+  const select = document.getElementById('poDienLucSelect');
+  if (!select) return;
+
+  if (!maCty) {
+    select.innerHTML = '<option value="">-- Chọn Công ty trước --</option>';
+    return;
+  }
+
+  const subs = EVNSPC_SUB_UNITS[maCty] || [];
+  if (subs.length === 0) {
+    select.innerHTML = `<option value="${maCty}">-- Toàn bộ khu vực --</option>`;
+    return;
+  }
+
+  select.innerHTML = '<option value="">-- Chọn Điện lực / Huyện --</option>'
+    + subs.map(s => `<option value="${s.ma}">${s.ten}</option>`).join('');
+}
+
+// ── Search by unit ────────────────────────────────────────────────────────
+async function poSearchByUnit() {
+  const madvi   = document.getElementById('poDienLucSelect')?.value
+               || document.getElementById('poCompanySelect')?.value;
+  const fromRaw = document.getElementById('poFromDate')?.value;
+  const toRaw   = document.getElementById('poToDate')?.value;
+  const result  = document.getElementById('poResult');
+
+  if (!madvi) { showPoError(result, 'Vui lòng chọn Điện lực trước khi tra cứu.'); return; }
+  if (!fromRaw || !toRaw) { showPoError(result, 'Vui lòng chọn khoảng thời gian.'); return; }
+
+  const tuNgay  = fromRaw.split('-').reverse().join('-'); // yyyy-mm-dd → dd-mm-yyyy
+  const denNgay = toRaw.split('-').reverse().join('-');
+
+  await doSearch(result, `${PROXY}/power-outage?action=tracuu&madvi=${encodeURIComponent(madvi)}&tuNgay=${encodeURIComponent(tuNgay)}&denNgay=${encodeURIComponent(denNgay)}`);
+}
+
+// ── Search by customer ID ─────────────────────────────────────────────────
+async function poSearchByMakh() {
+  const maKH    = document.getElementById('poMaKHInput')?.value?.trim();
+  const fromRaw = document.getElementById('poFromDateMakh')?.value;
+  const toRaw   = document.getElementById('poToDateMakh')?.value;
+  const result  = document.getElementById('poResult');
+
+  if (!maKH) { showPoError(result, 'Vui lòng nhập mã khách hàng.'); return; }
+
+  const tuNgay  = fromRaw.split('-').reverse().join('-');
+  const denNgay = toRaw.split('-').reverse().join('-');
+
+  await doSearch(result, `${PROXY}/power-outage?action=tracuu-makh&maKH=${encodeURIComponent(maKH)}&tuNgay=${encodeURIComponent(tuNgay)}&denNgay=${encodeURIComponent(denNgay)}`);
+}
+
+// ── Core search + render ──────────────────────────────────────────────────
+async function doSearch(result, url) {
+  result.innerHTML = `<div class="po-loading">⏳ Đang tra cứu dữ liệu từ EVNSPC...</div>`;
+
+  try {
+    const res  = await fetch(url);
+    const html = await res.text();
+
+    if (!html || html.trim() === '' || html.includes('"error"')) {
+      result.innerHTML = `<div class="po-empty">📭 Không tìm thấy lịch cúp điện trong khoảng thời gian này.</div>`;
+      return;
+    }
+
+    // Parse và render bảng từ HTML response
+    renderPoTable(result, html);
+  } catch (err) {
+    showPoError(result, `Không thể kết nối proxy: ${err.message}. Đảm bảo Cloudflare Function đã deploy.`);
+  }
+}
+
+// ── Parse HTML response → render table ───────────────────────────────────
+function renderPoTable(el, html) {
+  const parser = new DOMParser();
+  const doc    = parser.parseFromString(html, 'text/html');
+
+  // EVNSPC trả về bảng HTML hoặc JSON
+  const rows = doc.querySelectorAll('tr');
+
+  if (rows.length <= 1) {
+    el.innerHTML = `<div class="po-empty">📭 Không có lịch cúp điện trong khoảng thời gian đã chọn.</div>`;
+    return;
+  }
+
+  // Build clean table
+  let tableHtml = `
+    <div class="po-result-wrap animate-fade-in-up">
+      <div class="po-result-header">
+        <span class="po-result-icon">⚡</span>
+        <span class="po-result-title">Kết quả lịch cúp điện</span>
+        <span class="po-result-count">${rows.length - 1} lịch</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="po-table">
+          <thead><tr>`;
+
+  // Header row
+  const headerCells = rows[0].querySelectorAll('th, td');
+  headerCells.forEach(th => {
+    tableHtml += `<th>${th.textContent.trim()}</th>`;
+  });
+  tableHtml += `</tr></thead><tbody>`;
+
+  // Data rows
+  for (let i = 1; i < rows.length; i++) {
+    const cells = rows[i].querySelectorAll('td');
+    if (!cells.length) continue;
+    tableHtml += `<tr>`;
+    cells.forEach(td => {
+      tableHtml += `<td>${td.textContent.trim()}</td>`;
+    });
+    tableHtml += `</tr>`;
+  }
+
+  tableHtml += `</tbody></table></div></div>`;
+  el.innerHTML = tableHtml;
+}
+
+function showPoError(el, msg) {
+  el.innerHTML = `<div class="po-error">⚠️ ${msg}</div>`;
+}
+
+/** Legacy compat */
+export function searchPowerOutage() {}

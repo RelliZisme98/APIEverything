@@ -1,118 +1,209 @@
 /* ═══════════════════════════════════════════
-   LUNAR / SOLAR CALENDAR
+   LUNAR / SOLAR CALENDAR – Redesigned
    ═══════════════════════════════════════════ */
 
-/* ── Today header ── */
-.cal-today-header {
+/* ── Hero Date Display ── */
+.cal-hero {
   display: flex;
-  gap: 16px;
-  margin-bottom: 20px;
   align-items: stretch;
+  gap: 0;
+  margin-bottom: 20px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.07);
 }
 
-.cal-solar {
+.cal-hero-solar {
   flex: 1;
+  padding: 20px 16px;
   text-align: center;
-  background: linear-gradient(135deg, rgba(96,165,250,0.1), rgba(167,139,250,0.08));
-  border: 1px solid rgba(96,165,250,0.2);
-  border-radius: var(--radius-sm);
-  padding: 14px 10px;
+  background: linear-gradient(145deg, rgba(96,165,250,0.1) 0%, rgba(34,211,238,0.06) 100%);
+  border-right: 1px solid rgba(255,255,255,0.06);
 }
 
-.cal-solar-day {
-  font-size: 52px;
+.cal-hero-lunar {
+  flex: 1;
+  padding: 20px 16px;
+  text-align: center;
+  background: linear-gradient(145deg, rgba(251,191,36,0.08) 0%, rgba(251,146,60,0.05) 100%);
+}
+
+.cal-hero-label {
+  font-size: 9px;
   font-weight: 800;
-  letter-spacing: -2px;
-  background: var(--gradient-brand);
+  letter-spacing: 0.14em;
+  color: var(--accent-blue);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  opacity: 0.8;
+}
+
+.cal-hero-label.lunar-label {
+  color: var(--accent-yellow);
+}
+
+.cal-hero-bigday {
+  font-size: 72px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -4px;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  line-height: 1;
+  margin-bottom: 4px;
 }
 
-.cal-solar-sub  { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
-.cal-solar-week { font-size: 13px; font-weight: 600; color: var(--accent-cyan); margin-top: 2px; }
-
-.cal-lunar {
-  flex: 1;
-  text-align: center;
-  background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(251,146,60,0.06));
-  border: 1px solid rgba(251,191,36,0.2);
-  border-radius: var(--radius-sm);
-  padding: 14px 10px;
+.cal-hero-bigday.lunar-day {
+  background: linear-gradient(135deg, var(--accent-yellow), var(--accent-orange));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.cal-lunar-day {
-  font-size: 52px;
-  font-weight: 800;
-  letter-spacing: -2px;
-  color: var(--accent-yellow);
-  line-height: 1;
+.cal-hero-weekday {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 3px;
 }
 
-.cal-lunar-sub  { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
-.cal-lunar-week { font-size: 13px; font-weight: 600; color: var(--accent-orange); margin-top: 2px; }
+.cal-hero-weekday.lunar-week {
+  color: var(--accent-orange);
+}
 
-/* ── Can Chi banner ── */
-.cal-canchi {
+.cal-hero-monyear {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ── Divider ── */
+.cal-hero-divider {
   display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  gap: 6px;
+  background: rgba(255,255,255,0.02);
 }
 
-.canchi-item {
+.cal-hero-divider-line {
+  width: 1px;
   flex: 1;
-  min-width: 80px;
-  text-align: center;
-  background: rgba(255,255,255,0.03);
+  background: rgba(255,255,255,0.07);
+}
+
+.cal-hero-divider-icon {
+  font-size: 18px;
+  opacity: 0.6;
+}
+
+/* ── Can Chi Row ── */
+.cal-canchi-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.cal-canchi-card {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(167,139,250,0.06);
+  border: 1px solid rgba(167,139,250,0.15);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.2s;
+}
+
+.cal-canchi-card:hover {
+  border-color: rgba(167,139,250,0.3);
+}
+
+.cal-canchi-card-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.cal-canchi-card-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 3px;
+}
+
+.cal-canchi-card-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent-purple);
+}
+
+/* ── Bottom row: mini cal + events ── */
+.cal-bottom-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 700px) {
+  .cal-bottom-row { grid-template-columns: 1fr; }
+  .cal-hero { flex-direction: column; }
+  .cal-hero-solar { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .cal-hero-divider { flex-direction: row; padding: 8px; }
+  .cal-canchi-row { flex-wrap: wrap; }
+}
+
+/* ── Mini calendar ── */
+.cal-mini-wrap {
+  background: rgba(255,255,255,0.02);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 8px;
+  padding: 14px;
 }
 
-.canchi-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-.canchi-value { font-size: 14px; font-weight: 700; color: var(--accent-purple); margin-top: 3px; }
-
-/* ── Mini calendar grid ── */
-.mini-cal { margin-top: 4px; }
+.mini-cal { }
 
 .mini-cal-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
-.mini-cal-title { font-size: 14px; font-weight: 600; }
+.mini-cal-title { font-size: 13px; font-weight: 700; color: var(--text-primary); }
 
 .mini-cal-btn {
-  background: var(--bg-card);
+  background: rgba(255,255,255,0.05);
   border: 1px solid var(--border);
   color: var(--text-secondary);
   width: 28px; height: 28px;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   display: flex; align-items: center; justify-content: center;
   transition: all 0.2s;
 }
 
-.mini-cal-btn:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+.mini-cal-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }
 
 .mini-cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 3px;
+  gap: 2px;
 }
 
 .mini-cal-weekday {
   text-align: center;
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 9px;
+  font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
-  padding: 4px 0;
+  padding: 4px 0 6px;
+  letter-spacing: 0.04em;
 }
 
 .mini-cal-weekday:first-child { color: var(--accent-red); }
@@ -120,7 +211,7 @@
 
 .mini-cal-day {
   text-align: center;
-  border-radius: 8px;
+  border-radius: 7px;
   padding: 4px 2px;
   cursor: default;
   transition: background 0.15s;
@@ -130,13 +221,14 @@
 .mini-cal-day:hover { background: rgba(255,255,255,0.05); }
 
 .mcd-solar {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   line-height: 1;
+  color: var(--text-primary);
 }
 
 .mcd-lunar {
-  font-size: 9px;
+  font-size: 8px;
   color: var(--text-muted);
   margin-top: 1px;
   line-height: 1;
@@ -144,7 +236,7 @@
 
 .mini-cal-day.is-today {
   background: var(--gradient-brand);
-  border-radius: 8px;
+  border-radius: 7px;
 }
 
 .mini-cal-day.is-today .mcd-solar { color: #fff; font-weight: 800; }
@@ -153,34 +245,113 @@
 .mini-cal-day.is-holiday .mcd-solar { color: var(--accent-red); }
 .mini-cal-day.is-holiday .mcd-lunar { color: var(--accent-orange); }
 
-.mini-cal-day.is-sunday .mcd-solar  { color: var(--accent-red); opacity: 0.7; }
+.mini-cal-day.is-sunday  .mcd-solar { color: var(--accent-red);  opacity: 0.7; }
 .mini-cal-day.is-saturday .mcd-solar { color: var(--accent-blue); opacity: 0.7; }
 
 .mini-cal-day.empty { pointer-events: none; }
 
-/* ── Upcoming events ── */
-.cal-events { margin-top: 14px; }
-.cal-events-title { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
-
-.cal-event-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  font-size: 12px;
-}
-
-.cal-event-item:last-child { border-bottom: none; }
-
-.cal-event-date {
-  min-width: 60px;
-  color: var(--accent-cyan);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-}
-
-.cal-event-name { color: var(--text-secondary); }
-
 /* ── Lunar month indicator on day ── */
 .mcd-lunar-m1 { color: var(--accent-orange) !important; font-weight: 600; }
+
+/* ── Events panel ── */
+.cal-events-wrap {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+}
+
+.cal-events-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.cal-events-icon { font-size: 16px; }
+
+.cal-events-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.cal-events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cal-event-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.02);
+  transition: background 0.15s;
+}
+
+.cal-event-row:hover { background: rgba(255,255,255,0.04); }
+
+.cal-event-dates {
+  min-width: 56px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.cal-event-solar {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1;
+}
+
+.cal-event-lunar {
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+.cal-event-info { flex: 1; min-width: 0; }
+
+.cal-event-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+/* Event badges */
+.cal-event-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+}
+
+.cal-event-badge.today {
+  background: rgba(52,211,153,0.15);
+  color: var(--accent-green);
+  border: 1px solid rgba(52,211,153,0.25);
+}
+
+.cal-event-badge.soon {
+  background: rgba(251,146,60,0.12);
+  color: var(--accent-orange);
+  border: 1px solid rgba(251,146,60,0.2);
+}
+
+.cal-event-badge.far {
+  background: rgba(255,255,255,0.04);
+  color: var(--text-muted);
+  border: 1px solid rgba(255,255,255,0.06);
+}

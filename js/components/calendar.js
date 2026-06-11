@@ -1,6 +1,6 @@
 /**
  * components/calendar.js
- * Lunar / Solar calendar widget renderer.
+ * Lunar / Solar calendar widget renderer – redesigned layout.
  */
 
 import {
@@ -36,45 +36,77 @@ export function renderCalendar(containerId = 'calendarContent') {
   const canchiDayStr   = canChiDay(dayJd);
 
   const thuText = THU[now.getDay()];
+  const DAYS_VI = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+  const fullDay = DAYS_VI[now.getDay()];
+
+  const monthNames = ['','Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6',
+                      'Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
 
   el.innerHTML = `
-    <!-- ── Today overview ── -->
-    <div class="cal-today-header">
-      <div class="cal-solar">
-        <div class="cal-solar-day">${now.getDate()}</div>
-        <div class="cal-solar-week">${thuText}</div>
-        <div class="cal-solar-sub">
-          Tháng ${now.getMonth() + 1} / ${now.getFullYear()} Dương lịch
+    <!-- ══ Hero date display ══ -->
+    <div class="cal-hero">
+      <!-- Left: Dương lịch -->
+      <div class="cal-hero-solar">
+        <div class="cal-hero-label">DƯƠNG LỊCH</div>
+        <div class="cal-hero-bigday">${now.getDate()}</div>
+        <div class="cal-hero-weekday">${fullDay}</div>
+        <div class="cal-hero-monyear">${monthNames[now.getMonth() + 1]} ${now.getFullYear()}</div>
+      </div>
+
+      <!-- Divider -->
+      <div class="cal-hero-divider">
+        <div class="cal-hero-divider-line"></div>
+        <div class="cal-hero-divider-icon">🌙</div>
+        <div class="cal-hero-divider-line"></div>
+      </div>
+
+      <!-- Right: Âm lịch -->
+      <div class="cal-hero-lunar">
+        <div class="cal-hero-label lunar-label">ÂM LỊCH</div>
+        <div class="cal-hero-bigday lunar-day">${today.day}</div>
+        <div class="cal-hero-weekday lunar-week">
+          ${today.leap ? 'Tháng Nhuận ' : 'Tháng '}${THANG_AM[today.month]}
+        </div>
+        <div class="cal-hero-monyear">Năm ${canChiYear(today.year)}</div>
+      </div>
+    </div>
+
+    <!-- ══ Can Chi row ══ -->
+    <div class="cal-canchi-row">
+      <div class="cal-canchi-card">
+        <div class="cal-canchi-card-icon">🗓️</div>
+        <div class="cal-canchi-card-body">
+          <div class="cal-canchi-card-label">Ngày</div>
+          <div class="cal-canchi-card-value">${canchiDayStr}</div>
         </div>
       </div>
-      <div class="cal-lunar">
-        <div class="cal-lunar-day">${today.day}</div>
-        <div class="cal-lunar-week">Tháng ${today.leap ? 'Nhuận ' : ''}${THANG_AM[today.month]}</div>
-        <div class="cal-lunar-sub">Năm ${canChiYear(today.year)} Âm lịch</div>
+      <div class="cal-canchi-card">
+        <div class="cal-canchi-card-icon">📆</div>
+        <div class="cal-canchi-card-body">
+          <div class="cal-canchi-card-label">Tháng</div>
+          <div class="cal-canchi-card-value">${canchiMonthStr}</div>
+        </div>
+      </div>
+      <div class="cal-canchi-card">
+        <div class="cal-canchi-card-icon">🎴</div>
+        <div class="cal-canchi-card-body">
+          <div class="cal-canchi-card-label">Năm</div>
+          <div class="cal-canchi-card-value">${canchiYearStr}</div>
+        </div>
       </div>
     </div>
 
-    <!-- ── Can Chi ── -->
-    <div class="cal-canchi">
-      <div class="canchi-item">
-        <div class="canchi-label">Năm</div>
-        <div class="canchi-value">${canchiYearStr}</div>
+    <!-- ══ Layout: Mini Cal + Upcoming Events ══ -->
+    <div class="cal-bottom-row">
+      <!-- Mini Calendar -->
+      <div class="cal-mini-wrap">
+        <div class="mini-cal" id="miniCal"></div>
       </div>
-      <div class="canchi-item">
-        <div class="canchi-label">Tháng</div>
-        <div class="canchi-value">${canchiMonthStr}</div>
-      </div>
-      <div class="canchi-item">
-        <div class="canchi-label">Ngày</div>
-        <div class="canchi-value">${canchiDayStr}</div>
+      <!-- Upcoming Events -->
+      <div class="cal-events-wrap">
+        <div class="cal-events" id="calEvents"></div>
       </div>
     </div>
-
-    <!-- ── Mini Calendar ── -->
-    <div class="mini-cal" id="miniCal"></div>
-
-    <!-- ── Upcoming Events ── -->
-    <div class="cal-events" id="calEvents"></div>
   `;
 
   renderMiniCalendar();
@@ -199,23 +231,32 @@ function renderUpcomingEvents(lunarToday) {
   }
 
   el.innerHTML = `
-    <div class="cal-events-title">📌 Sự Kiện Sắp Tới</div>
-    ${events.slice(0, 6).map(e => `
-      <div class="cal-event-item">
-        <div class="cal-event-date">
-          ${e.solarDate}<br/>
-          <span style="color:var(--accent-yellow);font-size:10px;">${e.lunarDate} âm</span>
-        </div>
-        <div class="cal-event-name">
-          ${e.name}
-          ${e.daysAway === 0
-            ? '<span style="color:var(--accent-green);font-size:10px;margin-left:4px;">• Hôm nay</span>'
-            : e.daysAway <= 3
-              ? `<span style="color:var(--accent-orange);font-size:10px;margin-left:4px;">• ${e.daysAway} ngày nữa</span>`
-              : `<span style="color:var(--text-muted);font-size:10px;margin-left:4px;">• ${e.daysAway} ngày nữa</span>`
-          }
-        </div>
-      </div>
-    `).join('')}
+    <div class="cal-events-header">
+      <span class="cal-events-icon">📌</span>
+      <span class="cal-events-title">Sự Kiện Sắp Tới</span>
+    </div>
+    <div class="cal-events-list">
+      ${events.slice(0, 6).map(e => {
+        let badge = '';
+        if (e.daysAway === 0) {
+          badge = `<span class="cal-event-badge today">Hôm nay</span>`;
+        } else if (e.daysAway <= 3) {
+          badge = `<span class="cal-event-badge soon">${e.daysAway} ngày nữa</span>`;
+        } else {
+          badge = `<span class="cal-event-badge far">${e.daysAway} ngày nữa</span>`;
+        }
+        return `
+          <div class="cal-event-row">
+            <div class="cal-event-dates">
+              <div class="cal-event-solar">${e.solarDate}</div>
+              <div class="cal-event-lunar">🌙 ${e.lunarDate} âm</div>
+            </div>
+            <div class="cal-event-info">
+              <div class="cal-event-name">${e.name}</div>
+              ${badge}
+            </div>
+          </div>`;
+      }).join('')}
+    </div>
   `;
 }
