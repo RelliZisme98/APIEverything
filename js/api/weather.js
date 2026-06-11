@@ -1,6 +1,6 @@
 /**
  * api/weather.js
- * Fetches current weather data from OpenWeatherMap.
+ * Fetches current weather + 5-day forecast from OpenWeatherMap.
  * Requires a free API key: https://openweathermap.org/api
  */
 
@@ -50,4 +50,71 @@ export async function fetchWeather(city, apiKey) {
   const data = await res.json();
   state.weatherData = data;
   return data;
+}
+
+/**
+ * Fetch 5-day / 3-hour forecast for a city (free OWM plan).
+ * Returns list of daily summaries (1 entry per day, noon slot preferred).
+ */
+export async function fetchForecast(city, apiKey) {
+  const key = apiKey || state.owmKey;
+  if (!key) return null;
+
+  const url =
+    `${BASE_URL}/forecast` +
+    `?q=${encodeURIComponent(city)}` +
+    `&appid=${key}` +
+    `&units=metric` +
+    `&lang=vi` +
+    `&cnt=40`;
+
+  const res = await fetch(url);
+  if (!res.ok) return null;
+
+  const data = await res.json();
+
+  // Group by date, pick noon slot (12:00) or midday-closest
+  const byDate = {};
+  for (const item of data.list) {
+    const date = item.dt_txt.split(' ')[0]; // yyyy-mm-dd
+    const hour = parseInt(item.dt_txt.split(' ')[1]);
+    if (!byDate[date]) {
+      byDate[date] = item;
+    } else {
+      // Prefer slot closest to noon
+      const curHour = parseInt(byDate[date].dt_txt.split(' ')[1]);
+      if (Math.abs(hour - 12) < Math.abs(curHour - 12)) {
+        byDate[date] = item;
+      }
+    }
+  }
+
+  // Also compute daily min/max from all slots
+  const minMax = {};
+  for (const item of data.list) {
+    const date = item.dt_txt.split(' ')[0];
+    if (!minMax[date]) minMax[date] = { min: item.main.temp_min, max: item.main.temp_max };
+    else {
+      minMax[date].min = Math.min(minMax[date].min, item.main.temp_min);
+      minMax[date].max = Math.max(minMax[date].max, item.main.temp_max);
+    }
+  }
+
+  // Return array, skip today (already shown in current weather)
+  const todayStr = new Date().toISOString().split('T')[0];
+  return Object.entries(byDate)
+    .filter(([d]) => d > todayStr)
+    .slice(0, 5)
+    .map(([date, item]) => ({
+      date,
+      dt: item.dt,
+      icon: item.weather[0]?.icon ?? '01d',
+      desc: item.weather[0]?.description ?? '',
+      temp: Math.round(item.main.temp),
+      tempMin: Math.round(minMax[date]?.min ?? item.main.temp_min),
+      tempMax: Math.round(minMax[date]?.max ?? item.main.temp_max),
+      humidity: item.main.humidity,
+      windKmh: Math.round(item.wind.speed * 3.6),
+      pop: Math.round((item.pop ?? 0) * 100), // probability of precipitation %
+    }));
 }

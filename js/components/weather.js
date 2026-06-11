@@ -140,9 +140,49 @@ export function renderWeather(d, containerId = 'weatherContent') {
       </div>
     </div>
 
+    <div id="weatherForecast"></div>
+
     <div style="font-size:11px;color:var(--text-muted);margin-top:10px;text-align:right;">
       ⏱️ ${new Date().toLocaleTimeString('vi-VN')} · OpenWeatherMap
     </div>
+  `;
+}
+
+/** Render 5-day daily forecast strip */
+export function renderForecast(days, containerId = 'weatherForecast') {
+  const el = document.getElementById(containerId);
+  if (!el || !days?.length) return;
+
+  const DAY_VI = ['CN','T2','T3','T4','T5','T6','T7'];
+
+  const cards = days.map(d => {
+    const date   = new Date(d.dt * 1000);
+    const dayStr = DAY_VI[date.getDay()];
+    const ddmm   = `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}`;
+    const icon   = WEATHER_ICONS[d.icon] ?? '🌡️';
+    const popBar = d.pop > 0
+      ? `<div class="wf-pop-bar"><div class="wf-pop-fill" style="width:${d.pop}%"></div></div>
+         <div class="wf-pop-label">🌧 ${d.pop}%</div>`
+      : '<div class="wf-pop-label" style="color:var(--text-muted)">☀️ Khô</div>';
+
+    return `
+      <div class="wf-card">
+        <div class="wf-day">${dayStr}</div>
+        <div class="wf-date">${ddmm}</div>
+        <div class="wf-icon">${icon}</div>
+        <div class="wf-desc">${d.desc}</div>
+        <div class="wf-temps">
+          <span class="wf-max">${d.tempMax}°</span>
+          <span class="wf-min">${d.tempMin}°</span>
+        </div>
+        ${popBar}
+        <div class="wf-wind">💨 ${d.windKmh} km/h</div>
+      </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="wf-section-label">📅 Dự báo 5 ngày tới</div>
+    <div class="wf-strip">${cards}</div>
   `;
 }
 

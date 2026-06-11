@@ -147,3 +147,148 @@
 .wstat2-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
 .wstat2-val   { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; color: var(--text-primary); }
 .wstat2-sub   { font-size: 10px; color: var(--accent-cyan); margin-top: 2px; }
+
+/* ══════════════════════════════════════════
+   FORECAST STRIP – 5-day
+   ══════════════════════════════════════════ */
+
+.wf-section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  margin: 16px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wf-section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.wf-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 900px) {
+  .wf-strip {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .wf-strip {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+  .wf-card { min-width: 110px; flex-shrink: 0; }
+}
+
+.wf-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 8px;
+  text-align: center;
+  transition: background 0.2s, transform 0.18s, border-color 0.2s;
+  cursor: default;
+}
+
+.wf-card:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(96,165,250,0.25);
+  transform: translateY(-2px);
+}
+
+.wf-day {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent-blue);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.wf-date {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.wf-icon {
+  font-size: 28px;
+  margin-bottom: 4px;
+  line-height: 1.2;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.wf-desc {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: capitalize;
+  margin-bottom: 8px;
+  line-height: 1.3;
+  min-height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wf-temps {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.wf-max {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent-yellow);
+}
+
+.wf-min {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  align-self: flex-end;
+}
+
+/* Precipitation bar */
+.wf-pop-bar {
+  height: 3px;
+  background: rgba(56,189,248,0.15);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 0 4px 4px;
+}
+
+.wf-pop-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+  border-radius: 2px;
+  transition: width 0.6s ease;
+}
+
+.wf-pop-label {
+  font-size: 10px;
+  color: #38bdf8;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.wf-wind {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+

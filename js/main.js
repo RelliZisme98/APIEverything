@@ -15,7 +15,7 @@ import { state } from './store/state.js';
 // ── API ──
 import { fetchCryptoMarkets } from './api/crypto.js';
 import { fetchExchangeRates } from './api/exchange.js';
-import { fetchWeather }       from './api/weather.js';
+import { fetchWeather, fetchForecast } from './api/weather.js';
 import { fetchGoldPrice }     from './api/gold.js';
 
 // ── Feature Components ──
@@ -35,6 +35,7 @@ import { renderGas }           from './components/gas.js';
 import { renderGold, renderGoldFallback } from './components/gold.js';
 import {
   renderWeather,
+  renderForecast,
   renderWeatherLoading,
   renderWeatherError,
   setWeatherBadge,
@@ -128,8 +129,13 @@ async function loadWeather(cityOverride) {
   renderWeatherLoading();
 
   try {
-    const data = await fetchWeather(city);
+    // Fetch current weather + 5-day forecast in parallel
+    const [data, forecast] = await Promise.all([
+      fetchWeather(city),
+      fetchForecast(city),
+    ]);
     renderWeather(data);
+    if (forecast?.length) renderForecast(forecast);
     setWeatherBadge(true);
   } catch (err) {
     console.warn('[Weather]', err);
