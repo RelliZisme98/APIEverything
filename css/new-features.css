@@ -93,6 +93,26 @@
 .lot-row--db .lot-prize-nums { font-size:24px; }
 .lot-link { display:inline-block; padding:8px 20px; background:rgba(96,165,250,0.1); border:1px solid rgba(96,165,250,0.3); border-radius:20px; color:var(--accent-blue); font-size:12px; text-decoration:none; }
 .lot-link:hover { background:rgba(96,165,250,0.2); }
+.lot-footer { text-align:center; padding:12px 16px 14px; border-top:1px solid var(--border); }
+.lot-loading { text-align:center; padding:30px; color:var(--text-muted); font-size:14px; }
+
+/* Date navigation */
+.lot-date-nav { display:flex; align-items:center; gap:8px; margin-bottom:14px; background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:10px; padding:8px 12px; }
+.lot-nav-btn { padding:6px 12px; border-radius:8px; border:1px solid var(--border); background:rgba(255,255,255,0.04); color:var(--text-primary); cursor:pointer; font-size:12px; white-space:nowrap; transition:all .2s; }
+.lot-nav-btn:hover:not(:disabled) { background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.15); }
+.lot-nav-btn:disabled { opacity:.35; cursor:not-allowed; }
+.lot-date-center { flex:1; text-align:center; }
+.lot-date-input { background:transparent; border:none; color:var(--accent-blue); font-size:13px; font-weight:700; cursor:pointer; text-align:center; }
+.lot-date-input::-webkit-calendar-picker-indicator { filter:invert(.6); cursor:pointer; }
+.lot-date-label { font-size:10px; color:var(--text-muted); margin-top:2px; }
+
+/* Number pills */
+.lot-num { display:inline-flex; align-items:center; justify-content:center; min-width:34px; height:34px; padding:0 6px; margin:2px; border-radius:8px; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:16px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); }
+.lot-num--db { min-width:50px; height:44px; font-size:22px; background:rgba(248,113,113,0.12); border-color:rgba(248,113,113,0.3); color:#f87171; }
+.lot-raw { padding:10px; font-size:13px; }
+.lot-raw table { width:100%; }
+.lot-raw td { padding:4px 8px; border-bottom:1px solid rgba(255,255,255,0.05); }
+
 
 /* ── World Clock ── */
 .wc-section-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text-muted); margin-bottom:12px; }
