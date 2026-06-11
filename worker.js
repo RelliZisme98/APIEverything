@@ -400,25 +400,33 @@ const FOOTBALL_LEAGUES = {
 async function handleFootball(request) {
   if (request.method === 'OPTIONS') return preflight();
   const { searchParams } = new URL(request.url);
-  const league = searchParams.get('league') ?? 'wc'; // wc | pl
-  const type   = searchParams.get('type')   ?? 'next'; // next | past | table | season
+  const league = searchParams.get('league') ?? 'wc';
+  const type   = searchParams.get('type')   ?? 'next';
+  const id     = searchParams.get('id')     ?? '';
 
   const lg = FOOTBALL_LEAGUES[league];
-  if (!lg) return cors(JSON.stringify({ error: 'unknown league' }), 400);
 
   let url;
-  if      (type === 'next')   url = `${TSDB_BASE}/eventsnextleague.php?id=${lg.id}`;
-  else if (type === 'past')   url = `${TSDB_BASE}/eventspastleague.php?id=${lg.id}`;
-  else if (type === 'table')  url = `${TSDB_BASE}/lookuptable.php?l=${lg.id}&s=${lg.season}`;
-  else if (type === 'season') url = `${TSDB_BASE}/eventsseason.php?id=${lg.id}&s=${lg.season}`;
+  // League-level endpoints
+  if (type === 'next' && lg)      url = `${TSDB_BASE}/eventsnextleague.php?id=${lg.id}`;
+  else if (type === 'past' && lg) url = `${TSDB_BASE}/eventspastleague.php?id=${lg.id}`;
+  else if (type === 'table' && lg)url = `${TSDB_BASE}/lookuptable.php?l=${lg.id}&s=${lg.season}`;
+  else if (type === 'season' && lg)url = `${TSDB_BASE}/eventsseason.php?id=${lg.id}&s=${lg.season}`;
+  // Item-level endpoints (id required)
+  else if (type === 'event-detail') url = `${TSDB_BASE}/lookupevent.php?id=${id}`;
+  else if (type === 'team')         url = `${TSDB_BASE}/lookupteam.php?id=${id}`;
+  else if (type === 'team-next')    url = `${TSDB_BASE}/eventsnext.php?id=${id}`;
+  else if (type === 'team-last')    url = `${TSDB_BASE}/eventslast.php?id=${id}`;
   else return cors(JSON.stringify({ error: 'unknown type' }), 400);
+
+  if (!url) return cors(JSON.stringify({ error: 'missing league or id' }), 400);
 
   try {
     const res  = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
     if (!res.ok) throw new Error(`upstream ${res.status}`);
     const data = await res.json();
-    return new Response(JSON.stringify({ league, type, leagueName: lg.name, ...data }), {
-      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=120' },
+    return new Response(JSON.stringify({ league, type, leagueName: lg?.name ?? '', ...data }), {
+      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=60' },
     });
   } catch (err) {
     return cors(JSON.stringify({ error: err.message }), 500);

@@ -1,193 +1,213 @@
 /* ══════════════════════════════════════════════════════
-   FOOTBALL — Fixtures, Results, Standings
+   FOOTBALL v2 — Fixtures, Results, Standings, Team Panel
    ══════════════════════════════════════════════════════ */
 
-/* League tabs */
-.fb-league-tabs {
-  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;
-}
+/* ── League tabs ── */
+.fb-league-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
 .fb-league-tab {
-  display: flex; align-items: center; gap: 7px;
-  padding: 8px 16px; border-radius: 10px;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.03);
-  color: var(--text-secondary);
-  cursor: pointer; font-size: 13px; font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  transition: all .2s;
+  padding:8px 16px; border-radius:10px; border:1px solid var(--border);
+  background:rgba(255,255,255,0.03); color:var(--text-secondary);
+  cursor:pointer; font-size:13px; font-weight:600; font-family:'Inter',sans-serif;
+  transition:all .2s;
 }
-.fb-league-tab:hover { background: rgba(255,255,255,0.06); }
-.fb-league-tab.active { font-weight: 700; }
+.fb-league-tab:hover { background:rgba(255,255,255,0.06); color:var(--text-primary); }
+.fb-league-tab.active { font-weight:700; }
 
-.fb-badge {
-  font-size: 9px; font-weight: 700; letter-spacing: .04em;
-  padding: 2px 7px; border-radius: 20px;
-  background: rgba(255,255,255,0.07); color: var(--text-muted);
-  border: 1px solid var(--border);
-}
-
-/* Sub-tabs */
+/* ── Sub tabs ── */
 .fb-tabs {
-  display: flex; gap: 4px; margin-bottom: 16px;
-  border-bottom: 1px solid var(--border); padding-bottom: 10px;
+  display:flex; gap:4px; margin-bottom:16px;
+  border-bottom:1px solid var(--border); padding-bottom:10px; flex-wrap:wrap;
 }
 .fb-tab {
-  padding: 7px 16px; border-radius: 8px; border: 1px solid transparent;
-  background: none; color: var(--text-muted);
-  cursor: pointer; font-size: 13px; font-weight: 500;
-  font-family: 'Inter', sans-serif; transition: all .2s;
+  padding:7px 14px; border-radius:8px; border:1px solid transparent;
+  background:none; color:var(--text-muted); cursor:pointer;
+  font-size:13px; font-weight:500; font-family:'Inter',sans-serif; transition:all .2s;
 }
-.fb-tab:hover  { background: rgba(255,255,255,0.04); color: var(--text-primary); }
-.fb-tab.active {
-  background: rgba(96,165,250,0.1);
-  border-color: rgba(96,165,250,0.25);
-  color: var(--accent-blue); font-weight: 700;
-}
+.fb-tab:hover  { background:rgba(255,255,255,0.04); color:var(--text-primary); }
+.fb-tab.active { font-weight:700; }
 
-/* Loading / empty */
-.fb-loading { text-align: center; padding: 32px; color: var(--text-muted); font-size: 14px; }
-.fb-empty   { text-align: center; padding: 32px; color: var(--text-muted); font-size: 14px; }
+/* ── Loading / empty ── */
+.fb-loading { text-align:center; padding:32px; color:var(--text-muted); font-size:14px; }
+.fb-empty   { text-align:center; padding:32px; color:var(--text-muted); font-size:13px; }
+.fb-main    { min-height:100px; }
 
-/* Date group */
-.fb-date-group { margin-bottom: 16px; }
+/* ── Date group ── */
+.fb-date-group { margin-bottom:18px; }
 .fb-date-header {
-  display: flex; justify-content: space-between;
-  font-size: 11px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .07em; color: var(--text-muted);
-  padding: 6px 10px; background: rgba(255,255,255,0.02);
-  border-radius: 6px; margin-bottom: 6px;
-  border-left: 3px solid var(--border);
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.07em;
+  color:var(--text-muted); padding:7px 12px; margin-bottom:6px;
+  background:rgba(255,255,255,0.02); border-radius:8px;
+  border-left:3px solid rgba(255,255,255,0.1);
 }
-.fb-date-header.fb-today {
-  color: var(--accent-red); border-left-color: var(--accent-red);
-  background: rgba(248,113,113,0.06);
-}
+.fb-date-header.fb-today { background:rgba(248,113,113,0.05); }
 
-/* Match card */
+/* ── Match card ── */
 .fb-match {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 12px; margin-bottom: 5px;
-  background: rgba(255,255,255,0.02); border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.05);
-  transition: background .2s;
+  background:rgba(255,255,255,0.02); border-radius:10px; margin-bottom:5px;
+  border:1px solid rgba(255,255,255,0.04); transition:all .2s; overflow:hidden;
 }
-.fb-match:hover { background: rgba(255,255,255,0.05); }
-.fb-match--live {
-  border-color: rgba(248,113,113,0.3);
-  background: rgba(248,113,113,0.04);
-  animation: fb-pulse 2s ease-in-out infinite;
-}
-@keyframes fb-pulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(248,113,113,0); }
-  50%      { box-shadow: 0 0 12px 2px rgba(248,113,113,0.15); }
+.fb-match:hover { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.08); }
+.fb-match--live { border-color:rgba(248,113,113,0.35)!important; background:rgba(248,113,113,0.04)!important; animation:fb-pulse 2s ease-in-out infinite; }
+.fb-match--expanded { border-color:rgba(96,165,250,0.25)!important; background:rgba(96,165,250,0.04)!important; }
+
+@keyframes fb-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,0);} 50%{box-shadow:0 0 10px 2px rgba(248,113,113,0.12);} }
+
+.fb-match-row {
+  display:grid; grid-template-columns:1fr auto 1fr auto;
+  align-items:center; gap:8px; padding:10px 12px; cursor:pointer; min-height:60px;
 }
 
-.fb-match-left  { flex: 1; min-width: 0; }
-.fb-match-center {
-  display: flex; flex-direction: column; align-items: center;
-  gap: 2px; min-width: 80px; text-align: center;
-}
-.fb-match-right { width: 100px; text-align: right; }
+/* ── Teams ── */
+.fb-team-col { display:flex; align-items:center; }
+.fb-team-col--home { justify-content:flex-start; }
+.fb-team-col--away { justify-content:flex-end; }
 
-.fb-team-row {
-  display: flex; align-items: center; gap: 7px;
-  padding: 2px 0; font-size: 12px; color: var(--text-secondary);
+.fb-team-btn {
+  display:flex; align-items:center; gap:7px;
+  background:none; border:none; cursor:pointer; padding:4px 7px; border-radius:8px;
+  color:var(--text-secondary); font-size:12px; font-family:'Inter',sans-serif;
+  transition:all .2s; max-width:180px;
 }
-.fb-team-row:first-child { margin-bottom: 3px; }
+.fb-team-btn:hover { background:rgba(255,255,255,0.06); color:var(--text-primary); }
+.fb-team-btn--away { flex-direction:row-reverse; }
 
-.fb-match-badge {
-  width: 18px; height: 18px; object-fit: contain; flex-shrink: 0;
-}
-.fb-match-team { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
-.fb-winner { color: var(--text-primary); font-weight: 700; }
+.fb-match-team-name { font-size:12px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.fb-winner { color:var(--text-primary)!important; font-weight:700!important; }
 
-.fb-score {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 16px; font-weight: 800; color: var(--text-primary);
-  background: rgba(255,255,255,0.05);
-  padding: 4px 10px; border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.08);
+/* ── Score / Time ── */
+.fb-score-col { display:flex; flex-direction:column; align-items:center; gap:2px; min-width:80px; }
+.fb-group-label { font-size:9px; font-weight:700; color:var(--accent-yellow); text-transform:uppercase; letter-spacing:.06em; }
+.fb-score-box {
+  font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:800;
+  padding:4px 10px; border-radius:8px;
+  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08);
+  color:var(--text-primary);
 }
-.fb-score--live {
-  color: var(--accent-red);
-  background: rgba(248,113,113,0.1);
-  border-color: rgba(248,113,113,0.3);
-}
-.fb-time {
-  font-size: 13px; font-weight: 700; color: var(--accent-blue);
-}
-.fb-live-tag {
-  font-size: 10px; font-weight: 800; color: var(--accent-red);
-  letter-spacing: .07em;
-  animation: blink 1.2s step-start infinite;
-}
-@keyframes blink { 50% { opacity: 0; } }
+.fb-score-live { color:#f87171!important; background:rgba(248,113,113,0.1)!important; border-color:rgba(248,113,113,0.3)!important; }
+.fb-time-box { font-size:14px; font-weight:700; color:var(--accent-blue); }
+.fb-live-pill { font-size:10px; font-weight:800; color:#f87171; letter-spacing:.07em; animation:blink 1.2s step-start infinite; }
+.fb-result-note { font-size:9px; color:var(--text-muted); }
+@keyframes blink { 50%{opacity:0;} }
 
-.fb-result-tag {
-  font-size: 10px; color: var(--text-muted); margin-top: 2px;
-}
-.fb-group-tag {
-  font-size: 9px; font-weight: 700; text-transform: uppercase;
-  color: var(--accent-yellow); letter-spacing: .06em;
-  background: rgba(251,191,36,0.1); border-radius: 4px;
-  padding: 1px 5px; margin-bottom: 3px;
-}
-.fb-venue {
-  font-size: 10px; color: var(--text-muted);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
+.fb-expand-icon { font-size:10px; color:var(--text-muted); padding:0 4px; flex-shrink:0; }
 
-/* Standings table */
-.fb-table {
-  width: 100%; border-collapse: collapse; font-size: 12px;
+/* ── Match detail expand ── */
+.fb-match-detail {
+  border-top:1px solid rgba(255,255,255,0.06); padding:14px 16px;
+  animation:fadeInUp .2s ease;
 }
-.fb-table th {
-  font-size: 10px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .06em; color: var(--text-muted);
-  padding: 6px 8px; border-bottom: 1px solid var(--border);
-  text-align: center;
+.fb-detail-grid { display:flex; gap:14px; margin-bottom:12px; }
+.fb-detail-thumb { width:120px; height:80px; object-fit:cover; border-radius:8px; flex-shrink:0; }
+.fb-detail-info  { flex:1; display:flex; flex-direction:column; gap:6px; }
+.fb-detail-row   { display:flex; align-items:baseline; gap:8px; font-size:12px; }
+.fb-detail-label { min-width:80px; color:var(--text-muted); font-size:11px; flex-shrink:0; }
+.fb-detail-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.fb-detail-btn {
+  display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:8px;
+  border:1px solid var(--border); background:rgba(255,255,255,0.04);
+  color:var(--text-secondary); cursor:pointer; font-size:12px; font-family:'Inter',sans-serif;
+  transition:all .2s;
 }
-.fb-table-row { border-bottom: 1px solid rgba(255,255,255,0.03); }
-.fb-table-row:hover { background: rgba(255,255,255,0.03); }
+.fb-detail-btn:hover { background:rgba(96,165,250,0.1); border-color:rgba(96,165,250,0.3); color:var(--accent-blue); }
 
-.fb-rank { text-align: center; padding: 8px 6px; font-weight: 700; min-width: 28px; }
-.fb-stat { text-align: center; padding: 8px 6px; color: var(--text-secondary); }
-.fb-pts  { text-align: center; padding: 8px 8px; font-weight: 800; font-size: 13px; }
-
-.fb-team-cell {
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 8px; text-align: left; white-space: nowrap;
+/* ── Standings table ── */
+.fb-table { width:100%; border-collapse:collapse; font-size:12px; }
+.fb-th-rank,.fb-td-rank { text-align:center; padding:7px 6px; min-width:28px; }
+.fb-th-team,.fb-td-team  { text-align:left; padding:7px 6px; }
+.fb-th-stat,.fb-td-stat  { text-align:center; padding:7px 5px; color:var(--text-secondary); }
+.fb-th-form,.fb-td-form  { text-align:center; padding:7px 8px; }
+.fb-th-pts,.fb-td-pts    { text-align:center; padding:7px 8px; font-weight:800; font-size:13px; }
+.fb-th-rank,.fb-th-team,.fb-th-stat,.fb-th-form,.fb-th-pts {
+  font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
+  color:var(--text-muted); border-bottom:1px solid var(--border);
 }
-.fb-team-badge {
-  width: 22px; height: 22px; object-fit: contain; flex-shrink: 0;
-}
-.fb-team-name { font-weight: 500; font-size: 12px; }
+.fb-table-row { border-bottom:1px solid rgba(255,255,255,0.03); transition:background .15s; }
+.fb-table-row:hover { background:rgba(255,255,255,0.03); }
+.fb-td-rank  { font-weight:700; }
+.fb-td-team  { min-width:140px; }
+.fb-team-name-td { font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:120px; }
+.fb-td-form  { min-width:110px; }
 
+.fb-table-note {
+  font-size:11px; color:var(--text-muted); margin-bottom:10px;
+  padding:8px 12px; background:rgba(96,165,250,0.05); border-radius:8px;
+  border:1px solid rgba(96,165,250,0.15);
+}
 .fb-legend {
-  font-size: 11px; color: var(--text-muted);
-  margin-bottom: 12px; padding: 8px 12px;
-  background: rgba(255,255,255,0.02); border-radius: 8px;
+  font-size:11px; color:var(--text-muted); margin-bottom:10px;
+  padding:8px 12px; background:rgba(255,255,255,0.02); border-radius:8px;
 }
 
-/* Footer */
+/* ── Team Panel (slide from right) ── */
+.fb-team-panel {
+  position:fixed; top:0; right:-380px; width:360px; max-width:100vw;
+  height:100vh; background:#0d1424; z-index:99998;
+  border-left:1px solid rgba(255,255,255,0.08);
+  overflow-y:auto; transition:right .3s cubic-bezier(.4,0,.2,1);
+  box-shadow:-8px 0 40px rgba(0,0,0,0.5);
+  display:flex; flex-direction:column;
+}
+.fb-team-panel.open { right:0; }
+.fb-team-overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99997;
+}
+.fb-team-overlay.visible { display:block; }
+
+.fb-tp-header { padding:16px; border-bottom:1px solid rgba(255,255,255,0.07); }
+.fb-tp-close {
+  float:right; background:rgba(255,255,255,0.06); border:1px solid var(--border);
+  color:var(--text-secondary); width:28px; height:28px; border-radius:8px;
+  cursor:pointer; font-size:14px; line-height:1; transition:all .2s;
+}
+.fb-tp-close:hover { background:rgba(248,113,113,0.15); color:#f87171; border-color:rgba(248,113,113,0.3); }
+.fb-tp-hero { display:flex; align-items:center; gap:14px; margin-top:10px; }
+.fb-tp-name { font-size:18px; font-weight:800; color:var(--text-primary); }
+.fb-tp-meta { font-size:11px; color:var(--text-muted); }
+.fb-tp-desc { padding:12px 16px; font-size:12px; color:var(--text-secondary); line-height:1.6; border-bottom:1px solid rgba(255,255,255,0.05); }
+
+.fb-tp-section { padding:12px 16px; }
+.fb-tp-section-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text-muted); margin-bottom:10px; }
+
+.fb-tp-match {
+  display:flex; align-items:center; gap:10px; padding:8px 0;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.fb-tp-res {
+  display:flex; align-items:center; justify-content:center;
+  width:22px; height:22px; border-radius:6px; font-size:10px; font-weight:800; flex-shrink:0;
+}
+.fb-tp-w { background:rgba(74,222,128,.15); color:#4ade80; border:1px solid rgba(74,222,128,.3); }
+.fb-tp-l { background:rgba(248,113,113,.15); color:#f87171; border:1px solid rgba(248,113,113,.3); }
+.fb-tp-d { background:rgba(148,163,184,.12); color:#94a3b8; border:1px solid rgba(148,163,184,.2); }
+.fb-tp-match-info { flex:1; min-width:0; }
+.fb-tp-opp { display:flex; align-items:center; gap:5px; font-size:12px; font-weight:500; color:var(--text-primary); }
+.fb-tp-meta { font-size:10px; color:var(--text-muted); margin-top:1px; }
+.fb-tp-score { font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; flex-shrink:0; }
+.fb-tp-time  { font-size:12px; color:var(--accent-blue); font-weight:600; flex-shrink:0; }
+
+/* ── Footer ── */
 .fb-footer {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border);
-  font-size: 11px; color: var(--text-muted);
+  display:flex; justify-content:space-between; align-items:center;
+  margin-top:16px; padding-top:12px; border-top:1px solid var(--border); flex-wrap:wrap; gap:8px;
 }
-.fb-live-badge {
-  display: flex; align-items: center; gap: 6px;
-}
+.fb-live-badge { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text-muted); }
 
-/* Mobile */
-@media (max-width: 600px) {
-  .fb-match { flex-wrap: wrap; gap: 8px; }
-  .fb-match-right { width: auto; font-size: 10px; }
-  .fb-match-team { max-width: 100px; }
-  .fb-league-tab { font-size: 12px; padding: 6px 12px; }
-  .fb-table th, .fb-table td { padding: 6px 4px; font-size: 11px; }
-  .fb-team-name { font-size: 11px; }
-  /* Hide venue on mobile */
-  .fb-match-right { display: none; }
-  .fb-match-center { min-width: 70px; }
+/* ── Responsive ── */
+@media (max-width:700px) {
+  .fb-match-row { grid-template-columns:1fr auto 1fr auto; gap:4px; padding:8px 10px; }
+  .fb-team-btn  { padding:3px 4px; }
+  .fb-match-team-name { max-width:90px; font-size:11px; }
+  .fb-score-col { min-width:64px; }
+  .fb-score-box { font-size:13px; padding:3px 7px; }
+  .fb-detail-grid { flex-direction:column; }
+  .fb-detail-thumb { width:100%; height:100px; }
+  .fb-team-panel { width:100%; max-width:100%; }
+  .fb-table { font-size:11px; }
+  .fb-th-stat,.fb-td-stat { padding:6px 3px; }
+}
+@media (max-width:480px) {
+  .fb-match-team-name { max-width:70px; font-size:10px; }
+  .fb-score-box { font-size:12px; padding:3px 6px; }
+  .fb-time-box  { font-size:12px; }
 }
