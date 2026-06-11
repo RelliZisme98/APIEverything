@@ -2,16 +2,13 @@
  * store/state.js
  * Single source of truth for application state.
  *
- * API keys are read ONLY from config.js.
- * No localStorage, no UI input — configure in config.js and done.
+ * API keys (OWM, GoldAPI, AQICN) đã được chuyển sang Cloudflare Secrets.
+ * Không còn key nào ở phía frontend — tất cả gọi qua worker proxy.
  */
 
 import APP_CONFIG from '../../config.js';
 
 export const state = {
-  owmKey:       APP_CONFIG.OWM_API_KEY?.trim()   || '',
-  goldKey:      APP_CONFIG.GOLD_API_KEY?.trim()  || localStorage.getItem('gold_api_key') || '',
-  aqiToken:     APP_CONFIG.AQICN_TOKEN?.trim()   || '',
   cryptoData:   [],
   fxData:       [],
   weatherData:  null,

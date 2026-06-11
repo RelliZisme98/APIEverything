@@ -1,13 +1,11 @@
 /**
- * api/aqi.js — Air Quality Index via AQICN (waqi.info)
- * Free token: https://aqicn.org/api/
+ * api/aqi.js — Air Quality Index via AQICN worker proxy
+ * Token lưu trong Cloudflare Secrets — không bao giờ lộ ra browser.
  */
 import { state } from '../store/state.js';
 
-export async function fetchAQI(city = 'ho-chi-minh-city') {
-  const token = state.aqiToken;
-  if (!token) return null;
-  const res = await fetch(`https://api.waqi.info/feed/${encodeURIComponent(city)}/?token=${token}`);
+export async function fetchAQI(station = 'ho-chi-minh-city') {
+  const res = await fetch(`/aqi?station=${encodeURIComponent(station)}`);
   if (!res.ok) return null;
   const json = await res.json();
   if (json.status !== 'ok') return null;

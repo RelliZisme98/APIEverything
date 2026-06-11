@@ -1,6 +1,12 @@
 /**
  * worker.js — Cloudflare Worker chính
  * Routes: /phat-nguoi, /news-rss, /news-article, /vnindex, /power-outage, /vcb-rates
+ *         /weather, /gold, /aqi  (proxy bảo mật — key lưu trong Cloudflare Secrets)
+ *
+ * Cách set secrets:
+ *   wrangler secret put OWM_API_KEY
+ *   wrangler secret put GOLD_API_KEY
+ *   wrangler secret put AQICN_TOKEN
  */
 
 const CORS = {
@@ -433,6 +439,86 @@ async function handleFootball(request) {
   }
 }
 
+// ─── /weather (proxy bảo mật — key lưu trong env.OWM_API_KEY) ──────
+async function handleWeather(request, env) {
+  if (request.method === 'OPTIONS') return preflight();
+  const key = env.OWM_API_KEY;
+  if (!key) return cors(JSON.stringify({ error: 'OWM_API_KEY chưa được cấu hình trong Cloudflare Secrets.' }), 503);
+
+  const params   = new URL(request.url).searchParams;
+  const endpoint = params.get('endpoint') ?? 'weather'; // 'weather' | 'forecast' | 'air_pollution'
+  const q        = params.get('q')        ?? '';
+  const lat      = params.get('lat')      ?? '';
+  const lon      = params.get('lon')      ?? '';
+  const cnt      = params.get('cnt')      ?? '';
+  const lang     = params.get('lang')     ?? 'vi';
+  const units    = params.get('units')    ?? 'metric';
+
+  let upstreamUrl;
+  if (endpoint === 'air_pollution') {
+    if (!lat || !lon) return cors(JSON.stringify({ error: 'lat/lon required for air_pollution' }), 400);
+    upstreamUrl = `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${key}`;
+  } else {
+    if (!q) return cors(JSON.stringify({ error: 'q (city name) required' }), 400);
+    upstreamUrl = `https://api.openweathermap.org/data/2.5/${endpoint}?q=${encodeURIComponent(q)}&appid=${key}&units=${units}&lang=${lang}${cnt ? '&cnt=' + cnt : ''}`;
+  }
+
+  try {
+    const res  = await fetch(upstreamUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    const body = await res.text();
+    return new Response(body, {
+      status: res.status,
+      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=300' },
+    });
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
+// ─── /gold (proxy bảo mật — key lưu trong env.GOLD_API_KEY) ─────────
+async function handleGold(request, env) {
+  if (request.method === 'OPTIONS') return preflight();
+  const key = env.GOLD_API_KEY;
+  if (!key) return cors(JSON.stringify({ error: 'GOLD_API_KEY chưa được cấu hình trong Cloudflare Secrets.' }), 503);
+
+  try {
+    const res  = await fetch('https://www.goldapi.io/api/XAU/USD', {
+      headers: { 'x-access-token': key, 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' },
+    });
+    const body = await res.text();
+    return new Response(body, {
+      status: res.status,
+      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=120' },
+    });
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
+// ─── /aqi (proxy bảo mật — token lưu trong env.AQICN_TOKEN) ─────────
+async function handleAQI(request, env) {
+  if (request.method === 'OPTIONS') return preflight();
+  const token = env.AQICN_TOKEN;
+  if (!token) return cors(JSON.stringify({ error: 'AQICN_TOKEN chưa được cấu hình trong Cloudflare Secrets.' }), 503);
+
+  const station = new URL(request.url).searchParams.get('station') ?? 'ho-chi-minh-city';
+  // Chỉ cho phép ký tự an toàn (@, chữ số, chữ thường, gạch ngang)
+  if (!/^[@a-z0-9\-]+$/.test(station)) return cors(JSON.stringify({ error: 'invalid station' }), 400);
+
+  try {
+    const res  = await fetch(`https://api.waqi.info/feed/${encodeURIComponent(station)}/?token=${token}`, {
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+    });
+    const body = await res.text();
+    return new Response(body, {
+      status: res.status,
+      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=120' },
+    });
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
 // ─── Router ─────────────────────────────────────────────────────────
 export default {
   async fetch(request, env) {
@@ -446,6 +532,11 @@ export default {
     if (pathname === '/vcb-rates')     return handleVCBRates(request);
     if (pathname === '/lottery')       return handleLottery(request);
     if (pathname === '/football')      return handleFootball(request);
+
+    // ── Routes bảo mật (key ẩn trong Cloudflare Secrets) ──
+    if (pathname === '/weather')       return handleWeather(request, env);
+    if (pathname === '/gold')          return handleGold(request, env);
+    if (pathname === '/aqi')           return handleAQI(request, env);
 
     // Serve static assets for everything else
     return env.ASSETS.fetch(request);

@@ -2,7 +2,6 @@
  * components/aqi.js — Air Quality Index widget
  */
 import { fetchAQI, aqiLevel } from '../api/aqi.js';
-import { state } from '../store/state.js';
 
 const AQI_CITIES = [
   {
@@ -24,19 +23,6 @@ let currentCity    = AQI_CITIES[0]; // full config object
 export async function renderAQI(containerId = 'aqiContent') {
   const el = document.getElementById(containerId);
   if (!el) return;
-
-  if (!state.aqiToken) {
-    el.innerHTML = `
-      <div class="aqi-no-key">
-        <div style="font-size:36px;margin-bottom:10px;">🌫️</div>
-        <div style="font-size:14px;font-weight:600;margin-bottom:6px;">Cần AQICN API Token</div>
-        <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">
-          Đăng ký miễn phí tại <a href="https://aqicn.org/api/" target="_blank" style="color:var(--accent-blue);">aqicn.org/api</a>
-          rồi điền vào <code>config.js</code> → <code>AQICN_TOKEN</code>
-        </div>
-      </div>`;
-    return;
-  }
 
   el.innerHTML = `<div class="aqi-loading">🌍 Đang tải dữ liệu chất lượng không khí...</div>`;
 
@@ -60,7 +46,7 @@ export async function renderAQI(containerId = 'aqiContent') {
       }
     }
     if (!data) {
-      el.innerHTML = `<div class="aqi-chips">${chips}</div><div class="error-msg">⚠️ Không lấy được dữ liệu AQI. Kiểm tra lại token.</div>`;
+      el.innerHTML = `<div class="aqi-chips">${chips}</div><div class="error-msg">⚠️ Không lấy được dữ liệu AQI. Vui lòng thử lại sau.</div>`;
       return;
     }
 
@@ -158,13 +144,11 @@ window.aqiSelectCity = async (station) => {
   await renderAQI();
 };
 
-// ── OWM Air Pollution API helper ──
+// ── OWM Air Pollution API helper (gọi qua /weather proxy) ──
 async function fetchOWMAQI(cityConf) {
   try {
-    const key = state.owmKey;
-    if (!key) return null;
     const res = await fetch(
-      `https://api.openweathermap.org/data/2.5/air_pollution?lat=${cityConf.owmLat}&lon=${cityConf.owmLon}&appid=${key}`
+      `/weather?endpoint=air_pollution&lat=${cityConf.owmLat}&lon=${cityConf.owmLon}`
     );
     if (!res.ok) return null;
     return await res.json();

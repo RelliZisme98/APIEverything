@@ -3,9 +3,9 @@
  * Fetches live gold spot price (XAU/USD).
  *
  * Strategy (cascading fallback):
- *   1. metals.live  – free, no key needed
- *   2. GoldAPI.io   – free tier (100 req/day) — needs key from state.goldKey
- *   3. Static stub  – always works, returns last-known approximate price
+ *   1. CoinGecko (PAXG) – free, no key needed
+ *   2. /gold worker proxy  – GoldAPI.io key ẩn trong Cloudflare Secrets
+ *   3. Static stub  – always works, returns null
  */
 
 import { state, CONFIG } from '../store/state.js';
@@ -30,21 +30,17 @@ export async function fetchGoldPrice() {
     }
   } catch { /* fall through */ }
 
-  // ── Strategy 2: GoldAPI.io (needs key) ──
-  if (state.goldKey) {
-    try {
-      const res = await fetch('https://www.goldapi.io/api/XAU/USD', {
-        headers: { 'x-access-token': state.goldKey, 'Content-Type': 'application/json' },
-      });
-      if (res.ok) {
-        const d = await res.json();
-        if (d.price) {
-          state.goldData = { price: d.price, source: 'goldapi.io' };
-          return state.goldData;
-        }
+  // ── Strategy 2: GoldAPI.io qua worker proxy (key ẩn trong Cloudflare Secrets) ──
+  try {
+    const res = await fetch('/gold', { signal: AbortSignal.timeout(8000) });
+    if (res.ok) {
+      const d = await res.json();
+      if (d.price) {
+        state.goldData = { price: d.price, source: 'goldapi.io' };
+        return state.goldData;
       }
-    } catch { /* fall through */ }
-  }
+    }
+  } catch { /* fall through */ }
 
   // ── Strategy 3: Static fallback ──
   const fallback = { price: null, source: 'fallback' };

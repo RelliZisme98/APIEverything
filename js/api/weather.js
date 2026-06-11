@@ -1,12 +1,12 @@
 /**
  * api/weather.js
- * Fetches current weather + 5-day forecast from OpenWeatherMap.
- * Requires a free API key: https://openweathermap.org/api
+ * Fetches current weather + 5-day forecast via the secure /weather worker proxy.
+ * API key is stored in Cloudflare Secrets — never exposed to the browser.
  */
 
 import { state } from '../store/state.js';
 
-const BASE_URL = 'https://api.openweathermap.org/data/2.5';
+const PROXY = ''; // same-origin (Cloudflare Pages + Worker)
 
 /** Emoji weather icons keyed by OWM icon code */
 export const WEATHER_ICONS = {
@@ -28,22 +28,15 @@ export const WEATHER_ICONS = {
  * @returns {Promise<Object>} OWM weather response
  * @throws {Error} with a user-friendly Vietnamese message
  */
-export async function fetchWeather(city, apiKey) {
-  const key = apiKey || state.owmKey;
-  if (!key) throw new Error('Chưa có API key. Vui lòng nhập trong ⚙️ Cài đặt.');
-
-  const url =
-    `${BASE_URL}/weather` +
-    `?q=${encodeURIComponent(city)}` +
-    `&appid=${key}` +
-    `&units=metric` +
-    `&lang=vi`;
+export async function fetchWeather(city, _apiKey) {
+  const url = `${PROXY}/weather?endpoint=weather&q=${encodeURIComponent(city)}&units=metric&lang=vi`;
 
   const res = await fetch(url);
 
   if (!res.ok) {
     if (res.status === 401) throw new Error('API key không hợp lệ hoặc chưa kích hoạt.');
     if (res.status === 404) throw new Error(`Không tìm thấy thành phố "${city}".`);
+    if (res.status === 503) throw new Error('API key chưa được cấu hình trên server.');
     throw new Error(`Lỗi máy chủ thời tiết (HTTP ${res.status}).`);
   }
 
@@ -56,17 +49,8 @@ export async function fetchWeather(city, apiKey) {
  * Fetch 5-day / 3-hour forecast for a city (free OWM plan).
  * Returns list of daily summaries (1 entry per day, noon slot preferred).
  */
-export async function fetchForecast(city, apiKey) {
-  const key = apiKey || state.owmKey;
-  if (!key) return null;
-
-  const url =
-    `${BASE_URL}/forecast` +
-    `?q=${encodeURIComponent(city)}` +
-    `&appid=${key}` +
-    `&units=metric` +
-    `&lang=vi` +
-    `&cnt=40`;
+export async function fetchForecast(city, _apiKey) {
+  const url = `${PROXY}/weather?endpoint=forecast&q=${encodeURIComponent(city)}&units=metric&lang=vi&cnt=40`;
 
   const res = await fetch(url);
   if (!res.ok) return null;
