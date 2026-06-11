@@ -23,6 +23,11 @@ const APP_CONFIG = {
   // Gói Free: 100 req/ngày
   GOLD_API_KEY: 'goldapi-e662baae3dbf2a06936d59d2e8559150-io',
 
+  // ── AQICN – Chất lượng không khí ─────────────────────────
+  // Đăng ký token miễn phí tại: https://aqicn.org/api/
+  // Không giới hạn request, hoàn toàn miễn phí
+  AQICN_TOKEN: 'f7dab27c730e51f629ca52a47bfb94a244b2a8bd',
+
   // ── Tra cứu phạt nguội (CORS Proxy) ──────────────────────
   // Dùng Cloudflare Pages Function (file: functions/phat-nguoi.js)
   // Tự động available tại: https://everything.rellia.org/phat-nguoi

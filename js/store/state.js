@@ -9,15 +9,17 @@
 import APP_CONFIG from '../../config.js';
 
 export const state = {
-  owmKey:       APP_CONFIG.OWM_API_KEY?.trim()  || '',
-  goldKey:      APP_CONFIG.GOLD_API_KEY?.trim() || localStorage.getItem('gold_api_key') || '',
+  owmKey:       APP_CONFIG.OWM_API_KEY?.trim()   || '',
+  goldKey:      APP_CONFIG.GOLD_API_KEY?.trim()  || localStorage.getItem('gold_api_key') || '',
+  aqiToken:     APP_CONFIG.AQICN_TOKEN?.trim()   || '',
   cryptoData:   [],
   fxData:       [],
   weatherData:  null,
   goldData:     null,
   lastUpdate:   null,
-  usdToVndLive: null,   // set to live rate after exchange API responds
+  usdToVndLive: null,
 };
+
 
 /** Configuration constants — all sourced from config.js */
 export const CONFIG = {

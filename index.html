@@ -31,6 +31,9 @@
   <link rel="stylesheet" href="css/traffic.css" />
   <link rel="stylesheet" href="css/calendar.css" />
   <link rel="stylesheet" href="css/power-outage.css" />
+  <link rel="stylesheet" href="css/aqi.css" />
+  <link rel="stylesheet" href="css/vnindex.css" />
+  <link rel="stylesheet" href="css/news.css" />
 </head>
 
 <body>
@@ -90,6 +93,21 @@
           <span class="nav-icon">☀️</span>
           <span class="nav-label">Thời Tiết</span>
           <span class="nav-badge" id="weatherNavBadge">LIVE</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="aqi" onclick="switchSection('aqi')">
+          <span class="nav-icon">🌫️</span>
+          <span class="nav-label">Chất Lượng KK</span>
+          <span class="nav-badge">LIVE</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="vnindex" onclick="switchSection('vnindex')">
+          <span class="nav-icon">📈</span>
+          <span class="nav-label">Chứng Khoán</span>
+          <span class="nav-badge">LIVE</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="news" onclick="switchSection('news')">
+          <span class="nav-icon">📰</span>
+          <span class="nav-label">Tin Tức</span>
+          <span class="nav-badge">RSS</span>
         </button>
 
         <!-- Nav: Tiện ích -->
@@ -354,6 +372,42 @@
         </div>
       </section>
 
+      <!-- ════════ SECTION: AQI ════════ -->
+      <section class="content-section" id="section-aqi">
+        <div class="page-title"><span class="page-icon">🌫️</span> Chất Lượng Không Khí</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">🌫️</span> Air Quality Index (AQI)</div>
+            <span class="card-badge badge-live"><span class="status-dot dot-green"></span>LIVE</span>
+          </div>
+          <div id="aqiContent"></div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: VNINDEX ════════ -->
+      <section class="content-section" id="section-vnindex">
+        <div class="page-title"><span class="page-icon">📈</span> Chứng Khoán Việt Nam</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">📈</span> VN-Index · HNX · UPCOM</div>
+            <span class="card-badge badge-live"><span class="status-dot dot-green"></span>LIVE</span>
+          </div>
+          <div id="vnindexContent"></div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: NEWS ════════ -->
+      <section class="content-section" id="section-news">
+        <div class="page-title"><span class="page-icon">📰</span> Tin Tức</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">📰</span> Tin Tức Mới Nhất</div>
+            <span class="card-badge" style="background:rgba(251,191,36,0.12);color:var(--accent-yellow);border-color:rgba(251,191,36,0.25);">RSS</span>
+          </div>
+          <div id="newsContent"></div>
+        </div>
+      </section>
+
       <!-- Footer -->
       <footer>
         <p>
@@ -361,10 +415,14 @@
           <a href="https://www.coingecko.com" target="_blank">CoinGecko</a>,
           <a href="https://www.frankfurter.app" target="_blank">Frankfurter (ECB)</a>,
           <a href="https://openweathermap.org" target="_blank">OpenWeatherMap</a>,
-          <a href="https://www.goldapi.io" target="_blank">GoldAPI</a>
+          <a href="https://www.goldapi.io" target="_blank">GoldAPI</a>,
+          <a href="https://aqicn.org" target="_blank">AQICN</a>,
+          <a href="https://www.vps.com.vn" target="_blank">VPS</a>,
+          <a href="https://vnexpress.net" target="_blank">VnExpress</a>
         </p>
         <p style="margin-top:6px;">Chỉ mang tính tham khảo · Không phải lời khuyên tài chính</p>
       </footer>
+
 
     </div><!-- end .content-area -->
   </div><!-- end .app-shell -->

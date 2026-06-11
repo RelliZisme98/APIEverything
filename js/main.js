@@ -24,6 +24,9 @@ import { renderCalendar }                       from './components/calendar.js';
 import { renderPowerOutage, searchPowerOutage } from './components/power-outage.js';
 import { switchGoldUnit }                       from './components/gold.js';
 import { renderQuickCities }                    from './components/weather.js';
+import { renderAQI }                            from './components/aqi.js';
+import { renderVNIndex }                        from './components/vnindex.js';
+import { renderNews }                           from './components/news.js';
 
 // ── Render Components ──
 import { renderTicker }        from './components/ticker.js';
@@ -151,12 +154,15 @@ async function refreshAll() {
   const btn = document.getElementById('refreshBtn');
   btn?.classList.add('spinning');
 
-  await Promise.allSettled([
+  await Promise.all([
     loadCrypto(),
     loadExchange(),
     loadGold(),
     state.owmKey ? loadWeather() : Promise.resolve(),
+    loadVNIndex(),
+    loadNews(),
   ]);
+  if (state.aqiToken) loadAQI();
 
   if (btn) btn.classList.remove('spinning');
   state.lastUpdate = new Date();
@@ -171,6 +177,15 @@ window.selectCity        = (city) => {
   if (inp) inp.value = city;
   loadWeather(city);
 };
+
+// ── AQI load ──
+async function loadAQI() { await renderAQI(); }
+
+// ── VN-Index load ──
+async function loadVNIndex() { await renderVNIndex(); }
+
+// ── News load ──
+async function loadNews() { await renderNews(); }
 
 
 // ════════════════════════════════════════════════════════════
@@ -189,6 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCrypto();
     loadExchange();
     loadGold();
-    if (state.owmKey) loadWeather();
+    if (state.owmKey)   loadWeather();
+    if (state.aqiToken) loadAQI();
+    loadVNIndex();
+    loadNews();
   }, 60_000);
 });
