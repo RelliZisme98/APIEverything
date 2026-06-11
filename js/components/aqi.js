@@ -5,14 +5,14 @@ import { fetchAQI, aqiLevel } from '../api/aqi.js';
 import { state } from '../store/state.js';
 
 const AQI_CITIES = [
-  { label: 'TP.HCM',  station: 'ho-chi-minh-city' },
-  { label: 'Hà Nội',  station: 'hanoi' },
-  { label: 'Đà Nẵng', station: 'danang' },
-  { label: 'Cần Thơ', station: 'cantho' },
-  { label: 'Huế',     station: 'hue' },
+  { label: 'TP.HCM',  station: 'geo:10.7769;106.7009' },  // HCM center — geo fallback (US Consulate offline)
+  { label: 'Hà Nội',  station: '@1437' },                   // Hanoi – Kim Liên station (verified)
+  { label: 'Đà Nẵng', station: '@1584' },                   // Da Nang city (verified, AQI=13)
+  { label: 'Cần Thơ', station: '@13687' },                  // Cần Thơ/Ninh Kiều – KTTV (verified, AQI=26)
+  { label: 'Huế',     station: '@5505' },                   // Tp Huế (verified)
 ];
 
-let currentStation = 'ho-chi-minh-city';
+let currentStation = 'geo:10.7769;106.7009'; // TP.HCM default
 
 export async function renderAQI(containerId = 'aqiContent') {
   const el = document.getElementById(containerId);
@@ -42,11 +42,17 @@ export async function renderAQI(containerId = 'aqiContent') {
   try {
     const data = await fetchAQI(currentStation);
     if (!data) {
-      el.innerHTML = `<div class="error-msg">⚠️ Không lấy được dữ liệu AQI. Kiểm tra lại token.</div>`;
+      el.innerHTML = `<div class="aqi-chips">${chips}</div><div class="error-msg">⚠️ Không lấy được dữ liệu AQI. Kiểm tra lại token.</div>`;
       return;
     }
 
-    const aqi    = data.aqi;
+    const aqi = typeof data.aqi === 'number' ? data.aqi : null;
+    if (aqi === null) {
+      el.innerHTML = `
+        <div class="aqi-chips">${chips}</div>
+        <div class="error-msg">⚠️ Trạm đo không có dữ liệu (offline hoặc chưa có kết quả). Hãy thử thành phố khác.</div>`;
+      return;
+    }
     const level  = aqiLevel(aqi);
     const city   = data.city?.name ?? currentStation;
     const updated = data.time?.s ?? '';
@@ -97,6 +103,10 @@ export async function renderAQI(containerId = 'aqiContent') {
           </div>
           ${updated ? `<div class="aqi-updated">🕒 ${updated}</div>` : ''}
         </div>
+      </div>
+      <div class="aqi-standard-note">
+        ℹ️ Tiêu chuẩn <strong>US AQI (EPA)</strong> · Trạm: ${city}
+        &nbsp;·; Giá trị có thể khác với IQAir (dùng tiêu chuẩn CN AQI)
       </div>
 
       <!-- Pollutant breakdown -->
