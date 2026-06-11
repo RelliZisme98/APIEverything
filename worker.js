@@ -124,16 +124,55 @@ function decode(s) {
 // ─── /vnindex ────────────────────────────────────────────────────────
 const VPS_BASE = 'https://bgapidatafeed.vps.com.vn';
 
+// Yahoo Finance symbols for Vietnam market indices
+const YF_INDICES = [
+  { sym: 'VNINDEX', yf: '%5EVNINDEX.VN', label: 'VN-Index',  exchange: 'HOSE' },
+  // VN30 and HNX not available on Yahoo Finance — use VPS ETF as proxy
+];
+
+async function fetchYahooQuote(yfSym) {
+  const res = await fetch(
+    `https://query1.finance.yahoo.com/v8/finance/chart/${yfSym}?interval=1d&range=1d`,
+    { headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' } }
+  );
+  const d = await res.json();
+  const result = d?.chart?.result?.[0];
+  if (!result) return null;
+  const meta  = result.meta;
+  const price = meta.regularMarketPrice;
+  const prev  = meta.chartPreviousClose;
+  const change = price - prev;
+  const changePc = prev ? ((change / prev) * 100) : 0;
+  return { sym: meta.symbol, lastPrice: price, ot: change.toFixed(2), changePc: changePc.toFixed(2) };
+}
+
 async function handleVNIndex(request) {
   if (request.method === 'OPTIONS') return preflight();
   const params = new URL(request.url).searchParams;
   const type   = params.get('type') ?? 'stocks';
   const custom = params.get('symbols') ?? '';
 
+  // Index data: use Yahoo Finance (VPS doesn't expose index via REST)
+  if (type === 'index') {
+    try {
+      const results = await Promise.all(
+        YF_INDICES.map(idx => fetchYahooQuote(idx.yf)
+          .then(d => d ? { ...d, sym: idx.sym, exchange: idx.exchange } : null)
+          .catch(() => null))
+      );
+      const valid = results.filter(Boolean);
+      return new Response(JSON.stringify(valid), {
+        headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=60' },
+      });
+    } catch (err) {
+      return cors(JSON.stringify({ error: err.message }), 500);
+    }
+  }
+
+  // Stock data: VPS direct (has CORS * but send via proxy for Referer header)
   let path;
-  if (type === 'stocks')        path = '/getliststockdata/VCB,BID,CTG,TCB,VPB,MBB,HPG,VIC,VHM,VNM,MSN,SAB,GAS,PLX,FPT';
-  else if (type === 'custom' && custom) path = `/getliststockdata/${custom}`;
-  else                          path = '/getliststockdata/VNINDEX,VN30,HNXINDEX,UPINDEX';
+  if (type === 'custom' && custom) path = `/getliststockdata/${custom}`;
+  else                              path = '/getliststockdata/VCB,BID,CTG,TCB,VPB,MBB,HPG,VIC,VHM,VNM,MSN,SAB,GAS,PLX,FPT';
 
   try {
     const res = await fetch(VPS_BASE + path, {

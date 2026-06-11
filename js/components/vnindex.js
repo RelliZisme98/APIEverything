@@ -4,10 +4,11 @@
 import { fetchVNIndex, fetchTopStocks } from '../api/vnindex.js';
 
 const INDEX_META = {
-  VNINDEX: { label: 'VN-Index',  color: '#60a5fa', exchange: 'HOSE' },
-  VN30:    { label: 'VN30',      color: '#34d399', exchange: 'HOSE' },
-  HNXINDEX:{ label: 'HNX-Index', color: '#fbbf24', exchange: 'HNX'  },
-  UPINDEX: { label: 'UPCOM',     color: '#c084fc', exchange: 'UPCOM' },
+  'VNINDEX':       { label: 'VN-Index',  color: '#60a5fa', exchange: 'HOSE' },
+  '^VNINDEX.VN':   { label: 'VN-Index',  color: '#60a5fa', exchange: 'HOSE' },
+  'VN30':          { label: 'VN30',      color: '#34d399', exchange: 'HOSE' },
+  'HNXINDEX':      { label: 'HNX-Index', color: '#fbbf24', exchange: 'HNX'  },
+  'UPINDEX':       { label: 'UPCOM',     color: '#c084fc', exchange: 'UPCOM' },
 };
 
 const STOCK_SECTORS = {
@@ -49,12 +50,10 @@ export async function renderVNIndex(containerId = 'vnindexContent') {
       }).join('');
       indexSection = `<div class="vni-index-grid">${indexCards}</div>`;
     } else {
-      // Index proxy not deployed yet — show info note
+      // Partial or no index data from proxy
       indexSection = `
         <div class="vni-disclaimer" style="border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.06);">
-          ⚠️ Dữ liệu chỉ số (VN-Index, HNX...) chưa có — cần deploy Cloudflare Function
-          <code>functions/vnindex.js</code> lên <code>everything.rellia.org</code>.
-          Hiện đang hiển thị cổ phiếu bluechip trực tiếp từ VPS.
+          ⚠️ Chỉ số VN-Index đang được tải qua Yahoo Finance. VN30 và HNX-Index sẽ hiển thị khi Cloudflare Worker deploy xong.
         </div>`;
     }
 
