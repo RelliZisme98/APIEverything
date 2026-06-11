@@ -7,14 +7,14 @@ import { WEATHER_ICONS } from '../api/weather.js';
 
 /** Popular Vietnamese cities for quick-select */
 const QUICK_CITIES = [
-  { label: 'TP.HCM',    query: 'Ho Chi Minh City' },
-  { label: 'Hà Nội',    query: 'Hanoi' },
-  { label: 'Đà Nẵng',   query: 'Da Nang' },
-  { label: 'Cần Thơ',   query: 'Can Tho' },
-  { label: 'Nha Trang', query: 'Nha Trang' },
-  { label: 'Hải Phòng', query: 'Hai Phong' },
-  { label: 'Huế',       query: 'Hue' },
-  { label: 'Đà Lạt',    query: 'Da Lat' },
+  { label: 'TP.HCM',    query: 'Ho Chi Minh City,VN' },
+  { label: 'Hà Nội',    query: 'Hanoi,VN' },
+  { label: 'Đà Nẵng',   query: 'Da Nang,VN' },
+  { label: 'Cần Thơ',   query: 'Can Tho,VN' },
+  { label: 'Nha Trang', query: 'Nha Trang,VN' },
+  { label: 'Hải Phòng', query: 'Haiphong,VN' },
+  { label: 'Huế',       query: 'Hue,VN' },
+  { label: 'Đà Lạt',    query: 'Da Lat,VN' },
 ];
 
 /** Gradient theme per weather condition */
