@@ -1,6 +1,6 @@
 /**
  * components/tax-calc.js — Tính thuế Thu nhập cá nhân (TNCN) Việt Nam
- * Theo Luật thuế TNCN 2024 (áp dụng từ 2024–nay)
+ * Theo Luật thuế TNCN mới áp dụng từ năm 2026
  */
 
 export function renderTaxCalc(containerId = 'taxCalcContent') {
@@ -11,8 +11,8 @@ export function renderTaxCalc(containerId = 'taxCalcContent') {
     <div class="tax-hero">
       <div class="tax-hero-icon">🧮</div>
       <div>
-        <div class="tax-hero-title">Tính Thuế TNCN (Cá nhân cư trú)</div>
-        <div class="tax-hero-sub">Theo Luật thuế TNCN Việt Nam · Biểu thuế lũy tiến từng phần</div>
+        <div class="tax-hero-title">Tính Thuế TNCN 2026 (Cá nhân cư trú)</div>
+        <div class="tax-hero-sub">Theo Luật thuế TNCN 2026 · Biểu lũy tiến 5 bậc · Giảm trừ bản thân 15,5 triệu/tháng</div>
       </div>
     </div>
 
@@ -43,25 +43,28 @@ export function renderTaxCalc(containerId = 'taxCalcContent') {
       </div>
     </div>
 
+    <div class="tax-threshold-banner">
+      ℹ️ Theo quy định 2026: Thu nhập tháng <strong>vượt 15,5 triệu đồng</strong> (không có người phụ thuộc) mới bắt đầu phải nộp thuế TNCN.
+    </div>
+
     <div id="taxResult" style="margin-top:16px;"></div>
 
     <div class="tax-brackets">
-      <div class="tax-brackets-title">📊 Biểu thuế lũy tiến từng phần (thu nhập tính thuế/tháng)</div>
+      <div class="tax-brackets-title">📊 Biểu thuế lũy tiến 5 bậc 2026 (thu nhập tính thuế/tháng)</div>
       <table class="tax-table">
-        <thead><tr><th>Phần thu nhập</th><th>Thuế suất</th><th>Thuế tối đa bậc</th></tr></thead>
+        <thead><tr><th>Bậc</th><th>Phần thu nhập tính thuế/tháng</th><th>Thuế suất</th><th>Thuế tối đa bậc</th></tr></thead>
         <tbody>
-          <tr><td>≤ 5 triệu</td><td style="color:#4ade80;">5%</td><td>250.000đ</td></tr>
-          <tr><td>5 – 10 triệu</td><td style="color:#a3e635;">10%</td><td>500.000đ</td></tr>
-          <tr><td>10 – 18 triệu</td><td style="color:#fbbf24;">15%</td><td>1.200.000đ</td></tr>
-          <tr><td>18 – 32 triệu</td><td style="color:#fb923c;">20%</td><td>2.800.000đ</td></tr>
-          <tr><td>32 – 52 triệu</td><td style="color:#f87171;">25%</td><td>5.000.000đ</td></tr>
-          <tr><td>52 – 80 triệu</td><td style="color:#e879f9;">30%</td><td>8.400.000đ</td></tr>
-          <tr><td>> 80 triệu</td><td style="color:#c084fc;">35%</td><td>—</td></tr>
+          <tr><td>1</td><td>Đến 10 triệu đồng</td><td style="color:#4ade80;">5%</td><td>500.000đ</td></tr>
+          <tr><td>2</td><td>Trên 10 đến 30 triệu đồng</td><td style="color:#a3e635;">10%</td><td>2.000.000đ</td></tr>
+          <tr><td>3</td><td>Trên 30 đến 60 triệu đồng</td><td style="color:#fbbf24;">20%</td><td>6.000.000đ</td></tr>
+          <tr><td>4</td><td>Trên 60 đến 100 triệu đồng</td><td style="color:#fb923c;">30%</td><td>12.000.000đ</td></tr>
+          <tr><td>5</td><td>Trên 100 triệu đồng</td><td style="color:#c084fc;">35%</td><td>—</td></tr>
         </tbody>
       </table>
       <div class="tax-note">
-        📌 Giảm trừ bản thân: <strong>11 triệu/tháng</strong> &nbsp;·&nbsp;
-        Giảm trừ người phụ thuộc: <strong>4,4 triệu/người/tháng</strong>
+        📌 Giảm trừ bản thân: <strong>15,5 triệu/tháng</strong> &nbsp;·&nbsp;
+        Giảm trừ người phụ thuộc: <strong>6,2 triệu/người/tháng</strong> &nbsp;·&nbsp;
+        Ngưỡng chịu thuế (0 NPT): <strong>&gt; 15,5 triệu/tháng</strong>
       </div>
     </div>`;
 
@@ -94,8 +97,8 @@ export function renderTaxCalc(containerId = 'taxCalcContent') {
     const totalIns = bhxh + bhyt + bhtn;
 
     // Deductions
-    const personal  = 11000000;
-    const dependent = dep * 4400000;
+    const personal  = 15500000;
+    const dependent = dep * 6200000;
     const totalDeduct = personal + dependent + totalIns;
 
     // Taxable income
@@ -103,12 +106,10 @@ export function renderTaxCalc(containerId = 'taxCalcContent') {
 
     // Tax brackets (on taxable monthly income)
     const brackets = [
-      [5000000,  0.05],
-      [5000000,  0.10],
-      [8000000,  0.15],
-      [14000000, 0.20],
-      [20000000, 0.25],
-      [28000000, 0.30],
+      [10000000, 0.05],
+      [20000000, 0.10],
+      [30000000, 0.20],
+      [40000000, 0.30],
       [Infinity, 0.35],
     ];
     let tax = 0, remaining = taxable;
