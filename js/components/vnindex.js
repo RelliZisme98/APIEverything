@@ -80,7 +80,7 @@ export async function renderVNIndex(containerId = 'vnindexContent') {
     } else {
       indexSection = `
         <div class="vni-disclaimer" style="border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.06);">
-          ⚠️ Đang tải chỉ số — cần Worker deploy. VN-Index từ Yahoo Finance, VN30/HNX từ VPS basket.
+          ⏳ Chưa lấy được chỉ số thị trường (ngoài giờ giao dịch hoặc nguồn dữ liệu tạm thời không khả dụng).
         </div>`;
     }
 
