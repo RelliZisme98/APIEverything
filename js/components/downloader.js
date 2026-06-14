@@ -113,81 +113,84 @@ async function fetchMediaDownload(url) {
     }
   }
 
-  // Generic/YouTube/Fallback Downloader using Cobalt API proxy
-  try {
-    const apiBase = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.TRAFFIC_PROXY_URL) 
-      ? APP_CONFIG.TRAFFIC_PROXY_URL.replace(/\/$/, '') 
-      : '';
-      
-    const response = await fetch(`${apiBase}/api/downloader`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        url: url
-      })
-    });
+  // Generic/YouTube/Fallback Downloader using Cobalt API directly from the browser (bypasses CF Worker datacenter IP block)
+  const cobaltInstances = [
+    'https://api.cobalt.blackcat.sweeux.org',
+    'https://rue-cobalt.xenon.zone'
+  ];
 
-    if (response.ok) {
-      const data = await response.json();
-      
-      // Support Cobalt v10 Picker/Slideshow
-      if (data.status === 'picker' && Array.isArray(data.picker)) {
-        let pickerHtml = '';
-        data.picker.forEach((item, idx) => {
-          const typeLabel = item.type === 'photo' ? 'Ảnh' : item.type === 'audio' ? 'Âm thanh' : 'Video';
-          const btnClass = item.type === 'audio' ? 'dl-btn dl-btn--audio' : 'dl-btn dl-btn--video';
-          pickerHtml += `
-            <a class="${btnClass}" href="${item.url}" target="_blank" style="margin-top: 5px; font-size: 12px; padding: 6px 12px; display: inline-flex; align-items: center; justify-content: center;">
-              📥 Tải ${typeLabel} ${idx + 1}
-            </a>
+  for (const instance of cobaltInstances) {
+    try {
+      const response = await fetch(instance, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          url: url
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Support Cobalt v10 Picker/Slideshow
+        if (data.status === 'picker' && Array.isArray(data.picker)) {
+          let pickerHtml = '';
+          data.picker.forEach((item, idx) => {
+            const typeLabel = item.type === 'photo' ? 'Ảnh' : item.type === 'audio' ? 'Âm thanh' : 'Video';
+            const btnClass = item.type === 'audio' ? 'dl-btn dl-btn--audio' : 'dl-btn dl-btn--video';
+            pickerHtml += `
+              <a class="${btnClass}" href="${item.url}" target="_blank" style="margin-top: 5px; font-size: 12px; padding: 6px 12px; display: inline-flex; align-items: center; justify-content: center;">
+                📥 Tải ${typeLabel} ${idx + 1}
+              </a>
+            `;
+          });
+
+          resultDiv.innerHTML = `
+            <div class="dl-result-card">
+              <div style="font-size: 32px; padding: 20px;">📦</div>
+              <div class="dl-info">
+                <div>
+                  <div class="dl-title">${isYouTube ? 'YouTube Playlist / Album' : 'Danh sách tệp phương tiện'}</div>
+                  <div class="dl-author">Đã trích xuất danh sách liên kết thành công.</div>
+                </div>
+                <div class="dl-buttons" style="flex-wrap: wrap; gap: 8px;">
+                  ${pickerHtml}
+                </div>
+              </div>
+            </div>
           `;
-        });
+          return;
+        }
 
-        resultDiv.innerHTML = `
-          <div class="dl-result-card">
-            <div style="font-size: 32px; padding: 20px;">📦</div>
-            <div class="dl-info">
-              <div>
-                <div class="dl-title">${isYouTube ? 'YouTube Playlist / Album' : 'Danh sách tệp phương tiện'}</div>
-                <div class="dl-author">Đã trích xuất danh sách liên kết thành công.</div>
-              </div>
-              <div class="dl-buttons" style="flex-wrap: wrap; gap: 8px;">
-                ${pickerHtml}
+        if (data.status === 'stream' || data.status === 'redirect' || data.status === 'tunnel' || data.url) {
+          const downloadUrl = data.url;
+          const text = isYouTube ? 'YouTube Video' : 'Video Phương Tiện';
+
+          resultDiv.innerHTML = `
+            <div class="dl-result-card">
+              <div style="font-size: 32px; padding: 20px;">📦</div>
+              <div class="dl-info">
+                <div>
+                  <div class="dl-title">${text}</div>
+                  <div class="dl-author">Liên kết trích xuất thành công qua máy chủ tải xuống.</div>
+                </div>
+                <div class="dl-buttons">
+                  <a class="dl-btn dl-btn--video" href="${downloadUrl}" target="_blank">
+                    📥 Click Tải Xuống Ngay (MP4/MP3)
+                  </a>
+                </div>
               </div>
             </div>
-          </div>
-        `;
-        return;
+          `;
+          return;
+        }
       }
-
-      if (data.status === 'stream' || data.status === 'redirect' || data.status === 'tunnel' || data.url) {
-        const downloadUrl = data.url;
-        const text = isYouTube ? 'YouTube Video' : 'Video Phương Tiện';
-
-        resultDiv.innerHTML = `
-          <div class="dl-result-card">
-            <div style="font-size: 32px; padding: 20px;">📦</div>
-            <div class="dl-info">
-              <div>
-                <div class="dl-title">${text}</div>
-                <div class="dl-author">Liên kết trích xuất thành công qua máy chủ tải xuống.</div>
-              </div>
-              <div class="dl-buttons">
-                <a class="dl-btn dl-btn--video" href="${downloadUrl}" target="_blank">
-                  📥 Click Tải Xuống Ngay (MP4/MP3)
-                </a>
-              </div>
-            </div>
-          </div>
-        `;
-        return;
-      }
+    } catch (err) {
+      console.warn(`[Cobalt instance ${instance} failed]`, err);
     }
-  } catch (err) {
-    console.warn('[Cobalt API proxy failed, using manual links]', err);
   }
 
   // Fallback Helper Links if both APIs fail or for other unsupported formats
