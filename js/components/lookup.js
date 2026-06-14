@@ -97,13 +97,13 @@ export function renderLookup() {
       <div class="lk-pane" id="pane-tax">
         <div class="travel-title-sub">🏢 Tra cứu Mã số thuế doanh nghiệp &amp; cá nhân</div>
         <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">
-          Lấy thông tin đại diện pháp luật, tên đăng ký, địa chỉ và trạng thái hoạt động của doanh nghiệp Việt Nam.
+          Tra cứu nhanh thông tin đại diện pháp luật, tên đăng ký, địa chỉ và trạng thái của doanh nghiệp bằng Mã số thuế hoặc Tên doanh nghiệp/Từ khóa.
         </div>
         <div class="lk-search-box">
-          <input type="text" id="taxInput" class="field-input" placeholder="Nhập mã số thuế cần tra cứu..." />
+          <input type="text" id="taxInput" class="field-input" placeholder="Nhập mã số thuế hoặc tên doanh nghiệp cần tra cứu..." />
           <button id="btnCheckTax" class="btn-primary">Tra cứu</button>
         </div>
-        <div id="taxResult"></div>
+        <div id="taxLookupResult"></div>
       </div>
 
       <!-- PANE 3: POSTAL CODE -->
@@ -271,7 +271,7 @@ function handleSpamCheck() {
 
 async function handleTaxCheck() {
   const input = document.getElementById('taxInput').value.trim();
-  const resDiv = document.getElementById('taxResult');
+  const resDiv = document.getElementById('taxLookupResult');
   if (!resDiv) return;
 
   if (!input) {
