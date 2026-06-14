@@ -573,7 +573,14 @@ async function handleTodos(request, env) {
   const key = env.SUPABASE_KEY;
   
   if (!url || !key) {
-    return cors(JSON.stringify({ error: 'Supabase credentials are not configured in Worker Secrets.' }), 503);
+    return cors(JSON.stringify({ error: `Supabase URL or Key is missing. URL length: ${url ? url.length : 0}, Key length: ${key ? key.length : 0}` }), 503);
+  }
+
+  // Diagnostic format check
+  if (!key.startsWith('eyJ')) {
+    return cors(JSON.stringify({ 
+      error: 'SUPABASE_KEY on Cloudflare is invalid. It must start with "eyJ" (the JWT anon public key), but it currently starts with: ' + key.substring(0, 15) + '... (Length: ' + key.length + ')'
+    }), 400);
   }
 
   const supabaseHeaders = {
