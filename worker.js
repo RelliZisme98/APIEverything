@@ -889,6 +889,195 @@ async function handleTaxLookup(request) {
   return cors(JSON.stringify({ error: 'Không tìm thấy thông tin doanh nghiệp khớp với từ khóa của bạn.' }), 404);
 }
 
+// ─── /api/movies-now-playing (Dynamic Movies list from TMDB) ────────
+let cachedMovies = null;
+let lastCachedTime = 0;
+
+async function handleMoviesNowPlaying(request) {
+  if (request.method === 'OPTIONS') return preflight();
+  
+  const cacheDuration = 4 * 60 * 60 * 1000; // 4 hours
+  const now = Date.now();
+  if (cachedMovies && (now - lastCachedTime < cacheDuration)) {
+    return cors(JSON.stringify(cachedMovies));
+  }
+  
+  try {
+    const url = 'https://www.themoviedb.org/movie/now-playing?language=vi-VN';
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7'
+      },
+      signal: AbortSignal.timeout(6000)
+    });
+    
+    if (!res.ok) {
+      throw new Error(`TMDB search failed with status ${res.status}`);
+    }
+    
+    const html = await res.text();
+    const movieLinkRegex = /\/movie\/([0-9]+)/g;
+    const movieIds = [];
+    let match;
+    while ((match = movieLinkRegex.exec(html)) !== null) {
+      movieIds.push(match[1]);
+    }
+    
+    const uniqueIds = Array.from(new Set(movieIds)).slice(0, 6);
+    const detailPromises = uniqueIds.map(async (id) => {
+      try {
+        const detailUrl = `https://www.themoviedb.org/movie/${id}?language=vi-VN`;
+        const dRes = await fetch(detailUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7'
+          },
+          signal: AbortSignal.timeout(5000)
+        });
+        if (!dRes.ok) return null;
+        const dHtml = await dRes.text();
+        
+        const ogTitleMatch = dHtml.match(/<meta property="og:title" content="([^"]+)"/i);
+        let title = ogTitleMatch ? ogTitleMatch[1].replace(" — The Movie Database (TMDb)", "").trim() : '';
+        
+        const ogDescMatch = dHtml.match(/<meta property="og:description" content="([^"]+)"/i);
+        let overview = ogDescMatch ? ogDescMatch[1].trim() : '';
+        
+        const posterMatch = dHtml.match(/class="poster"[^>]*src="https:\/\/image.tmdb.org\/t\/p\/[^\/]+(\/[^"]+)"/i) ||
+                            dHtml.match(/src="https:\/\/image.tmdb.org\/t\/p\/[^\/]+(\/[^"]+)"[^>]*class="poster"/i) ||
+                            dHtml.match(/class="poster"[^>]*src="https:\/\/media.themoviedb.org\/t\/p\/[^\/]+(\/[^"]+)"/i) ||
+                            dHtml.match(/src="https:\/\/media.themoviedb.org\/t\/p\/[^\/]+(\/[^"]+)"[^>]*class="poster"/i) ||
+                            dHtml.match(/https:\/\/(?:media|image)\.themoviedb\.org\/t\/p\/[^\/]+(\/[a-zA-Z0-9_\-\.]+\.jpg)/i);
+        const posterPath = posterMatch ? posterMatch[1] : '';
+        
+        const releaseMatch = dHtml.match(/class="release"[^>]*>\s*([^\n<]+)/i) ||
+                             dHtml.match(/"release_date":"([^"]+)"/i);
+        let releaseDate = releaseMatch ? releaseMatch[1].trim() : '';
+        releaseDate = releaseDate.replace(/\s*\([A-Z]+\)$/, '');
+        
+        const scoreMatch = dHtml.match(/data-percent="([0-9\.]+)"/i);
+        const voteAverage = scoreMatch ? parseFloat(scoreMatch[1]) / 10 : 7.5;
+        
+        const ytMatch = dHtml.match(/youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/i) || 
+                        dHtml.match(/embed\/([a-zA-Z0-9_-]{11})/i) ||
+                        dHtml.match(/"key":"([a-zA-Z0-9_-]{11})"/);
+        const trailerId = ytMatch ? ytMatch[1] : '';
+        
+        return {
+          title,
+          overview,
+          poster_path: posterPath,
+          vote_average: voteAverage,
+          release_date: releaseDate,
+          trailer_id: trailerId || 'dQw4w9WgXcQ'
+        };
+      } catch (e) {
+        return null;
+      }
+    });
+    
+    const resolvedMovies = await Promise.all(detailPromises);
+    const validMovies = resolvedMovies.filter(m => m !== null);
+    
+    if (validMovies.length > 0) {
+      cachedMovies = validMovies;
+      lastCachedTime = now;
+      return cors(JSON.stringify(validMovies));
+    }
+    
+    throw new Error("No movies resolved.");
+  } catch (err) {
+    console.warn("Live movie scrape failed, using static list:", err.message);
+    const staticFallback = [
+      {
+        title: "Captain America: Thế Giới Mới",
+        overview: "Sau khi gặp Tổng thống Hoa Kỳ mới đắc cử Thaddeus Ross, Sam Wilson thấy mình bị cuốn vào một sự cố quốc tế. Anh phải khám phá lý do đằng sau một âm mưu cực kì nguy hiểm trước khi kẻ chủ mưu thật sự khiến cả thế giới phải hoảng sợ.",
+        poster_path: "/fWTZk4Y7HTyTTGNJnXNaX3XTE0v.jpg",
+        vote_average: 7.6,
+        release_date: "2025-02-14",
+        trailer_id: "1pHDWnXmK7Y"
+      },
+      {
+        title: "Một bộ phim Minecraft",
+        overview: "Bốn kẻ lạc lõng bất ngờ bị kéo qua cánh cửa dẫn đến Overworld: một thế giới kỳ lạ từ những khối lập phương. Để trở về nhà, họ cần phải làm chủ thế giới này dưới sự giúp đỡ của thợ chế tạo huyền thoại Steve.",
+        poster_path: "/wRrGBv4uNofBVyShxfS0iugbcm8.jpg",
+        vote_average: 7.2,
+        release_date: "2025-04-04",
+        trailer_id: "wJO_vIDZn-I"
+      },
+      {
+        title: "Nhiệm Vụ: Bất Khả Thi - Nghiệp Báo Cuối Cùng",
+        overview: "Sau khi thoát khỏi vụ tai nạn tàu hỏa thảm khốc, Ethan Hunt nhận ra thực thể nhân tạo The Entity đang được giấu bên trong một chiếc tàu ngầm cũ của Nga, đồng thời đối mặt với cuộc săn đuổi của kẻ thù trong quá khứ.",
+        poster_path: "/wxnbCpRKs8FV1SLZYA0mj1x26f9.jpg",
+        vote_average: 8.6,
+        release_date: "2025-05-30",
+        trailer_id: "fsQgc9pCyDU"
+      },
+      {
+        title: "Superman",
+        overview: "Superman cố gắng can thiệp vào một cuộc khủng hoảng toàn cầu do Lex Luthor gây ra, nhưng lại bị công chúng hiểu lầm. Anh buộc phải đối mặt với bản ngã đen tối Ultraman để giành lại niềm tin từ nhân loại.",
+        poster_path: "/f4hJ5yVSiOSnW9S6vtoGlNYvW5J.jpg",
+        vote_average: 8.8,
+        release_date: "2025-07-10",
+        trailer_id: "3ztJynZvxa4"
+      }
+    ];
+    return cors(JSON.stringify(staticFallback));
+  }
+}
+
+// ─── /api/downloader (Cobalt v10 Proxy) ──────────────────────────────
+async function handleDownloader(request) {
+  if (request.method === 'OPTIONS') return preflight();
+  if (request.method !== 'POST') {
+    return cors(JSON.stringify({ error: 'Method not allowed' }), 405);
+  }
+
+  try {
+    const { url } = await request.json();
+    if (!url) {
+      return cors(JSON.stringify({ error: 'Thiếu đường dẫn (url) cần tải.' }), 400);
+    }
+
+    const cobaltInstances = [
+      'https://api.cobalt.blackcat.sweeux.org',
+      'https://rue-cobalt.xenon.zone'
+    ];
+
+    for (const instance of cobaltInstances) {
+      try {
+        const res = await fetch(instance, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            url: url,
+            filenamePattern: 'basic'
+          }),
+          signal: AbortSignal.timeout(6000)
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          return cors(JSON.stringify(data));
+        } else {
+          const text = await res.text();
+          console.warn(`Cobalt instance ${instance} returned status ${res.status}: ${text}`);
+        }
+      } catch (err) {
+        console.warn(`Cobalt instance ${instance} failed:`, err.message);
+      }
+    }
+
+    return cors(JSON.stringify({ error: 'Tất cả các máy chủ tải xuống đều bận, vui lòng thử lại sau.' }), 502);
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
 // ─── Router ─────────────────────────────────────────────────────────
 export default {
   async fetch(request, env) {
@@ -905,6 +1094,8 @@ export default {
     if (pathname === '/api/todos')     return handleTodos(request, env);
     if (pathname === '/api/spam-check') return handleSpamCheck(request);
     if (pathname === '/api/tax-lookup') return handleTaxLookup(request);
+    if (pathname === '/api/downloader') return handleDownloader(request);
+    if (pathname === '/api/movies-now-playing') return handleMoviesNowPlaying(request);
 
     // ── Routes bảo mật (key ẩn trong Cloudflare Secrets) ──
     if (pathname === '/weather')       return handleWeather(request, env);

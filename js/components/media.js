@@ -1,88 +1,106 @@
+import APP_CONFIG from '../../config.js';
+
 /* ── Movies & Games Component ── */
 
 const CURATED_MOVIES = [
   {
-    title: "Dune: Cát Hành Tinh - Phần 2",
-    overview: "Hành trình tiếp theo của Paul Atreides khi anh hợp lực với Chani và người Fremen để trả thù những kẻ âm mưu hủy diệt gia đình mình.",
-    poster_path: "/1pdfxvk3ig4G4y5744h28M7uQev.jpg",
-    vote_average: 8.3,
-    release_date: "2024-03-01",
-    trailer_id: "U2Qp5pL3ovA"
-  },
-  {
-    title: "Deadpool & Wolverine",
-    overview: "Cặp đôi lập dị nhất của Marvel hội ngộ để cùng thực hiện một sứ mệnh giải cứu vũ trụ đầy hài hước và bạo lực.",
-    poster_path: "/8cdWjvZSuw9aojJmGLNNw4HQA5q.jpg",
-    vote_average: 8.0,
-    release_date: "2024-07-26",
-    trailer_id: "73_1biulkYk"
-  },
-  {
-    title: "Những Mảnh Ghép Cảm Xúc 2 (Inside Out 2)",
-    overview: "Riley bước vào tuổi dậy thì với những cảm xúc mới xuất hiện như Lo Âu (Anxiety), Ghen Tị (Envy), Xấu Hổ (Embarrassment) náo loạn trung tâm điều khiển.",
-    poster_path: "/vpnVM9B6mFJ44vY786QCmHO84jG.jpg",
+    title: "Captain America: Thế Giới Mới",
+    overview: "Sau khi gặp Tổng thống Hoa Kỳ mới đắc cử Thaddeus Ross, Sam Wilson thấy mình bị cuốn vào một sự cố quốc tế. Anh phải khám phá lý do đằng sau một âm mưu cực kì nguy hiểm trước khi kẻ chủ mưu thật sự khiến cả thế giới phải hoảng sợ.",
+    poster_path: "/fWTZk4Y7HTyTTGNJnXNaX3XTE0v.jpg",
     vote_average: 7.6,
-    release_date: "2024-06-14",
-    trailer_id: "LEjhYygAlQI"
+    release_date: "2025-02-14",
+    trailer_id: "1pHDWnXmK7Y"
   },
   {
-    title: "Võ Sĩ Giác Đấu II (Gladiator II)",
-    overview: "Nhiều năm sau khi chứng kiến cái chết của người anh hùng Maximus, Lucius buộc phải bước vào đấu trường Colosseum để giành lại vinh quang cho La Mã.",
-    poster_path: "/2cxh2j27coQD5GlgiuawY751548.jpg",
-    vote_average: 7.5,
-    release_date: "2024-11-22",
-    trailer_id: "GP3xOJNlqM4"
-  },
-  {
-    title: "Hành Trình Của Moana 2",
-    overview: "Nhận được cuộc gọi bất ngờ từ tổ tiên, Moana cùng đoàn thuỷ thủ mới dấn thân vào vùng biển xa xôi đầy thử thách của châu Đại Dương.",
-    poster_path: "/yh64q0IC49ii6t6GD460tFAz50v.jpg",
+    title: "Một bộ phim Minecraft",
+    overview: "Bốn kẻ lạc lõng bất ngờ bị kéo qua cánh cửa dẫn đến Overworld: một thế giới kỳ lạ từ những khối lập phương. Để trở về nhà, họ cần phải làm chủ thế giới này dưới sự giúp đỡ của thợ chế tạo huyền thoại Steve.",
+    poster_path: "/wRrGBv4uNofBVyShxfS0iugbcm8.jpg",
     vote_average: 7.2,
-    release_date: "2024-11-27",
-    trailer_id: "hDZ7y8RP5HE"
+    release_date: "2025-04-04",
+    trailer_id: "wJO_vIDZn-I"
   },
   {
-    title: "Wicked: Phù Thuỷ Xứ Oz",
-    overview: "Câu chuyện chưa kể về tình bạn phức tạp giữa Elphaba - phù thủy da xanh tương lai và Glinda - phù thủy tốt bụng xứ Oz.",
-    poster_path: "/c55zN7v54u2V11bXf6l9B0R10f2.jpg",
-    vote_average: 7.4,
-    release_date: "2024-11-22",
-    trailer_id: "6COmYeLsz4c"
+    title: "Nhiệm Vụ: Bất Khả Thi - Nghiệp Báo Cuối Cùng",
+    overview: "Sau khi thoát khỏi vụ tai nạn tàu hỏa thảm khốc, Ethan Hunt nhận ra thực thể nhân tạo The Entity đang được giấu bên trong một chiếc tàu ngầm cũ của Nga, đồng thời đối mặt với cuộc săn đuổi của kẻ thù trong quá khứ.",
+    poster_path: "/wxnbCpRKs8FV1SLZYA0mj1x26f9.jpg",
+    vote_average: 8.6,
+    release_date: "2025-05-30",
+    trailer_id: "fsQgc9pCyDU"
+  },
+  {
+    title: "Superman",
+    overview: "Superman cố gắng can thiệp vào một cuộc khủng hoảng toàn cầu do Lex Luthor gây ra, nhưng lại bị công chúng hiểu lầm. Anh buộc phải đối mặt với bản ngã đen tối Ultraman để giành lại niềm tin từ nhân loại.",
+    poster_path: "/f4hJ5yVSiOSnW9S6vtoGlNYvW5J.jpg",
+    vote_average: 8.8,
+    release_date: "2025-07-10",
+    trailer_id: "3ztJynZvxa4"
+  },
+  {
+    title: "Phi Vụ Động Trời 2 (Zootopia 2)",
+    overview: "Bộ đôi cảnh sát nổi tiếng Judy Hopps và Nick Wilde tái xuất trong một vụ án mới đầy thách thức tại thành phố động vật Zootopia, mở ra những bí ẩn ly kỳ và những tiếng cười sảng khoái.",
+    poster_path: "/5wXpOF9WPUKliIzNBdAqwAStLHU.jpg",
+    vote_average: 8.4,
+    release_date: "2025-11-28",
+    trailer_id: "BjkIOU5PhyQ"
+  },
+  {
+    title: "Avatar: Lửa và Tro Tàn",
+    overview: "Gia đình Jake Sully và Neytiri phải đối mặt với tộc Tro Tàn — một nhóm Na'vi hung bạo và khát khao quyền lực do thủ lĩnh tàn nhẫn Varang dẫn dắt, đẩy cuộc xung đột sinh tồn đến giới hạn cuối cùng.",
+    poster_path: "/w6DBmG260sCHBQdGzkBIVn9gAQZ.jpg",
+    vote_average: 8.5,
+    release_date: "2025-12-19",
+    trailer_id: "nb_fFj_0rq8"
   }
 ];
 
 const CURATED_GAMES = [
   {
-    title: "Hắc Thần Thoại: Ngộ Không",
-    overview: "Tựa game nhập vai hành động cốt truyện Tây Du Ký. Người chơi vào vai Thiên Mệnh Nhân dấn thân vào hành trình đầy chông gai để khám phá sự thật.",
-    image: "https://images.unsplash.com/photo-1612287230202-1bf1d85d1bdf?auto=format&fit=crop&q=80&w=400",
-    rating: 9.0,
-    platforms: ["pc", "ps5"],
-    publisher: "Game Science"
-  },
-  {
-    title: "Elden Ring: Shadow of the Erdtree",
-    overview: "Bản mở rộng cốt truyện lớn nhất của siêu phẩm Elden Ring đưa người chơi khám phá Vùng Đất Bóng Tối đầy nguy hiểm và thử thách.",
-    image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&q=80&w=400",
-    rating: 9.5,
+    title: "Monster Hunter Wilds",
+    overview: "Siêu phẩm hành động nhập vai săn quái vật thế hệ mới của Capcom, mang đến thế giới hoang dã rộng lớn cùng cơ chế thời tiết biến đổi và chiến đấu kịch tính.",
+    image: "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?auto=format&fit=crop&q=80&w=400",
+    rating: 9.3,
     platforms: ["pc", "ps5", "xbox"],
-    publisher: "FromSoftware"
+    publisher: "Capcom"
   },
   {
     title: "Grand Theft Auto VI",
-    overview: "Siêu phẩm thế giới mở tiếp theo của Rockstar Games, đưa người chơi trở lại thành phố đầy ánh đèn Vice City của bang Leonida.",
+    overview: "Siêu phẩm thế giới mở tiếp theo của Rockstar Games, đưa người chơi trở lại thành phố ngập tràn ánh đèn Vice City của bang Leonida với cốt truyện đầy hấp dẫn.",
     image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=400",
     rating: 9.8,
     platforms: ["ps5", "xbox"],
     publisher: "Rockstar Games"
   },
   {
-    title: "Helldivers 2",
-    overview: "Trò chơi bắn súng co-op góc nhìn thứ ba đầy hỗn loạn. Sát cánh cùng đồng đội chiến đấu bảo vệ nền Dân Chủ Siêu Cấp trước các bầy bọ vũ trụ.",
+    title: "Ghost of Yōtei",
+    overview: "Hậu bản của bom tấn Ghost of Tsushima, đưa người chơi đến năm 1603. Theo chân Atsushi trong hành trình báo thù đầy cô độc xung quanh chân núi Yōtei.",
+    image: "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&q=80&w=400",
+    rating: 9.2,
+    platforms: ["ps5"],
+    publisher: "Sucker Punch Productions"
+  },
+  {
+    title: "Death Stranding 2: On The Beach",
+    overview: "Kiệt tác tiếp theo của nhà làm game huyền thoại Hideo Kojima, Sam Porter Bridges tiếp tục hành trình kết nối nhân loại bên ngoài ranh giới nước Mỹ.",
+    image: "https://images.unsplash.com/photo-1618336753974-aae8e04506aa?auto=format&fit=crop&q=80&w=400",
+    rating: 9.0,
+    platforms: ["ps5"],
+    publisher: "Kojima Productions"
+  },
+  {
+    title: "Doom: The Dark Ages",
+    overview: "Phần tiền truyện kể về nguồn gốc cơn giận dữ của Doom Slayer. Lấy bối cảnh những trận chiến phong kiến tăm tối chống lại ác quỷ địa ngục.",
+    image: "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&q=80&w=400",
+    rating: 8.9,
+    platforms: ["pc", "ps5", "xbox"],
+    publisher: "id Software / Bethesda"
+  },
+  {
+    title: "Civilization VII",
+    overview: "Đỉnh cao mới của dòng game chiến thuật xây dựng đế chế 4X huyền thoại, dẫn dắt nền văn minh của bạn qua các thời kỳ lịch sử phát triển.",
     image: "https://images.unsplash.com/photo-1553481187-be93c21490a9?auto=format&fit=crop&q=80&w=400",
-    rating: 8.5,
-    platforms: ["pc", "ps5"],
-    publisher: "PlayStation Publishing"
+    rating: 9.1,
+    platforms: ["pc", "ps5", "xbox", "nintendo"],
+    publisher: "Firaxis Games / 2K"
   }
 ];
 
@@ -136,11 +154,35 @@ export function renderMedia() {
   setupTrailerModal();
 }
 
-function renderMoviesList() {
+async function renderMoviesList() {
   const grid = document.getElementById('moviesGrid');
   if (!grid) return;
 
-  grid.innerHTML = CURATED_MOVIES.map(movie => {
+  grid.innerHTML = `
+    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: rgba(255,255,255,0.6);">
+      <span class="status-dot dot-yellow"></span> Đang tải phim chiếu rạp thời gian thực...
+    </div>
+  `;
+
+  let movies = [];
+  try {
+    const apiBase = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.TRAFFIC_PROXY_URL) 
+      ? APP_CONFIG.TRAFFIC_PROXY_URL.replace(/\/$/, '') 
+      : '';
+    const res = await fetch(`${apiBase}/api/movies-now-playing`);
+    if (res.ok) {
+      movies = await res.json();
+    }
+  } catch (err) {
+    console.warn("Failed to fetch live movies:", err);
+  }
+
+  // Fallback to static if empty or failed
+  if (!movies || movies.length === 0) {
+    movies = CURATED_MOVIES;
+  }
+
+  grid.innerHTML = movies.map(movie => {
     const posterUrl = movie.poster_path 
       ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` 
       : 'https://images.unsplash.com/photo-1594909122845-11baa439b7bf?auto=format&fit=crop&q=80&w=400';
@@ -149,15 +191,15 @@ function renderMoviesList() {
       <div class="media-card">
         <div class="media-poster-wrap">
           <img class="media-poster" src="${posterUrl}" alt="${movie.title}" loading="lazy" />
-          <span class="media-rating-badge">★ ${movie.vote_average.toFixed(1)}</span>
+          <span class="media-rating-badge">★ ${(movie.vote_average || 7.5).toFixed(1)}</span>
         </div>
         <div class="media-body">
           <div>
             <div class="media-card-title">${movie.title}</div>
-            <div class="media-meta-info" style="margin-top:2px;">Khởi chiếu: ${movie.release_date}</div>
-            <div class="media-card-desc" style="margin-top:6px;">${movie.overview}</div>
+            <div class="media-meta-info" style="margin-top:2px;">Khởi chiếu: ${movie.release_date || 'Đang cập nhật'}</div>
+            <div class="media-card-desc" style="margin-top:6px;">${movie.overview || 'Không có tóm tắt.'}</div>
           </div>
-          <button class="btn-primary" style="padding: 6px 12px; font-size:11px; margin-top:8px; display:flex; align-items:center; justify-content:center; gap:6px;" onclick="window.openTrailerModal('${movie.trailer_id}', '${movie.title.replace(/'/g, "\\'")}')">
+          <button class="btn-primary" style="padding: 6px 12px; font-size:11px; margin-top:8px; display:flex; align-items:center; justify-content:center; gap:6px;" onclick="window.openTrailerModal('${movie.trailer_id || 'dQw4w9WgXcQ'}', '${movie.title.replace(/'/g, "\\'")}')">
             ▶ Xem Trailer
           </button>
         </div>
