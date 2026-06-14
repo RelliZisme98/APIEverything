@@ -130,6 +130,9 @@
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s;
+  font-family: inherit;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .dl-btn--video {

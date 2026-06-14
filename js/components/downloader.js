@@ -61,6 +61,112 @@ export function renderDownloader() {
   });
 }
 
+/**
+ * Programmatically download a URL as a Blob with progress tracking.
+ * This avoids the "Cannot render the file" error when the OS tries to
+ * play a streaming URL instead of saving it to disk.
+ */
+async function blobDownload(downloadUrl, filename) {
+  const resultDiv = document.getElementById('dlResultContainer');
+
+  // Show progress UI
+  const progressId = 'dlProgress_' + Date.now();
+  const progressBarId = 'dlBar_' + Date.now();
+  const progressTextId = 'dlText_' + Date.now();
+
+  // Find the download button area and replace with progress
+  const existingCard = resultDiv.querySelector('.dl-result-card');
+  if (existingCard) {
+    const btnArea = existingCard.querySelector('.dl-buttons');
+    if (btnArea) {
+      btnArea.innerHTML = `
+        <div id="${progressId}" style="width:100%;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <span class="status-dot dot-yellow" style="flex-shrink:0;"></span>
+            <span id="${progressTextId}" style="font-size:13px;color:var(--text-muted);">Đang tải xuống... 0%</span>
+          </div>
+          <div style="width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">
+            <div id="${progressBarId}" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple));border-radius:3px;transition:width 0.2s ease;"></div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  try {
+    const response = await fetch(downloadUrl);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const contentLength = response.headers.get('content-length') ||
+                          response.headers.get('estimated-content-length');
+    const total = contentLength ? parseInt(contentLength, 10) : 0;
+
+    const reader = response.body.getReader();
+    const chunks = [];
+    let received = 0;
+
+    // Read stream with progress
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      received += value.length;
+
+      if (total > 0) {
+        const pct = Math.round((received / total) * 100);
+        const bar = document.getElementById(progressBarId);
+        const txt = document.getElementById(progressTextId);
+        if (bar) bar.style.width = pct + '%';
+        if (txt) txt.textContent = `Đang tải xuống... ${pct}% (${formatBytes(received)} / ${formatBytes(total)})`;
+      } else {
+        const txt = document.getElementById(progressTextId);
+        if (txt) txt.textContent = `Đang tải xuống... ${formatBytes(received)}`;
+      }
+    }
+
+    // Combine chunks into a single Blob
+    const blob = new Blob(chunks);
+    const blobUrl = URL.createObjectURL(blob);
+
+    // Trigger save-to-disk
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = filename || 'download';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    // Short delay then release memory
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+
+    // Show success
+    const progressEl = document.getElementById(progressId);
+    if (progressEl) {
+      progressEl.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;color:#4ade80;font-size:13px;">
+          ✅ Tải xuống hoàn tất! File đã được lưu vào thư mục tải xuống.
+        </div>
+      `;
+    }
+  } catch (err) {
+    console.error('[blobDownload]', err);
+    const progressEl = document.getElementById(progressId);
+    if (progressEl) {
+      progressEl.innerHTML = `
+        <div style="color:var(--accent-red);font-size:13px;">
+          ❌ Lỗi tải xuống: ${err.message}. Thử lại hoặc dùng link dự phòng.
+        </div>
+      `;
+    }
+  }
+}
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
 async function fetchMediaDownload(url) {
   const resultDiv = document.getElementById('dlResultContainer');
   if (!resultDiv) return;
@@ -83,22 +189,25 @@ async function fetchMediaDownload(url) {
 
       if (resData.code === 0 && resData.data) {
         const d = resData.data;
+        const videoFilename = `tiktok_${d.author?.unique_id || 'video'}.mp4`;
+        const audioFilename = `tiktok_${d.author?.unique_id || 'audio'}.mp3`;
+
         resultDiv.innerHTML = `
           <div class="dl-result-card">
             <img class="dl-thumbnail" src="${d.cover}" alt="Thumbnail" />
             <div class="dl-info">
               <div>
                 <div class="dl-title">${d.title || 'Video TikTok'}</div>
-                <div class="dl-author">👤 Kênh: @${d.author.unique_id} (${d.author.nickname})</div>
+                <div class="dl-author">👤 Kênh: @${d.author?.unique_id} (${d.author?.nickname})</div>
               </div>
               <div class="dl-buttons">
-                <a class="dl-btn dl-btn--video" href="${d.play}" target="_blank" download="tiktok_video.mp4">
+                <button class="dl-btn dl-btn--video" onclick="window._dlBlob('${d.play}','${videoFilename}')">
                   📥 Tải Video (Không Logo)
-                </a>
+                </button>
                 ${d.music ? `
-                  <a class="dl-btn dl-btn--audio" href="${d.music}" target="_blank" download="tiktok_audio.mp3">
+                  <button class="dl-btn dl-btn--audio" onclick="window._dlBlob('${d.music}','${audioFilename}')">
                     🎵 Tải Nhạc Nền (MP3)
-                  </a>
+                  </button>
                 ` : ''}
               </div>
             </div>
@@ -113,7 +222,8 @@ async function fetchMediaDownload(url) {
     }
   }
 
-  // Generic/YouTube/Fallback Downloader using Cobalt API directly from the browser (bypasses CF Worker datacenter IP block)
+  // Generic/YouTube/Fallback Downloader using Cobalt API directly from browser
+  // (bypasses CF Worker datacenter IP block — uses user's home/4G IP)
   const cobaltInstances = [
     'https://api.cobalt.blackcat.sweeux.org',
     'https://rue-cobalt.xenon.zone'
@@ -127,24 +237,24 @@ async function fetchMediaDownload(url) {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify({
-          url: url
-        })
+        body: JSON.stringify({ url })
       });
 
       if (response.ok) {
         const data = await response.json();
-        
-        // Support Cobalt v10 Picker/Slideshow
+
+        // Support Cobalt v10 Picker/Slideshow (e.g., Instagram carousels)
         if (data.status === 'picker' && Array.isArray(data.picker)) {
           let pickerHtml = '';
           data.picker.forEach((item, idx) => {
+            const ext = item.type === 'photo' ? 'jpg' : item.type === 'audio' ? 'mp3' : 'mp4';
             const typeLabel = item.type === 'photo' ? 'Ảnh' : item.type === 'audio' ? 'Âm thanh' : 'Video';
             const btnClass = item.type === 'audio' ? 'dl-btn dl-btn--audio' : 'dl-btn dl-btn--video';
+            const filename = `media_${idx + 1}.${ext}`;
             pickerHtml += `
-              <a class="${btnClass}" href="${item.url}" target="_blank" style="margin-top: 5px; font-size: 12px; padding: 6px 12px; display: inline-flex; align-items: center; justify-content: center;">
+              <button class="${btnClass}" onclick="window._dlBlob('${item.url}','${filename}')" style="margin-top:5px;font-size:12px;padding:6px 12px;">
                 📥 Tải ${typeLabel} ${idx + 1}
-              </a>
+              </button>
             `;
           });
 
@@ -167,24 +277,35 @@ async function fetchMediaDownload(url) {
 
         if (data.status === 'stream' || data.status === 'redirect' || data.status === 'tunnel' || data.url) {
           const downloadUrl = data.url;
-          const text = isYouTube ? 'YouTube Video' : 'Video Phương Tiện';
+          // Use filename from Cobalt if provided, otherwise guess from URL
+          const filename = data.filename || (isYouTube ? 'youtube_video.mp4' : 'media_download.mp4');
+          const title = data.filename ? data.filename.replace(/\s*\(.*?\)\s*/g, ' ').trim() : (isYouTube ? 'YouTube Video' : 'Video Phương Tiện');
 
           resultDiv.innerHTML = `
             <div class="dl-result-card">
               <div style="font-size: 32px; padding: 20px;">📦</div>
               <div class="dl-info">
                 <div>
-                  <div class="dl-title">${text}</div>
-                  <div class="dl-author">Liên kết trích xuất thành công qua máy chủ tải xuống.</div>
+                  <div class="dl-title">${title}</div>
+                  <div class="dl-author" style="font-size:12px;opacity:0.7;">📄 ${filename}</div>
                 </div>
                 <div class="dl-buttons">
-                  <a class="dl-btn dl-btn--video" href="${downloadUrl}" target="_blank">
-                    📥 Click Tải Xuống Ngay (MP4/MP3)
-                  </a>
+                  <button class="dl-btn dl-btn--video" id="btnStartDownload">
+                    📥 Bắt đầu tải xuống
+                  </button>
                 </div>
               </div>
             </div>
           `;
+
+          // Store data for button
+          document.getElementById('btnStartDownload').addEventListener('click', () => {
+            blobDownload(downloadUrl, filename);
+          });
+
+          // Register global helper for picker buttons
+          window._dlBlob = blobDownload;
+
           return;
         }
       }
@@ -193,7 +314,7 @@ async function fetchMediaDownload(url) {
     }
   }
 
-  // Fallback Helper Links if both APIs fail or for other unsupported formats
+  // Fallback helper links if both APIs fail
   const cleanUrl = encodeURIComponent(url);
   resultDiv.innerHTML = `
     <div class="dl-result-card" style="border-color: rgba(251,191,36,0.3); background: rgba(251,191,36,0.03);">
@@ -220,3 +341,6 @@ async function fetchMediaDownload(url) {
     </div>
   `;
 }
+
+// Register global helper so inline onclick handlers in picker work
+window._dlBlob = blobDownload;
