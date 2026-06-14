@@ -36,6 +36,12 @@
   <link rel="stylesheet" href="css/news.css" />
   <link rel="stylesheet" href="css/new-features.css" />
   <link rel="stylesheet" href="css/football.css" />
+  <link rel="stylesheet" href="css/travel.css" />
+  <link rel="stylesheet" href="css/todo.css" />
+  <link rel="stylesheet" href="css/downloader.css" />
+  <link rel="stylesheet" href="css/lookup.css" />
+  <link rel="stylesheet" href="css/media.css" />
+  <link rel="stylesheet" href="css/file-tools.css" />
   <link rel="stylesheet" href="css/mobile.css" />
 </head>
 
@@ -107,14 +113,9 @@
           <span class="nav-label">Chứng Khoán</span>
           <span class="nav-badge">LIVE</span>
         </button>
-        <button class="sidebar-nav-item" data-section="news" onclick="switchSection('news')">
-          <span class="nav-icon">📰</span>
-          <span class="nav-label">Tin Tức</span>
-          <span class="nav-badge">RSS</span>
-        </button>
 
         <!-- Nav: Tiện ích -->
-        <div class="sidebar-section-label" style="padding-left:0;margin-top:6px;">🛠️ Tiện Ích</div>
+        <div class="sidebar-section-label" style="padding-left:0;margin-top:6px;">🛠️ Tiện ích</div>
         <button class="sidebar-nav-item" data-section="calendar" onclick="switchSection('calendar')">
           <span class="nav-icon">📅</span>
           <span class="nav-label">Lịch Âm Dương</span>
@@ -128,9 +129,21 @@
           <span class="nav-icon">⚡</span>
           <span class="nav-label">Lịch Cúp Điện</span>
         </button>
+        <button class="sidebar-nav-item" data-section="travel" onclick="switchSection('travel')">
+          <span class="nav-icon">✈️</span>
+          <span class="nav-label">Di Chuyển & Vé Xe</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="todo" onclick="switchSection('todo')">
+          <span class="nav-icon">📝</span>
+          <span class="nav-label">Ghi Chú & Todo</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="lookup" onclick="switchSection('lookup')">
+          <span class="nav-icon">🔎</span>
+          <span class="nav-label">Tra Cứu Dịch Vụ Công</span>
+        </button>
 
         <!-- Nav: Công cụ -->
-        <div class="sidebar-section-label" style="padding-left:0;margin-top:6px;">🔧 Công Cụ</div>
+        <div class="sidebar-section-label" style="padding-left:0;margin-top:6px;">🔧 Công cụ</div>
         <button class="sidebar-nav-item" data-section="bank-rates" onclick="switchSection('bank-rates')">
           <span class="nav-icon">🏦</span>
           <span class="nav-label">Tỷ Giá Ngân Hàng</span>
@@ -158,7 +171,19 @@
         <button class="sidebar-nav-item" data-section="football" onclick="switchSection('football')">
           <span class="nav-icon">⚽</span>
           <span class="nav-label">Bóng Đá</span>
-          <span class="nav-badge" style="background:rgba(251,191,36,.15);color:#fbbf24;border-color:rgba(251,191,36,.3);">WC</span>
+          <span class="nav-badge" style="background:rgba(251,191,36,.15);color:#fbbf24;border-color:rgba(251,191,36,.3);">EPL</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="downloader" onclick="switchSection('downloader')">
+          <span class="nav-icon">📥</span>
+          <span class="nav-label">Tải Video & Nhạc</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="media" onclick="switchSection('media')">
+          <span class="nav-icon">🎬</span>
+          <span class="nav-label">Phim & Trò Chơi</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="file-tools" onclick="switchSection('file-tools')">
+          <span class="nav-icon">📁</span>
+          <span class="nav-label">Công Cụ File</span>
         </button>
       </div>
 
@@ -318,12 +343,35 @@
           </div>
           <div class="card">
             <div class="card-header">
-              <div class="card-title"><span class="icon">📈</span> Thống Kê Thị Trường</div>
-              <span class="card-badge badge-live"><span class="status-dot dot-green"></span>LIVE</span>
+              <div class="card-title"><span class="icon">🧮</span> Công Cụ Quy Đổi Tỷ Giá</div>
+              <span class="card-badge badge-live"><span class="status-dot dot-green"></span>TỰ ĐỘNG</span>
             </div>
-            <div id="marketStatsExchange">
-              <p style="color:var(--text-muted);font-size:12px;padding:12px 0;">Chuyển sang tab <strong
-                  style="color:var(--accent-blue)">Tiền Điện Tử</strong> để xem thống kê thị trường.</p>
+            <div class="converter-wrap">
+              <div class="conv-row">
+                <div class="conv-field">
+                  <label class="conv-label">Số tiền</label>
+                  <input type="number" id="convAmount" class="field-input" value="1" min="0" placeholder="Nhập số tiền..." />
+                </div>
+              </div>
+              <div class="conv-row conv-select-row">
+                <div class="conv-field">
+                  <label class="conv-label">Từ</label>
+                  <select id="convFrom" class="field-input select-currency">
+                    <!-- Dynamic currencies -->
+                  </select>
+                </div>
+                <button class="conv-swap-btn" id="convSwap" title="Đổi chiều">⇆</button>
+                <div class="conv-field">
+                  <label class="conv-label">Sang</label>
+                  <select id="convTo" class="field-input select-currency">
+                    <!-- Dynamic currencies -->
+                  </select>
+                </div>
+              </div>
+              <div class="conv-result-card">
+                <div class="conv-result-val" id="convResult">0 ₫</div>
+                <div class="conv-rate-detail" id="convRateDetail">1 USD = ...</div>
+              </div>
             </div>
           </div>
         </div>
@@ -513,6 +561,74 @@
         </div>
       </section>
 
+      <!-- ════════ SECTION: TRAVEL ════════ -->
+      <section class="content-section" id="section-travel">
+        <div class="page-title"><span class="page-icon">✈️</span> Di Chuyển &amp; Vé Xe</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">✈️</span> Hành Trình &amp; Chuyến Bay</div>
+            <span class="card-badge badge-live"><span class="status-dot dot-green"></span>LIVE</span>
+          </div>
+          <div id="travelContent"></div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: TODO ════════ -->
+      <section class="content-section" id="section-todo">
+        <div class="page-title"><span class="page-icon">📝</span> Ghi Chú &amp; Todo</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">📝</span> Quản Lý Công Việc</div>
+          </div>
+          <div id="todoContent"></div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: LOOKUP ════════ -->
+      <section class="content-section" id="section-lookup">
+        <div class="page-title"><span class="page-icon">🔎</span> Tra Cứu Dịch Vụ Công</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">🏛️</span> Tra Cứu &amp; Liên Kết Dịch Vụ</div>
+          </div>
+          <div id="lookupContent"></div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: DOWNLOADER ════════ -->
+      <section class="content-section" id="section-downloader">
+        <div class="page-title"><span class="page-icon">📥</span> Tải Video &amp; Nhạc</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">📥</span> Trích Xuất Link Tải Phương Tiện</div>
+          </div>
+          <div id="downloaderContent"></div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: MEDIA ════════ -->
+      <section class="content-section" id="section-media">
+        <div class="page-title"><span class="page-icon">🎬</span> Phim &amp; Trò Chơi</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">🎬</span> Lịch Phim Chiếu Rạp &amp; Game Hot</div>
+          </div>
+          <div id="mediaContent"></div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: FILE TOOLS ════════ -->
+      <section class="content-section" id="section-file-tools">
+        <div class="page-title"><span class="page-icon">📁</span> Công Cụ File</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">⚙️</span> Chuyển Đổi, Nén Ảnh &amp; ZIP</div>
+            <span class="card-badge badge-manual">CLIENT-ONLY</span>
+          </div>
+          <div id="fileToolsContent"></div>
+        </div>
+      </section>
+
       <!-- Footer -->
       <footer>
         <p>
@@ -531,6 +647,19 @@
 
     </div><!-- end .content-area -->
   </div><!-- end .app-shell -->
+
+  <!-- ════════ CALENDAR MODAL ════════ -->
+  <div class="cal-modal-overlay" id="calModal">
+    <div class="cal-modal-content">
+      <div class="cal-modal-header">
+        <h3 id="calModalTitle">Chi Tiết Ngày</h3>
+        <button class="cal-modal-close" onclick="document.getElementById('calModal').classList.remove('open')">✕</button>
+      </div>
+      <div class="cal-modal-body" id="calModalBody">
+        <!-- Filled dynamically -->
+      </div>
+    </div>
+  </div>
 
   <!-- ── ES Module entry ── -->
   <script type="module" src="js/main.js"></script>

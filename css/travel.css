@@ -1,0 +1,271 @@
+/* ── Travel & Flight Styles ── */
+.travel-wrap {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.travel-estimator {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.travel-title-sub {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--accent-blue);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.travel-route-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 600px) {
+  .travel-route-selector {
+    grid-template-columns: 1fr;
+  }
+}
+
+.travel-select-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.travel-select-wrap label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.travel-results-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+@media (max-width: 768px) {
+  .travel-results-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.travel-mode-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.travel-mode-card:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+}
+
+.travel-mode-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.travel-mode-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.travel-mode-icon {
+  font-size: 18px;
+}
+
+.travel-mode-time {
+  font-size: 18px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent-yellow);
+}
+
+.travel-mode-cost {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.travel-mode-speed {
+  font-size: 11px;
+  color: var(--text-muted);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 6px;
+  margin-top: 4px;
+}
+
+/* Flight tracker section */
+.flight-tracker {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.flight-search-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.flight-search-bar input {
+  flex: 1;
+  text-transform: uppercase;
+}
+
+.flight-info-card {
+  background: linear-gradient(135deg, rgba(96, 165, 250, 0.05), rgba(167, 139, 250, 0.03));
+  border: 1px solid rgba(96, 165, 250, 0.15);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: fadeIn 0.3s ease;
+}
+
+.flight-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 10px;
+}
+
+.flight-code-badge {
+  font-size: 14px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent-blue);
+  background: rgba(96, 165, 250, 0.1);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.flight-status-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+
+.flight-status--active {
+  background: rgba(52, 211, 153, 0.1);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.flight-status--landed {
+  background: rgba(156, 163, 175, 0.1);
+  color: var(--text-muted);
+  border: 1px solid rgba(156, 163, 175, 0.3);
+}
+
+.flight-path {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  position: relative;
+}
+
+.flight-airport {
+  text-align: center;
+}
+
+.airport-code {
+  font-size: 20px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.airport-name {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.flight-progress-line {
+  flex: 1;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 20px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flight-progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: var(--accent-blue);
+  width: 60%;
+}
+
+.flight-plane-icon {
+  font-size: 16px;
+  position: absolute;
+  left: 60%;
+  transform: translate(-50%, -50%) rotate(90deg);
+  text-shadow: 0 0 8px var(--accent-blue);
+  animation: planePulse 2s infinite ease-in-out;
+}
+
+@keyframes planePulse {
+  0% { opacity: 0.8; }
+  50% { opacity: 1; transform: translate(-50%, -50%) rotate(90deg) scale(1.1); }
+  100% { opacity: 0.8; }
+}
+
+.flight-details-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 12px;
+}
+
+.flight-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.flight-detail-label {
+  color: var(--text-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.flight-detail-val {
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+}

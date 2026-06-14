@@ -1,0 +1,188 @@
+/* ── Public Lookups Styles ── */
+.lk-wrap {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.lk-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.lk-tab-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.lk-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+}
+
+.lk-tab-btn.active {
+  background: rgba(96, 165, 250, 0.15);
+  border-color: rgba(96, 165, 250, 0.4);
+  color: var(--accent-blue);
+  font-weight: 700;
+}
+
+.lk-pane {
+  display: none;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  animation: fadeIn 0.2s ease;
+}
+
+.lk-pane.active {
+  display: block;
+}
+
+.lk-search-box {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.lk-search-box input {
+  flex: 1;
+}
+
+.lk-result-box {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 13px;
+}
+
+.lk-status-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.lk-status--safe { background: rgba(52, 211, 153, 0.15); color: #34d399; }
+.lk-status--danger { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+.lk-details-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.lk-details-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.lk-details-table td:first-child {
+  color: var(--text-muted);
+  width: 150px;
+  font-weight: 500;
+}
+
+.lk-details-table td:last-child {
+  font-weight: 600;
+}
+
+/* Gov Portal Grid */
+.lk-gov-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 10px;
+}
+
+@media (max-width: 600px) {
+  .lk-gov-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lk-gov-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s;
+}
+
+.lk-gov-card:hover {
+  border-color: rgba(96, 165, 250, 0.3);
+  background: rgba(96, 165, 250, 0.03);
+  transform: translateY(-2px);
+}
+
+.lk-gov-icon {
+  font-size: 24px;
+}
+
+.lk-gov-info {
+  flex: 1;
+}
+
+.lk-gov-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.lk-gov-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.lk-gov-arrow {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* Postal list */
+.postal-select-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.postal-result-card {
+  margin-top: 14px;
+  padding: 16px;
+  background: rgba(96, 165, 250, 0.05);
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.postal-code-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--accent-blue);
+  letter-spacing: .05em;
+}

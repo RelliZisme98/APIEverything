@@ -39,3 +39,89 @@
   font-size: 11px;
   color: var(--text-muted);
 }
+
+/* ── Currency Converter Styles ── */
+.converter-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 10px 0;
+}
+
+.conv-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.conv-select-row {
+  align-items: center;
+}
+
+.conv-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.conv-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.select-currency {
+  font-family: inherit;
+  font-weight: 500;
+}
+
+.conv-swap-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin-top: 18px;
+  transition: all 0.2s ease;
+}
+
+.conv-swap-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+  transform: rotate(180deg);
+}
+
+.conv-result-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.conv-result-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent-green);
+}
+
+.conv-rate-detail {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+

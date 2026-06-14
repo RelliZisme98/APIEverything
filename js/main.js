@@ -34,6 +34,12 @@ import { renderTaxCalc }     from './components/tax-calc.js';
 import { renderLottery }     from './components/lottery.js';
 import { renderWorldClock, destroyWorldClock } from './components/world-clock.js';
 import { renderFootball }    from './components/football.js';
+import { renderTravel }      from './components/travel.js';
+import { renderTodo }        from './components/todo.js';
+import { renderLookup }      from './components/lookup.js';
+import { renderDownloader }  from './components/downloader.js';
+import { renderMedia }       from './components/media.js';
+import { renderFileTools }   from './components/file-tools.js';
 
 // ── Render Components ──
 import { renderTicker }        from './components/ticker.js';
@@ -213,6 +219,12 @@ window.switchSection = (id) => {
     if (id === 'lottery')     renderLottery();
     if (id === 'world-clock') renderWorldClock();
     if (id === 'football')    renderFootball();
+    if (id === 'travel')      renderTravel();
+    if (id === 'todo')        renderTodo();
+    if (id === 'lookup')      renderLookup();
+    if (id === 'downloader')  renderDownloader();
+    if (id === 'media')       renderMedia();
+    if (id === 'file-tools')  renderFileTools();
   }
 };
 

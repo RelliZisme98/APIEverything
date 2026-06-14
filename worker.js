@@ -250,20 +250,50 @@ async function handleVNIndex(request) {
 // ─── /power-outage ───────────────────────────────────────────────────
 async function handlePowerOutage(request) {
   if (request.method === 'OPTIONS') return preflight();
-  const params = new URL(request.url).searchParams;
-  const maDVQLLD = params.get('maDVQLLD') ?? '';
-  const maDV     = params.get('maDV')     ?? '';
-  const tuNgay   = params.get('tuNgay')   ?? '';
-  const denNgay  = params.get('denNgay')  ?? '';
+  const url    = new URL(request.url);
+  const action = url.searchParams.get('action');
 
-  const TARGET = `https://cskh.evnspc.vn/TraCuu/GetThongTinLichCupDien?maDVQLLD=${maDVQLLD}&maDV=${maDV}&tuNgay=${tuNgay}&denNgay=${denNgay}`;
+  const BROWSER_HEADERS = {
+    'User-Agent':       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+    'Accept':           'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'Accept-Language':  'vi-VN,vi;q=0.9,en-US;q=0.8',
+    'Referer':          'https://cskh.evnspc.vn/TraCuu/LichNgungGiamCungCapDien',
+    'X-Requested-With': 'XMLHttpRequest',
+  };
+
   try {
-    const res = await fetch(TARGET, {
-      headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://cskh.evnspc.vn/' },
+    let upstreamUrl;
+
+    if (action === 'danhsach') {
+      const maDviCha = url.searchParams.get('pMA_DVICTREN') || '';
+      upstreamUrl = `https://cskh.evnspc.vn/TraCuu/GetDanhMucDienLuc?pMA_DVICTREN=${encodeURIComponent(maDviCha)}`;
+    } else if (action === 'tracuu') {
+      const madvi    = url.searchParams.get('madvi')    || '';
+      const tuNgay   = url.searchParams.get('tuNgay')   || '';
+      const denNgay  = url.searchParams.get('denNgay')  || '';
+      upstreamUrl = `https://cskh.evnspc.vn/TraCuu/GetThongTinLichNgungGiamCungCapDien?madvi=${encodeURIComponent(madvi)}&tuNgay=${encodeURIComponent(tuNgay)}&denNgay=${encodeURIComponent(denNgay)}&ChucNang=MaDonVi`;
+    } else if (action === 'tracuu-makh') {
+      const maKH    = url.searchParams.get('maKH')    || '';
+      const tuNgay  = url.searchParams.get('tuNgay')  || '';
+      const denNgay = url.searchParams.get('denNgay') || '';
+      upstreamUrl = `https://cskh.evnspc.vn/TraCuu/GetThongTinLichNgungGiamCungCapDien?maKH=${encodeURIComponent(maKH)}&tuNgay=${encodeURIComponent(tuNgay)}&denNgay=${encodeURIComponent(denNgay)}&ChucNang=MaKhachHang`;
+    } else {
+      return cors(JSON.stringify({ error: 'Invalid action. Use: danhsach | tracuu | tracuu-makh' }), 400);
+    }
+
+    const upstream = await fetch(upstreamUrl, {
+      method:  'GET',
+      headers: BROWSER_HEADERS,
     });
-    const data = await res.text();
-    return new Response(data, {
-      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS },
+
+    const html = await upstream.text();
+    return new Response(html, {
+      status:  upstream.status,
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'public, max-age=300',
+        ...CORS,
+      },
     });
   } catch (err) {
     return cors(JSON.stringify({ error: err.message }), 500);
@@ -396,42 +426,33 @@ async function handleLottery(request) {
 }
 
 // ─── /football ────────────────────────────────────────────────────────
-// Proxy TheSportsDB for PL + World Cup 2026 data (no API key needed)
-const TSDB_BASE = 'https://www.thesportsdb.com/api/v1/json/3';
-const FOOTBALL_LEAGUES = {
-  wc: { id: '4429', name: 'FIFA World Cup 2026', season: '2026' },
-  pl: { id: '4328', name: 'Premier League',      season: '2025-2026' },
-};
-
 async function handleFootball(request) {
   if (request.method === 'OPTIONS') return preflight();
   const { searchParams } = new URL(request.url);
-  const league = searchParams.get('league') ?? 'wc';
-  const type   = searchParams.get('type')   ?? 'next';
+  const league = searchParams.get('league') ?? 'eng.1';
+  const type   = searchParams.get('type')   ?? 'scoreboard';
   const id     = searchParams.get('id')     ?? '';
 
-  const lg = FOOTBALL_LEAGUES[league];
-
   let url;
-  // League-level endpoints
-  if (type === 'next' && lg)      url = `${TSDB_BASE}/eventsnextleague.php?id=${lg.id}`;
-  else if (type === 'past' && lg) url = `${TSDB_BASE}/eventspastleague.php?id=${lg.id}`;
-  else if (type === 'table' && lg)url = `${TSDB_BASE}/lookuptable.php?l=${lg.id}&s=${lg.season}`;
-  else if (type === 'season' && lg)url = `${TSDB_BASE}/eventsseason.php?id=${lg.id}&s=${lg.season}`;
-  // Item-level endpoints (id required)
-  else if (type === 'event-detail') url = `${TSDB_BASE}/lookupevent.php?id=${id}`;
-  else if (type === 'team')         url = `${TSDB_BASE}/lookupteam.php?id=${id}`;
-  else if (type === 'team-next')    url = `${TSDB_BASE}/eventsnext.php?id=${id}`;
-  else if (type === 'team-last')    url = `${TSDB_BASE}/eventslast.php?id=${id}`;
-  else return cors(JSON.stringify({ error: 'unknown type' }), 400);
-
-  if (!url) return cors(JSON.stringify({ error: 'missing league or id' }), 400);
+  if (type === 'table') {
+    url = `https://site.api.espn.com/apis/v2/sports/soccer/${league}/standings`;
+  } else if (type === 'scoreboard') {
+    url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/scoreboard`;
+  } else if (type === 'summary') {
+    url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/summary?event=${id}`;
+  } else if (type === 'team') {
+    url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/teams/${id}`;
+  } else if (type === 'team-schedule') {
+    url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/teams/${id}/schedule`;
+  } else {
+    return cors(JSON.stringify({ error: 'unknown type' }), 400);
+  }
 
   try {
     const res  = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
     if (!res.ok) throw new Error(`upstream ${res.status}`);
-    const data = await res.json();
-    return new Response(JSON.stringify({ league, type, leagueName: lg?.name ?? '', ...data }), {
+    const data = await res.text();
+    return new Response(data, {
       headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=60' },
     });
   } catch (err) {

@@ -7,14 +7,40 @@
 import APP_CONFIG from '../../config.js';
 import { EVNSPC_COMPANIES, EVNSPC_SUB_UNITS } from '../data/evnspc-units.js';
 
-const PROXY = APP_CONFIG.TRAFFIC_PROXY_URL || 'https://everything.rellia.org';
+const PROXY = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.port)
+  ? window.location.origin
+  : (APP_CONFIG.TRAFFIC_PROXY_URL || window.location.origin);
 
 // ── EVN units cho các vùng khác ────────────────────────────────────────────
 const OTHER_UNITS = {
-  EVNHCMC:  { label: 'EVNHCMC – TP. Hồ Chí Minh',  url: 'https://cskh.evnhcmc.vn/tracuu/tabid/96/Default.aspx',            color: '#34d399' },
-  EVNHANOI: { label: 'EVNHANOI – Hà Nội',            url: 'https://cskh.evnhanoi.com.vn/TraCuu/LichNgungCungCapDien',        color: '#60a5fa' },
-  EVNNPC:   { label: 'EVNNPC – miền Bắc (19 tỉnh)', url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungCungCapDien',       color: '#a78bfa' },
-  EVNCPC:   { label: 'EVNCPC – miền Trung & Tây Nguyên', url: 'https://cskh.cpc.vn/TraCuu/TraCuuLichNgungCungCapDien',     color: '#fbbf24' },
+  EVNHCMC: { 
+    label: 'EVNHCMC – TP. Hồ Chí Minh',  
+    url: 'https://cskh.evnhcmc.vn/Tracuu/thongtincungcapdien',            
+    color: '#34d399', 
+    hotline: '1900 545454',
+    guide: 'Nhập Mã khách hàng (PE...) để kiểm tra trực tiếp lịch mất điện đột xuất hoặc định kỳ tại TP.HCM.'
+  },
+  EVNHANOI: { 
+    label: 'EVNHANOI – Thủ đô Hà Nội',            
+    url: 'https://evnhanoi.vn/search/power-cut',        
+    color: '#60a5fa', 
+    hotline: '1900 1288',
+    guide: 'Tra cứu theo Quận/Huyện, tên khu vực hoặc Mã khách hàng (PD...) để xem lịch cắt điện tại Hà Nội.'
+  },
+  EVNNPC: { 
+    label: 'EVNNPC – Miền Bắc (27 tỉnh thành)', 
+    url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungGiamCungCapDien',       
+    color: '#a78bfa', 
+    hotline: '1900 6769',
+    guide: 'Tra cứu lịch tạm ngừng cấp điện của 27 tỉnh thành miền Bắc (không gồm Hà Nội) theo Mã khách hàng hoặc Điện lực thành viên.'
+  },
+  EVNCPC: { 
+    label: 'EVNCPC – Miền Trung & Tây Nguyên', 
+    url: 'https://cskh.cpc.vn/tra-cuu/lich-tam-ngung-cung-cap-dien/khu-vuc',     
+    color: '#fbbf24', 
+    hotline: '1900 1909',
+    guide: 'Tra cứu lịch tạm ngừng cung cấp điện khu vực miền Trung & Tây Nguyên theo Quận/Huyện hoặc Mã khách hàng.'
+  },
 };
 
 function fmtDate(d) {
@@ -107,17 +133,32 @@ export function renderPowerOutage(containerId = 'powerContent') {
 
     <!-- ══ Other regions panel ══ -->
     <div id="poPanelOther" class="po-panel" style="display:none;">
-      <div class="po-section-label">Chọn đơn vị điện lực theo khu vực</div>
-      <div class="po-other-grid">
+      <div class="po-section-label">Lịch cúp điện các khu vực khác ngoài miền Nam</div>
+      <div class="po-other-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px;margin-bottom:20px;">
         ${Object.entries(OTHER_UNITS).map(([key, u]) => `
-          <a class="po-other-card" href="${u.url}" target="_blank" rel="noopener" style="border-color:${u.color}30;background:${u.color}08;">
-            <div class="po-other-card-title" style="color:${u.color};">${u.label}</div>
-            <div class="po-other-card-sub">Mở trang tra cứu chính thức ↗</div>
-          </a>`).join('')}
+          <div class="po-other-card" style="border:1px solid ${u.color}30;background:${u.color}05;border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;transition:all 0.2s;">
+            <div>
+              <div class="po-other-card-title" style="color:${u.color};font-weight:700;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
+                <span>🔌</span> ${u.label}
+              </div>
+              <div class="po-other-card-desc" style="font-size:12px;color:var(--text-secondary);margin:8px 0 12px;line-height:1.4;">${u.guide}</div>
+            </div>
+            <div>
+              <div class="po-other-card-hotline" style="font-size:12px;color:var(--text-muted);margin-bottom:12px;border-top:1px solid rgba(255,255,255,0.04);padding-top:10px;">
+                📞 Tổng đài: <strong style="color:var(--text-primary);">${u.hotline}</strong>
+              </div>
+              <a class="po-other-card-btn" href="${u.url}" target="_blank" rel="noopener" style="background:${u.color}15;color:${u.color};border:1px solid ${u.color}30;padding:8px 12px;border-radius:8px;font-size:12px;text-decoration:none;display:block;text-align:center;font-weight:600;transition:all 0.2s;">
+                Đến cổng tra cứu chính thức ↗
+              </a>
+            </div>
+          </div>`).join('')}
       </div>
-      <div class="po-hotline">
-        <span>📞</span>
-        <div><div class="po-hotline-num">19001006</div><div class="po-hotline-sub">Hotline EVN 24/7 · Miễn phí</div></div>
+      <div class="po-hotline" style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:14px;">
+        <span style="font-size:20px;">📞</span>
+        <div>
+          <div class="po-hotline-num" style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--accent-cyan);">1900 1006</div>
+          <div class="po-hotline-sub" style="font-size:11px;color:var(--text-muted);">Tổng đài chăm sóc khách hàng EVN Toàn Quốc</div>
+        </div>
       </div>
     </div>
   `;

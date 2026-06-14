@@ -1,0 +1,149 @@
+/* ── File Tools Styles ── */
+.ft-wrap {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ft-row-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .ft-row-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ft-box {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ft-dropzone {
+  border: 2px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 30px 20px;
+  text-align: center;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.01);
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.ft-dropzone:hover {
+  border-color: var(--accent-blue);
+  background: rgba(96, 165, 250, 0.03);
+}
+
+.ft-dropzone-icon {
+  font-size: 32px;
+  color: var(--text-muted);
+}
+
+.ft-dropzone-text {
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.ft-dropzone-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.ft-settings {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ft-slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ft-slider {
+  flex: 1;
+  cursor: pointer;
+}
+
+.ft-slider-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-blue);
+  width: 40px;
+  text-align: right;
+}
+
+.ft-compare-box {
+  background: rgba(52, 211, 153, 0.05);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ft-compare-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ft-compare-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+}
+
+.ft-file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.ft-file-item {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.ft-file-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+.ft-file-size {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+}

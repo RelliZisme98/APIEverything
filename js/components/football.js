@@ -1,9 +1,7 @@
 /**
- * components/football.js — v2
- * World Cup 2026 + Premier League
- * • WC: All fixtures grouped by date, VN time, click-to-expand detail, team panel
- * • PL: Full standings (5 available on free tier) + form + GF/GA, team panel
- * Source: TheSportsDB via /football worker proxy
+ * components/football.js
+ * Football Center powered by ESPN API (EPL, La Liga, Serie A, UCL, World Cup)
+ * No API key limits. Fully detailed match stats, lineups, and timelines.
  */
 
 // ── Constants ──────────────────────────────────────────────────────
@@ -11,46 +9,25 @@ const API = (params) => `/football?${new URLSearchParams(params)}`;
 const VN_TZ = 'Asia/Ho_Chi_Minh';
 
 const LEAGUES = {
-  wc: { label: '🏆 World Cup 2026', shortLabel: 'WC 2026',  color: '#fbbf24', season: '2026' },
-  pl: { label: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League', shortLabel: 'PL 25/26', color: '#60a5fa', season: '2025-2026' },
+  pl: { id: 'eng.1', label: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League', color: '#60a5fa' },
+  laliga: { id: 'esp.1', label: '🇪🇸 La Liga', color: '#fbbf24' },
+  seriea: { id: 'ita.1', label: '🇮🇹 Serie A', color: '#34d399' },
+  ucl: { id: 'uefa.champs', label: '🏆 Champions League', color: '#a78bfa' },
+  wc: { id: 'fifa.world', label: '🌎 World Cup 2026', color: '#fb923c' },
 };
-
-const WC_GROUPS = {
-  A:['Mexico','South Africa'],
-  B:['South Korea','Czech Republic'],
-  C:['Canada','Bosnia-Herzegovina'],
-  D:['USA','Paraguay'],
-  E:['Brazil','Morocco'],
-  F:['Qatar','Switzerland'],
-  G:['Haiti','Scotland'],
-  H:['Germany','Curaçao'],
-  I:['Ivory Coast','Ecuador'],
-  J:['Netherlands','Japan'],
-  K:['Australia','Turkey'],
-  L:['Belgium','Egypt'],
-  M:['Saudi Arabia','Uruguay'],
-  N:['Spain','Cape Verde'],
-  O:['Sweden','Tunisia'],
-};
-
-// Build team→group map
-const TEAM_GROUP = {};
-for (const [grp, teams] of Object.entries(WC_GROUPS)) {
-  for (const t of teams) TEAM_GROUP[t] = grp;
-}
 
 // ── State ──────────────────────────────────────────────────────────
-let _league   = 'wc';
-let _tab      = 'fixtures'; // fixtures | results | table
+let _league   = 'pl';
+let _tab      = 'fixtures'; // fixtures | table
 let _cache    = {};
 let _timer    = null;
 let _expanded = null;      // expanded match idEvent
 let _teamPanelId = null;   // open team panel
 
 // ── Helpers ────────────────────────────────────────────────────────
-function toVN(dateStr, timeStr) {
+function toVN(dateStr) {
   try {
-    const dt = new Date(`${dateStr}T${timeStr || '00:00:00'}Z`);
+    const dt = new Date(dateStr);
     return dt.toLocaleString('vi-VN', {
       weekday: 'short', day: '2-digit', month: '2-digit',
       hour: '2-digit', minute: '2-digit', timeZone: VN_TZ
@@ -58,17 +35,17 @@ function toVN(dateStr, timeStr) {
   } catch { return dateStr; }
 }
 
-function toVNTime(dateStr, timeStr) {
+function toVNTime(dateStr) {
   try {
-    const dt = new Date(`${dateStr}T${timeStr || '00:00:00'}Z`);
+    const dt = new Date(dateStr);
     return dt.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', timeZone: VN_TZ });
-  } catch { return timeStr || ''; }
+  } catch { return dateStr; }
 }
 
-function toVNDateKey(dateStr, timeStr) {
+function toVNDateKey(dateStr) {
   try {
-    const dt = new Date(`${dateStr}T${timeStr || '00:00:00'}Z`);
-    return dt.toLocaleDateString('sv-SE', { timeZone: VN_TZ }); // YYYY-MM-DD in VN
+    const dt = new Date(dateStr);
+    return dt.toLocaleDateString('sv-SE', { timeZone: VN_TZ }); // YYYY-MM-DD
   } catch { return dateStr; }
 }
 
@@ -81,17 +58,8 @@ function fmtDateHeader(dateKey) {
   return d.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
-function isLive(status) {
-  return status && ['1H','2H','HT','ET','P','LIVE','In Progress'].some(s => status.toUpperCase().includes(s.toUpperCase()));
-}
-
 function badge(url, size = 22) {
   return url ? `<img src="${url}" alt="" style="width:${size}px;height:${size}px;object-fit:contain;flex-shrink:0;" loading="lazy" onerror="this.style.display='none'">` : '';
-}
-
-function formPill(char) {
-  const clr = char === 'W' ? '#4ade80' : char === 'L' ? '#f87171' : '#94a3b8';
-  return `<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;font-size:9px;font-weight:800;background:${clr}22;color:${clr};border:1px solid ${clr}44;">${char}</span>`;
 }
 
 // ── Main entry ─────────────────────────────────────────────────────
@@ -123,9 +91,8 @@ function buildShell(el) {
   ).join('');
 
   const tabs = [
-    { key: 'fixtures', label: '📅 Lịch thi đấu' },
-    { key: 'results',  label: '✅ Kết quả' },
-    { key: 'table',    label: '📊 Bảng XH' },
+    { key: 'fixtures', label: '📅 Trận Đấu & Lịch Trình' },
+    { key: 'table',    label: '📊 Bảng Xếp Hạng' },
   ].map(t =>
     `<button class="fb-tab ${t.key === _tab ? 'active' : ''}"
              onclick="window._fbTab('${t.key}')"
@@ -142,8 +109,8 @@ function buildShell(el) {
     </div>
     <div class="fb-team-overlay" id="fbTeamOverlay" onclick="window._fbCloseTeam()"></div>
     <div class="fb-footer">
-      <span style="color:var(--text-muted);font-size:11px;">Nguồn: TheSportsDB · WC 2026 đang diễn ra</span>
-      <span class="fb-live-badge"><span class="dot-green"></span> Tự động cập nhật mỗi 60s</span>
+      <span style="color:var(--text-muted);font-size:11px;">Dữ liệu: ESPN Live Soccer Update</span>
+      <span class="fb-live-badge"><span class="dot-green"></span> Tự động làm mới 60s</span>
     </div>`;
 
   window._fbLeague = (key) => { _league = key; _tab = 'fixtures'; _expanded = null; buildShell(el); loadLeagueData(); };
@@ -155,36 +122,28 @@ function buildShell(el) {
 
 // ── Data loading ───────────────────────────────────────────────────
 async function loadLeagueData(silent = false) {
-  let type;
-  if (_tab === 'fixtures') type = _league === 'wc' ? 'season' : 'next';
-  else if (_tab === 'results') type = 'past';
-  else type = 'table';
-
+  const leagueId = LEAGUES[_league].id;
+  const type = _tab === 'fixtures' ? 'scoreboard' : 'table';
   const key = `${_league}_${type}`;
   const main = document.getElementById('fbMain');
   if (!main) return;
 
-  if (!silent) main.innerHTML = `<div class="fb-loading">⚽ Đang tải dữ liệu...</div>`;
+  if (!silent) main.innerHTML = `<div class="fb-loading">⚽ Đang tải dữ liệu bóng đá...</div>`;
 
   try {
-    const res  = await fetch(API({ league: _league, type }));
+    const res  = await fetch(API({ league: leagueId, type }));
     const data = await res.json();
-    if (data.error) throw new Error(data.error);
     _cache[key] = data;
     renderMain();
   } catch (err) {
-    if (!silent) main.innerHTML = `<div class="error-msg">⚠️ ${err.message}</div>`;
+    if (!silent) main.innerHTML = `<div class="error-msg">⚠️ Lỗi tải dữ liệu: ${err.message}</div>`;
   }
 }
 
 function renderMain() {
   const main = document.getElementById('fbMain');
   if (!main) return;
-  let type;
-  if (_tab === 'fixtures') type = _league === 'wc' ? 'season' : 'next';
-  else if (_tab === 'results') type = 'past';
-  else type = 'table';
-
+  const type = _tab === 'fixtures' ? 'scoreboard' : 'table';
   const data = _cache[`${_league}_${type}`];
   if (!data) { main.innerHTML = `<div class="fb-loading">⚽ Đang tải...</div>`; return; }
 
@@ -192,27 +151,19 @@ function renderMain() {
   else renderFixtureList(main, data);
 }
 
-// ── Fixtures / Results ─────────────────────────────────────────────
+// ── Fixtures / Scoreboard ──────────────────────────────────────────
 function renderFixtureList(el, data) {
-  let events = (data.events || []).filter(Boolean);
-  const isPast = _tab === 'results';
-
-  // Sort
-  events.sort((a, b) => {
-    const da = new Date(`${a.dateEvent}T${a.strTime || '00:00:00'}Z`);
-    const db = new Date(`${b.dateEvent}T${b.strTime || '00:00:00'}Z`);
-    return isPast ? db - da : da - db;
-  });
+  const events = data.events || [];
 
   if (!events.length) {
-    el.innerHTML = `<div class="fb-empty">${isPast ? '✅ Chưa có kết quả nào' : '📅 Không có lịch thi đấu'}</div>`;
+    el.innerHTML = `<div class="fb-empty">📅 Hiện chưa có trận đấu nào trong vòng này.</div>`;
     return;
   }
 
   // Group by VN date
   const byDate = new Map();
   for (const e of events) {
-    const dk = toVNDateKey(e.dateEvent, e.strTime);
+    const dk = toVNDateKey(e.date);
     if (!byDate.has(dk)) byDate.set(dk, []);
     byDate.get(dk).push(e);
   }
@@ -225,7 +176,7 @@ function renderFixtureList(el, data) {
     html += `
       <div class="fb-date-group">
         <div class="fb-date-header ${today ? 'fb-today' : ''}" style="${today ? `border-color:${lg.color};color:${lg.color};` : ''}">
-          <span>${today ? '🔴 HÔM NAY' : fmtDateHeader(dateKey)}</span>
+          <span>${today ? '🔴 TRẬN ĐẤU HÔM NAY' : fmtDateHeader(dateKey)}</span>
           <span>${evs.length} trận</span>
         </div>`;
 
@@ -239,47 +190,66 @@ function renderFixtureList(el, data) {
 }
 
 function renderMatchCard(e, lg) {
-  const isExpanded = _expanded === e.idEvent;
-  const live = isLive(e.strStatus);
-  const ns   = e.strStatus === 'NS';
-  const scored = (e.intHomeScore != null && e.intAwayScore != null);
-  const score = scored ? `${e.intHomeScore} – ${e.intAwayScore}` : 'vs';
-  const vnTime = toVNTime(e.dateEvent, e.strTime);
-  const group = e.strGroup || TEAM_GROUP[e.strHomeTeam] || '';
+  const isExpanded = _expanded === e.id;
+  const status = e.status?.type;
+  
+  // States: pre (scheduled), in (live), post (finished)
+  const isLive = status?.state === 'in';
+  const isPre = status?.state === 'pre';
+  const isPost = status?.state === 'post';
+  
+  const competition = e.competitions?.[0];
+  const competitors = competition?.competitors || [];
+  
+  const home = competitors.find(c => c.homeAway === 'home') || {};
+  const away = competitors.find(c => c.homeAway === 'away') || {};
+  
+  const homeName = home.team?.displayName || 'Home Team';
+  const homeBadge = home.team?.logos?.[0]?.href || home.team?.logo || '';
+  const homeScore = home.score ?? 0;
+  
+  const awayName = away.team?.displayName || 'Away Team';
+  const awayBadge = away.team?.logos?.[0]?.href || away.team?.logo || '';
+  const awayScore = away.score ?? 0;
+  
+  const scoreStr = !isPre ? `${homeScore} – ${awayScore}` : 'vs';
+  const vnTime = toVNTime(e.date);
+  
+  const statusText = status?.detail || vnTime;
+  const venue = competition?.venue?.fullName || '';
 
-  const homeWin = scored && parseInt(e.intHomeScore) > parseInt(e.intAwayScore);
-  const awayWin = scored && parseInt(e.intAwayScore) > parseInt(e.intHomeScore);
+  const detail = isExpanded ? `<div id="fbMatchDetail_${e.id}" class="fb-match-detail"><div class="fb-loading">⏳ Đang tải chi tiết trận đấu...</div></div>` : '';
 
-  const detail = isExpanded ? renderMatchDetail(e, lg) : '';
+  // Trigger lazy loading of detail when expanded
+  if (isExpanded) {
+    setTimeout(() => loadMatchDetail(e.id, lg), 50);
+  }
 
   return `
-    <div class="fb-match ${live ? 'fb-match--live' : ''} ${isExpanded ? 'fb-match--expanded' : ''}"
-         id="fbMatch_${e.idEvent}">
-      <div class="fb-match-row" onclick="window._fbExpand('${e.idEvent}')">
+    <div class="fb-match ${isLive ? 'fb-match--live' : ''} ${isExpanded ? 'fb-match--expanded' : ''}" id="fbMatch_${e.id}">
+      <div class="fb-match-row" onclick="window._fbExpand('${e.id}')">
         <!-- Left: Home team -->
         <div class="fb-team-col fb-team-col--home">
-          <button class="fb-team-btn" onclick="event.stopPropagation();window._fbTeam('${e.idHomeTeam}','${e.strHomeTeam}','${e.strHomeTeamBadge || ''}')">
-            ${badge(e.strHomeTeamBadge, 24)}
-            <span class="fb-match-team-name ${homeWin ? 'fb-winner' : ''}">${e.strHomeTeam}</span>
+          <button class="fb-team-btn" onclick="event.stopPropagation();window._fbTeam('${home.team?.id}','${homeName}','${homeBadge}')">
+            ${badge(homeBadge, 24)}
+            <span class="fb-match-team-name ${isPost && parseInt(homeScore) > parseInt(awayScore) ? 'fb-winner' : ''}">${homeName}</span>
           </button>
         </div>
 
         <!-- Center: Score / Time -->
         <div class="fb-score-col">
-          ${group ? `<div class="fb-group-label">Bảng ${group}</div>` : ''}
-          ${live
-            ? `<div class="fb-score-box fb-score-live">${score}</div><div class="fb-live-pill">● LIVE</div>`
-            : ns
-              ? `<div class="fb-time-box">${vnTime}</div>`
-              : `<div class="fb-score-box">${score}</div>`}
-          ${e.strResult ? `<div class="fb-result-note">${e.strResult}</div>` : ''}
+          ${isLive 
+            ? `<div class="fb-score-box fb-score-live">${scoreStr}</div><div class="fb-live-pill">● ${statusText}</div>`
+            : isPre 
+              ? `<div class="fb-time-box" style="color: ${lg.color}">${vnTime}</div><div class="fb-result-note">Lịch thi đấu</div>`
+              : `<div class="fb-score-box">${scoreStr}</div><div class="fb-result-note">Đã kết thúc</div>`}
         </div>
 
         <!-- Right: Away team -->
         <div class="fb-team-col fb-team-col--away">
-          <button class="fb-team-btn fb-team-btn--away" onclick="event.stopPropagation();window._fbTeam('${e.idAwayTeam}','${e.strAwayTeam}','${e.strAwayTeamBadge || ''}')">
-            <span class="fb-match-team-name ${awayWin ? 'fb-winner' : ''}">${e.strAwayTeam}</span>
-            ${badge(e.strAwayTeamBadge, 24)}
+          <button class="fb-team-btn fb-team-btn--away" onclick="event.stopPropagation();window._fbTeam('${away.team?.id}','${awayName}','${awayBadge}')">
+            <span class="fb-match-team-name ${isPost && parseInt(awayScore) > parseInt(homeScore) ? 'fb-winner' : ''}">${awayName}</span>
+            ${badge(awayBadge, 24)}
           </button>
         </div>
 
@@ -290,124 +260,263 @@ function renderMatchCard(e, lg) {
     </div>`;
 }
 
-function renderMatchDetail(e, lg) {
-  const vnTime = toVN(e.dateEvent, e.strTime);
-  const venue  = [e.strVenue, e.strCity].filter(Boolean).join(' — ');
+// ── Match details loader ───────────────────────────────────────────
+async function loadMatchDetail(eventId, lg) {
+  const container = document.getElementById(`fbMatchDetail_${eventId}`);
+  if (!container) return;
 
-  return `
-    <div class="fb-match-detail">
-      <div class="fb-detail-grid">
-        ${e.strThumb ? `<img src="${e.strThumb}" class="fb-detail-thumb" loading="lazy" onerror="this.remove()">` : ''}
-        <div class="fb-detail-info">
-          ${e.strGroup ? `<div class="fb-detail-row"><span class="fb-detail-label">Bảng</span><span style="color:${lg.color};font-weight:700;">${e.strGroup}</span></div>` : ''}
-          <div class="fb-detail-row"><span class="fb-detail-label">⏰ Giờ VN</span><span style="color:${lg.color};font-weight:600;">${vnTime}</span></div>
-          ${venue ? `<div class="fb-detail-row"><span class="fb-detail-label">📍 Sân</span><span>${venue}</span></div>` : ''}
-          ${e.intRound ? `<div class="fb-detail-row"><span class="fb-detail-label">🔢 Lượt</span><span>Round ${e.intRound}</span></div>` : ''}
-          ${e.strStatus && e.strStatus !== 'NS' ? `<div class="fb-detail-row"><span class="fb-detail-label">📊 TT</span><span>${e.strStatus}</span></div>` : ''}
+  const leagueId = LEAGUES[_league].id;
+  try {
+    const res = await fetch(API({ league: leagueId, type: 'summary', id: eventId }));
+    const data = await res.json();
+    renderMatchDetail(container, data, lg);
+  } catch (err) {
+    container.innerHTML = `<div class="error-msg" style="padding:10px 0;">⚠️ Lỗi tải chi tiết: ${err.message}</div>`;
+  }
+}
+
+function renderMatchDetail(el, data, lg) {
+  // 1. Boxscore Stats Comparison
+  const teams = data.boxscore?.teams || [];
+  let statsHtml = '';
+  if (teams.length === 2) {
+    const homeStats = teams[0].statistics || [];
+    const awayStats = teams[1].statistics || [];
+    
+    // Core statistics we want to display
+    const statKeys = [
+      { name: 'possession', label: 'Kiểm soát bóng (%)' },
+      { name: 'shots', label: 'Tổng cú sút' },
+      { name: 'shotsOnGoal', label: 'Sút trúng đích' },
+      { name: 'fouls', label: 'Phạm lỗi' },
+      { name: 'corners', label: 'Phạt góc' },
+      { name: 'yellowCards', label: 'Thẻ vàng' },
+      { name: 'redCards', label: 'Thẻ đỏ' },
+    ];
+
+    const statsList = statKeys.map(k => {
+      const hStat = homeStats.find(s => s.name === k.name);
+      const aStat = awayStats.find(s => s.name === k.name);
+
+      if (!hStat && !aStat) return '';
+
+      const hVal = parseFloat(hStat?.displayValue || 0);
+      const aVal = parseFloat(aStat?.displayValue || 0);
+      const total = hVal + aVal;
+      
+      let hPct = 50;
+      let aPct = 50;
+      if (total > 0) {
+        hPct = (hVal / total) * 100;
+        aPct = (aVal / total) * 100;
+      }
+
+      return `
+        <div class="fb-stats-row">
+          <div class="fb-stats-label-row">
+            <span>${hStat?.displayValue || '0'}</span>
+            <span class="fb-detail-label">${k.label}</span>
+            <span>${aStat?.displayValue || '0'}</span>
+          </div>
+          <div class="fb-stats-bar-container">
+            <div class="fb-stats-bar-home" style="width: ${hPct}%; background-color: var(--accent-blue)"></div>
+            <div class="fb-stats-bar-away" style="width: ${aPct}%; background-color: var(--accent-yellow)"></div>
+          </div>
+        </div>`;
+    }).join('');
+
+    statsHtml = statsList ? `
+      <div class="fb-stats-container">
+        <div class="fb-detail-sec-title">📊 Thống kê trận đấu</div>
+        ${statsList}
+      </div>` : '';
+  }
+
+  // 2. Key Events / Timeline
+  const keyEvents = data.keyEvents || [];
+  let timelineHtml = '';
+  if (keyEvents.length > 0) {
+    const list = keyEvents.map(ev => {
+      const time = ev.play?.clock?.displayValue || '';
+      const text = ev.play?.text || '';
+      const type = ev.type?.text || 'Sự kiện';
+      
+      let icon = '⚽';
+      if (type.includes('Yellow')) icon = '🟨';
+      else if (type.includes('Red')) icon = '🟥';
+      else if (type.includes('Substitution')) icon = '🔄';
+
+      return `
+        <div class="fb-timeline-item">
+          <span class="fb-timeline-time">${time}</span>
+          <span class="fb-timeline-icon">${icon}</span>
+          <span class="fb-timeline-text">${text}</span>
+        </div>`;
+    }).join('');
+
+    timelineHtml = `
+      <div class="fb-stats-container" style="margin-top: 14px;">
+        <div class="fb-detail-sec-title">⏱️ Diễn biến chính</div>
+        <div class="fb-timeline-list">${list}</div>
+      </div>`;
+  }
+
+  // 3. Lineups / Rosters
+  const rosters = data.rosters || {};
+  let rosterHtml = '';
+  
+  const getRoster = (side) => {
+    const teamData = rosters[side] || {};
+    const list = teamData.roster || [];
+    const starters = list.filter(p => p.starter);
+    if (!starters.length) return '';
+
+    return `
+      <div class="fb-roster-col">
+        <h4>${side === 'home' ? '🏠 Chủ nhà' : '✈️ Khách'} (Sơ đồ: ${teamData.formation || 'N/A'})</h4>
+        <div class="fb-roster-list">
+          ${starters.map(p => `
+            <div class="fb-player-item">
+              <span>${p.jersey || ''}. <strong>${p.athlete?.displayName || ''}</strong></span>
+              <span class="fb-player-pos">${p.position?.displayName || ''}</span>
+            </div>`).join('')}
         </div>
-      </div>
-      <div class="fb-detail-actions">
-        <button class="fb-detail-btn" onclick="window._fbTeam('${e.idHomeTeam}','${e.strHomeTeam}','${e.strHomeTeamBadge||''}')">
-          ${badge(e.strHomeTeamBadge, 16)} Thông tin ${e.strHomeTeam}
-        </button>
-        <button class="fb-detail-btn" onclick="window._fbTeam('${e.idAwayTeam}','${e.strAwayTeam}','${e.strAwayTeamBadge||''}')">
-          ${badge(e.strAwayTeamBadge, 16)} Thông tin ${e.strAwayTeam}
-        </button>
-      </div>
-    </div>`;
+      </div>`;
+  };
+
+  const homeRosterHtml = getRoster('home');
+  const awayRosterHtml = getRoster('away');
+  if (homeRosterHtml || awayRosterHtml) {
+    rosterHtml = `
+      <div class="fb-stats-container" style="margin-top: 14px;">
+        <div class="fb-detail-sec-title">🏃 Đội hình xuất phát</div>
+        <div class="fb-roster-grid">
+          ${homeRosterHtml}
+          ${awayRosterHtml}
+        </div>
+      </div>`;
+  }
+
+  // 4. Info Card
+  const info = data.gameInfo || {};
+  const ref = info.referee?.displayName ? ` · ⚖️ Trọng tài: ${info.referee.displayName}` : '';
+  const venue = [info.venue?.fullName, info.venue?.address?.city].filter(Boolean).join(' - ');
+  const venueStr = venue ? `📍 Sân: ${venue}` : '';
+
+  el.innerHTML = `
+    <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;padding:4px 0;">
+      ${venueStr}${ref}
+    </div>
+    ${statsHtml}
+    ${timelineHtml}
+    ${rosterHtml}
+  `;
 }
 
 // ── Standings table ────────────────────────────────────────────────
 function renderTable(el, data) {
-  const rows = data.table || [];
-  const lg   = LEAGUES[_league];
+  const lg = LEAGUES[_league];
+  
+  // Standard leagues have 1 child in data.children
+  // Cup group stages (World Cup) have multiple children (one for each group)
+  const children = data.children || [];
 
-  if (!rows.length) {
-    el.innerHTML = `<div class="fb-empty">📊 Chưa có bảng xếp hạng</div>`;
+  if (!children.length) {
+    el.innerHTML = `<div class="fb-empty">📊 Hiện chưa có dữ liệu bảng xếp hạng.</div>`;
     return;
   }
 
-  const header = _league === 'pl' ? `
-    <div class="fb-table-note">
-      ℹ️ TheSportsDB cung cấp top 5 trên gói miễn phí · Season 2025-2026
-      &nbsp;|&nbsp; <span style="color:${lg.color};">Arsenal dẫn đầu 85pts</span>
-    </div>` : '';
+  // Render group grids
+  let html = '';
 
-  const thead = `
-    <tr>
-      <th class="fb-th-rank">#</th>
-      <th class="fb-th-team">Đội bóng</th>
-      <th class="fb-th-stat" title="Số trận">Tr</th>
-      <th class="fb-th-stat" title="Thắng">T</th>
-      <th class="fb-th-stat" title="Hòa">H</th>
-      <th class="fb-th-stat" title="Thua">B</th>
-      <th class="fb-th-stat" title="Bàn thắng">BT</th>
-      <th class="fb-th-stat" title="Bàn thua">Bthua</th>
-      <th class="fb-th-stat" title="Hiệu số">HS</th>
-      ${data.table?.[0]?.strForm ? '<th class="fb-th-form">5 trận</th>' : ''}
-      <th class="fb-th-pts">Điểm</th>
-    </tr>`;
+  children.forEach(group => {
+    const entries = group.standings?.entries || [];
+    const hasGroupName = children.length > 1;
 
-  const tbody = rows.map(r => {
-    const rank = parseInt(r.intRank);
-    const gd   = parseInt(r.intGoalDifference || 0);
-    const gdStr = gd > 0 ? `+${gd}` : String(gd);
-    const gdClr = gd > 0 ? '#4ade80' : gd < 0 ? '#f87171' : '#94a3b8';
+    if (!entries.length) return;
 
-    let rankClr = '';
-    if (_league === 'pl') {
-      if (rank <= 4)  rankClr = '#60a5fa';
-      if (rank === 5) rankClr = '#fb923c';
-      if (rank >= 18) rankClr = '#f87171';
-    }
+    const groupTitle = hasGroupName ? `<div class="fb-detail-sec-title" style="margin: 18px 0 8px; color: ${lg.color}; font-size:13px; font-weight:700;">${group.name || 'Group'}</div>` : '';
 
-    const formHtml = r.strForm
-      ? (r.strForm || '').split('').slice(-5).map(formPill).join('')
-      : '';
-
-    const teamBadge = r.strBadge
-      ? `<img src="${r.strBadge}" alt="" style="width:20px;height:20px;object-fit:contain;flex-shrink:0;" loading="lazy" onerror="this.remove()">`
-      : '';
-
-    return `
-      <tr class="fb-table-row" style="${rankClr ? `border-left:3px solid ${rankClr};` : ''}">
-        <td class="fb-td-rank" style="color:${rankClr || 'var(--text-secondary)'};">${rank}</td>
-        <td class="fb-td-team">
-          <button class="fb-team-btn" onclick="window._fbTeam('${r.idTeam}','${r.strTeam}','${r.strBadge || ''}')">
-            ${teamBadge}
-            <span class="fb-team-name-td">${r.strTeam}</span>
-          </button>
-        </td>
-        <td class="fb-td-stat">${r.intPlayed ?? '—'}</td>
-        <td class="fb-td-stat">${r.intWin ?? '—'}</td>
-        <td class="fb-td-stat">${r.intDraw ?? '—'}</td>
-        <td class="fb-td-stat">${r.intLoss ?? '—'}</td>
-        <td class="fb-td-stat">${r.intGoalsFor ?? '—'}</td>
-        <td class="fb-td-stat">${r.intGoalsAgainst ?? '—'}</td>
-        <td class="fb-td-stat" style="color:${gdClr};font-weight:600;">${gdStr}</td>
-        ${r.strForm ? `<td class="fb-td-form">${formHtml}</td>` : ''}
-        <td class="fb-td-pts" style="color:${lg.color};">${r.intPoints ?? '—'}</td>
+    const thead = `
+      <tr>
+        <th class="fb-th-rank">#</th>
+        <th class="fb-th-team">Đội bóng</th>
+        <th class="fb-th-stat" title="Số trận">Tr</th>
+        <th class="fb-th-stat" title="Thắng">T</th>
+        <th class="fb-th-stat" title="Hòa">H</th>
+        <th class="fb-th-stat" title="Thua">B</th>
+        <th class="fb-th-stat" title="Bàn thắng/Bàn thua">BT-BB</th>
+        <th class="fb-th-stat" title="Hiệu số">HS</th>
+        <th class="fb-th-form">5 trận gần nhất</th>
+        <th class="fb-th-pts">Điểm</th>
       </tr>`;
-  }).join('');
 
-  let legend = '';
-  if (_league === 'pl') {
-    legend = `<div class="fb-legend">
-      <span style="color:#60a5fa;font-weight:700;">─</span> Champions League &nbsp;
-      <span style="color:#fb923c;font-weight:700;">─</span> Europa League &nbsp;
-      <span style="color:#f87171;font-weight:700;">─</span> Xuống hạng
-    </div>`;
-  }
+    const tbody = entries.map((entry, index) => {
+      const teamName = entry.team?.displayName || 'Team';
+      const teamBadge = entry.team?.logos?.[0]?.href || entry.team?.logo || '';
+      
+      const rank = entry.stats?.find(s => s.name === 'rank' || s.name === 'position')?.value ?? (index + 1);
+      const played = entry.stats?.find(s => s.name === 'gamesPlayed')?.value ?? 0;
+      const wins = entry.stats?.find(s => s.name === 'wins')?.value ?? 0;
+      const draws = entry.stats?.find(s => s.name === 'ties')?.value ?? 0;
+      const losses = entry.stats?.find(s => s.name === 'losses')?.value ?? 0;
+      
+      const goalsFor = entry.stats?.find(s => s.name === 'goalsFor')?.value ?? 0;
+      const goalsAgainst = entry.stats?.find(s => s.name === 'goalsAgainst')?.value ?? 0;
+      
+      const gd = entry.stats?.find(s => s.name === 'pointDifferential')?.value ?? 0;
+      const gdStr = gd > 0 ? `+${gd}` : String(gd);
+      const gdClr = gd > 0 ? '#4ade80' : gd < 0 ? '#f87171' : '#94a3b8';
 
-  el.innerHTML = `
-    ${header}
-    ${legend}
-    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
-      <table class="fb-table">
-        <thead>${thead}</thead>
-        <tbody>${tbody}</tbody>
-      </table>
-    </div>`;
+      const pts = entry.stats?.find(s => s.name === 'points')?.value ?? 0;
+      
+      // Form string like W-D-L-W-W
+      const formStr = entry.stats?.find(s => s.name === 'summary')?.displayValue || '';
+      const formHtml = formStr ? formStr.split('-').map(char => {
+        const clr = char === 'W' ? '#4ade80' : char === 'L' ? '#f87171' : '#94a3b8';
+        const displayChar = char === 'W' ? 'T' : char === 'L' ? 'B' : 'H';
+        return `<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;font-size:9px;font-weight:800;background:${clr}22;color:${clr};border:1px solid ${clr}44;margin:0 1px;">${displayChar}</span>`;
+      }).join('') : '—';
+
+      // Border highlight for Champions League / Relegation in PL
+      let borderLeftStyle = '';
+      if (_league === 'pl') {
+        if (rank <= 4)  borderLeftStyle = 'border-left:3px solid #60a5fa;'; // UCL
+        else if (rank === 5) borderLeftStyle = 'border-left:3px solid #fb923c;'; // UEL
+        else if (rank >= 18) borderLeftStyle = 'border-left:3px solid #f87171;'; // Relegation
+      }
+
+      return `
+        <tr class="fb-table-row" style="${borderLeftStyle}">
+          <td class="fb-td-rank">${rank}</td>
+          <td class="fb-td-team">
+            <button class="fb-team-btn" onclick="window._fbTeam('${entry.team?.id}','${teamName}','${teamBadge}')">
+              ${badge(teamBadge, 20)}
+              <span class="fb-team-name-td">${teamName}</span>
+            </button>
+          </td>
+          <td class="fb-td-stat">${played}</td>
+          <td class="fb-td-stat">${wins}</td>
+          <td class="fb-td-stat">${draws}</td>
+          <td class="fb-td-stat">${losses}</td>
+          <td class="fb-td-stat">${goalsFor}-${goalsAgainst}</td>
+          <td class="fb-td-stat" style="color:${gdClr};font-weight:600;">${gdStr}</td>
+          <td class="fb-td-form">${formHtml}</td>
+          <td class="fb-td-pts" style="color:${lg.color};">${pts}</td>
+        </tr>`;
+    }).join('');
+
+    html += `
+      ${groupTitle}
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+        <table class="fb-table">
+          <thead>${thead}</thead>
+          <tbody>${tbody}</tbody>
+        </table>
+      </div>`;
+  });
+
+  el.innerHTML = html;
 }
 
 // ── Team panel ─────────────────────────────────────────────────────
@@ -418,34 +527,102 @@ async function openTeamPanel(teamId, teamName, teamBadgeUrl) {
   const overlay = document.getElementById('fbTeamOverlay');
   if (!panel || !inner) return;
 
-  // Show panel immediately with loading
   panel.classList.add('open');
   if (overlay) overlay.classList.add('visible');
+
   inner.innerHTML = `
     <div class="fb-tp-header">
       <button class="fb-tp-close" onclick="window._fbCloseTeam()">✕</button>
-      <div class="fb-tp-title">
-        ${badge(teamBadgeUrl, 32)}
-        <span>${teamName}</span>
+      <div class="fb-tp-hero">
+        ${badge(teamBadgeUrl, 44)}
+        <div>
+          <div class="fb-tp-name">${teamName}</div>
+          <div class="fb-tp-meta" id="fbTeamMeta">🌍 Đang tải thông tin CLB...</div>
+        </div>
       </div>
     </div>
-    <div class="fb-loading" style="padding:30px;">⏳ Đang tải thông tin...</div>`;
+    <div class="fb-tp-desc" id="fbTeamDesc">Đang tải mô tả chi tiết...</div>
+    <div class="fb-tp-section">
+      <div class="fb-tp-section-title">📅 Trận đấu gần đây & sắp tới</div>
+      <div id="fbTeamSchedule" class="fb-loading">⏳ Đang tải lịch đấu CLB...</div>
+    </div>`;
 
-  // Fetch team info + last + next in parallel
+  const leagueId = LEAGUES[_league].id;
   try {
-    const [teamRes, lastRes, nextRes] = await Promise.all([
-      fetch(API({ type: 'team', id: teamId })),
-      fetch(API({ type: 'team-last', id: teamId })),
-      fetch(API({ type: 'team-next', id: teamId })),
-    ]);
-    const [teamData, lastData, nextData] = await Promise.all([
-      teamRes.json(), lastRes.json(), nextRes.json()
+    const [teamRes, schedRes] = await Promise.all([
+      fetch(API({ league: leagueId, type: 'team', id: teamId })),
+      fetch(API({ league: leagueId, type: 'team-schedule', id: teamId })),
     ]);
 
-    if (_teamPanelId !== teamId) return; // stale if user opened another team
-    renderTeamPanel(inner, teamData, lastData, nextData, teamBadgeUrl);
+    const teamData = await teamRes.json();
+    const schedData = await schedRes.json();
+
+    if (_teamPanelId !== teamId) return;
+
+    renderTeamDetails(teamData, schedData, teamName);
   } catch (err) {
-    inner.innerHTML += `<div class="error-msg" style="margin:16px;">⚠️ ${err.message}</div>`;
+    document.getElementById('fbTeamSchedule').innerHTML = `<div class="error-msg">⚠️ Lỗi tải: ${err.message}</div>`;
+  }
+}
+
+function renderTeamDetails(teamData, schedData, teamName) {
+  const team = teamData.team || {};
+  const metaEl = document.getElementById('fbTeamMeta');
+  const descEl = document.getElementById('fbTeamDesc');
+  const schedEl = document.getElementById('fbTeamSchedule');
+
+  if (metaEl) {
+    const location = team.venue?.fullName ? `🏟️ ${team.venue.fullName}` : 'Sân vận động';
+    metaEl.innerHTML = `${location}`;
+  }
+
+  if (descEl) {
+    descEl.textContent = team.description || `Thông tin chính thức của câu lạc bộ ${teamName}. Hiện chưa có mô tả chi tiết bằng tiếng Việt.`;
+  }
+
+  if (schedEl) {
+    const events = schedData.events || [];
+    if (!events.length) {
+      schedEl.innerHTML = '<div style="color:var(--text-muted);font-size:12px;padding:12px 0;">Không có dữ liệu trận đấu sắp tới.</div>';
+      return;
+    }
+
+    schedEl.innerHTML = events.slice(0, 8).map(e => {
+      const status = e.status?.type;
+      const isPost = status?.state === 'post';
+      
+      const competitor = e.competitions?.[0]?.competitors || [];
+      const home = competitor.find(c => c.homeAway === 'home') || {};
+      const away = competitor.find(c => c.homeAway === 'away') || {};
+      
+      const homeName = home.team?.displayName || '';
+      const awayName = away.team?.displayName || '';
+
+      const scored = isPost;
+      const score = scored ? `${home.score} - ${away.score}` : 'vs';
+
+      const isHome = home.team?.id === _teamPanelId;
+      const opponent = isHome ? awayName : homeName;
+      const oppBadge = isHome ? (away.team?.logos?.[0]?.href || away.team?.logo) : (home.team?.logos?.[0]?.href || home.team?.logo);
+      const isWin = isPost && ((isHome && home.score > away.score) || (!isHome && away.score > home.score));
+      const isLoss = isPost && ((isHome && home.score < away.score) || (!isHome && away.score < home.score));
+      
+      const resChar = isPost ? (isWin ? 'T' : isLoss ? 'B' : 'H') : '—';
+      const resCls = isPost ? (isWin ? 'fb-tp-w' : isLoss ? 'fb-tp-l' : 'fb-tp-d') : 'fb-tp-d';
+
+      return `
+        <div class="fb-tp-match">
+          <span class="fb-tp-res ${resCls}">${resChar}</span>
+          <div class="fb-tp-match-info">
+            <div class="fb-tp-opp">
+              ${badge(oppBadge, 16)}
+              <span>${isHome ? 'vs' : '@'} ${opponent}</span>
+            </div>
+            <div class="fb-tp-meta">${toVN(e.date)}</div>
+          </div>
+          <span class="fb-tp-score">${score}</span>
+        </div>`;
+    }).join('');
   }
 }
 
@@ -455,73 +632,4 @@ function closeTeamPanel() {
   const overlay = document.getElementById('fbTeamOverlay');
   if (panel)   panel.classList.remove('open');
   if (overlay) overlay.classList.remove('visible');
-}
-
-function renderTeamPanel(el, teamData, lastData, nextData, fallbackBadge) {
-  const team  = (teamData.teams || [])[0] || {};
-  const last  = (lastData.events  || []).slice(0, 5);
-  const next  = (nextData.events  || []).slice(0, 5);
-  const badgeUrl = team.strBadge || fallbackBadge;
-  const group = TEAM_GROUP[team.strTeam] || '';
-
-  const matchRow = (e) => {
-    const home = e.strHomeTeam === team.strTeam;
-    const scored = e.intHomeScore != null;
-    const myScore = home ? e.intHomeScore : e.intAwayScore;
-    const opScore = home ? e.intAwayScore : e.intHomeScore;
-    const opponent = home ? e.strAwayTeam : e.strHomeTeam;
-    const oppBadge = home ? e.strAwayTeamBadge : e.strHomeTeamBadge;
-    const win = scored && parseInt(myScore) > parseInt(opScore);
-    const lose= scored && parseInt(myScore) < parseInt(opScore);
-    const resCls = win ? 'fb-tp-w' : lose ? 'fb-tp-l' : 'fb-tp-d';
-    const resChar = win ? 'T' : lose ? 'B' : scored ? 'H' : '—';
-    const vnTime = toVNTime(e.dateEvent, e.strTime);
-
-    return `
-      <div class="fb-tp-match">
-        <span class="fb-tp-res ${resCls}">${resChar}</span>
-        <div class="fb-tp-match-info">
-          <div class="fb-tp-opp">
-            ${badge(oppBadge, 16)}
-            <span>${home ? 'vs' : '@'} ${opponent}</span>
-          </div>
-          <div class="fb-tp-meta">${e.strLeague} · ${e.dateEvent} ${vnTime || ''}</div>
-        </div>
-        ${scored ? `<span class="fb-tp-score">${myScore}–${opScore}</span>` : `<span class="fb-tp-time">${vnTime}</span>`}
-      </div>`;
-  };
-
-  const desc = (team.strDescriptionEN || '').slice(0, 200);
-
-  el.innerHTML = `
-    <div class="fb-tp-header">
-      <button class="fb-tp-close" onclick="window._fbCloseTeam()">✕</button>
-      <div class="fb-tp-hero">
-        ${badge(badgeUrl, 52)}
-        <div>
-          <div class="fb-tp-name">${team.strTeam || ''}</div>
-          <div class="fb-tp-meta" style="margin-top:4px;">
-            ${team.strCountry ? `🌍 ${team.strCountry}` : ''}
-            ${team.strStadium ? ` · 🏟️ ${team.strStadium}` : ''}
-            ${group ? ` · Bảng ${group}` : ''}
-          </div>
-        </div>
-      </div>
-    </div>
-
-    ${desc ? `<div class="fb-tp-desc">${desc}...</div>` : ''}
-
-    ${next.length ? `
-      <div class="fb-tp-section">
-        <div class="fb-tp-section-title">📅 Sắp thi đấu</div>
-        ${next.map(matchRow).join('')}
-      </div>` : ''}
-
-    ${last.length ? `
-      <div class="fb-tp-section">
-        <div class="fb-tp-section-title">✅ Kết quả gần đây</div>
-        ${last.map(matchRow).join('')}
-      </div>` : ''}
-
-    ${!next.length && !last.length ? `<div class="fb-empty" style="padding:24px;">Không có dữ liệu trận đấu</div>` : ''}`;
 }
