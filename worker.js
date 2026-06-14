@@ -569,9 +569,22 @@ async function handleAQI(request, env) {
 async function handleTodos(request, env) {
   if (request.method === 'OPTIONS') return preflight();
   
-  const url = env.SUPABASE_URL;
-  const key = env.SUPABASE_KEY;
+  const url = env.SUPABASE_URL ? env.SUPABASE_URL.trim().replace(/^['"]|['"]$/g, '') : '';
+  const key = env.SUPABASE_KEY ? env.SUPABASE_KEY.trim().replace(/^['"]|['"]$/g, '') : '';
   
+  const { searchParams } = new URL(request.url);
+  if (searchParams.get('diagnostic') === 'true') {
+    return cors(JSON.stringify({
+      urlLength: url ? url.length : 0,
+      urlPrefix: url ? url.substring(0, 15) : '',
+      keyLength: key ? key.length : 0,
+      keyPrefix: key ? key.substring(0, 15) : '',
+      keySuffix: key ? key.substring(key.length - 10) : '',
+      hasWhitespace: key ? /\s/.test(key) : false,
+      hasQuotes: key ? /['"]/.test(key) : false,
+    }), 200);
+  }
+
   if (!url || !key) {
     return cors(JSON.stringify({ error: `Supabase URL or Key is missing. URL length: ${url ? url.length : 0}, Key length: ${key ? key.length : 0}` }), 503);
   }

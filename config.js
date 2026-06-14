@@ -20,11 +20,7 @@ const APP_CONFIG = {
     'bitcoin', 'ethereum', 'tether', 'bnb', 'solana',
     'usd-coin', 'xrp', 'dogecoin', 'cardano', 'avalanche-2',
     'chainlink', 'polkadot', 'tron', 'matic-network', 'litecoin',
-  ],
-
-  // ── Supabase Configuration (Tránh rò rỉ - Lưu trữ dưới dạng Secrets trên Worker) ──
-  SUPABASE_URL: '',
-  SUPABASE_KEY: '',
+  ]
 
 };
 
