@@ -6,13 +6,14 @@ import { fetchAQI, aqiLevel } from '../api/aqi.js';
 const AQI_CITIES = [
   {
     label: 'TP.HCM',
-    station: '@8767',           // US Consulate - often offline
-    owmFallback: true,          // use OWM Air Pollution as fallback
+    // Trạm US Consulate @8767 offline từ đầu 2025 — dùng OWM trực tiếp
+    station: 'ho-chi-minh-city',  // AQICN city slug (thường có dữ liệu hơn @8767)
+    owmFallback: true,             // luôn fallback sang OWM nếu AQICN offline
     owmLat: 10.8231, owmLon: 106.6297,
     owmName: 'Hồ Chí Minh, Vietnam',
   },
-  { label: 'Hà Nội',  station: '@1583'  },  // Hanoi verified
-  { label: 'Đà Nẵng', station: '@1584'  },  // Da Nang verified
+  { label: 'Hà Nội',  station: '@1583'  },  // Hanoi US Embassy - verified
+  { label: 'Đà Nẵng', station: '@4629'  },  // Da Nang - verified
   { label: 'Cần Thơ', station: '@13687' },  // Cần Thơ/Ninh Kiều KTTV verified
   { label: 'Huế',     station: '@5505'  },  // Tp Huế verified
 ];
@@ -178,7 +179,6 @@ function renderFromOWM(el, chips, owmData, cityConf) {
   const comp   = owmData.list?.[0]?.components ?? {};
   const pm25   = comp.pm2_5 ?? 0;
   const aqi    = owmPm25ToAQI(pm25);
-  const { aqiLevel } = window._aqiLevel || {}; // need direct import
   const level  = aqiLevelFn(aqi);
 
   const pollCards = [
@@ -216,7 +216,7 @@ function renderFromOWM(el, chips, owmData, cityConf) {
       </div>
     </div>
     <div class="aqi-standard-note">
-      📡 Nguồn: <strong>OpenWeatherMap Air Pollution</strong> · Trạm AQICN tạm offline · Tiêu chuẩn US AQI (EPA)
+      📡 Nguồn: <strong>OpenWeatherMap Air Pollution</strong> · Tiêu chuẩn US AQI (EPA)
     </div>
     <div class="aqi-poll-label">Chỉ số ô nhiễm</div>
     <div class="aqi-poll-grid">${pollCards}</div>

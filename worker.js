@@ -128,19 +128,31 @@ const VPS_BASE = 'https://bgapidatafeed.vps.com.vn';
 // VN30 basket (official 30 stocks on HOSE)
 const VN30_BASKET = 'ACB,BID,BCM,BVH,CTG,FPT,GAS,GVR,HDB,HPG,MBB,MSN,MWG,PLX,POW,SAB,SSI,STB,TCB,TPB,VCB,VHM,VIB,VIC,VJC,VNM,VPB,VRE,VSH,VGC';
 // HNX top stocks (proxy for HNX-Index)
-const HNX_BASKET = 'ACB,SHB,NVB,VIB,SHS,HUT,TNG,PVC,DXG,SCI,S55,IDJ,PGS,VGS,NHA';
+const HNX_BASKET = 'SHB,NVB,SHS,HUT,TNG,PVC,DXG,SCI,S55,IDJ,PGS,VGS,NHA,CEO,HND';
+// VNINDEX representative basket (fallback khi Yahoo Finance bị block)
+const VNINDEX_BASKET = 'VCB,BID,CTG,TCB,VPB,MBB,HPG,VIC,VHM,VNM,MSN,SAB,GAS,PLX,FPT,VJC,MWG,POW,GVR,SSI';
 
 async function fetchYahooIndex(yfSym, symName) {
+  // Symbol đúng: ^VNINDEX.VN (encoded: %5EVNINDEX.VN) — dùng query2 (query1 trả về Not Found)
   const res = await fetch(
-    `https://query1.finance.yahoo.com/v8/finance/chart/${yfSym}?interval=1d&range=1d`,
-    { headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' } }
+    `https://query2.finance.yahoo.com/v8/finance/chart/${yfSym}?interval=1d&range=1d`,
+    {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json',
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
+      signal: AbortSignal.timeout(6000),
+    }
   );
+  if (!res.ok) return null;
   const d = await res.json();
   const result = d?.chart?.result?.[0];
   if (!result) return null;
   const meta   = result.meta;
   const price  = meta.regularMarketPrice;
-  const prev   = meta.chartPreviousClose;
+  if (!price) return null;
+  const prev   = meta.chartPreviousClose ?? meta.previousClose ?? price;
   const high   = meta.regularMarketDayHigh   ?? price;
   const low    = meta.regularMarketDayLow    ?? price;
   const open   = meta.regularMarketOpen      ?? price;
@@ -155,8 +167,15 @@ async function fetchYahooIndex(yfSym, symName) {
 }
 
 async function fetchVpsBasket(symbols) {
-  const res = await fetch(`${VPS_BASE}/getliststockdata/${symbols}`,
-    { headers: { 'Referer': 'https://banggia.vps.com.vn/' } });
+  const res = await fetch(`${VPS_BASE}/getliststockdata/${symbols}`, {
+    headers: {
+      'Referer': 'https://banggia.vps.com.vn/',
+      'Origin': 'https://banggia.vps.com.vn',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+    },
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!res.ok) throw new Error(`VPS HTTP ${res.status}`);
   return await res.json(); // array of stocks
 }
 
@@ -196,20 +215,26 @@ async function handleVNIndex(request) {
   const type   = params.get('type') ?? 'stocks';
   const custom = params.get('symbols') ?? '';
 
-  // ── INDEX: Yahoo Finance for VNINDEX + VPS basket for VN30/HNX ──
+  // ── INDEX: Yahoo Finance (query2, symbol ^VNINDEX.VN) + VPS basket cho VN30/HNX ──
   if (type === 'index') {
     try {
-      const [vnResult, vn30Stocks, hnxStocks] = await Promise.allSettled([
-        fetchYahooIndex('%5EVNINDEX.VN', 'VNINDEX'),
+      const [vnResult, vn30Stocks, hnxStocks, vnidxBasket] = await Promise.allSettled([
+        fetchYahooIndex('%5EVNINDEX.VN', 'VNINDEX'),  // query2 + symbol ^VNINDEX.VN — đã xác nhận hoạt động
         fetchVpsBasket(VN30_BASKET),
         fetchVpsBasket(HNX_BASKET),
+        fetchVpsBasket(VNINDEX_BASKET),             // fallback nếu Yahoo bị block
       ]);
 
       const indices = [];
 
+      // Ưu tiên Yahoo Finance; nếu fail → dùng VPS basket làm proxy VNINDEX
       if (vnResult.status === 'fulfilled' && vnResult.value) {
         indices.push(vnResult.value);
+      } else if (vnidxBasket.status === 'fulfilled') {
+        const idx = basketToIndex(vnidxBasket.value, 'VNINDEX', 'VN-Index');
+        if (idx) indices.push(idx);
       }
+
       if (vn30Stocks.status === 'fulfilled') {
         const idx = basketToIndex(vn30Stocks.value, 'VN30', 'VN30');
         if (idx) indices.push(idx);
