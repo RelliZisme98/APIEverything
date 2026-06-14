@@ -5,6 +5,78 @@ let hasDbConnection = false;
 
 const LOCAL_TASKS_KEY = 'rellia_todo_tasks';
 
+const DEFAULT_CATEGORIES = [
+  { id: 'work', label: 'Công việc 💼' },
+  { id: 'personal', label: 'Cá nhân 🏡' },
+  { id: 'urgent', label: 'Khẩn cấp 🚨' }
+];
+
+function getCustomCategories() {
+  try {
+    const raw = localStorage.getItem('rellia_todo_custom_categories');
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveCustomCategory(id, label) {
+  const list = getCustomCategories();
+  if (!list.some(c => c.id === id)) {
+    list.push({ id, label });
+    localStorage.setItem('rellia_todo_custom_categories', JSON.stringify(list));
+  }
+}
+
+function getAllCategories() {
+  const custom = getCustomCategories();
+  const all = [...DEFAULT_CATEGORIES];
+  custom.forEach(c => {
+    if (!all.some(a => a.id === c.id)) {
+      all.push(c);
+    }
+  });
+  tasks.forEach(t => {
+    if (t.category && !all.some(a => a.id === t.category)) {
+      all.push({ id: t.category, label: t.category });
+    }
+  });
+  return all;
+}
+
+function getCategoryColor(catId) {
+  let hash = 0;
+  for (let i = 0; i < catId.length; i++) {
+    hash = catId.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const h = Math.abs(hash) % 360;
+  return {
+    bg: `hsla(${h}, 70%, 50%, 0.15)`,
+    color: `hsl(${h}, 85%, 70%)`,
+    border: `hsla(${h}, 70%, 50%, 0.3)`
+  };
+}
+
+function populateCategoryDropdown(selectedId = 'work') {
+  const select = document.getElementById('todoCategorySelect');
+  if (!select) return;
+  const all = getAllCategories();
+  select.innerHTML = all.map(c => `<option value="${escapeHTML(c.id)}">${escapeHTML(c.label)}</option>`).join('');
+  select.value = selectedId;
+}
+
+function escapeHTML(str) {
+  return str.replace(/[&<>'"]/g, 
+    tag => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[tag] || tag)
+  );
+}
+
 export function renderTodo() {
   const container = document.getElementById('todoContent');
   if (!container) return;
@@ -32,11 +104,12 @@ export function renderTodo() {
           </div>
           <div class="travel-select-wrap">
             <label>Phân loại</label>
-            <select id="todoCategorySelect" class="field-input">
-              <option value="work">Công việc 💼</option>
-              <option value="personal">Cá nhân 🏡</option>
-              <option value="urgent">Khẩn cấp 🚨</option>
-            </select>
+            <div style="display: flex; gap: 6px; align-items: center;">
+              <select id="todoCategorySelect" class="field-input" style="flex: 1; min-width: 100px;">
+                <!-- Will be populated dynamically -->
+              </select>
+              <button id="btnAddNewCategory" class="btn-primary" style="padding: 0 10px; height: 38px; min-width: 38px; display: flex; align-items: center; justify-content: center; font-size: 16px; margin: 0; line-height: 1;" title="Thêm phân loại mới">+</button>
+            </div>
           </div>
           <div class="travel-select-wrap">
             <label>Hạn chót (tùy chọn)</label>
@@ -86,6 +159,18 @@ export function renderTodo() {
 
   // Bind Events
   document.getElementById('btnAddTodo').addEventListener('click', addNewTodo);
+  document.getElementById('btnAddNewCategory').addEventListener('click', () => {
+    const newCatName = prompt('Nhập tên phân loại mới (ví dụ: Học tập 📚, Gia đình 👨‍👩‍👧):');
+    if (newCatName && newCatName.trim()) {
+      const cleanName = newCatName.trim();
+      const catId = cleanName.toLowerCase().replace(/\s+/g, '_');
+      saveCustomCategory(catId, cleanName);
+      populateCategoryDropdown(catId);
+    }
+  });
+
+  // Populate categories initially
+  populateCategoryDropdown();
 
   // Load and check DB connection
   initProxyTodos();
@@ -114,6 +199,7 @@ async function initProxyTodos() {
         createdAt: item.created_at
       }));
       saveTasksLocally();
+      populateCategoryDropdown(document.getElementById('todoCategorySelect')?.value || 'work');
       renderTasks();
     } else {
       throw new Error(`Server returned status ${res.status}`);
@@ -134,6 +220,7 @@ function loadTasks() {
   try {
     const raw = localStorage.getItem(LOCAL_TASKS_KEY);
     tasks = raw ? JSON.parse(raw) : [];
+    populateCategoryDropdown(document.getElementById('todoCategorySelect')?.value || 'work');
   } catch (e) {
     tasks = [];
   }
@@ -197,14 +284,21 @@ function renderTasks() {
     card.id = `task-${task.id}`;
 
     // Tag Badge
-    let tagLabel = 'Công việc';
-    let tagClass = 'todo-badge--work';
-    if (task.category === 'personal') {
-      tagLabel = 'Cá nhân';
+    const allCats = getAllCategories();
+    const matchedCat = allCats.find(c => c.id === task.category);
+    const tagLabel = matchedCat ? matchedCat.label : task.category;
+    
+    let badgeStyle = '';
+    let tagClass = '';
+    if (task.category === 'work') {
+      tagClass = 'todo-badge--work';
+    } else if (task.category === 'personal') {
       tagClass = 'todo-badge--personal';
     } else if (task.category === 'urgent') {
-      tagLabel = 'Khẩn cấp';
       tagClass = 'todo-badge--urgent';
+    } else {
+      const colors = getCategoryColor(task.category);
+      badgeStyle = `style="background: ${colors.bg}; color: ${colors.color}; border: 1px solid ${colors.border};"`;
     }
 
     // Due Date
@@ -229,7 +323,7 @@ function renderTasks() {
       <div class="todo-card-title">${task.title}</div>
       ${task.desc ? `<div class="todo-card-desc">${task.desc}</div>` : ''}
       <div class="todo-card-meta">
-        <span class="todo-badge ${tagClass}">${tagLabel}</span>
+        <span class="todo-badge ${tagClass}" ${badgeStyle}>${tagLabel}</span>
         ${dueHTML}
       </div>
       <div class="todo-card-actions">
