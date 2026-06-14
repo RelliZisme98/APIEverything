@@ -193,163 +193,146 @@ export function renderLookup() {
 function handleSpamCheck() {
   const input = document.getElementById('spamInput').value.trim();
   const resDiv = document.getElementById('spamResult');
-  if (!input || !resDiv) return;
+  if (!resDiv) return;
+
+  if (!input) {
+    resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Vui lòng nhập số điện thoại hoặc email.</div>`;
+    return;
+  }
 
   resDiv.innerHTML = `<span class="status-dot dot-yellow"></span> Đang truy vấn cơ sở dữ liệu bảo mật...`;
 
-  setTimeout(() => {
-    // Detect email
-    if (input.includes('@')) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(input)) {
-        resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Định dạng email không hợp lệ.</div>`;
-        return;
-      }
-
-      // Simulation based on input string
-      const hasLeak = input.length % 2 === 0;
-      if (hasLeak) {
-        resDiv.innerHTML = `
-          <div class="lk-result-box">
-            <span class="lk-status-tag lk-status--danger">⚠️ CẢNH BÁO RÒ RỈ</span>
-            <div style="font-weight: 700; font-size:14px; margin-bottom: 6px;">Email này đã bị phát hiện trong 2 vụ lộ lọt dữ liệu công cộng!</div>
-            <div style="color: var(--text-muted); line-height: 1.4;">
-              - Nguồn rò rỉ: <strong>Wattpad Database (2020)</strong>, <strong>Canva Leak (2019)</strong><br/>
-              - Các thông tin bị lộ: Mật khẩu mã hoá, Tên người dùng, IP đăng nhập.<br/>
-              <span style="color: #fbbf24; font-weight:700;">Khuyên dùng:</span> Hãy đổi mật khẩu của hòm thư này ngay lập tức.
-            </div>
-          </div>
-        `;
-      } else {
-        resDiv.innerHTML = `
-          <div class="lk-result-box">
-            <span class="lk-status-tag lk-status--safe">✅ AN TOÀN</span>
-            <div style="font-weight:700;">Không tìm thấy dữ liệu rò rỉ!</div>
-            <div style="color: var(--text-muted); margin-top: 4px;">Địa chỉ email của bạn hiện không nằm trong cơ sở dữ liệu các vụ xâm nhập bảo mật được công bố công khai.</div>
-          </div>
-        `;
-      }
-    } else {
-      // Clean phone number
-      const phoneClean = input.replace(/[^0-9]/g, '');
-      if (phoneClean.length < 9 || phoneClean.length > 11) {
-        resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Số điện thoại phải gồm 9-11 chữ số.</div>`;
-        return;
-      }
-
-      // Detect carrier
-      let carrier = "Không rõ";
-      const prefix = phoneClean.startsWith('0') ? phoneClean.substring(1, 3) : phoneClean.substring(0, 2);
-      
-      const viettel = ['86', '96', '97', '98', '32', '33', '34', '35', '36', '37', '38', '39'];
-      const mobi = ['89', '90', '93', '70', '79', '77', '76', '78'];
-      const vina = ['88', '91', '94', '81', '82', '83', '84', '85'];
-      const vnm = ['92', '56', '58'];
-
-      if (viettel.includes(prefix)) carrier = "Viettel";
-      else if (mobi.includes(prefix)) carrier = "MobiFone";
-      else if (vina.includes(prefix)) carrier = "VinaPhone";
-      else if (vnm.includes(prefix)) carrier = "Vietnamobile";
-
-      const isSpam = parseInt(phoneClean.slice(-1)) % 3 === 0;
-
-      if (isSpam) {
-        resDiv.innerHTML = `
-          <div class="lk-result-box">
-            <span class="lk-status-tag lk-status--danger">🚨 BÁO CÁO SPAM</span>
-            <table class="lk-details-table">
-              <tr><td>Nhà mạng</td><td>${carrier}</td></tr>
-              <tr><td>Đánh giá</td><td style="color:#f87171;">Thường xuyên Spam / QC rác</td></tr>
-              <tr><td>Số lượt báo cáo</td><td>36 lượt từ cộng đồng</td></tr>
-              <tr><td>Chi tiết cuộc gọi</td><td>Tự động chào mời vay tiêu dùng, bán khoá học</td></tr>
-            </table>
-          </div>
-        `;
-      } else {
-        resDiv.innerHTML = `
-          <div class="lk-result-box">
-            <span class="lk-status-tag lk-status--safe">✅ AN TOÀN</span>
-            <table class="lk-details-table">
-              <tr><td>Nhà mạng</td><td>${carrier}</td></tr>
-              <tr><td>Đánh giá</td><td style="color:#34d399;">Số thuê bao sạch</td></tr>
-              <tr><td>Số lượt báo cáo</td><td>0 báo cáo rác</td></tr>
-            </table>
-          </div>
-        `;
-      }
-    }
-  }, 600);
+  try {
+    fetch(`/api/spam-check?q=${encodeURIComponent(input)}`)
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(errData => {
+            resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Lỗi: ${errData.error || 'Yêu cầu không hợp lệ.'}</div>`;
+          });
+        }
+        return response.json().then(data => {
+          if (data.type === 'email') {
+            if (data.safe) {
+              resDiv.innerHTML = `
+                <div class="lk-result-box">
+                  <span class="lk-status-tag lk-status--safe">✅ AN TOÀN</span>
+                  <div style="font-weight:700;">Không tìm thấy dữ liệu rò rỉ!</div>
+                  <div style="color: var(--text-muted); margin-top: 4px;">Địa chỉ email của bạn hiện không nằm trong cơ sở dữ liệu các vụ xâm nhập bảo mật được công bố công khai.</div>
+                </div>
+              `;
+            } else {
+              resDiv.innerHTML = `
+                <div class="lk-result-box">
+                  <span class="lk-status-tag lk-status--danger">⚠️ CẢNH BÁO RÒ RỈ</span>
+                  <div style="font-weight: 700; font-size:14px; margin-bottom: 6px;">Email này đã bị phát hiện trong ${data.count} vụ lộ lọt dữ liệu công cộng!</div>
+                  <div style="color: var(--text-muted); line-height: 1.4;">
+                    - Nguồn rò rỉ tiêu biểu: <strong>${data.breaches.join(', ')}</strong><br/>
+                    - Lời khuyên: Hãy thay đổi mật khẩu tài khoản liên kết với email này ngay lập tức để bảo vệ tài sản số.
+                  </div>
+                </div>
+              `;
+            }
+          } else if (data.type === 'phone') {
+            if (data.safe) {
+              resDiv.innerHTML = `
+                <div class="lk-result-box">
+                  <span class="lk-status-tag lk-status--safe">✅ AN TOÀN</span>
+                  <table class="lk-details-table">
+                    <tr><td>Nhà mạng</td><td>${data.carrier}</td></tr>
+                    <tr><td>Đánh giá</td><td style="color:#34d399;">Số thuê bao sạch</td></tr>
+                    <tr><td>Số lượt báo cáo</td><td>0 báo cáo rác</td></tr>
+                    <tr><td>Chi tiết</td><td>${data.details}</td></tr>
+                  </table>
+                </div>
+              `;
+            } else {
+              resDiv.innerHTML = `
+                <div class="lk-result-box">
+                  <span class="lk-status-tag lk-status--danger">🚨 BÁO CÁO SPAM</span>
+                  <table class="lk-details-table">
+                    <tr><td>Nhà mạng</td><td>${data.carrier}</td></tr>
+                    <tr><td>Đánh giá</td><td style="color:#f87171;">Số điện thoại quảng cáo / cuộc gọi rác</td></tr>
+                    <tr><td>Số lượt báo cáo</td><td>${data.spamReports} lượt báo cáo từ cộng đồng</td></tr>
+                    <tr><td>Đặc điểm cuộc gọi</td><td>${data.details}</td></tr>
+                  </table>
+                </div>
+              `;
+            }
+          }
+        });
+      })
+      .catch(err => {
+        resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Lỗi kết nối dịch vụ kiểm tra bảo mật: ${err.message}</div>`;
+      });
+  } catch (err) {
+    resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Lỗi kết nối: ${err.message}</div>`;
+  }
 }
 
 async function handleTaxCheck() {
   const input = document.getElementById('taxInput').value.trim();
   const resDiv = document.getElementById('taxResult');
-  if (!input || !resDiv) return;
+  if (!resDiv) return;
 
-  resDiv.innerHTML = `<span class="status-dot dot-yellow"></span> Đang kết nối Cổng thông tin Đăng ký Doanh nghiệp...`;
-
-  try {
-    // Try public tax info APIs
-    const response = await fetch(`https://mst.minhchuyen.online/api/mst/${input}`);
-    if (response.ok) {
-      const data = await response.json();
-      if (data && data.ma_so_thue) {
-        resDiv.innerHTML = `
-          <div class="lk-result-box">
-            <span class="lk-status-tag lk-status--safe" style="background:rgba(96,165,250,0.15);color:var(--accent-blue);">ĐANG HOẠT ĐỘNG</span>
-            <table class="lk-details-table">
-              <tr><td>Tên Doanh Nghiệp</td><td>${data.ten_chinh_thuc || data.ten_doanh_nghiep}</td></tr>
-              <tr><td>Mã Số Thuế</td><td>${data.ma_so_thue}</td></tr>
-              <tr><td>Đại Diện Pháp Luật</td><td>${data.nguoi_dai_dien || 'Không có thông tin'}</td></tr>
-              <tr><td>Địa Chỉ Trụ Sở</td><td>${data.dia_chi}</td></tr>
-              <tr><td>Ngày Cấp Phép</td><td>${data.ngay_cap || 'Không có thông tin'}</td></tr>
-            </table>
-          </div>
-        `;
-        return;
-      }
-    }
-  } catch (err) {
-    console.warn('[Tax API failed, fallback to simulated validation]', err);
+  if (!input) {
+    resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Vui lòng nhập mã số thuế hoặc tên doanh nghiệp cần tra cứu.</div>`;
+    return;
   }
 
-  // Realistic fallback search if API is offline
-  setTimeout(() => {
-    const isSuccess = input.length >= 8 && !isNaN(input);
-    if (!isSuccess) {
-      resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Mã số thuế không đúng cấu trúc (thường gồm 10 hoặc 13 chữ số).</div>`;
+  resDiv.innerHTML = `<span class="status-dot dot-yellow"></span> Đang truy vấn Cổng thông tin Doanh nghiệp...`;
+
+  try {
+    const response = await fetch(`/api/tax-lookup?q=${encodeURIComponent(input)}`);
+    if (!response.ok) {
+      const errData = await response.json();
+      resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Lỗi: ${errData.error || 'Không tìm thấy kết quả phù hợp.'}</div>`;
       return;
     }
 
-    // Generate simulated company metadata based on tax code
-    const mockCompanies = [
-      { name: "CÔNG TY TNHH CÔNG NGHỆ THÔNG TIN RELLIA VIỆT NAM", rep: "Nguyễn Văn Rellia", addr: "Tòa nhà Bitexco, Bến Nghé, Quận 1, TP. Hồ Chí Minh" },
-      { name: "CÔNG TY CỔ PHẦN ĐẦU TƯ VÀ DỊCH VỤ API EVERYTHING", rep: "Trần Đại Dashboard", addr: "5 Láng Hạ, Thành Công, Ba Đình, Hà Nội" },
-      { name: "DOANH NGHIỆP TƯ NHÂN THƯƠNG MẠI & SẢN XUẤT VIỆT NAM", rep: "Phạm Minh Công", addr: "102 Hùng Vương, Hải Châu, Đà Nẵng" }
-    ];
+    const data = await response.json();
+    if (!data.results || data.results.length === 0) {
+      resDiv.innerHTML = `<div class="lk-result-box" style="color:#fbbf24;">⚠️ Không tìm thấy thông tin doanh nghiệp khớp với từ khóa của bạn.</div>`;
+      return;
+    }
 
-    const idx = parseInt(input) % mockCompanies.length;
-    const company = mockCompanies[idx];
+    let html = `<div style="display:flex; flex-direction:column; gap:12px; max-height:450px; overflow-y:auto; padding-right:4px;">`;
+    data.results.forEach(company => {
+      // Display mstImg if present, else plaintext mst
+      const mstHTML = company.mstImg 
+        ? `<img src="${company.mstImg}" style="max-height: 18px; vertical-align: middle;" alt="MST" />`
+        : company.mst;
 
-    resDiv.innerHTML = `
-      <div class="lk-result-box">
-        <span class="lk-status-tag lk-status--safe" style="background:rgba(96,165,250,0.15);color:var(--accent-blue);">ĐANG HOẠT ĐỘNG</span>
-        <div style="font-size: 11px; color: #fbbf24; margin-bottom: 8px;">Dữ liệu lưu trữ quốc gia:</div>
-        <table class="lk-details-table">
-          <tr><td>Tên Doanh Nghiệp</td><td>${company.name}</td></tr>
-          <tr><td>Mã Số Thuế</td><td>${input}</td></tr>
-          <tr><td>Đại Diện Pháp Luật</td><td>${company.rep}</td></tr>
-          <tr><td>Địa Chỉ Trụ Sở</td><td>${company.addr}</td></tr>
-          <tr><td>Trạng Thái Thuế</td><td>Người nộp thuế đang hoạt động (đã được cấp MST)</td></tr>
-        </table>
-        <div style="margin-top: 10px; text-align: right;">
-          <a href="https://masothue.com/Search/?q=${input}" target="_blank" class="lot-link" style="padding: 4px 12px; font-size:11px;">
-            Xem đầy đủ trên MaSoThue.com ➔
-          </a>
+      const detailLink = company.url 
+        ? `<div style="margin-top: 10px; text-align: right;">
+            <a href="${company.url}" target="_blank" class="lot-link" style="padding: 4px 12px; font-size:11px;">
+              Xem chi tiết đối tác ➔
+            </a>
+           </div>`
+        : `<div style="margin-top: 10px; text-align: right;">
+            <a href="https://masothue.com/Search/?q=${encodeURIComponent(company.mst || company.name)}" target="_blank" class="lot-link" style="padding: 4px 12px; font-size:11px;">
+              Xem đầy đủ trên MaSoThue.com ➔
+            </a>
+           </div>`;
+
+      html += `
+        <div class="lk-result-box" style="margin-bottom:0;">
+          <span class="lk-status-tag lk-status--safe" style="background:rgba(96,165,250,0.15);color:var(--accent-blue);">${company.status || 'ĐANG HOẠT ĐỘNG'}</span>
+          <table class="lk-details-table">
+            <tr><td>Tên Doanh Nghiệp</td><td style="font-weight:700; color:var(--text-primary);">${company.name}</td></tr>
+            <tr><td>Mã Số Thuế</td><td>${mstHTML}</td></tr>
+            <tr><td>Đại Diện Pháp Luật</td><td>${company.representative}</td></tr>
+            <tr><td>Địa Chỉ Trụ Sở</td><td>${company.address}</td></tr>
+          </table>
+          ${detailLink}
         </div>
-      </div>
-    `;
-  }, 650);
+      `;
+    });
+    html += `</div>`;
+    resDiv.innerHTML = html;
+
+  } catch (err) {
+    resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Lỗi kết nối Cổng thông tin Doanh nghiệp: ${err.message}</div>`;
+  }
 }
 
 function handlePostalChange() {
