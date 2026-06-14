@@ -15,6 +15,7 @@ import {
   THU,
   CAN, CHI,
 } from '../utils/lunar-calendar.js';
+import { renderHolidays } from './holidays.js';
 
 // Tracked display month/year for navigation
 let displayYear  = new Date().getFullYear();
@@ -106,10 +107,21 @@ export function renderCalendar(containerId = 'calendarContent') {
         <div class="cal-events" id="calEvents"></div>
       </div>
     </div>
+
+    <!-- ══ Holidays Section inline ══ -->
+    <div class="card" style="margin-top: 20px;">
+      <div class="card-header" style="border-bottom: 1px solid var(--border); padding-bottom: 10px; padding-left: 0; background: transparent;">
+        <div class="card-title" style="font-size: 14px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+          <span>🎌</span> Ngày lễ & sự kiện quan trọng VN 2026–2027
+        </div>
+      </div>
+      <div id="holidaysContent" style="padding-top: 14px;"></div>
+    </div>
   `;
 
   renderMiniCalendar();
   renderUpcomingEvents(today);
+  renderHolidays('holidaysContent');
 
   // Bind click day helper globally
   window._calClickDay = openDayDetailModal;
@@ -464,11 +476,6 @@ function saveCustomEvent(day, month, year, eventId) {
 
   // Re-render
   renderCalendar();
-  // Also notify holidays list to re-render if it exists
-  const holSection = document.getElementById('section-holidays');
-  if (holSection && holSection.classList.contains('active')) {
-    import('./holidays.js').then(m => m.renderHolidays());
-  }
 }
 
 /**
@@ -486,9 +493,4 @@ function deleteCustomEvent(eventId) {
 
   // Re-render
   renderCalendar();
-  // Notify holidays
-  const holSection = document.getElementById('section-holidays');
-  if (holSection && holSection.classList.contains('active')) {
-    import('./holidays.js').then(m => m.renderHolidays());
-  }
 }

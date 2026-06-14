@@ -29,7 +29,6 @@ import { renderVNIndex }                        from './components/vnindex.js';
 import { renderNews }                           from './components/news.js';
 // New feature components
 import { renderBankRates }   from './components/bank-rates.js';
-import { renderHolidays }    from './components/holidays.js';
 import { renderTaxCalc }     from './components/tax-calc.js';
 import { renderLottery }     from './components/lottery.js';
 import { renderWorldClock, destroyWorldClock } from './components/world-clock.js';
@@ -214,7 +213,6 @@ window.switchSection = (id) => {
   if (!_rendered.has(id)) {
     _rendered.add(id);
     if (id === 'bank-rates')  renderBankRates();
-    if (id === 'holidays')    renderHolidays();
     if (id === 'tax-calc')    renderTaxCalc();
     if (id === 'lottery')     renderLottery();
     if (id === 'world-clock') renderWorldClock();
@@ -238,9 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderQuickCities();
   initTrafficCard();
   // Pre-render static/no-API sections immediately
-  renderHolidays();
   renderTaxCalc();
-  _rendered.add('holidays');
   _rendered.add('tax-calc');
   refreshAll();
 
