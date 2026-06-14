@@ -11,35 +11,6 @@ export function renderTodo() {
 
   container.innerHTML = `
     <div class="todo-wrap">
-      <!-- Supabase Setup Instructions (Hidden by default, shown if proxy has no credentials) -->
-      <div class="todo-instructions-card" id="todoInstructions" style="display: none; background: rgba(96, 165, 250, 0.04); border: 1px solid rgba(96, 165, 250, 0.25); border-radius: 12px; padding: 18px; font-size: 13px; line-height: 1.6; color: var(--text-secondary); margin-bottom: 16px;">
-        <div style="font-weight: 700; font-size: 14px; color: var(--accent-blue); margin-bottom: 10px; display:flex; align-items:center; gap:6px;">
-          💡 HƯỚNG DẪN CẤU HÌNH SUPABASE (Lưu trữ vĩnh viễn bảo mật)
-        </div>
-        <p style="margin-bottom: 10px;">Máy chủ Worker chưa được cấu hình thông tin Supabase để đồng bộ công việc. Hãy cài đặt bảo mật theo các bước sau:</p>
-        <ol style="margin-left: 20px; display: flex; flex-direction: column; gap: 8px;">
-          <li>Truy cập <a href="https://supabase.com" target="_blank" style="color:var(--accent-blue); font-weight:600; text-decoration: underline;">Supabase.com</a> và lấy <strong>Project URL</strong> cùng <strong>anon (public) API Key</strong>.</li>
-          <li>Tạo bảng <code>todos</code> trong mục **SQL Editor** trên Supabase bằng câu lệnh:
-            <pre style="background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); padding:10px; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:11px; overflow-x:auto; margin-top:6px; margin-bottom:6px; max-height:100px; color: #38bdf8;">create table todos (
-  id text primary key,
-  title text not null,
-  description text,
-  category text default 'work',
-  status text default 'todo',
-  due_date text,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-alter table todos enable row level security;
-create policy "Public Access" on todos for all using (true) with check (true);</pre>
-          </li>
-          <li><strong>Cấu hình Secrets chạy Local:</strong> Tạo một tệp tin mang tên <code>.dev.vars</code> ở thư mục gốc của dự án (ngang hàng <code>worker.js</code>) và điền nội dung sau:
-            <pre style="background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); padding:10px; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:11px; margin-top:6px; margin-bottom:6px; color: #a78bfa;">SUPABASE_URL=https://kavodsarpdvzmaqrkunv.supabase.co
-SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imthdm9kc2FycGR2em1hcXJrdW52Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDQ0ODUsImV4cCI6MjA5NzAyMDQ4NX0.uQnEpHl3dqN5mW4sj9HVAaTEeXiiJ20SAjRAR7He15c</pre>
-          </li>
-          <li><strong>Cấu hình Secrets khi Deploy lên Cloudflare:</strong> Nhập 2 biến môi trường <code>SUPABASE_URL</code> và <code>SUPABASE_KEY</code> vào phần cài đặt biến (Settings -> Variables -> Secrets) trên trang quản lý Cloudflare Pages/Worker của bạn.</li>
-        </ol>
-      </div>
-
       <!-- Supabase Sync Status Panel -->
       <div class="todo-sync-panel">
         <div class="todo-sync-header" id="syncHeader" style="cursor: default;">
@@ -123,7 +94,6 @@ SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZi
 async function initProxyTodos() {
   const indicator = document.getElementById('syncIndicator');
   const syncText = document.getElementById('syncText');
-  const instructionsCard = document.getElementById('todoInstructions');
 
   try {
     const res = await fetch('/api/todos');
@@ -132,7 +102,6 @@ async function initProxyTodos() {
       hasDbConnection = true;
       if (indicator) indicator.className = 'status-dot dot-green';
       if (syncText) syncText.textContent = 'Đã kết nối cơ sở dữ liệu (Bảo mật qua Server)';
-      if (instructionsCard) instructionsCard.style.display = 'none';
 
       // Load tasks from DB
       tasks = data.map(item => ({
@@ -154,7 +123,6 @@ async function initProxyTodos() {
     hasDbConnection = false;
     if (indicator) indicator.className = 'status-dot dot-yellow';
     if (syncText) syncText.textContent = 'Ngoại tuyến (Chỉ lưu trữ trình duyệt)';
-    if (instructionsCard) instructionsCard.style.display = 'block';
 
     // Fallback to local cache
     loadTasks();
