@@ -1,38 +1,26 @@
-/* ── Todo & Notes Component with Supabase Sync ── */
-
-import APP_CONFIG from '../../config.js';
+/* ── Todo & Notes Component with Server-Proxied Database Sync ── */
 
 let tasks = [];
-let supabaseClient = null;
+let hasDbConnection = false;
 
-// Local storage keys
 const LOCAL_TASKS_KEY = 'rellia_todo_tasks';
-const SUPABASE_CONFIG_KEY = 'rellia_supabase_config';
 
 export function renderTodo() {
   const container = document.getElementById('todoContent');
   if (!container) return;
 
-  // Load config and tasks
-  const config = loadLocalConfig();
-  loadTasks();
-
-  const isConfigured = config && config.url && config.key;
-
   container.innerHTML = `
     <div class="todo-wrap">
-      <!-- Supabase Setup Instructions (Visible if not configured) -->
-      ${!isConfigured ? `
-        <div class="todo-instructions-card" style="background: rgba(96,165,250,0.04); border: 1px solid rgba(96,165,250,0.25); border-radius: 12px; padding: 18px; font-size: 13px; line-height: 1.6; color: var(--text-secondary); margin-bottom: 16px;">
-          <div style="font-weight: 700; font-size: 14px; color: var(--accent-blue); margin-bottom: 10px; display:flex; align-items:center; gap:6px;">
-            💡 HƯỚNG DẪN TẠO CƠ SỞ DỮ LIỆU SUPABASE (Lưu trữ vĩnh viễn)
-          </div>
-          <p style="margin-bottom: 10px;">Để danh sách công việc không bị mất khi trình duyệt tự động xoá bộ nhớ đệm (cache/localstorage), hãy liên kết với cơ sở dữ liệu Supabase theo 4 bước sau:</p>
-          <ol style="margin-left: 20px; display: flex; flex-direction: column; gap: 8px;">
-            <li>Truy cập và đăng nhập vào <a href="https://supabase.com" target="_blank" style="color:var(--accent-blue); font-weight:600; text-decoration: underline;">Supabase.com</a>, sau đó tạo một dự án mới (New Project).</li>
-            <li>Ở menu trái, chọn <strong>SQL Editor</strong> -> nhấp <strong>New Query</strong>. Dán đoạn mã SQL sau rồi bấm <strong>Run</strong>:
-              <pre style="background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); padding:10px; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:11px; overflow-x:auto; margin-top:6px; margin-bottom:6px; max-height:160px; color: #38bdf8;">-- 1. Tạo bảng todos lưu công việc
-create table todos (
+      <!-- Supabase Setup Instructions (Hidden by default, shown if proxy has no credentials) -->
+      <div class="todo-instructions-card" id="todoInstructions" style="display: none; background: rgba(96, 165, 250, 0.04); border: 1px solid rgba(96, 165, 250, 0.25); border-radius: 12px; padding: 18px; font-size: 13px; line-height: 1.6; color: var(--text-secondary); margin-bottom: 16px;">
+        <div style="font-weight: 700; font-size: 14px; color: var(--accent-blue); margin-bottom: 10px; display:flex; align-items:center; gap:6px;">
+          💡 HƯỚNG DẪN CẤU HÌNH SUPABASE (Lưu trữ vĩnh viễn bảo mật)
+        </div>
+        <p style="margin-bottom: 10px;">Máy chủ Worker chưa được cấu hình thông tin Supabase để đồng bộ công việc. Hãy cài đặt bảo mật theo các bước sau:</p>
+        <ol style="margin-left: 20px; display: flex; flex-direction: column; gap: 8px;">
+          <li>Truy cập <a href="https://supabase.com" target="_blank" style="color:var(--accent-blue); font-weight:600; text-decoration: underline;">Supabase.com</a> và lấy <strong>Project URL</strong> cùng <strong>anon (public) API Key</strong>.</li>
+          <li>Tạo bảng <code>todos</code> trong mục **SQL Editor** trên Supabase bằng câu lệnh:
+            <pre style="background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); padding:10px; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:11px; overflow-x:auto; margin-top:6px; margin-bottom:6px; max-height:100px; color: #38bdf8;">create table todos (
   id text primary key,
   title text not null,
   description text,
@@ -41,49 +29,24 @@ create table todos (
   due_date text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
-
--- 2. Tắt RLS để cho phép đọc ghi công khai (hoặc viết policy)
 alter table todos enable row level security;
-create policy "Cho phép đọc ghi công khai" on todos for all using (true) with check (true);</pre>
-            </li>
-            <li>Vào mục <strong>Project Settings</strong> (Biểu tượng bánh răng) -> <strong>API</strong>. Sao chép <strong>Project URL</strong> và <strong>anon (public) API Key</strong>.</li>
-            <li>Mở file <a href="file:///d:/APIeverything/config.js" style="color:var(--accent-blue); font-weight: 600; text-decoration: underline;">config.js</a> trong thư mục dự án và điền vào hai khoá <code>SUPABASE_URL</code> và <code>SUPABASE_KEY</code> để kết nối vĩnh viễn (không bao giờ mất thông tin cấu hình).</li>
-          </ol>
-        </div>
-      ` : ''}
+create policy "Public Access" on todos for all using (true) with check (true);</pre>
+          </li>
+          <li><strong>Cấu hình Secrets chạy Local:</strong> Tạo một tệp tin mang tên <code>.dev.vars</code> ở thư mục gốc của dự án (ngang hàng <code>worker.js</code>) và điền nội dung sau:
+            <pre style="background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); padding:10px; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:11px; margin-top:6px; margin-bottom:6px; color: #a78bfa;">SUPABASE_URL=https://kavodsarpdvzmaqrkunv.supabase.co
+SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imthdm9kc2FycGR2em1hcXJrdW52Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDQ0ODUsImV4cCI6MjA5NzAyMDQ4NX0.uQnEpHl3dqN5mW4sj9HVAaTEeXiiJ20SAjRAR7He15c</pre>
+          </li>
+          <li><strong>Cấu hình Secrets khi Deploy lên Cloudflare:</strong> Nhập 2 biến môi trường <code>SUPABASE_URL</code> và <code>SUPABASE_KEY</code> vào phần cài đặt biến (Settings -> Variables -> Secrets) trên trang quản lý Cloudflare Pages/Worker của bạn.</li>
+        </ol>
+      </div>
 
-      <!-- Supabase Sync Panel -->
+      <!-- Supabase Sync Status Panel -->
       <div class="todo-sync-panel">
-        <div class="todo-sync-header" id="syncHeader">
+        <div class="todo-sync-header" id="syncHeader" style="cursor: default;">
           <div class="todo-sync-title">
-            ☁️ Trạng thái đồng bộ đám mây
+            ☁️ Đồng bộ đám mây (Bảo mật qua Server)
             <span id="syncIndicator" class="status-dot dot-yellow"></span>
             <span id="syncText" style="font-size: 11px; color: var(--text-muted);">Đang kết nối...</span>
-          </div>
-          <button class="todo-sync-toggle" id="btnToggleSyncConfig">Cấu hình ▾</button>
-        </div>
-        <div class="todo-sync-body" id="syncConfigBody">
-          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
-            ${config?.isPermanent 
-              ? 'Thông tin Supabase được đọc cố định từ file <code>config.js</code>. Để chỉnh sửa, vui lòng thay đổi trực tiếp trong code.'
-              : 'Nhập thông tin kết nối tạm thời bên dưới. Lưu ý: Cấu hình tạm thời ở trình duyệt có thể bị mất nếu xoá bộ nhớ đệm. Nên điền vào <code>config.js</code>.'
-            }
-          </div>
-          <div class="todo-sync-fields">
-            <div class="travel-select-wrap">
-              <label>SUPABASE URL</label>
-              <input type="text" id="sbUrl" class="field-input" placeholder="https://xxx.supabase.co" ${config?.isPermanent ? 'disabled' : ''} />
-            </div>
-            <div class="travel-select-wrap">
-              <label>SUPABASE ANON KEY</label>
-              <input type="password" id="sbKey" class="field-input" placeholder="eyJhbG..." ${config?.isPermanent ? 'disabled' : ''} />
-            </div>
-          </div>
-          <div class="todo-form-actions" style="margin-top: 8px; gap: 10px;">
-            ${!config?.isPermanent ? `
-              <button id="btnDisconnectSb" class="btn-primary" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: #f87171;">Xoá kết nối</button>
-              <button id="btnConnectSb" class="btn-primary">Kết nối &amp; Lưu</button>
-            ` : '<span style="font-size: 11px; color: var(--accent-green); font-weight:600;">🔒 Đang bảo mật kết nối qua config.js</span>'}
           </div>
         </div>
       </div>
@@ -151,80 +114,52 @@ create policy "Cho phép đọc ghi công khai" on todos for all using (true) wi
   `;
 
   // Bind Events
-  document.getElementById('btnToggleSyncConfig').addEventListener('click', toggleSyncBody);
-  document.getElementById('syncHeader').addEventListener('click', (e) => {
-    if (e.target.id !== 'btnToggleSyncConfig') toggleSyncBody();
-  });
-  
-  if (!config?.isPermanent) {
-    document.getElementById('btnConnectSb').addEventListener('click', connectSupabase);
-    document.getElementById('btnDisconnectSb').addEventListener('click', disconnectSupabase);
-  }
-  
   document.getElementById('btnAddTodo').addEventListener('click', addNewTodo);
 
-  // Load inputs and trigger connection
-  if (config) {
-    document.getElementById('sbUrl').value = config.url || '';
-    document.getElementById('sbKey').value = config.key || '';
-    if (config.url && config.key) {
-      initSupabase(config.url, config.key);
-    }
-  } else {
-    const indicator = document.getElementById('syncIndicator');
-    const syncText = document.getElementById('syncText');
-    indicator.className = 'status-dot dot-yellow';
-    syncText.textContent = 'Chỉ lưu trữ cục bộ (Dễ mất khi xoá cache)';
-  }
-
-  // Initial draw
-  renderTasks();
+  // Load and check DB connection
+  initProxyTodos();
 }
 
-function toggleSyncBody() {
-  const body = document.getElementById('syncConfigBody');
-  const btn = document.getElementById('btnToggleSyncConfig');
-  if (body.classList.contains('open')) {
-    body.classList.remove('open');
-    btn.textContent = 'Cấu hình ▾';
-  } else {
-    body.classList.add('open');
-    btn.textContent = 'Đóng ▴';
-  }
-}
+async function initProxyTodos() {
+  const indicator = document.getElementById('syncIndicator');
+  const syncText = document.getElementById('syncText');
+  const instructionsCard = document.getElementById('todoInstructions');
 
-function loadLocalConfig() {
-  // 1. Try config.js permanent credentials first
-  if (APP_CONFIG.SUPABASE_URL && APP_CONFIG.SUPABASE_KEY) {
-    return {
-      url: APP_CONFIG.SUPABASE_URL,
-      key: APP_CONFIG.SUPABASE_KEY,
-      isPermanent: true
-    };
-  }
-
-  // 2. Fallback to localStorage temporary credentials
   try {
-    const raw = localStorage.getItem(SUPABASE_CONFIG_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      return {
-        url: parsed.url,
-        key: parsed.key,
-        isPermanent: false
-      };
+    const res = await fetch('/api/todos');
+    if (res.ok) {
+      const data = await res.json();
+      hasDbConnection = true;
+      if (indicator) indicator.className = 'status-dot dot-green';
+      if (syncText) syncText.textContent = 'Đã kết nối cơ sở dữ liệu (Bảo mật qua Server)';
+      if (instructionsCard) instructionsCard.style.display = 'none';
+
+      // Load tasks from DB
+      tasks = data.map(item => ({
+        id: item.id,
+        title: item.title,
+        desc: item.description || '',
+        category: item.category || 'work',
+        status: item.status || 'todo',
+        dueDate: item.due_date || '',
+        createdAt: item.created_at
+      }));
+      saveTasksLocally();
+      renderTasks();
+    } else {
+      throw new Error(`Server returned status ${res.status}`);
     }
-  } catch (e) {}
+  } catch (err) {
+    console.warn('[Todo Server Connect Failed, using local cache]', err);
+    hasDbConnection = false;
+    if (indicator) indicator.className = 'status-dot dot-yellow';
+    if (syncText) syncText.textContent = 'Ngoại tuyến (Chỉ lưu trữ trình duyệt)';
+    if (instructionsCard) instructionsCard.style.display = 'block';
 
-  return null;
-}
-
-function getLocalConfig() {
-  return loadLocalConfig();
-}
-
-function saveLocalConfig(url, key) {
-  localStorage.setItem(SUPABASE_CONFIG_KEY, JSON.stringify({ url, key }));
+    // Fallback to local cache
+    loadTasks();
+    renderTasks();
+  }
 }
 
 function loadTasks() {
@@ -240,99 +175,13 @@ function saveTasksLocally() {
   localStorage.setItem(LOCAL_TASKS_KEY, JSON.stringify(tasks));
 }
 
-// Supabase Logic
-async function initSupabase(url, key) {
-  const indicator = document.getElementById('syncIndicator');
-  const syncText = document.getElementById('syncText');
-
-  if (!window.supabase) {
-    indicator.className = 'status-dot dot-yellow';
-    syncText.textContent = 'Đang tải thư viện đồng bộ...';
-    await new Promise((resolve) => {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-      script.onload = resolve;
-      document.head.appendChild(script);
-    });
-  }
-
+async function uploadTaskToProxy(task) {
+  if (!hasDbConnection) return;
   try {
-    supabaseClient = window.supabase.createClient(url, key);
-    indicator.className = 'status-dot dot-green';
-    syncText.textContent = 'Đã kết nối Supabase đám mây';
-    
-    // Sync down tasks
-    await syncFromSupabase();
-  } catch (err) {
-    console.error('[Supabase Init]', err);
-    indicator.className = 'status-dot dot-red';
-    syncText.textContent = 'Lỗi kết nối Supabase!';
-  }
-}
-
-async function connectSupabase() {
-  const url = document.getElementById('sbUrl').value.trim();
-  const key = document.getElementById('sbKey').value.trim();
-
-  if (!url || !key) {
-    alert('Vui lòng nhập đầy đủ Supabase URL và Anon Key!');
-    return;
-  }
-
-  saveLocalConfig(url, key);
-  await initSupabase(url, key);
-  toggleSyncBody();
-}
-
-function disconnectSupabase() {
-  localStorage.removeItem(SUPABASE_CONFIG_KEY);
-  supabaseClient = null;
-  document.getElementById('sbUrl').value = '';
-  document.getElementById('sbKey').value = '';
-  
-  const indicator = document.getElementById('syncIndicator');
-  const syncText = document.getElementById('syncText');
-  indicator.className = 'status-dot dot-yellow';
-  syncText.textContent = 'Ngoại tuyến (Chỉ lưu trình duyệt)';
-  
-  alert('Đã ngắt kết nối Supabase. Dữ liệu tiếp tục lưu tại trình duyệt.');
-}
-
-async function syncFromSupabase() {
-  if (!supabaseClient) return;
-  try {
-    const { data, error } = await supabaseClient
-      .from('todos')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-
-    if (data) {
-      // Map supabase schema to local tasks
-      tasks = data.map(item => ({
-        id: item.id,
-        title: item.title,
-        desc: item.description || '',
-        category: item.category || 'work',
-        status: item.status || 'todo',
-        dueDate: item.due_date || '',
-        createdAt: item.created_at
-      }));
-      saveTasksLocally();
-      renderTasks();
-    }
-  } catch (err) {
-    console.warn('[Supabase Sync Down Failed, using local]', err);
-  }
-}
-
-async function uploadTaskToSupabase(task) {
-  if (!supabaseClient) return;
-  try {
-    const { error } = await supabaseClient
-      .from('todos')
-      .upsert({
+    const res = await fetch('/api/todos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         id: task.id,
         title: task.title,
         description: task.desc,
@@ -340,23 +189,23 @@ async function uploadTaskToSupabase(task) {
         status: task.status,
         due_date: task.dueDate || null,
         created_at: task.createdAt
-      });
-    if (error) throw error;
+      })
+    });
+    if (!res.ok) throw new Error(`Status ${res.status}`);
   } catch (err) {
-    console.warn('[Supabase Upload Task Failed]', err);
+    console.warn('[Upload Task Failed]', err);
   }
 }
 
-async function deleteTaskFromSupabase(taskId) {
-  if (!supabaseClient) return;
+async function deleteTaskFromProxy(taskId) {
+  if (!hasDbConnection) return;
   try {
-    const { error } = await supabaseClient
-      .from('todos')
-      .delete()
-      .eq('id', taskId);
-    if (error) throw error;
+    const res = await fetch(`/api/todos?id=${encodeURIComponent(taskId)}`, {
+      method: 'DELETE'
+    });
+    if (!res.ok) throw new Error(`Status ${res.status}`);
   } catch (err) {
-    console.warn('[Supabase Delete Task Failed]', err);
+    console.warn('[Delete Task Failed]', err);
   }
 }
 
@@ -471,7 +320,7 @@ function addNewTodo() {
   dueInp.value = '';
 
   // Sync upload
-  uploadTaskToSupabase(newTask);
+  uploadTaskToProxy(newTask);
 }
 
 // Global functions for card action click handlers
@@ -481,7 +330,7 @@ window.moveTodoTask = function(id, newStatus) {
     task.status = newStatus;
     saveTasksLocally();
     renderTasks();
-    uploadTaskToSupabase(task);
+    uploadTaskToProxy(task);
   }
 };
 
@@ -490,6 +339,6 @@ window.deleteTodoTask = function(id) {
     tasks = tasks.filter(t => t.id !== id);
     saveTasksLocally();
     renderTasks();
-    deleteTaskFromSupabase(id);
+    deleteTaskFromProxy(id);
   }
 };

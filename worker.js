@@ -565,6 +565,74 @@ async function handleAQI(request, env) {
   }
 }
 
+// ─── /api/todos (proxy bảo mật bảo vệ Supabase URL và Key) ────────
+async function handleTodos(request, env) {
+  if (request.method === 'OPTIONS') return preflight();
+  
+  const url = env.SUPABASE_URL;
+  const key = env.SUPABASE_KEY;
+  
+  if (!url || !key) {
+    return cors(JSON.stringify({ error: 'Supabase credentials are not configured in Worker Secrets.' }), 503);
+  }
+
+  const supabaseHeaders = {
+    'apikey': key,
+    'Authorization': `Bearer ${key}`,
+    'Content-Type': 'application/json'
+  };
+
+  try {
+    if (request.method === 'GET') {
+      const res = await fetch(`${url}/rest/v1/todos?select=*&order=created_at.desc`, {
+        headers: supabaseHeaders
+      });
+      const data = await res.text();
+      return new Response(data, {
+        status: res.status,
+        headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS }
+      });
+    }
+
+    if (request.method === 'POST') {
+      const body = await request.json();
+      const res = await fetch(`${url}/rest/v1/todos`, {
+        method: 'POST',
+        headers: {
+          ...supabaseHeaders,
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify(body)
+      });
+      const data = await res.text();
+      return new Response(data, {
+        status: res.status,
+        headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS }
+      });
+    }
+
+    if (request.method === 'DELETE') {
+      const { searchParams } = new URL(request.url);
+      const id = searchParams.get('id');
+      if (!id) return cors(JSON.stringify({ error: 'id required' }), 400);
+
+      const res = await fetch(`${url}/rest/v1/todos?id=eq.${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: supabaseHeaders
+      });
+      const data = await res.text();
+      return new Response(data, {
+        status: res.status,
+        headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS }
+      });
+    }
+
+    return cors(JSON.stringify({ error: 'method not allowed' }), 405);
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
 // ─── Router ─────────────────────────────────────────────────────────
 export default {
   async fetch(request, env) {
@@ -578,6 +646,7 @@ export default {
     if (pathname === '/vcb-rates')     return handleVCBRates(request);
     if (pathname === '/lottery')       return handleLottery(request);
     if (pathname === '/football')      return handleFootball(request);
+    if (pathname === '/api/todos')     return handleTodos(request, env);
 
     // ── Routes bảo mật (key ẩn trong Cloudflare Secrets) ──
     if (pathname === '/weather')       return handleWeather(request, env);
