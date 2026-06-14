@@ -183,6 +183,11 @@ footer a:hover {
 
 .field-input:focus { border-color: var(--border-glow); }
 
+select.field-input option {
+  background-color: #1e293b;
+  color: #f8fafc;
+}
+
 /* ── Responsive ── */
 @media (max-width: 1100px) {
   .row-4 { grid-template-columns: repeat(2, 1fr); }
