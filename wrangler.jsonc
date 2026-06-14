@@ -12,5 +12,11 @@
   },
   "compatibility_flags": [
     "nodejs_compat"
-  ]
+  ],
+  "routes": [
+    { "pattern": "everything.rellia.org", "custom_domain": true }
+  ],
+  "vars": {
+    "SUPABASE_URL": "https://kavodsarpdvzmaqrkunv.supabase.co"
+  }
 }
