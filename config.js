@@ -22,6 +22,10 @@ const APP_CONFIG = {
     'chainlink', 'polkadot', 'tron', 'matic-network', 'litecoin',
   ],
 
+  // ── Supabase Configuration (Lưu trữ Todo vĩnh viễn không sợ mất cache) ────────
+  SUPABASE_URL: 'https://kavodsarpdvzmaqrkunv.supabase.co',
+  SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imthdm9kc2FycGR2em1hcXJrdW52Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NDQ0ODUsImV4cCI6MjA5NzAyMDQ4NX0.uQnEpHl3dqN5mW4sj9HVAaTEeXiiJ20SAjRAR7He15c',
+
 };
 
 export default APP_CONFIG;

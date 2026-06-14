@@ -1,5 +1,7 @@
 /* ── Todo & Notes Component with Supabase Sync ── */
 
+import APP_CONFIG from '../../config.js';
+
 let tasks = [];
 let supabaseClient = null;
 
@@ -12,39 +14,76 @@ export function renderTodo() {
   if (!container) return;
 
   // Load config and tasks
-  loadLocalConfig();
+  const config = loadLocalConfig();
   loadTasks();
+
+  const isConfigured = config && config.url && config.key;
 
   container.innerHTML = `
     <div class="todo-wrap">
+      <!-- Supabase Setup Instructions (Visible if not configured) -->
+      ${!isConfigured ? `
+        <div class="todo-instructions-card" style="background: rgba(96,165,250,0.04); border: 1px solid rgba(96,165,250,0.25); border-radius: 12px; padding: 18px; font-size: 13px; line-height: 1.6; color: var(--text-secondary); margin-bottom: 16px;">
+          <div style="font-weight: 700; font-size: 14px; color: var(--accent-blue); margin-bottom: 10px; display:flex; align-items:center; gap:6px;">
+            💡 HƯỚNG DẪN TẠO CƠ SỞ DỮ LIỆU SUPABASE (Lưu trữ vĩnh viễn)
+          </div>
+          <p style="margin-bottom: 10px;">Để danh sách công việc không bị mất khi trình duyệt tự động xoá bộ nhớ đệm (cache/localstorage), hãy liên kết với cơ sở dữ liệu Supabase theo 4 bước sau:</p>
+          <ol style="margin-left: 20px; display: flex; flex-direction: column; gap: 8px;">
+            <li>Truy cập và đăng nhập vào <a href="https://supabase.com" target="_blank" style="color:var(--accent-blue); font-weight:600; text-decoration: underline;">Supabase.com</a>, sau đó tạo một dự án mới (New Project).</li>
+            <li>Ở menu trái, chọn <strong>SQL Editor</strong> -> nhấp <strong>New Query</strong>. Dán đoạn mã SQL sau rồi bấm <strong>Run</strong>:
+              <pre style="background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05); padding:10px; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:11px; overflow-x:auto; margin-top:6px; margin-bottom:6px; max-height:160px; color: #38bdf8;">-- 1. Tạo bảng todos lưu công việc
+create table todos (
+  id text primary key,
+  title text not null,
+  description text,
+  category text default 'work',
+  status text default 'todo',
+  due_date text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- 2. Tắt RLS để cho phép đọc ghi công khai (hoặc viết policy)
+alter table todos enable row level security;
+create policy "Cho phép đọc ghi công khai" on todos for all using (true) with check (true);</pre>
+            </li>
+            <li>Vào mục <strong>Project Settings</strong> (Biểu tượng bánh răng) -> <strong>API</strong>. Sao chép <strong>Project URL</strong> và <strong>anon (public) API Key</strong>.</li>
+            <li>Mở file <a href="file:///d:/APIeverything/config.js" style="color:var(--accent-blue); font-weight: 600; text-decoration: underline;">config.js</a> trong thư mục dự án và điền vào hai khoá <code>SUPABASE_URL</code> và <code>SUPABASE_KEY</code> để kết nối vĩnh viễn (không bao giờ mất thông tin cấu hình).</li>
+          </ol>
+        </div>
+      ` : ''}
+
       <!-- Supabase Sync Panel -->
       <div class="todo-sync-panel">
         <div class="todo-sync-header" id="syncHeader">
           <div class="todo-sync-title">
-            ☁️ Đồng bộ đám mây (Supabase)
+            ☁️ Trạng thái đồng bộ đám mây
             <span id="syncIndicator" class="status-dot dot-yellow"></span>
-            <span id="syncText" style="font-size: 11px; color: var(--text-muted);">Ngoại tuyến (Chỉ lưu trình duyệt)</span>
+            <span id="syncText" style="font-size: 11px; color: var(--text-muted);">Đang kết nối...</span>
           </div>
           <button class="todo-sync-toggle" id="btnToggleSyncConfig">Cấu hình ▾</button>
         </div>
         <div class="todo-sync-body" id="syncConfigBody">
           <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
-            Nhập thông tin dự án Supabase của bạn để đồng bộ danh sách Todo giữa nhiều thiết bị.
-            Bảng của bạn nên tên là <code>todos</code> với các cột: <code>id</code> (text, primary key), <code>title</code> (text), <code>description</code> (text), <code>category</code> (text), <code>status</code> (text), <code>due_date</code> (text).
+            ${config?.isPermanent 
+              ? 'Thông tin Supabase được đọc cố định từ file <code>config.js</code>. Để chỉnh sửa, vui lòng thay đổi trực tiếp trong code.'
+              : 'Nhập thông tin kết nối tạm thời bên dưới. Lưu ý: Cấu hình tạm thời ở trình duyệt có thể bị mất nếu xoá bộ nhớ đệm. Nên điền vào <code>config.js</code>.'
+            }
           </div>
           <div class="todo-sync-fields">
             <div class="travel-select-wrap">
               <label>SUPABASE URL</label>
-              <input type="text" id="sbUrl" class="field-input" placeholder="https://xxx.supabase.co" />
+              <input type="text" id="sbUrl" class="field-input" placeholder="https://xxx.supabase.co" ${config?.isPermanent ? 'disabled' : ''} />
             </div>
             <div class="travel-select-wrap">
               <label>SUPABASE ANON KEY</label>
-              <input type="password" id="sbKey" class="field-input" placeholder="eyJhbG..." />
+              <input type="password" id="sbKey" class="field-input" placeholder="eyJhbG..." ${config?.isPermanent ? 'disabled' : ''} />
             </div>
           </div>
           <div class="todo-form-actions" style="margin-top: 8px; gap: 10px;">
-            <button id="btnDisconnectSb" class="btn-primary" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: #f87171;">Ngắt kết nối</button>
-            <button id="btnConnectSb" class="btn-primary">Kết nối &amp; Đồng bộ</button>
+            ${!config?.isPermanent ? `
+              <button id="btnDisconnectSb" class="btn-primary" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: #f87171;">Xoá kết nối</button>
+              <button id="btnConnectSb" class="btn-primary">Kết nối &amp; Lưu</button>
+            ` : '<span style="font-size: 11px; color: var(--accent-green); font-weight:600;">🔒 Đang bảo mật kết nối qua config.js</span>'}
           </div>
         </div>
       </div>
@@ -116,19 +155,26 @@ export function renderTodo() {
   document.getElementById('syncHeader').addEventListener('click', (e) => {
     if (e.target.id !== 'btnToggleSyncConfig') toggleSyncBody();
   });
-  document.getElementById('btnConnectSb').addEventListener('click', connectSupabase);
-  document.getElementById('btnDisconnectSb').addEventListener('click', disconnectSupabase);
+  
+  if (!config?.isPermanent) {
+    document.getElementById('btnConnectSb').addEventListener('click', connectSupabase);
+    document.getElementById('btnDisconnectSb').addEventListener('click', disconnectSupabase);
+  }
+  
   document.getElementById('btnAddTodo').addEventListener('click', addNewTodo);
 
-  // Load inputs if config exists
-  const config = getLocalConfig();
+  // Load inputs and trigger connection
   if (config) {
     document.getElementById('sbUrl').value = config.url || '';
     document.getElementById('sbKey').value = config.key || '';
-    // Auto connect if configured
     if (config.url && config.key) {
       initSupabase(config.url, config.key);
     }
+  } else {
+    const indicator = document.getElementById('syncIndicator');
+    const syncText = document.getElementById('syncText');
+    indicator.className = 'status-dot dot-yellow';
+    syncText.textContent = 'Chỉ lưu trữ cục bộ (Dễ mất khi xoá cache)';
   }
 
   // Initial draw
@@ -148,11 +194,29 @@ function toggleSyncBody() {
 }
 
 function loadLocalConfig() {
-  try {
-    return JSON.parse(localStorage.getItem(SUPABASE_CONFIG_KEY));
-  } catch (e) {
-    return null;
+  // 1. Try config.js permanent credentials first
+  if (APP_CONFIG.SUPABASE_URL && APP_CONFIG.SUPABASE_KEY) {
+    return {
+      url: APP_CONFIG.SUPABASE_URL,
+      key: APP_CONFIG.SUPABASE_KEY,
+      isPermanent: true
+    };
   }
+
+  // 2. Fallback to localStorage temporary credentials
+  try {
+    const raw = localStorage.getItem(SUPABASE_CONFIG_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return {
+        url: parsed.url,
+        key: parsed.key,
+        isPermanent: false
+      };
+    }
+  } catch (e) {}
+
+  return null;
 }
 
 function getLocalConfig() {
