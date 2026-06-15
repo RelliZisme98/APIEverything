@@ -1264,7 +1264,79 @@ async function handleDownloader(request) {
   }
 }
 
-// ─── Router ─────────────────────────────────────────────────────────
+// ─── /api/download-proxy (stream file từ URL về qua Worker) ─────────────────
+async function handleDownloadProxy(request) {
+  if (request.method === 'OPTIONS') return preflight();
+  const params   = new URL(request.url).searchParams;
+  const fileUrl  = params.get('url');
+  const filename = params.get('filename') || 'download';
+
+  if (!fileUrl) {
+    return cors(JSON.stringify({ error: 'Missing url param' }), 400);
+  }
+
+  // Only allow known Cobalt/media domains to prevent open-redirect abuse
+  const ALLOWED_HOSTS = [
+    'cobalt.blackcat.sweeux.org',
+    'xenon.zone',
+    'tikwm.com',
+    'cdn.cobalt.tools',
+    'youtube.com',
+    'googlevideo.com',
+    'fbcdn.net',
+    'instagram.com',
+    'cdninstagram.com',
+    'soundcloud.com',
+    'sndcdn.com',
+    'tiktok.com',
+    'ttwcdn.net',
+    'ttoverseaus.net',
+  ];
+
+  let parsedHost;
+  try { parsedHost = new URL(fileUrl).hostname; }
+  catch { return cors(JSON.stringify({ error: 'Invalid URL' }), 400); }
+
+  const allowed = ALLOWED_HOSTS.some(h => parsedHost === h || parsedHost.endsWith('.' + h));
+  if (!allowed) {
+    return cors(JSON.stringify({ error: 'Domain not allowed for proxy' }), 403);
+  }
+
+  try {
+    const upstream = await fetch(fileUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Referer':    'https://cobalt.tools/',
+      },
+      signal: AbortSignal.timeout(30000),
+    });
+
+    if (!upstream.ok) {
+      return cors(JSON.stringify({ error: `Upstream ${upstream.status}` }), 502);
+    }
+
+    // Forward the stream directly – no buffering in Worker memory
+    const contentType = upstream.headers.get('content-type') || 'application/octet-stream';
+    const contentLen  = upstream.headers.get('content-length');
+
+    const respHeaders = {
+      'Content-Type': contentType,
+      'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
+      'Cache-Control': 'no-store',
+      ...CORS,
+    };
+    if (contentLen) respHeaders['Content-Length'] = contentLen;
+
+    return new Response(upstream.body, {
+      status: 200,
+      headers: respHeaders,
+    });
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
+
 export default {
   async fetch(request, env) {
     const { pathname } = new URL(request.url);
@@ -1280,7 +1352,8 @@ export default {
     if (pathname === '/api/todos')     return handleTodos(request, env);
     if (pathname === '/api/spam-check') return handleSpamCheck(request);
     if (pathname === '/api/tax-lookup') return handleTaxLookup(request);
-    if (pathname === '/api/downloader') return handleDownloader(request);
+    if (pathname === '/api/downloader')         return handleDownloader(request);
+    if (pathname === '/api/download-proxy')      return handleDownloadProxy(request);
     if (pathname === '/api/movies-now-playing') return handleMoviesNowPlaying(request);
     if (pathname === '/vietlott')      return handleVietlott(request);
 

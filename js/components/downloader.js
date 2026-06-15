@@ -1,6 +1,121 @@
-import APP_CONFIG from '../../config.js';
+// ── Proxy URL builder ────────────────────────────────────────────────
+const PROXY_BASE = (() => {
+  if (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.TRAFFIC_PROXY_URL) return APP_CONFIG.TRAFFIC_PROXY_URL;
+  return window.location.origin;
+})();
 
-/* ── Media Downloader Component ── */
+function proxyDownloadUrl(originalUrl, filename) {
+  return `${PROXY_BASE}/api/download-proxy?url=${encodeURIComponent(originalUrl)}&filename=${encodeURIComponent(filename)}`;
+}
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/1048576).toFixed(1) + ' MB';
+}
+
+
+async function blobDownload(downloadUrl, suggestedFilename) {
+  const resultDiv = document.getElementById('dlResultContainer');
+  const pid = 'dlP_' + Date.now();
+  const bid = 'dlB_' + Date.now();
+  const tid = 'dlT_' + Date.now();
+
+  const card = resultDiv.querySelector('.dl-result-card');
+  if (card) {
+    const btnArea = card.querySelector('.dl-buttons');
+    if (btnArea) btnArea.innerHTML = `
+      <div id="${pid}" style="width:100%;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <span class="status-dot dot-yellow" style="flex-shrink:0;"></span>
+          <span id="${tid}" style="font-size:13px;color:var(--text-muted);">Đang chuẩn bị tải xuống...</span>
+        </div>
+        <div style="width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">
+          <div id="${bid}" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple));border-radius:3px;transition:width 0.15s;"></div>
+        </div>
+      </div>`;
+  }
+
+  const filename = suggestedFilename || 'download';
+  // Always route through Worker proxy to avoid CORS/redirect issues
+  const fetchUrl = proxyDownloadUrl(downloadUrl, filename);
+
+  const txt = () => document.getElementById(tid);
+  const bar = () => document.getElementById(bid);
+
+  try {
+    if (txt()) txt().textContent = '⏳ Đang kết nối qua proxy...';
+
+    const response = await fetch(fetchUrl);
+    if (!response.ok) {
+      throw new Error(`Proxy lỗi HTTP ${response.status} – thử link dự phòng bên dưới`);
+    }
+
+    const contentType = response.headers.get('content-type') || 'application/octet-stream';
+    const contentLen  = response.headers.get('content-length');
+    const total       = contentLen ? parseInt(contentLen, 10) : 0;
+
+    if (txt()) txt().textContent = total
+      ? `Đang tải... 0% · ${formatBytes(0)} / ${formatBytes(total)}`
+      : 'Đang tải...';
+
+    const reader = response.body.getReader();
+    const chunks = [];
+    let received  = 0;
+    const startMs = Date.now();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      received += value.length;
+
+      const elapsed = Math.max((Date.now() - startMs) / 1000, 0.01);
+      const speed   = received / elapsed;
+      const spdStr  = speed > 1048576 ? `${(speed/1048576).toFixed(1)} MB/s` : `${(speed/1024).toFixed(0)} KB/s`;
+
+      if (total > 0) {
+        const pct = Math.min(99, Math.round(received / total * 100));
+        if (bar()) bar().style.width = pct + '%';
+        if (txt()) txt().textContent = `Đang tải... ${pct}% · ${formatBytes(received)}/${formatBytes(total)} · ${spdStr}`;
+      } else {
+        if (txt()) txt().textContent = `Đang tải... ${formatBytes(received)} · ${spdStr}`;
+      }
+    }
+
+    if (received === 0) throw new Error('File trả về 0 byte – proxy không thể tải URL này');
+
+    const mimeType = contentType.split(';')[0].trim() || 'application/octet-stream';
+    const blob     = new Blob(chunks, { type: mimeType });
+    const blobUrl  = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 8000);
+
+    if (bar()) bar().style.width = '100%';
+    const prog = document.getElementById(pid);
+    if (prog) prog.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;color:#4ade80;font-size:13px;">
+        ✅ Tải xong! <strong>${filename}</strong> · ${formatBytes(received)}
+      </div>`;
+
+  } catch (err) {
+    console.error('[blobDownload]', err);
+    const prog = document.getElementById(pid);
+    if (prog) prog.innerHTML = `
+      <div style="color:#f87171;font-size:12px;line-height:1.5;">
+        ❌ ${err.message}<br>
+        <a href="${downloadUrl}" target="_blank" style="color:var(--accent-blue);font-size:11px;">📎 Thử mở link trực tiếp ↗</a>
+      </div>`;
+  }
+}
+
+
 
 export function renderDownloader() {
   const container = document.getElementById('downloaderContent');
@@ -59,114 +174,6 @@ export function renderDownloader() {
       if (url) fetchMediaDownload(url);
     }
   });
-}
-
-/**
- * Programmatically download a URL as a Blob with progress tracking.
- * This avoids the "Cannot render the file" error when the OS tries to
- * play a streaming URL instead of saving it to disk.
- */
-async function blobDownload(downloadUrl, suggestedFilename) {
-  const resultDiv = document.getElementById('dlResultContainer');
-  const pid = 'dlP_' + Date.now();
-  const bid = 'dlB_' + Date.now();
-  const tid = 'dlT_' + Date.now();
-
-  const card = resultDiv.querySelector('.dl-result-card');
-  if (card) {
-    const btnArea = card.querySelector('.dl-buttons');
-    if (btnArea) btnArea.innerHTML = `
-      <div id="${pid}" style="width:100%;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-          <span class="status-dot dot-yellow" style="flex-shrink:0;"></span>
-          <span id="${tid}" style="font-size:13px;color:var(--text-muted);">Đang tải xuống... 0%</span>
-        </div>
-        <div style="width:100%;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">
-          <div id="${bid}" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent-blue),var(--accent-purple));border-radius:3px;transition:width 0.15s;"></div>
-        </div>
-      </div>`;
-  }
-
-  try {
-    const response = await fetch(downloadUrl);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-    // ── Detect proper mime & extension from response ──
-    const contentType = response.headers.get('content-type') || '';
-    const mimeToExt = {
-      'video/mp4':'mp4','video/webm':'webm','video/quicktime':'mov',
-      'audio/mpeg':'mp3','audio/mp4':'m4a','audio/ogg':'ogg','audio/wav':'wav','audio/webm':'webm',
-      'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/gif':'gif',
-    };
-    const detectedExt = mimeToExt[contentType.split(';')[0].trim()];
-
-    // Fix filename extension to match actual content
-    let filename = suggestedFilename || 'download';
-    if (detectedExt) {
-      const currentExt = filename.split('.').pop().toLowerCase();
-      const videoExts = ['mp4','webm','mov','avi','mkv'];
-      const audioExts = ['mp3','m4a','ogg','wav','flac'];
-      if (!videoExts.includes(currentExt) && !audioExts.includes(currentExt)) {
-        filename = filename.replace(/\.[^.]+$/, '') + '.' + detectedExt;
-      } else if (detectedExt !== currentExt && detectedExt) {
-        // Only rename if mime clearly differs (e.g., got audio/mpeg but named .mp4)
-        const isMimeAudio = audioExts.includes(detectedExt);
-        const isNameAudio = audioExts.includes(currentExt);
-        if (isMimeAudio !== isNameAudio) filename = filename.replace(/\.[^.]+$/, '') + '.' + detectedExt;
-      }
-    }
-
-    const contentLength = response.headers.get('content-length');
-    const total = contentLength ? parseInt(contentLength, 10) : 0;
-
-    const reader = response.body.getReader();
-    const chunks = [];
-    let received = 0;
-    let startTime = Date.now();
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-      received += value.length;
-
-      const elapsed = (Date.now() - startTime) / 1000 || 0.001;
-      const speed = received / elapsed;
-      const speedStr = speed > 1048576 ? `${(speed/1048576).toFixed(1)} MB/s` : `${(speed/1024).toFixed(0)} KB/s`;
-
-      const bar = document.getElementById(bid);
-      const txt = document.getElementById(tid);
-      if (total > 0) {
-        const pct = Math.min(99, Math.round(received/total*100));
-        if (bar) bar.style.width = pct + '%';
-        if (txt) txt.textContent = `Đang tải... ${pct}% · ${formatBytes(received)}/${formatBytes(total)} · ${speedStr}`;
-      } else {
-        if (txt) txt.textContent = `Đang tải... ${formatBytes(received)} · ${speedStr}`;
-      }
-    }
-
-    const mimeType = contentType.split(';')[0].trim() || 'application/octet-stream';
-    const blob = new Blob(chunks, { type: mimeType });
-    const blobUrl = URL.createObjectURL(blob);
-
-    const a = document.createElement('a');
-    a.href = blobUrl; a.download = filename;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
-
-    const prog = document.getElementById(pid);
-    if (prog) prog.innerHTML = `<div style="display:flex;align-items:center;gap:8px;color:#4ade80;font-size:13px;">✅ Đã tải xong! Lưu vào thư mục tải về với tên: <strong>${filename}</strong></div>`;
-
-  } catch (err) {
-    const prog = document.getElementById(pid);
-    if (prog) prog.innerHTML = `<div style="color:var(--accent-red);font-size:13px;">❌ Lỗi: ${err.message}. Thử dùng link dự phòng bên dưới.</div>`;
-  }
-}
-
-function formatBytes(bytes) {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
-  return (bytes/1048576).toFixed(1) + ' MB';
 }
 
 
