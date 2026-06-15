@@ -38,7 +38,7 @@ import { renderTodo }        from './components/todo.js';
 import { renderLookup }      from './components/lookup.js';
 import { renderDownloader }  from './components/downloader.js';
 import { renderMedia }       from './components/media.js';
-import { renderFileTools }   from './components/file-tools.js';
+import { renderFileTools, renderAudioTools } from './components/file-tools.js';
 
 // ── Render Components ──
 import { renderTicker }        from './components/ticker.js';
@@ -222,7 +222,7 @@ window.switchSection = (id) => {
     if (id === 'lookup')      renderLookup();
     if (id === 'downloader')  renderDownloader();
     if (id === 'media')       renderMedia();
-    if (id === 'file-tools')  renderFileTools();
+    if (id === 'file-tools')  { renderFileTools(); renderAudioTools(); }
   }
 };
 

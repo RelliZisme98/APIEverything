@@ -334,3 +334,9 @@
   .fb-score-box { font-size:12px; padding:3px 6px; }
   .fb-time-box  { font-size:12px; }
 }
+
+/* ── Football date nav ── */
+.fb-date-nav { display:flex; gap:8px; align-items:center; margin-bottom:12px; }
+.fb-date-btn { padding:6px 14px; border-radius:20px; border:1px solid var(--border); background:rgba(255,255,255,0.04); color:var(--text-muted); cursor:pointer; font-size:12px; font-weight:600; font-family:'Inter',sans-serif; transition:all .2s; }
+.fb-date-btn:hover { background:rgba(255,255,255,0.08); color:var(--text-primary); }
+.fb-date-btn.active { background:rgba(251,146,60,0.15); border-color:rgba(251,146,60,0.4); color:#fb923c; }

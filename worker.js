@@ -542,23 +542,20 @@ async function handleLottery(request) {
 async function handleVietlott(request) {
   if (request.method === 'OPTIONS') return preflight();
   const params = new URL(request.url).searchParams;
-  const game   = params.get('game') ?? 'power655';  // power655 | mega645 | max4d | keno
-  const date   = params.get('date') ?? '';           // YYYY-MM-DD
+  const game   = params.get('game') ?? 'power655';
+  const date   = params.get('date') ?? '';
+  const page   = parseInt(params.get('page') ?? '0');
 
-  // Map to Vietlott product IDs
   const GAME_MAP = {
     power655: 'XS655', mega645: 'XS645', max4d: 'XS4D', keno: 'KENO',
   };
   const product = GAME_MAP[game];
   if (!product) return cors(JSON.stringify({ error: 'Invalid game' }), 400);
 
-  // Vietlott API (JSON endpoint)
-  const baseUrl = 'https://www.vietlott.vn/ajaxpro/Vietlott.PlugIn.WebParts.GameRandom6x36,Vietlott.PlugIn.ashx';
   const dateStr = date || new Date().toISOString().split('T')[0];
 
-  // Try the official JSON API first
+  // Try the official JSON API
   try {
-    const payload = JSON.stringify({ "ngay": dateStr, "product": product });
     const r = await fetch('https://api.vietlott.vn/api/prize-winning/list', {
       method: 'POST',
       headers: {
@@ -567,13 +564,26 @@ async function handleVietlott(request) {
         'Referer': 'https://www.vietlott.vn/',
         'Origin': 'https://www.vietlott.vn',
       },
-      body: JSON.stringify({ pageIndex: 0, pageSize: 10, product, drawDate: dateStr }),
+      body: JSON.stringify({ pageIndex: page, pageSize: 20, product, drawDate: page > 0 ? '' : dateStr }),
       signal: AbortSignal.timeout(8000),
     });
 
     if (r.ok) {
       const data = await r.json();
       if (data && data.data && data.data.length) {
+        // If history mode (page requested), return full list
+        if (page > 0 || params.get('page') !== null) {
+          const history = data.data.map(d => ({
+            drawCode: d.drawCode || '',
+            drawDate: d.drawDate || '',
+            numbers:  d.winningNumbers || d.numbers || [],
+            jackpot:  d.jackpot1 || d.jackpot || 0,
+          }));
+          return new Response(JSON.stringify({ game, history }), {
+            headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=300' },
+          });
+        }
+
         const latest = data.data[0];
         return new Response(JSON.stringify({
           game, product,
@@ -582,11 +592,12 @@ async function handleVietlott(request) {
           numbers: latest.winningNumbers || latest.numbers || [],
           jackpot:  latest.jackpot1 || latest.jackpot || 0,
           nextJackpot: latest.nextJackpot || 0,
-          winners: {
-            jackpot: latest.jackpot1Winners || 0,
-            match5:  latest.match5Winners  || 0,
-            match4:  latest.match4Winners  || 0,
-          }
+          history: data.data.slice(0, 10).map(d => ({
+            drawCode: d.drawCode || '',
+            drawDate: d.drawDate || '',
+            numbers:  d.winningNumbers || d.numbers || [],
+            jackpot:  d.jackpot1 || d.jackpot || 0,
+          })),
         }), {
           headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=300' },
         });

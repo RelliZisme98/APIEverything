@@ -346,3 +346,173 @@ async function fetchVietlott() {
       </div>`;
   }
 }
+
+// ── Vietlott History & Statistics tab ─────────────────────────────────────
+// Thêm UI lịch sử + thống kê tần suất sau khi fetchVietlott render xong
+let _vlHistoryCache = {};
+let _vlStatsCache   = {};
+
+async function fetchVietlottHistory(gameId, page = 0) {
+  const game = VIETLOTT_GAMES.find(g => g.id === gameId) ?? VIETLOTT_GAMES[0];
+  const cacheKey = `${gameId}_${page}`;
+
+  if (_vlHistoryCache[cacheKey]) return _vlHistoryCache[cacheKey];
+
+  const res = await fetch(`/vietlott?game=${gameId}&page=${page}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+
+  _vlHistoryCache[cacheKey] = data.history || [];
+  return _vlHistoryCache[cacheKey];
+}
+
+// Extend buildUI to include history/stats tabs when in vietlott mode
+const _origBuildUI = window._vlBuildUIHooked;
+function buildVietlottTabs(containerId) {
+  const dataDiv = document.getElementById('lotteryData');
+  if (!dataDiv || currentLotteryMode !== 'vietlott') return;
+
+  // Check if tabs already exist
+  if (document.getElementById('vlTabBar')) return;
+
+  const tabBar = document.createElement('div');
+  tabBar.id = 'vlTabBar';
+  tabBar.className = 'vl-tab-bar';
+  tabBar.innerHTML = `
+    <button class="vl-tab active" data-vltab="result">🎱 Kết quả mới nhất</button>
+    <button class="vl-tab" data-vltab="history">📅 Lịch sử</button>
+    <button class="vl-tab" data-vltab="stats">📊 Thống kê tần suất</button>`;
+
+  dataDiv.parentNode.insertBefore(tabBar, dataDiv);
+
+  tabBar.querySelectorAll('.vl-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabBar.querySelectorAll('.vl-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      switch (tab.dataset.vltab) {
+        case 'result':  fetchVietlott(); break;
+        case 'history': renderVietlottHistory(dataDiv); break;
+        case 'stats':   renderVietlottStats(dataDiv); break;
+      }
+    });
+  });
+}
+
+async function renderVietlottHistory(el) {
+  el.innerHTML = `<div class="lot-loading">📅 Đang tải lịch sử...</div>`;
+  const game = VIETLOTT_GAMES.find(g => g.id === currentVietlottGame);
+
+  try {
+    const history = await fetchVietlottHistory(currentVietlottGame, 0);
+
+    if (!history.length) {
+      el.innerHTML = `<div class="vl-result-card" style="padding:20px;text-align:center;color:var(--text-muted);">Chưa có dữ liệu lịch sử. Vui lòng thử lại sau.</div>`;
+      return;
+    }
+
+    const rows = history.map(h => {
+      const nums = Array.isArray(h.numbers) ? h.numbers : [];
+      const balls = nums.map((n, i) => {
+        const isSpecial = i === nums.length - 1 && (currentVietlottGame === 'power655' || currentVietlottGame === 'mega645');
+        return `<span class="vl-ball-sm ${isSpecial?'vl-ball-sm--sp':''}" style="${isSpecial?`background:${game.color}25;border-color:${game.color}50;color:${game.color};`:''}">${String(n).padStart(2,'0')}</span>`;
+      }).join('');
+
+      const jp = h.jackpot ? Number(h.jackpot).toLocaleString('vi-VN') + ' ₫' : '—';
+      return `
+        <div class="vl-hist-row">
+          <div class="vl-hist-meta">
+            <span class="vl-hist-kky">#${h.drawCode || '—'}</span>
+            <span class="vl-hist-date">${h.drawDate || ''}</span>
+          </div>
+          <div class="vl-hist-balls">${balls}</div>
+          <div class="vl-hist-jp" style="color:${game.color};">${jp}</div>
+        </div>`;
+    }).join('');
+
+    el.innerHTML = `
+      <div class="vl-result-card" style="border-color:${game.color}30;">
+        <div class="vl-header">
+          <div class="vl-title" style="color:${game.color};">📅 Lịch sử ${game.label}</div>
+          <div class="vl-date">${history.length} kỳ gần nhất</div>
+        </div>
+        <div class="vl-hist-list">${rows}</div>
+      </div>`;
+  } catch (err) {
+    el.innerHTML = `<div class="vl-result-card" style="padding:20px;text-align:center;"><div style="color:var(--text-muted);font-size:12px;">⏳ Không thể tải lịch sử: ${err.message}</div><a href="https://www.vietlott.vn" target="_blank" class="lot-link" style="margin-top:12px;display:inline-block;">Xem tại Vietlott.vn ↗</a></div>`;
+  }
+}
+
+async function renderVietlottStats(el) {
+  el.innerHTML = `<div class="lot-loading">📊 Đang tính toán thống kê...</div>`;
+  const game = VIETLOTT_GAMES.find(g => g.id === currentVietlottGame);
+
+  try {
+    // Try to get multiple pages for better stats
+    const [p0, p1] = await Promise.allSettled([
+      fetchVietlottHistory(currentVietlottGame, 0),
+      fetchVietlottHistory(currentVietlottGame, 1),
+    ]);
+
+    const all = [
+      ...(p0.status === 'fulfilled' ? p0.value : []),
+      ...(p1.status === 'fulfilled' ? p1.value : []),
+    ];
+
+    if (!all.length) {
+      el.innerHTML = `<div class="vl-result-card" style="padding:20px;text-align:center;color:var(--text-muted);">Không đủ dữ liệu để thống kê.</div>`;
+      return;
+    }
+
+    // Count frequency for each number
+    const freq = {};
+    let maxNum = currentVietlottGame === 'power655' ? 55 : currentVietlottGame === 'mega645' ? 45 : currentVietlottGame === 'max4d' ? 9 : 80;
+
+    all.forEach(h => {
+      const nums = Array.isArray(h.numbers) ? h.numbers : [];
+      // For power/mega, exclude last number (special ball)
+      const mainNums = (currentVietlottGame === 'power655' || currentVietlottGame === 'mega645')
+        ? nums.slice(0, -1) : nums;
+      mainNums.forEach(n => { freq[n] = (freq[n] || 0) + 1; });
+    });
+
+    const sorted = Object.entries(freq).sort((a,b) => b[1]-a[1]);
+    const maxFreq = sorted[0]?.[1] || 1;
+    const hot = sorted.slice(0, 10);
+    const cold = sorted.slice(-10).reverse();
+
+    const barHtml = (list, color) => list.map(([num, cnt]) => `
+      <div class="vl-stat-row">
+        <span class="vl-stat-num" style="background:${color}15;border:1px solid ${color}40;color:${color};">${String(num).padStart(2,'0')}</span>
+        <div class="vl-stat-bar-wrap">
+          <div class="vl-stat-bar" style="width:${Math.round(cnt/maxFreq*100)}%;background:${color};"></div>
+        </div>
+        <span class="vl-stat-cnt">${cnt} lần</span>
+      </div>`).join('');
+
+    el.innerHTML = `
+      <div class="vl-result-card" style="border-color:${game.color}30;">
+        <div class="vl-header">
+          <div class="vl-title" style="color:${game.color};">📊 Thống kê ${game.label}</div>
+          <div class="vl-date">Dựa trên ${all.length} kỳ quay</div>
+        </div>
+        <div style="padding:16px;">
+          <div class="vl-stat-title" style="color:#f87171;">🔥 10 số ra nhiều nhất</div>
+          <div class="vl-stat-list">${barHtml(hot,'#f87171')}</div>
+          <div class="vl-stat-title" style="color:#60a5fa;margin-top:16px;">❄️ 10 số ra ít nhất</div>
+          <div class="vl-stat-list">${barHtml(cold,'#60a5fa')}</div>
+        </div>
+      </div>`;
+  } catch (err) {
+    el.innerHTML = `<div class="vl-result-card" style="padding:20px;text-align:center;color:var(--text-muted);">Lỗi tải thống kê: ${err.message}</div>`;
+  }
+}
+
+// Patch selectVietlott to inject tab bar after fetch completes
+const _origSelectVietlott = window.selectVietlott;
+if (_origSelectVietlott) {
+  window.selectVietlott = (gameId) => {
+    _origSelectVietlott(gameId);
+    setTimeout(() => buildVietlottTabs(), 100);
+  };
+}

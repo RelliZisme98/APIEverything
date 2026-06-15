@@ -269,3 +269,50 @@
   font-weight: 700;
   font-family: 'JetBrains Mono', monospace;
 }
+
+/* ── Travel Tabs ── */
+.travel-tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+.travel-tab { padding:7px 16px; border-radius:20px; border:1px solid var(--border); background:rgba(255,255,255,0.03); color:var(--text-muted); cursor:pointer; font-size:12px; font-weight:600; font-family:'Inter',sans-serif; transition:all .2s; white-space:nowrap; }
+.travel-tab:hover { background:rgba(255,255,255,0.07); color:var(--text-primary); }
+.travel-tab.active { background:rgba(96,165,250,0.12); border-color:rgba(96,165,250,0.4); color:var(--accent-blue); }
+.travel-pane { display:none; }
+.travel-pane.active { display:block; }
+
+/* ── Swap button ── */
+.travel-swap-btn-wrap { display:flex; align-items:flex-end; padding-bottom:2px; }
+.travel-swap-btn { background:rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:50%; width:36px; height:36px; cursor:pointer; font-size:18px; color:var(--accent-blue); transition:all .2s; }
+.travel-swap-btn:hover { background:rgba(96,165,250,0.15); }
+
+/* ── Schedule ── */
+.sched-header { margin-bottom:16px; }
+.sched-route { display:flex; align-items:center; gap:12px; margin-bottom:4px; }
+.sched-airport { font-size:28px; font-weight:900; font-family:'JetBrains Mono',monospace; color:var(--text-primary); }
+.sched-arrow { font-size:20px; color:var(--text-muted); }
+.sched-meta { font-size:12px; color:var(--text-muted); }
+
+.sched-airline-block { border:1px solid var(--border); border-radius:12px; overflow:hidden; margin-bottom:14px; }
+.sched-airline-header { display:flex; justify-content:space-between; align-items:center; padding:10px 16px; }
+.sched-airline-name { font-weight:700; font-size:14px; }
+.sched-price-range { font-size:12px; color:var(--text-muted); font-family:'JetBrains Mono',monospace; }
+
+.sched-flights { padding:8px 0; }
+.sched-flight-row { display:flex; align-items:center; gap:16px; padding:8px 16px; border-top:1px solid rgba(255,255,255,0.04); transition:background .15s; }
+.sched-flight-row:hover { background:rgba(255,255,255,0.03); }
+.sched-flight--past { opacity:.45; }
+.sched-flight-no { font-family:'JetBrains Mono',monospace; font-weight:700; font-size:13px; width:70px; flex-shrink:0; }
+.sched-times { display:flex; align-items:center; gap:6px; font-family:'JetBrains Mono',monospace; font-size:13px; flex:1; }
+.sched-dep { font-weight:700; color:var(--accent-blue); }
+.sched-dur { color:var(--text-muted); font-size:11px; }
+.sched-arr { font-weight:700; color:var(--accent-yellow); }
+.sched-status { font-size:10px; font-weight:600; white-space:nowrap; }
+.sched-status--upcoming { color:#4ade80; }
+.sched-status--past { color:var(--text-muted); }
+
+.sched-book-row { padding:8px 16px 12px; border-top:1px solid rgba(255,255,255,0.04); }
+.sched-book-btn { display:inline-block; padding:5px 14px; border-radius:20px; border:1px solid; font-size:11px; font-weight:600; text-decoration:none; transition:opacity .2s; }
+.sched-book-btn:hover { opacity:.75; }
+
+/* ── Airline quick grid ── */
+.airline-quick-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin:14px 0; }
+.airline-quick-card { padding:12px; border:1px solid var(--border); border-radius:10px; cursor:pointer; text-align:center; transition:all .2s; }
+.airline-quick-card:hover { transform:translateY(-2px); filter:brightness(1.1); }
