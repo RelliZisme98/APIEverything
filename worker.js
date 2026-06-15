@@ -1227,9 +1227,15 @@ async function handleDownloader(request) {
     }
 
     const cobaltInstances = [
-      'https://api.cobalt.blackcat.sweeux.org',
-      'https://cobalt.k6.cz',
-      'https://rue-cobalt.xenon.zone'
+      'https://subito-c.meowing.de',
+      'https://dog.kittycat.boo',
+      'https://melon.clxxped.lol',
+      'https://nuko-c.meowing.de',
+      'https://grapefruit.clxxped.lol',
+      'https://rue-cobalt.xenon.zone',
+      'https://cobalt.alpha.wolfy.love',
+      'https://cobaltapi.squair.xyz',
+      'https://api.qwkuns.me'
     ];
 
     for (const instance of cobaltInstances) {
@@ -1281,6 +1287,12 @@ async function handleDownloadProxy(request) {
   const ALLOWED_HOSTS = [
     'cobalt.blackcat.sweeux.org',
     'xenon.zone',
+    'meowing.de',
+    'kittycat.boo',
+    'clxxped.lol',
+    'wolfy.love',
+    'squair.xyz',
+    'qwkuns.me',
     'tikwm.com',
     'cdn.cobalt.tools',
     'youtube.com',
@@ -1345,6 +1357,21 @@ async function handleExchange(request) {
   const from = urlParams.get('from') || 'USD';
   const to = urlParams.get('to');
 
+  const cacheUrl = new URL(request.url);
+  const cacheKey = new Request(cacheUrl.toString(), request);
+  const cache = typeof caches !== 'undefined' ? caches.default : null;
+
+  if (cache && request.method === 'GET') {
+    try {
+      const cachedResponse = await cache.match(cacheKey);
+      if (cachedResponse) return cachedResponse;
+    } catch (e) {
+      console.warn('Exchange cache match failed:', e.message);
+    }
+  }
+
+  let finalData = null;
+
   // Try Frankfurter
   try {
     const targetUrl = to 
@@ -1354,30 +1381,48 @@ async function handleExchange(request) {
       signal: AbortSignal.timeout(6000),
     });
     if (res.ok) {
-      const data = await res.json();
-      return cors(JSON.stringify(data));
+      finalData = await res.json();
     }
   } catch (err) {
     console.warn('Worker Frankfurter failed:', err.message);
   }
 
   // Fallback to open.er-api
-  try {
-    const res = await fetch(`https://open.er-api.com/v6/latest/${from}`, {
-      signal: AbortSignal.timeout(6000),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const normalizedData = {
-        amount: 1.0,
-        base: data.base_code || 'USD',
-        date: data.time_last_update_utc ? new Date(data.time_last_update_utc).toISOString().split('T')[0] : '',
-        rates: data.rates || {}
-      };
-      return cors(JSON.stringify(normalizedData));
+  if (!finalData) {
+    try {
+      const res = await fetch(`https://open.er-api.com/v6/latest/${from}`, {
+        signal: AbortSignal.timeout(6000),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        finalData = {
+          amount: 1.0,
+          base: data.base_code || 'USD',
+          date: data.time_last_update_utc ? new Date(data.time_last_update_utc).toISOString().split('T')[0] : '',
+          rates: data.rates || {}
+        };
+      }
+    } catch (err) {
+      console.warn('Worker OpenEx fallback failed:', err.message);
     }
-  } catch (err) {
-    console.warn('Worker OpenEx fallback failed:', err.message);
+  }
+
+  if (finalData) {
+    const headers = {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'public, max-age=300',
+      ...CORS
+    };
+    const response = new Response(JSON.stringify(finalData), { status: 200, headers });
+
+    if (cache && request.method === 'GET') {
+      try {
+        await cache.put(cacheKey, response.clone());
+      } catch (e) {
+        console.warn('Exchange cache put failed:', e.message);
+      }
+    }
+    return response;
   }
 
   return cors(JSON.stringify({ error: 'Failed to fetch exchange rates' }), 502);
@@ -1388,6 +1433,19 @@ async function handleCrypto(request) {
   if (request.method === 'OPTIONS') return preflight();
   const { search } = new URL(request.url);
   const targetPath = new URL(request.url).searchParams.get('path') || 'coins/markets';
+
+  const cacheUrl = new URL(request.url);
+  const cacheKey = new Request(cacheUrl.toString(), request);
+  const cache = typeof caches !== 'undefined' ? caches.default : null;
+
+  if (cache && request.method === 'GET') {
+    try {
+      const cachedResponse = await cache.match(cacheKey);
+      if (cachedResponse) return cachedResponse;
+    } catch (e) {
+      console.warn('Crypto cache match failed:', e.message);
+    }
+  }
 
   // Build the target URL
   const targetUrl = `https://api.coingecko.com/api/v3/${targetPath}${search}`;
@@ -1402,7 +1460,21 @@ async function handleCrypto(request) {
     });
     if (res.ok) {
       const data = await res.json();
-      return cors(JSON.stringify(data));
+      const headers = {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Cache-Control': 'public, max-age=90',
+        ...CORS
+      };
+      const response = new Response(JSON.stringify(data), { status: 200, headers });
+
+      if (cache && request.method === 'GET') {
+        try {
+          await cache.put(cacheKey, response.clone());
+        } catch (e) {
+          console.warn('Crypto cache put failed:', e.message);
+        }
+      }
+      return response;
     }
     return cors(JSON.stringify({ error: `CoinGecko returned status ${res.status}` }), res.status);
   } catch (err) {
