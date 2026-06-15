@@ -11,13 +11,21 @@ const PROXY = (APP_CONFIG.TRAFFIC_PROXY_URL || 'https://everything.rellia.org') 
 /** Fetch market indices. Requires Cloudflare proxy to be deployed. */
 export async function fetchVNIndex() {
   try {
-    const res = await fetch(`${PROXY}?type=index`, { signal: AbortSignal.timeout(5000) });
+    const res = await fetch(`${PROXY}?type=index`, { signal: AbortSignal.timeout(8000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    return Array.isArray(data) && data.length ? data : null;
+    // Handle new wrapper format { indices, marketStatus, timestamp }
+    if (data && Array.isArray(data.indices)) {
+      return { indices: data.indices, marketStatus: data.marketStatus ?? 'unknown' };
+    }
+    // Legacy: direct array
+    if (Array.isArray(data) && data.length) {
+      return { indices: data, marketStatus: 'unknown' };
+    }
+    return { indices: [], marketStatus: 'unknown' };
   } catch (err) {
     console.warn('[VNIndex] proxy unavailable:', err.message);
-    return null; // Handled gracefully in component
+    return null;
   }
 }
 

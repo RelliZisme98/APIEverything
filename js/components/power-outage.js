@@ -11,37 +11,38 @@ const PROXY = (window.location.hostname === 'localhost' || window.location.hostn
   ? window.location.origin
   : (APP_CONFIG.TRAFFIC_PROXY_URL || window.location.origin);
 
-// ── EVN units cho các vùng khác ────────────────────────────────────────────
-const OTHER_UNITS = {
-  EVNHCMC: { 
-    label: 'EVNHCMC – TP. Hồ Chí Minh',  
-    url: 'https://cskh.evnhcmc.vn/Tracuu/thongtincungcapdien',            
-    color: '#34d399', 
-    hotline: '1900 545454',
-    guide: 'Nhập Mã khách hàng (PE...) để kiểm tra trực tiếp lịch mất điện đột xuất hoặc định kỳ tại TP.HCM.'
+// ── EVN regions cho tra cứu proxy ──────────────────────────────────────────
+const OTHER_EVN = [
+  {
+    key: 'hanoi', label: 'EVNHANOI – Hà Nội', color: '#60a5fa', hotline: '1900 1288',
+    provinces: ['Hà Nội'],
+    fields: [
+      { id: 'hn_keyword', label: 'Tên khu vực / Quận / Phường', placeholder: 'VD: Hoàn Kiếm, Đống Đa...' },
+      { id: 'hn_from',    label: 'Từ ngày', type: 'date' },
+      { id: 'hn_to',      label: 'Đến ngày', type: 'date' },
+    ],
   },
-  EVNHANOI: { 
-    label: 'EVNHANOI – Thủ đô Hà Nội',            
-    url: 'https://evnhanoi.vn/search/power-cut',        
-    color: '#60a5fa', 
-    hotline: '1900 1288',
-    guide: 'Tra cứu theo Quận/Huyện, tên khu vực hoặc Mã khách hàng (PD...) để xem lịch cắt điện tại Hà Nội.'
+  {
+    key: 'npc', label: 'EVNNPC – Miền Bắc (27 tỉnh)', color: '#a78bfa', hotline: '1900 6769',
+    provinces: ['Vĩnh Phúc','Bắc Ninh','Quảng Ninh','Hải Dương','Hải Phòng','Hưng Yên','Thái Bình','Hà Nam','Nam Định','Ninh Bình','Hà Giang','Cao Bằng','Bắc Kạn','Tuyên Quang','Lào Cai','Yên Bái','Thái Nguyên','Lạng Sơn','Bắc Giang','Phú Thọ','Điện Biên','Lai Châu','Sơn La','Hòa Bình','Thanh Hóa','Nghệ An','Hà Tĩnh'],
+    fields: [
+      { id: 'npc_province', label: 'Tỉnh thành', type: 'province' },
+      { id: 'npc_from',     label: 'Từ ngày', type: 'date' },
+      { id: 'npc_to',       label: 'Đến ngày', type: 'date' },
+      { id: 'npc_makh',     label: 'Mã khách hàng (nếu có)', placeholder: 'VD: PB012345...' },
+    ],
   },
-  EVNNPC: { 
-    label: 'EVNNPC – Miền Bắc (27 tỉnh thành)', 
-    url: 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungGiamCungCapDien',       
-    color: '#a78bfa', 
-    hotline: '1900 6769',
-    guide: 'Tra cứu lịch tạm ngừng cấp điện của 27 tỉnh thành miền Bắc (không gồm Hà Nội) theo Mã khách hàng hoặc Điện lực thành viên.'
+  {
+    key: 'cpc', label: 'EVNCPC – Miền Trung & Tây Nguyên', color: '#fbbf24', hotline: '1900 1909',
+    provinces: ['Đà Nẵng','Quảng Nam','Quảng Ngãi','Bình Định','Phú Yên','Khánh Hòa','Ninh Thuận','Bình Thuận','Kon Tum','Gia Lai','Đắk Lắk','Đắk Nông','Lâm Đồng','Quảng Bình','Quảng Trị','Thừa Thiên Huế'],
+    fields: [
+      { id: 'cpc_province', label: 'Tỉnh thành', type: 'province' },
+      { id: 'cpc_keyword',  label: 'Tên khu vực / Từ khóa', placeholder: 'VD: Ngũ Hành Sơn...' },
+      { id: 'cpc_from',     label: 'Từ ngày', type: 'date' },
+      { id: 'cpc_to',       label: 'Đến ngày', type: 'date' },
+    ],
   },
-  EVNCPC: { 
-    label: 'EVNCPC – Miền Trung & Tây Nguyên', 
-    url: 'https://cskh.cpc.vn/tra-cuu/lich-tam-ngung-cung-cap-dien/khu-vuc',     
-    color: '#fbbf24', 
-    hotline: '1900 1909',
-    guide: 'Tra cứu lịch tạm ngừng cung cấp điện khu vực miền Trung & Tây Nguyên theo Quận/Huyện hoặc Mã khách hàng.'
-  },
-};
+];
 
 function fmtDate(d) {
   // dd-mm-yyyy
@@ -133,27 +134,64 @@ export function renderPowerOutage(containerId = 'powerContent') {
 
     <!-- ══ Other regions panel ══ -->
     <div id="poPanelOther" class="po-panel" style="display:none;">
-      <div class="po-section-label">Lịch cúp điện các khu vực khác ngoài miền Nam</div>
-      <div class="po-other-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px;margin-bottom:20px;">
-        ${Object.entries(OTHER_UNITS).map(([key, u]) => `
-          <div class="po-other-card" style="border:1px solid ${u.color}30;background:${u.color}05;border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;transition:all 0.2s;">
-            <div>
-              <div class="po-other-card-title" style="color:${u.color};font-weight:700;font-size:14px;margin-bottom:8px;display:flex;align-items:center;gap:6px;">
-                <span>🔌</span> ${u.label}
-              </div>
-              <div class="po-other-card-desc" style="font-size:12px;color:var(--text-secondary);margin:8px 0 12px;line-height:1.4;">${u.guide}</div>
-            </div>
-            <div>
-              <div class="po-other-card-hotline" style="font-size:12px;color:var(--text-muted);margin-bottom:12px;border-top:1px solid rgba(255,255,255,0.04);padding-top:10px;">
-                📞 Tổng đài: <strong style="color:var(--text-primary);">${u.hotline}</strong>
-              </div>
-              <a class="po-other-card-btn" href="${u.url}" target="_blank" rel="noopener" style="background:${u.color}15;color:${u.color};border:1px solid ${u.color}30;padding:8px 12px;border-radius:8px;font-size:12px;text-decoration:none;display:block;text-align:center;font-weight:600;transition:all 0.2s;">
-                Đến cổng tra cứu chính thức ↗
-              </a>
-            </div>
-          </div>`).join('')}
+      <div class="po-section-label">Tra cứu trực tiếp lịch cúp điện – các vùng khác</div>
+
+      <!-- Sub-tabs for each EVN -->
+      <div class="po-evn-tabs" id="poEvnTabs">
+        ${OTHER_EVN.map((e, i) => `
+          <button class="po-evn-tab ${i === 0 ? 'active' : ''}"
+                  onclick="window.poSwitchEvn('${e.key}')"
+                  style="--evn-color:${e.color};"
+                  data-evn="${e.key}">
+            🔌 ${e.label.split('–')[0].trim()}
+          </button>`).join('')}
       </div>
-      <div class="po-hotline" style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:14px;">
+
+      <!-- Forms for each EVN -->
+      ${OTHER_EVN.map((evn, i) => `
+        <div class="po-evn-form" id="poEvnForm_${evn.key}" style="${i !== 0 ? 'display:none;' : ''}">
+          <div class="po-other-meta" style="border-color:${evn.color}30;">
+            <span style="color:${evn.color};font-weight:700;">🔌 ${evn.label}</span>
+            <span style="font-size:11px;color:var(--text-muted);">📞 Tổng đài: <strong>${evn.hotline}</strong></span>
+          </div>
+          <div class="po-form-grid">
+            ${evn.fields.map(f => {
+              if (f.type === 'province') {
+                return `<div class="po-field">
+                  <label class="po-label">${f.label}</label>
+                  <select class="po-select" id="${f.id}">
+                    <option value="">-- Chọn tỉnh thành --</option>
+                    ${evn.provinces.map(p => `<option value="${p}">${p}</option>`).join('')}
+                  </select>
+                </div>`;
+              } else if (f.type === 'date') {
+                const defaultVal = f.id.includes('to')
+                  ? new Date(Date.now() + 14*86400000).toISOString().split('T')[0]
+                  : new Date().toISOString().split('T')[0];
+                return `<div class="po-field">
+                  <label class="po-label">${f.label}</label>
+                  <input class="po-input" type="date" id="${f.id}" value="${defaultVal}" />
+                </div>`;
+              } else {
+                return `<div class="po-field">
+                  <label class="po-label">${f.label}</label>
+                  <input class="po-input" type="text" id="${f.id}" placeholder="${f.placeholder || ''}" />
+                </div>`;
+              }
+            }).join('')}
+          </div>
+          <button class="po-search-btn" onclick="window.poSearchOther('${evn.key}')">⚡ Tra cứu lịch cúp điện</button>
+          <div id="poOtherResult_${evn.key}" class="po-other-result"></div>
+
+          <!-- Fallback link -->
+          <div class="po-other-fallback" style="border-color:${evn.color}20;">
+            <span style="font-size:11px;color:var(--text-muted);">Nếu không tìm thấy kết quả, truy cập cổng chính thức:</span>
+            <a href="${evn.key === 'hanoi' ? 'https://evnhanoi.vn/search/power-cut' : evn.key === 'npc' ? 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungGiamCungCapDien' : 'https://cskh.cpc.vn/tra-cuu/lich-tam-ngung-cung-cap-dien/khu-vuc'}"
+               target="_blank" rel="noopener" class="lot-link" style="font-size:11px;padding:4px 12px;">Cổng tra cứu chính thức ↗</a>
+          </div>
+        </div>`).join('')}
+
+      <div class="po-hotline" style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:16px;">
         <span style="font-size:20px;">📞</span>
         <div>
           <div class="po-hotline-num" style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--accent-cyan);">1900 1006</div>
@@ -169,6 +207,8 @@ export function renderPowerOutage(containerId = 'powerContent') {
   window.poLoadDienLuc  = poLoadDienLuc;
   window.poSearchByUnit = poSearchByUnit;
   window.poSearchByMakh = poSearchByMakh;
+  window.poSwitchEvn    = poSwitchEvn;
+  window.poSearchOther  = poSearchOther;
 }
 
 // ── Tab switcher ──────────────────────────────────────────────────────────
@@ -313,3 +353,103 @@ function showPoError(el, msg) {
 
 /** Legacy compat */
 export function searchPowerOutage() {}
+
+// ── Sub-tab switcher for Other EVN regions ────────────────────────────────
+function poSwitchEvn(key) {
+  OTHER_EVN.forEach(e => {
+    const form = document.getElementById(`poEvnForm_${e.key}`);
+    const tab  = document.querySelector(`[data-evn="${e.key}"]`);
+    if (form) form.style.display = e.key === key ? '' : 'none';
+    if (tab)  tab.classList.toggle('active', e.key === key);
+  });
+}
+
+// ── Search other EVN regions via proxy ───────────────────────────────────
+async function poSearchOther(evnKey) {
+  const resultEl = document.getElementById(`poOtherResult_${evnKey}`);
+  if (!resultEl) return;
+
+  resultEl.innerHTML = `<div class="po-loading">⏳ Đang tra cứu qua proxy ${evnKey.toUpperCase()}...</div>`;
+
+  let url = `${PROXY}/power-outage?evn=${evnKey}`;
+
+  if (evnKey === 'hanoi') {
+    const keyword  = document.getElementById('hn_keyword')?.value?.trim() || '';
+    const fromDate = document.getElementById('hn_from')?.value || '';
+    const toDate   = document.getElementById('hn_to')?.value   || '';
+    if (!keyword && !fromDate) {
+      resultEl.innerHTML = `<div class="po-error">⚠️ Vui lòng nhập tên khu vực hoặc chọn khoảng thời gian.</div>`;
+      return;
+    }
+    url += `&action=tracuu&keyword=${encodeURIComponent(keyword)}&fromDate=${encodeURIComponent(fromDate)}&toDate=${encodeURIComponent(toDate)}`;
+
+  } else if (evnKey === 'npc') {
+    const province = document.getElementById('npc_province')?.value || '';
+    const maKH     = document.getElementById('npc_makh')?.value?.trim() || '';
+    const fromDate = document.getElementById('npc_from')?.value || '';
+    const toDate   = document.getElementById('npc_to')?.value   || '';
+    if (!province && !maKH) {
+      resultEl.innerHTML = `<div class="po-error">⚠️ Vui lòng chọn tỉnh thành hoặc nhập mã khách hàng.</div>`;
+      return;
+    }
+    url += `&action=tracuu&province=${encodeURIComponent(province)}&maKH=${encodeURIComponent(maKH)}&fromDate=${encodeURIComponent(fromDate)}&toDate=${encodeURIComponent(toDate)}`;
+
+  } else if (evnKey === 'cpc') {
+    const province = document.getElementById('cpc_province')?.value || '';
+    const keyword  = document.getElementById('cpc_keyword')?.value?.trim() || '';
+    const fromDate = document.getElementById('cpc_from')?.value || '';
+    const toDate   = document.getElementById('cpc_to')?.value   || '';
+    if (!province && !keyword) {
+      resultEl.innerHTML = `<div class="po-error">⚠️ Vui lòng chọn tỉnh thành hoặc nhập từ khóa khu vực.</div>`;
+      return;
+    }
+    url += `&action=tracuu&province=${encodeURIComponent(province)}&keyword=${encodeURIComponent(keyword)}&fromDate=${encodeURIComponent(fromDate)}&toDate=${encodeURIComponent(toDate)}`;
+  }
+
+  try {
+    const res  = await fetch(url);
+    const body = await res.text();
+
+    // Try JSON first (EVNHANOI, EVNCPC return JSON)
+    try {
+      const json = JSON.parse(body);
+      if (json.error) throw new Error(json.error);
+
+      // Normalise: EVNHANOI & CPC return an array or {data:[...]}
+      const items = Array.isArray(json) ? json : (json.data || json.items || json.result || []);
+      if (!items.length) {
+        resultEl.innerHTML = `<div class="po-empty">📭 Không có lịch cúp điện trong khoảng thời gian này.</div>`;
+        return;
+      }
+
+      const rows = items.map(it => `
+        <tr>
+          <td>${it.area || it.khuVuc || it.tenKhuVuc || '—'}</td>
+          <td>${it.reason || it.lyDo || it.noiDung || '—'}</td>
+          <td>${it.fromDate || it.tuNgay || it.startTime || '—'}</td>
+          <td>${it.toDate   || it.denNgay || it.endTime   || '—'}</td>
+        </tr>`).join('');
+
+      resultEl.innerHTML = `
+        <div class="po-result-wrap animate-fade-in-up">
+          <div class="po-result-header">
+            <span class="po-result-icon">⚡</span>
+            <span class="po-result-title">Lịch cúp điện ${evnKey.toUpperCase()}</span>
+            <span class="po-result-count">${items.length} lịch</span>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="po-table">
+              <thead><tr><th>Khu vực</th><th>Lý do</th><th>Từ ngày</th><th>Đến ngày</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </div>`;
+
+    } catch (_) {
+      // Fall back to HTML table parsing (EVNNPC)
+      renderPoTable(resultEl, body);
+    }
+  } catch (err) {
+    resultEl.innerHTML = `<div class="po-error">⚠️ Không thể kết nối proxy: ${err.message}</div>`;
+  }
+}

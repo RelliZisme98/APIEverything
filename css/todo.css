@@ -251,3 +251,231 @@
   justify-content: flex-end;
   margin-top: 12px;
 }
+
+/* ── View Tabs ── */
+.todo-view-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 4px 0;
+}
+
+.todo-view-tab {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+}
+
+.todo-view-tab:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+.todo-view-tab.active {
+  background: rgba(96,165,250,0.12);
+  border-color: rgba(96,165,250,0.35);
+  color: var(--accent-blue);
+}
+
+/* ── Stats Bar ── */
+.todo-stats-bar {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.todo-stats-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.todo-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 50px;
+}
+
+.todo-stat-num {
+  font-size: 22px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1;
+}
+
+.todo-stat-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 3px;
+  text-align: center;
+}
+
+.todo-stat--alert .todo-stat-label { color: var(--accent-red); }
+
+.todo-stat-progress {
+  flex: 1;
+  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.todo-stat-progress-bar {
+  height: 6px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.todo-stat-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.todo-stat-pct {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* ── List View ── */
+.todo-list-header {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.todo-count-badge {
+  background: rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 1px 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.todo-list-view {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.todo-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: all 0.18s;
+}
+
+.todo-list-item:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); }
+
+.todo-list-item--done {
+  opacity: 0.55;
+}
+
+.todo-list-item--done .todo-list-title {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.todo-list-item--overdue {
+  border-left: 3px solid rgba(248,113,113,0.5);
+}
+
+.todo-list-left {
+  padding-top: 2px;
+}
+
+.todo-check {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--accent-blue);
+}
+
+.todo-list-body { flex: 1; min-width: 0; }
+
+.todo-list-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  word-break: break-word;
+}
+
+.todo-list-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+
+.todo-list-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.todo-status-sel {
+  font-size: 11px;
+  padding: 2px 6px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+
+.todo-list-delete {
+  flex-shrink: 0;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.todo-empty-view {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+}
+
+/* ── Overdue card highlight ── */
+.todo-card--overdue {
+  border-left: 3px solid rgba(248,113,113,0.5);
+  background: rgba(248,113,113,0.03);
+}
+
+/* ── Form grid ── */
+.todo-form-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+@media (max-width: 768px) {
+  .todo-form-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 500px) {
+  .todo-form-grid { grid-template-columns: 1fr; }
+  .todo-view-tabs { gap: 4px; }
+  .todo-view-tab { font-size: 11px; padding: 5px 10px; }
+}

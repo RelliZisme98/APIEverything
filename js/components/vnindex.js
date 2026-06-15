@@ -29,7 +29,24 @@ export async function renderVNIndex(containerId = 'vnindexContent') {
   el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;">📈 Đang tải dữ liệu chứng khoán...</div>`;
 
   try {
-    const [indices, stocks] = await Promise.all([fetchVNIndex(), fetchTopStocks()]);
+    const [result, stocks] = await Promise.all([fetchVNIndex(), fetchTopStocks()]);
+
+    // ── Market status banner ──
+    const marketStatus = result?.marketStatus ?? 'unknown';
+    let statusBanner = '';
+    const now = new Date();
+    const vnTime = now.toLocaleTimeString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', hour: '2-digit', minute: '2-digit' });
+    const vnDate = now.toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', weekday: 'long', day: '2-digit', month: '2-digit' });
+
+    if (marketStatus === 'open') {
+      statusBanner = `<div class="vni-status-bar vni-status--open">🟢 THỊ TRƯỜNG ĐANG MỞ CỬA · ${vnTime} (giờ VN)</div>`;
+    } else if (marketStatus === 'closed') {
+      statusBanner = `<div class="vni-status-bar vni-status--closed">🔴 ĐÃ ĐÓNG CỬA · ${vnTime} (giờ VN) · Phiên tiếp theo: Ngày làm việc 9:00–11:30 và 13:00–15:00</div>`;
+    } else if (marketStatus === 'weekend') {
+      statusBanner = `<div class="vni-status-bar vni-status--weekend">📅 CUỐI TUẦN · ${vnDate} · Thị trường nghỉ, hiển thị giá đóng cửa cuối tuần trước</div>`;
+    }
+
+    const indices = result?.indices ?? [];
 
     // ── Index cards ──
     let indexSection = '';
@@ -49,7 +66,6 @@ export async function renderVNIndex(containerId = 'vnindexContent') {
         const clr     = isFlat ? '#fbbf24' : isUp ? 'var(--accent-green)' : 'var(--accent-red)';
         const approx  = idx.isBasket ? '<span style="font-size:9px;opacity:0.6;"> ˜ ước tính</span>' : '';
 
-        // Mini range bar (position of price between low-high)
         const range   = high - low;
         const rangePct = range > 0 ? ((price - low) / range * 100).toFixed(0) : 50;
 
@@ -76,11 +92,18 @@ export async function renderVNIndex(containerId = 'vnindexContent') {
             ${vol > 0 ? `<div class="vni-index-vol">Vol: ${(vol/1000000).toFixed(2)}M</div>` : ''}
           </div>`;
       }).join('');
-      indexSection = `<div class="vni-index-grid">${indexCards}</div>`;
+      indexSection = `${statusBanner}<div class="vni-index-grid">${indexCards}</div>`;
     } else {
+      // No index data — show market status instead of error
+      const msgs = {
+        closed:  '🕐 Thị trường đã đóng cửa. Đang hiển thị dữ liệu phiên gần nhất.',
+        weekend: '📅 Cuối tuần — thị trường nghỉ. Số liệu từ phiên đóng cửa thứ Sáu.',
+        unknown: '⏳ Chưa lấy được dữ liệu chỉ số (nguồn dữ liệu tạm thời không khả dụng).',
+      };
       indexSection = `
+        ${statusBanner}
         <div class="vni-disclaimer" style="border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.06);">
-          ⏳ Chưa lấy được chỉ số thị trường (ngoài giờ giao dịch hoặc nguồn dữ liệu tạm thời không khả dụng).
+          ${msgs[marketStatus] ?? msgs.unknown}
         </div>`;
     }
 

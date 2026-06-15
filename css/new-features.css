@@ -118,13 +118,36 @@
 
 /* ── World Clock ── */
 .wc-section-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--text-muted); margin-bottom:12px; }
-.wc-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px; }
-@media(max-width:700px){ .wc-grid { grid-template-columns:repeat(2,1fr); } }
+
+/* Controls bar */
+.wc-controls { display:flex; gap:10px; align-items:center; margin-bottom:14px; flex-wrap:wrap; }
+.wc-add-dropdown {
+  flex:1; min-width:200px; max-width:340px;
+  padding:8px 12px;
+  background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:10px;
+  color:var(--text-primary); font-size:12px; font-family:'Inter',sans-serif; cursor:pointer;
+  transition:border-color .2s;
+}
+.wc-add-dropdown:hover { border-color:rgba(96,165,250,0.4); }
+.wc-add-dropdown:focus { outline:none; border-color:var(--accent-blue); }
+.wc-btn { padding:7px 14px; border-radius:10px; border:1px solid var(--border); background:rgba(255,255,255,0.04); color:var(--text-muted); cursor:pointer; font-size:12px; transition:all .2s; white-space:nowrap; }
+.wc-btn:hover { background:rgba(255,255,255,0.08); color:var(--text-primary); }
+
+/* Clock grid */
+.wc-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px; margin-bottom:20px; }
+@media(max-width:700px){ .wc-grid { grid-template-columns:repeat(3,1fr); } }
 @media(max-width:500px){ .wc-grid { grid-template-columns:1fr 1fr; } }
-.wc-card { background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:12px; padding:14px; text-align:center; }
-.wc-flag { font-size:24px; margin-bottom:4px; }
-.wc-city { font-size:11px; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:.05em; margin-bottom:6px; }
-.wc-time { font-size:20px; font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--text-primary); margin-bottom:2px; }
+
+/* Clock card */
+.wc-card { background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:12px; padding:12px 10px 10px; text-align:center; position:relative; transition:border-color .2s; }
+.wc-card:hover { border-color:rgba(255,255,255,0.12); }
+.wc-card-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px; }
+.wc-flag { font-size:22px; flex:1; text-align:left; }
+.wc-remove-btn { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:14px; padding:0 2px; line-height:1; transition:color .15s; opacity:0.5; }
+.wc-remove-btn:hover { color:#f87171; opacity:1; }
+.wc-city { font-size:11px; color:var(--text-secondary); font-weight:600; margin-bottom:3px; }
+.wc-utc { font-size:9px; color:var(--text-muted); background:rgba(255,255,255,0.06); border-radius:10px; padding:1px 6px; display:inline-block; margin-bottom:6px; font-family:'JetBrains Mono',monospace; }
+.wc-time { font-size:17px; font-weight:800; font-family:'JetBrains Mono',monospace; color:var(--text-primary); margin-bottom:2px; letter-spacing:.03em; }
 .wc-date { font-size:10px; color:var(--text-muted); }
 
 .wc-tools-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
@@ -150,3 +173,99 @@
 .cd-input-date { width:100%; padding:8px 10px; background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:8px; color:var(--text-primary); font-size:12px; box-sizing:border-box; }
 .cd-sep { font-size:22px; font-weight:700; color:var(--text-muted); }
 .cd-done { text-align:center; font-size:24px; font-weight:800; color:#4ade80; padding:10px; animation: pulse 1s infinite; }
+
+/* ── Lottery Mode Tabs ── */
+.lot-mode-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.lot-mode-tab {
+  padding: 8px 18px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.lot-mode-tab:hover { background: rgba(255,255,255,0.06); color: var(--text-primary); }
+.lot-mode-tab.active {
+  background: rgba(248,113,113,0.12);
+  border-color: rgba(248,113,113,0.4);
+  color: #f87171;
+}
+
+/* ── Vietlott result card ── */
+.vl-result-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.vl-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.vl-title { font-size: 15px; font-weight: 800; }
+.vl-date  { font-size: 11px; color: var(--text-muted); }
+
+.vl-balls-wrap {
+  padding: 20px 16px;
+  text-align: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.vl-ball {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  transition: transform 0.2s;
+}
+
+.vl-ball:hover { transform: scale(1.1); }
+
+.vl-ball--power {
+  width: 50px; height: 50px;
+  font-size: 19px;
+  box-shadow: 0 0 16px currentColor;
+}
+
+.vl-jackpot-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.vl-jackpot-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  text-align: center;
+}
+
+.vl-jackpot-label { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+.vl-jackpot-val   { font-size: 16px; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+
+.vl-footer { padding: 12px 16px; text-align: center; border-top: 1px solid var(--border); }

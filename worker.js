@@ -217,35 +217,48 @@ async function handleVNIndex(request) {
 
   // ── INDEX: Yahoo Finance (query2, symbol ^VNINDEX.VN) + VPS basket cho VN30/HNX ──
   if (type === 'index') {
+    // Determine market status (ICT = UTC+7, session 9:00-15:00 Mon-Fri)
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+    const h = now.getHours();
+    const m = now.getMinutes();
+    const dow = now.getDay(); // 0=Sun, 6=Sat
+    const totalMinutes = h * 60 + m;
+    const isWeekday = dow >= 1 && dow <= 5;
+    const isSession1 = totalMinutes >= 9 * 60 && totalMinutes < 11 * 60 + 30; // 9:00-11:30
+    const isSession2 = totalMinutes >= 13 * 60 && totalMinutes < 15 * 60;     // 13:00-15:00
+    const marketOpen = isWeekday && (isSession1 || isSession2);
+    const marketStatus = !isWeekday ? 'weekend' : marketOpen ? 'open' : 'closed';
+
     try {
       const [vnResult, vn30Stocks, hnxStocks, vnidxBasket] = await Promise.allSettled([
-        fetchYahooIndex('%5EVNINDEX.VN', 'VNINDEX'),  // query2 + symbol ^VNINDEX.VN — đã xác nhận hoạt động
+        fetchYahooIndex('%5EVNINDEX.VN', 'VNINDEX'),
         fetchVpsBasket(VN30_BASKET),
         fetchVpsBasket(HNX_BASKET),
-        fetchVpsBasket(VNINDEX_BASKET),             // fallback nếu Yahoo bị block
+        fetchVpsBasket(VNINDEX_BASKET),
       ]);
 
       const indices = [];
 
       // Ưu tiên Yahoo Finance; nếu fail → dùng VPS basket làm proxy VNINDEX
       if (vnResult.status === 'fulfilled' && vnResult.value) {
-        indices.push(vnResult.value);
+        indices.push({ ...vnResult.value, marketStatus });
       } else if (vnidxBasket.status === 'fulfilled') {
         const idx = basketToIndex(vnidxBasket.value, 'VNINDEX', 'VN-Index');
-        if (idx) indices.push(idx);
+        if (idx) indices.push({ ...idx, marketStatus });
       }
 
       if (vn30Stocks.status === 'fulfilled') {
         const idx = basketToIndex(vn30Stocks.value, 'VN30', 'VN30');
-        if (idx) indices.push(idx);
+        if (idx) indices.push({ ...idx, marketStatus });
       }
       if (hnxStocks.status === 'fulfilled') {
         const idx = basketToIndex(hnxStocks.value, 'HNXINDEX', 'HNX-Index');
-        if (idx) indices.push(idx);
+        if (idx) indices.push({ ...idx, marketStatus });
       }
 
-      return new Response(JSON.stringify(indices), {
-        headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=60' },
+      // Always return with market status even if empty
+      return new Response(JSON.stringify({ indices, marketStatus, timestamp: Date.now() }), {
+        headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': `public,max-age=${marketOpen ? 30 : 120}` },
       });
     } catch (err) {
       return cors(JSON.stringify({ error: err.message }), 500);
@@ -277,53 +290,128 @@ async function handlePowerOutage(request) {
   if (request.method === 'OPTIONS') return preflight();
   const url    = new URL(request.url);
   const action = url.searchParams.get('action');
+  const evn    = url.searchParams.get('evn') ?? 'spc'; // spc | hanoi | cpc | npc
 
   const BROWSER_HEADERS = {
     'User-Agent':       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
     'Accept':           'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
     'Accept-Language':  'vi-VN,vi;q=0.9,en-US;q=0.8',
-    'Referer':          'https://cskh.evnspc.vn/TraCuu/LichNgungGiamCungCapDien',
     'X-Requested-With': 'XMLHttpRequest',
   };
 
-  try {
-    let upstreamUrl;
-
-    if (action === 'danhsach') {
-      const maDviCha = url.searchParams.get('pMA_DVICTREN') || '';
-      upstreamUrl = `https://cskh.evnspc.vn/TraCuu/GetDanhMucDienLuc?pMA_DVICTREN=${encodeURIComponent(maDviCha)}`;
-    } else if (action === 'tracuu') {
-      const madvi    = url.searchParams.get('madvi')    || '';
-      const tuNgay   = url.searchParams.get('tuNgay')   || '';
-      const denNgay  = url.searchParams.get('denNgay')  || '';
-      upstreamUrl = `https://cskh.evnspc.vn/TraCuu/GetThongTinLichNgungGiamCungCapDien?madvi=${encodeURIComponent(madvi)}&tuNgay=${encodeURIComponent(tuNgay)}&denNgay=${encodeURIComponent(denNgay)}&ChucNang=MaDonVi`;
-    } else if (action === 'tracuu-makh') {
-      const maKH    = url.searchParams.get('maKH')    || '';
-      const tuNgay  = url.searchParams.get('tuNgay')  || '';
-      const denNgay = url.searchParams.get('denNgay') || '';
-      upstreamUrl = `https://cskh.evnspc.vn/TraCuu/GetThongTinLichNgungGiamCungCapDien?maKH=${encodeURIComponent(maKH)}&tuNgay=${encodeURIComponent(tuNgay)}&denNgay=${encodeURIComponent(denNgay)}&ChucNang=MaKhachHang`;
-    } else {
-      return cors(JSON.stringify({ error: 'Invalid action. Use: danhsach | tracuu | tracuu-makh' }), 400);
+  // ── EVNSPC (Miền Nam) ──────────────────────────────────────────────
+  if (evn === 'spc') {
+    BROWSER_HEADERS['Referer'] = 'https://cskh.evnspc.vn/TraCuu/LichNgungGiamCungCapDien';
+    try {
+      let upstreamUrl;
+      if (action === 'danhsach') {
+        const maDviCha = url.searchParams.get('pMA_DVICTREN') || '';
+        upstreamUrl = `https://cskh.evnspc.vn/TraCuu/GetDanhMucDienLuc?pMA_DVICTREN=${encodeURIComponent(maDviCha)}`;
+      } else if (action === 'tracuu') {
+        const madvi   = url.searchParams.get('madvi')   || '';
+        const tuNgay  = url.searchParams.get('tuNgay')  || '';
+        const denNgay = url.searchParams.get('denNgay') || '';
+        upstreamUrl = `https://cskh.evnspc.vn/TraCuu/GetThongTinLichNgungGiamCungCapDien?madvi=${encodeURIComponent(madvi)}&tuNgay=${encodeURIComponent(tuNgay)}&denNgay=${encodeURIComponent(denNgay)}&ChucNang=MaDonVi`;
+      } else if (action === 'tracuu-makh') {
+        const maKH    = url.searchParams.get('maKH')    || '';
+        const tuNgay  = url.searchParams.get('tuNgay')  || '';
+        const denNgay = url.searchParams.get('denNgay') || '';
+        upstreamUrl = `https://cskh.evnspc.vn/TraCuu/GetThongTinLichNgungGiamCungCapDien?maKH=${encodeURIComponent(maKH)}&tuNgay=${encodeURIComponent(tuNgay)}&denNgay=${encodeURIComponent(denNgay)}&ChucNang=MaKhachHang`;
+      } else {
+        return cors(JSON.stringify({ error: 'Invalid action' }), 400);
+      }
+      const upstream = await fetch(upstreamUrl, { method: 'GET', headers: BROWSER_HEADERS });
+      const html = await upstream.text();
+      return new Response(html, {
+        status: upstream.status,
+        headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=300', ...CORS },
+      });
+    } catch (err) {
+      return cors(JSON.stringify({ error: err.message }), 500);
     }
-
-    const upstream = await fetch(upstreamUrl, {
-      method:  'GET',
-      headers: BROWSER_HEADERS,
-    });
-
-    const html = await upstream.text();
-    return new Response(html, {
-      status:  upstream.status,
-      headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'public, max-age=300',
-        ...CORS,
-      },
-    });
-  } catch (err) {
-    return cors(JSON.stringify({ error: err.message }), 500);
   }
+
+  // ── EVNHANOI (Hà Nội) ──────────────────────────────────────────────
+  if (evn === 'hanoi') {
+    BROWSER_HEADERS['Referer'] = 'https://evnhanoi.vn/';
+    try {
+      let upstreamUrl;
+      if (action === 'tracuu') {
+        // EVNHANOI: /api/power-outage?keyword=...&fromDate=...&toDate=...
+        const keyword = url.searchParams.get('keyword') || '';
+        const fromDate = url.searchParams.get('fromDate') || '';
+        const toDate   = url.searchParams.get('toDate')   || '';
+        upstreamUrl = `https://evnhanoi.vn/api/power-outage/search?keyword=${encodeURIComponent(keyword)}&fromDate=${encodeURIComponent(fromDate)}&toDate=${encodeURIComponent(toDate)}&size=50`;
+      } else if (action === 'tracuu-makh') {
+        const maKH = url.searchParams.get('maKH') || '';
+        upstreamUrl = `https://evnhanoi.vn/api/power-outage/search?keyword=${encodeURIComponent(maKH)}&size=50`;
+      } else {
+        return cors(JSON.stringify({ error: 'Invalid action' }), 400);
+      }
+      const upstream = await fetch(upstreamUrl, { headers: { ...BROWSER_HEADERS, 'Accept': 'application/json' } });
+      const body = await upstream.text();
+      return new Response(body, {
+        status: upstream.status,
+        headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=300', ...CORS },
+      });
+    } catch (err) {
+      return cors(JSON.stringify({ error: err.message }), 500);
+    }
+  }
+
+  // ── EVNCPC (Miền Trung & Tây Nguyên) ──────────────────────────────
+  if (evn === 'cpc') {
+    BROWSER_HEADERS['Referer'] = 'https://cskh.cpc.vn/';
+    try {
+      const keyword  = url.searchParams.get('keyword')  || '';
+      const fromDate = url.searchParams.get('fromDate')  || '';
+      const toDate   = url.searchParams.get('toDate')    || '';
+      const province = url.searchParams.get('province')  || '';
+
+      // CPC has a JSON search API
+      const upstreamUrl = `https://cskh.cpc.vn/api/power-outage/list?province=${encodeURIComponent(province)}&fromDate=${encodeURIComponent(fromDate)}&toDate=${encodeURIComponent(toDate)}&keyword=${encodeURIComponent(keyword)}&pageSize=50&pageIndex=1`;
+
+      const upstream = await fetch(upstreamUrl, { headers: { ...BROWSER_HEADERS, 'Accept': 'application/json' } });
+      const body = await upstream.text();
+      return new Response(body, {
+        status: upstream.status,
+        headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=300', ...CORS },
+      });
+    } catch (err) {
+      return cors(JSON.stringify({ error: err.message }), 500);
+    }
+  }
+
+  // ── EVNNPC (27 tỉnh Miền Bắc) ──────────────────────────────────────
+  if (evn === 'npc') {
+    BROWSER_HEADERS['Referer'] = 'https://cskh.npc.com.vn/';
+    try {
+      const maKH     = url.searchParams.get('maKH')     || '';
+      const fromDate = url.searchParams.get('fromDate')  || '';
+      const toDate   = url.searchParams.get('toDate')    || '';
+      const province = url.searchParams.get('province')  || '';
+
+      let upstreamUrl;
+      if (maKH) {
+        upstreamUrl = `https://cskh.npc.com.vn/TraCuu/GetLichNgungCungCapDienTheoMaKH?maKH=${encodeURIComponent(maKH)}&tuNgay=${encodeURIComponent(fromDate)}&denNgay=${encodeURIComponent(toDate)}`;
+      } else {
+        upstreamUrl = `https://cskh.npc.com.vn/TraCuu/GetLichNgungCungCapDienTheoKhuVuc?tinh=${encodeURIComponent(province)}&tuNgay=${encodeURIComponent(fromDate)}&denNgay=${encodeURIComponent(toDate)}`;
+      }
+
+      const upstream = await fetch(upstreamUrl, { headers: BROWSER_HEADERS });
+      const body = await upstream.text();
+      return new Response(body, {
+        status: upstream.status,
+        headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=300', ...CORS },
+      });
+    } catch (err) {
+      return cors(JSON.stringify({ error: err.message }), 500);
+    }
+  }
+
+  return cors(JSON.stringify({ error: 'Unknown EVN unit. Use: spc | hanoi | cpc | npc' }), 400);
 }
+
 
 // ─── /phat-nguoi ────────────────────────────────────────────────────
 async function handlePhatNguoi(request) {
@@ -450,7 +538,94 @@ async function handleLottery(request) {
   }
 }
 
-// ─── /football ────────────────────────────────────────────────────────
+// ─── /vietlott ────────────────────────────────────────────────────────
+async function handleVietlott(request) {
+  if (request.method === 'OPTIONS') return preflight();
+  const params = new URL(request.url).searchParams;
+  const game   = params.get('game') ?? 'power655';  // power655 | mega645 | max4d | keno
+  const date   = params.get('date') ?? '';           // YYYY-MM-DD
+
+  // Map to Vietlott product IDs
+  const GAME_MAP = {
+    power655: 'XS655', mega645: 'XS645', max4d: 'XS4D', keno: 'KENO',
+  };
+  const product = GAME_MAP[game];
+  if (!product) return cors(JSON.stringify({ error: 'Invalid game' }), 400);
+
+  // Vietlott API (JSON endpoint)
+  const baseUrl = 'https://www.vietlott.vn/ajaxpro/Vietlott.PlugIn.WebParts.GameRandom6x36,Vietlott.PlugIn.ashx';
+  const dateStr = date || new Date().toISOString().split('T')[0];
+
+  // Try the official JSON API first
+  try {
+    const payload = JSON.stringify({ "ngay": dateStr, "product": product });
+    const r = await fetch('https://api.vietlott.vn/api/prize-winning/list', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0',
+        'Referer': 'https://www.vietlott.vn/',
+        'Origin': 'https://www.vietlott.vn',
+      },
+      body: JSON.stringify({ pageIndex: 0, pageSize: 10, product, drawDate: dateStr }),
+      signal: AbortSignal.timeout(8000),
+    });
+
+    if (r.ok) {
+      const data = await r.json();
+      if (data && data.data && data.data.length) {
+        const latest = data.data[0];
+        return new Response(JSON.stringify({
+          game, product,
+          drawDate: latest.drawDate || dateStr,
+          drawCode: latest.drawCode || '',
+          numbers: latest.winningNumbers || latest.numbers || [],
+          jackpot:  latest.jackpot1 || latest.jackpot || 0,
+          nextJackpot: latest.nextJackpot || 0,
+          winners: {
+            jackpot: latest.jackpot1Winners || 0,
+            match5:  latest.match5Winners  || 0,
+            match4:  latest.match4Winners  || 0,
+          }
+        }), {
+          headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=300' },
+        });
+      }
+    }
+  } catch (e) {
+    console.warn('[Vietlott API failed, fallback]', e.message);
+  }
+
+  // Fallback: scrape vietlott.vn HTML
+  try {
+    const scrapUrl = `https://www.vietlott.vn/vi/trung-thuong/ket-qua-trung-thuong/${product.toLowerCase()}?${dateStr ? 'date=' + dateStr : ''}`;
+    const res = await fetch(scrapUrl, {
+      headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://www.vietlott.vn/' }
+    });
+    const html = await res.text();
+
+    // Extract numbers from the result balls
+    const numbersMatch = html.match(/class="box-number"[^>]*>.*?<span[^>]*>(\d+)<\/span>/gi);
+    const numbers = (numbersMatch || []).map(m => {
+      const n = m.match(/>(\d+)</);
+      return n ? parseInt(n[1]) : null;
+    }).filter(Boolean);
+
+    const jackpotMatch = html.match(/Jackpot.*?(\d[\d,.]+)/i);
+    const jackpot = jackpotMatch ? jackpotMatch[1].replace(/[,.]/g, '') : '0';
+
+    return new Response(JSON.stringify({
+      game, product, drawDate: dateStr, numbers,
+      jackpot: parseInt(jackpot) || 0,
+      source: 'scraped'
+    }), {
+      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=300' },
+    });
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
 async function handleFootball(request) {
   if (request.method === 'OPTIONS') return preflight();
   const { searchParams } = new URL(request.url);
@@ -1096,6 +1271,8 @@ export default {
     if (pathname === '/api/tax-lookup') return handleTaxLookup(request);
     if (pathname === '/api/downloader') return handleDownloader(request);
     if (pathname === '/api/movies-now-playing') return handleMoviesNowPlaying(request);
+    if (pathname === '/vietlott')      return handleVietlott(request);
+
 
     // ── Routes bảo mật (key ẩn trong Cloudflare Secrets) ──
     if (pathname === '/weather')       return handleWeather(request, env);

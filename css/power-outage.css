@@ -258,3 +258,73 @@
 
 .po-hotline-num { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: var(--accent-blue); }
 .po-hotline-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* ── Other EVN – Sub-tabs ── */
+.po-evn-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.po-evn-tab {
+  padding: 7px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.po-evn-tab:hover { background: rgba(255,255,255,0.07); color: var(--text-primary); }
+
+.po-evn-tab.active {
+  background: color-mix(in srgb, var(--evn-color, #60a5fa) 15%, transparent);
+  border-color: color-mix(in srgb, var(--evn-color, #60a5fa) 50%, transparent);
+  color: var(--evn-color, #60a5fa);
+}
+
+/* ── EVN Form Container ── */
+.po-evn-form {
+  background: rgba(255,255,255,0.015);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.po-other-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.po-other-result {
+  margin-top: 14px;
+}
+
+.po-other-fallback {
+  margin-top: 14px;
+  padding: 10px 14px;
+  border: 1px solid;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.02);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 11px;
+}

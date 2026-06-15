@@ -1,6 +1,6 @@
 /**
- * components/lottery.js — Kết quả xổ số (XSMB / XSMN / XSMT)
- * Nguồn: Worker /lottery → minhngoc.net.vn (parse server-side, no jQuery)
+ * components/lottery.js — Kết quả xổ số (XSMB / XSMN / XSMT + Vietlott)
+ * Nguồn: Worker /lottery + /vietlott
  */
 
 const LOTTERY_REGIONS = [
@@ -12,15 +12,17 @@ const LOTTERY_REGIONS = [
   { id: 'binh-duong',label: '🏗️ Bình Dương', color: '#fb923c', drawDays: [5] },
 ];
 
-// Special prize label mappings (minhngoc HTML entity cleanup)
-const PRIZE_MAP = {
-  'gi&#7843;i&#273;b': 'Giải ĐB',
-  'gi&#7843;idb': 'Giải ĐB',
-  'gi&#7843;i&#273;&#7863;c bi&#7879;t': 'Giải ĐB',
-};
+const VIETLOTT_GAMES = [
+  { id: 'power655', label: '⚡ Power 6/55', color: '#f43f5e', desc: 'Thứ 3, 5, 7 hàng tuần' },
+  { id: 'mega645', label: '💎 Mega 6/45',  color: '#8b5cf6', desc: 'Thứ 4, 6, CN hàng tuần' },
+  { id: 'max4d',   label: '🎯 Max 4D',     color: '#0ea5e9', desc: 'Thứ 2, 4, 6 hàng tuần' },
+  { id: 'keno',    label: '🎲 Keno',       color: '#10b981', desc: 'Hàng ngày' },
+];
 
 let currentLotteryId   = 'mien-bac';
+let currentLotteryMode = 'traditional'; // 'traditional' | 'vietlott'
 let currentLotteryDate = new Date();
+let currentVietlottGame = 'power655';
 
 function formatDate(d) {
   const dd = String(d.getDate()).padStart(2, '0');
@@ -53,25 +55,51 @@ export function renderLottery(containerId = 'lotteryContent') {
   fetchAndRender();
 
   window.selectLottery = (id) => {
+    currentLotteryMode = 'traditional';
     currentLotteryId = id;
     buildUI(el, containerId);
     fetchAndRender();
   };
+
+  window.selectVietlott = (gameId) => {
+    currentLotteryMode = 'vietlott';
+    currentVietlottGame = gameId;
+    buildUI(el, containerId);
+    fetchVietlott();
+  };
 }
 
+
 function buildUI(el, containerId) {
-  const chips = LOTTERY_REGIONS.map(r => {
-    const active = r.id === currentLotteryId;
+  const tradChips = LOTTERY_REGIONS.map(r => {
+    const active = currentLotteryMode === 'traditional' && r.id === currentLotteryId;
     const clr = r.color;
     return `<button class="lot-chip ${active ? 'active' : ''}"
                     onclick="window.selectLottery('${r.id}')"
                     style="${active ? `border-color:${clr}60;background:${clr}12;color:${clr};` : ''}">${r.label}</button>`;
   }).join('');
 
+  const vietlottChips = VIETLOTT_GAMES.map(g => {
+    const active = currentLotteryMode === 'vietlott' && g.id === currentVietlottGame;
+    const clr = g.color;
+    return `<button class="lot-chip ${active ? 'active' : ''}"
+                    onclick="window.selectVietlott('${g.id}')"
+                    style="${active ? `border-color:${clr}60;background:${clr}12;color:${clr};` : ''}">${g.label}</button>`;
+  }).join('');
+
   const todayStr = toInputDate(new Date());
 
   el.innerHTML = `
-    <div class="lot-chips">${chips}</div>
+    <div class="lot-mode-tabs">
+      <button class="lot-mode-tab ${currentLotteryMode === 'traditional' ? 'active' : ''}" onclick="window.selectLottery('${currentLotteryId}')">🎰 Xổ Số Truyền Thống</button>
+      <button class="lot-mode-tab ${currentLotteryMode === 'vietlott' ? 'active' : ''}" onclick="window.selectVietlott('${currentVietlottGame}')">✨ Vietlott</button>
+    </div>
+
+    <div class="lot-chips" style="margin-top:10px;">
+      ${currentLotteryMode === 'traditional' ? tradChips : vietlottChips}
+    </div>
+
+    ${currentLotteryMode === 'traditional' ? `
     <div class="lot-date-nav">
       <button class="lot-nav-btn" onclick="window.lotNavDate(-1)">◀ Ngày trước</button>
       <div class="lot-date-center">
@@ -82,7 +110,11 @@ function buildUI(el, containerId) {
       </div>
       <button class="lot-nav-btn" id="lotNextBtn" onclick="window.lotNavDate(1)"
               ${isToday(currentLotteryDate) ? 'disabled' : ''}>Ngày sau ▶</button>
-    </div>
+    </div>` : `
+    <div class="lot-vietlott-desc" style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">
+      ${VIETLOTT_GAMES.find(g => g.id === currentVietlottGame)?.desc ?? ''}
+    </div>`}
+
     <div id="lotteryData"><div class="lot-loading">🎱 Đang tải kết quả...</div></div>`;
 
   window.lotNavDate = (delta) => {
@@ -240,4 +272,77 @@ function renderPrizes(el, data, region) {
         </a>
       </div>
     </div>`;
+}
+// ── Vietlott fetch & render ─────────────────────────────────────────
+async function fetchVietlott() {
+  const dataDiv = document.getElementById('lotteryData');
+  if (!dataDiv) return;
+  dataDiv.innerHTML = '<div class="lot-loading">✨ Đang tải kết quả Vietlott...</div>';
+
+  const game = VIETLOTT_GAMES.find(g => g.id === currentVietlottGame) ?? VIETLOTT_GAMES[0];
+
+  try {
+    const res = await fetch(`/vietlott?game=${currentVietlottGame}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    if (data.error) throw new Error(data.error);
+
+    const nums = Array.isArray(data.numbers) ? data.numbers : [];
+    const jackpot = data.jackpot ? Number(data.jackpot).toLocaleString('vi-VN') + ' đ' : '—';
+    const nextJP  = data.nextJackpot ? Number(data.nextJackpot).toLocaleString('vi-VN') + ' đ' : '';
+    const drawCode = data.drawCode ? `Kỳ quay: <strong>#${data.drawCode}</strong> ·` : '';
+
+    const numBalls = nums.map((n, i) => {
+      const isLast = i === nums.length - 1 && (currentVietlottGame === 'power655' || currentVietlottGame === 'mega645');
+      return `<span class="vl-ball ${isLast ? 'vl-ball--power' : ''}" style="background:${isLast ? game.color+'30' : 'rgba(255,255,255,0.08)'};border:2px solid ${isLast ? game.color+'60' : 'rgba(255,255,255,0.1)'};color:${isLast ? game.color : 'var(--text-primary)'};">${String(n).padStart(2,'0')}</span>`;
+    }).join('');
+
+    dataDiv.innerHTML = `
+      <div class="vl-result-card" style="border-color:${game.color}30;background:${game.color}06;">
+        <div class="vl-header">
+          <div class="vl-title" style="color:${game.color};">${game.label}</div>
+          <div class="vl-date">${drawCode} Ngày: ${data.drawDate || 'N/A'}</div>
+        </div>
+
+        <div class="vl-balls-wrap">
+          ${numBalls.length ? numBalls : '<div style="color:var(--text-muted);padding:20px;text-align:center;">Chưa có kết quả hôm nay. Vui lòng thử lại sau khi quay số.</div>'}
+          ${currentVietlottGame !== 'keno' && nums.length > 1 ? `
+          <div style="font-size:11px;color:var(--text-muted);margin-top:8px;text-align:center;">
+            ${currentVietlottGame === 'power655' || currentVietlottGame === 'mega645' ? '⭐ = Số đặc biệt (Power/Mega)' : ''}
+          </div>` : ''}
+        </div>
+
+        <div class="vl-jackpot-row">
+          <div class="vl-jackpot-card">
+            <div class="vl-jackpot-label">💰 Jackpot kỳ này</div>
+            <div class="vl-jackpot-val" style="color:${game.color};">${jackpot}</div>
+          </div>
+          ${nextJP ? `<div class="vl-jackpot-card">
+            <div class="vl-jackpot-label">🚀 Jackpot kỳ sau (ước tính)</div>
+            <div class="vl-jackpot-val">${nextJP}</div>
+          </div>` : ''}
+        </div>
+
+        <div class="vl-footer">
+          <a href="https://www.vietlott.vn" target="_blank" rel="noopener" class="lot-link">🔗 Vietlott chính thức</a>
+        </div>
+      </div>`;
+  } catch (err) {
+    dataDiv.innerHTML = `
+      <div class="vl-result-card" style="border-color:rgba(251,191,36,0.3);">
+        <div style="text-align:center;padding:20px;">
+          <div style="font-size:28px;margin-bottom:10px;">⏳</div>
+          <div style="font-weight:700;color:var(--text-primary);">Chưa có kết quả</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:6px;">
+            ${err.message.includes('404') || err.message.includes('not found') 
+              ? 'Hôm nay chưa có kỳ quay hoặc kết quả chưa được công bố.' 
+              : 'Không thể kết nối tới máy chủ Vietlott. Vui lòng thử lại sau.'}
+          </div>
+          <a href="https://www.vietlott.vn" target="_blank" rel="noopener" class="lot-link" style="display:inline-block;margin-top:14px;">
+            🔗 Xem tại Vietlott.vn
+          </a>
+        </div>
+      </div>`;
+  }
 }
