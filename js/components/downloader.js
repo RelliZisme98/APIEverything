@@ -263,7 +263,6 @@ async function fetchMediaDownload(url) {
 
     if (response.ok) {
       const data = await response.json();
-
       // Support Cobalt v10 Picker/Slideshow (e.g., Instagram carousels)
       if (data.status === 'picker' && Array.isArray(data.picker)) {
         let pickerHtml = '';
@@ -336,9 +335,35 @@ async function fetchMediaDownload(url) {
         window._dlBlob = blobDownload;
         return;
       }
+      throw new Error('Định dạng phản hồi không hợp lệ hoặc không có dữ liệu tải.');
+    } else {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error || `Lỗi từ máy chủ tải xuống (${response.status})`);
     }
   } catch (err) {
     console.warn('[Worker Downloader API failed]', err);
+    resultDiv.innerHTML = `
+      <div class="dl-result-card" style="border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.03);">
+        <div style="font-size: 32px; padding: 20px;">❌</div>
+        <div class="dl-info">
+          <div>
+            <div class="dl-title" style="color: var(--accent-red); font-weight:700;">Không thể tự động giải mã liên kết</div>
+            <div class="dl-author" style="font-size:12px; opacity:0.8; margin-bottom:10px;">${err.message || 'Tất cả các máy chủ tải xuống đều bận.'}</div>
+          </div>
+          <div class="dl-buttons" style="display:flex; gap:8px; flex-wrap:wrap; width:100%;">
+            <a class="dl-btn dl-btn--fallback" href="https://y2mate.is/analyze?url=${cleanUrl}" target="_blank" style="text-decoration:none; padding:10px 14px; font-size:13px;">
+              📺 Tải qua Y2Mate
+            </a>
+            <a class="dl-btn dl-btn--fallback" href="https://9xbuddy.xyz/process?url=${cleanUrl}" target="_blank" style="text-decoration:none; padding:10px 14px; font-size:13px;">
+              🚀 Tải qua 9XBuddy
+            </a>
+            <a class="dl-btn dl-btn--fallback" href="https://savefrom.net/?url=${cleanUrl}" target="_blank" style="text-decoration:none; padding:10px 14px; font-size:13px;">
+              🌐 Tải qua SaveFrom
+            </a>
+          </div>
+        </div>
+      </div>
+    `;
   }
 }
 

@@ -6,7 +6,7 @@
 
 import { CONFIG, state } from '../store/state.js';
 
-const BASE_URL = 'https://api.coingecko.com/api/v3';
+const BASE_URL = '/api/crypto';
 
 /**
  * Fetch market data for the configured coin list.
@@ -15,8 +15,9 @@ const BASE_URL = 'https://api.coingecko.com/api/v3';
 export async function fetchCryptoMarkets() {
   const ids = CONFIG.cryptoIds.join(',');
   const url =
-    `${BASE_URL}/coins/markets` +
-    `?vs_currency=usd` +
+    `${BASE_URL}` +
+    `?path=coins/markets` +
+    `&vs_currency=usd` +
     `&ids=${ids}` +
     `&order=market_cap_desc` +
     `&per_page=15&page=1` +
@@ -36,7 +37,7 @@ export async function fetchCryptoMarkets() {
  * @returns {Promise<Object>}
  */
 export async function fetchGlobalStats() {
-  const res = await fetch(`${BASE_URL}/global`);
+  const res = await fetch(`${BASE_URL}?path=global`);
   if (!res.ok) throw new Error(`CoinGecko global HTTP ${res.status}`);
   const json = await res.json();
   return json.data;

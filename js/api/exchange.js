@@ -9,8 +9,8 @@
 
 import { CONFIG, state } from '../store/state.js';
 
-const FRANKFURTER_URL = 'https://api.frankfurter.app';
-const OPENEX_URL      = 'https://open.er-api.com/v6/latest/USD'; // free, ~1500 currencies
+const FRANKFURTER_URL = '/api/exchange';
+const OPENEX_URL      = '/api/exchange?from=USD'; // proxied to open.er-api.com
 
 /** Metadata for each currency: flag emoji + full name */
 export const FX_META = {
@@ -73,7 +73,7 @@ async function _fetchFxRates() {
   // ── Strategy 1: Frankfurter (ECB) ──
   try {
     const res = await fetch(
-      `${FRANKFURTER_URL}/latest?from=USD&to=${symbols}`,
+      `${FRANKFURTER_URL}?from=USD&to=${symbols}`,
       { signal: AbortSignal.timeout(7000) }
     );
 

@@ -142,7 +142,7 @@ async function fetchYahooIndex(yfSym, symName) {
         'Accept': 'application/json',
         'Accept-Language': 'en-US,en;q=0.9',
       },
-      signal: AbortSignal.timeout(6000),
+      signal: AbortSignal.timeout(4000),
     }
   );
   if (!res.ok) return null;
@@ -173,7 +173,7 @@ async function fetchVpsBasket(symbols) {
       'Origin': 'https://banggia.vps.com.vn',
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
     },
-    signal: AbortSignal.timeout(8000),
+    signal: AbortSignal.timeout(4000),
   });
   if (!res.ok) throw new Error(`VPS HTTP ${res.status}`);
   return await res.json(); // array of stocks
@@ -1245,7 +1245,7 @@ async function handleDownloader(request) {
             filenamePattern: 'basic',
             alwaysProxy: true
           }),
-          signal: AbortSignal.timeout(6000)
+          signal: AbortSignal.timeout(15000)
         });
 
         if (res.ok) {
@@ -1338,6 +1338,78 @@ async function handleDownloadProxy(request) {
   }
 }
 
+// ─── /api/exchange (Exchange Rate Proxy) ─────────────────────────────
+async function handleExchange(request) {
+  if (request.method === 'OPTIONS') return preflight();
+  const urlParams = new URL(request.url).searchParams;
+  const from = urlParams.get('from') || 'USD';
+  const to = urlParams.get('to');
+
+  // Try Frankfurter
+  try {
+    const targetUrl = to 
+      ? `https://api.frankfurter.app/latest?from=${from}&to=${to}`
+      : `https://api.frankfurter.app/latest?from=${from}`;
+    const res = await fetch(targetUrl, {
+      signal: AbortSignal.timeout(6000),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return cors(JSON.stringify(data));
+    }
+  } catch (err) {
+    console.warn('Worker Frankfurter failed:', err.message);
+  }
+
+  // Fallback to open.er-api
+  try {
+    const res = await fetch(`https://open.er-api.com/v6/latest/${from}`, {
+      signal: AbortSignal.timeout(6000),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const normalizedData = {
+        amount: 1.0,
+        base: data.base_code || 'USD',
+        date: data.time_last_update_utc ? new Date(data.time_last_update_utc).toISOString().split('T')[0] : '',
+        rates: data.rates || {}
+      };
+      return cors(JSON.stringify(normalizedData));
+    }
+  } catch (err) {
+    console.warn('Worker OpenEx fallback failed:', err.message);
+  }
+
+  return cors(JSON.stringify({ error: 'Failed to fetch exchange rates' }), 502);
+}
+
+// ─── /api/crypto (CoinGecko Proxy) ──────────────────────────────────
+async function handleCrypto(request) {
+  if (request.method === 'OPTIONS') return preflight();
+  const { search } = new URL(request.url);
+  const targetPath = new URL(request.url).searchParams.get('path') || 'coins/markets';
+
+  // Build the target URL
+  const targetUrl = `https://api.coingecko.com/api/v3/${targetPath}${search}`;
+
+  try {
+    const res = await fetch(targetUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0',
+        'Accept': 'application/json',
+      },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return cors(JSON.stringify(data));
+    }
+    return cors(JSON.stringify({ error: `CoinGecko returned status ${res.status}` }), res.status);
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
 
 export default {
   async fetch(request, env) {
@@ -1357,6 +1429,8 @@ export default {
     if (pathname === '/api/downloader')         return handleDownloader(request);
     if (pathname === '/api/download-proxy')      return handleDownloadProxy(request);
     if (pathname === '/api/movies-now-playing') return handleMoviesNowPlaying(request);
+    if (pathname === '/api/exchange')            return handleExchange(request);
+    if (pathname === '/api/crypto')              return handleCrypto(request);
     if (pathname === '/vietlott')      return handleVietlott(request);
 
 

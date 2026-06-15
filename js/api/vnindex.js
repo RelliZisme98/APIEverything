@@ -11,7 +11,7 @@ const PROXY = (APP_CONFIG.TRAFFIC_PROXY_URL || 'https://everything.rellia.org') 
 /** Fetch market indices. Requires Cloudflare proxy to be deployed. */
 export async function fetchVNIndex() {
   try {
-    const res = await fetch(`${PROXY}?type=index`, { signal: AbortSignal.timeout(8000) });
+    const res = await fetch(`${PROXY}?type=index`, { signal: AbortSignal.timeout(12000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     // Handle new wrapper format { indices, marketStatus, timestamp }
