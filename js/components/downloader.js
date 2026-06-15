@@ -176,6 +176,8 @@ export function renderDownloader() {
 }
 
 async function fetchMediaDownload(url) {
+  const resultDiv = document.getElementById('dlResultContainer');
+  if (!resultDiv) return;
 
   const cleanUrl = encodeURIComponent(url);
   const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
