@@ -210,14 +210,20 @@ async function fetchMediaDownload(url) {
                 <div class="dl-title">${d.title || 'Video TikTok'}</div>
                 <div class="dl-author">👤 Kênh: @${d.author?.unique_id} (${d.author?.nickname})</div>
               </div>
-              <div class="dl-buttons">
+              <div class="dl-buttons" style="display:flex;gap:8px;flex-wrap:wrap;">
                 <button class="dl-btn dl-btn--video" onclick="window._dlBlob('${d.play}','${videoFilename}')">
-                  📥 Tải Video (Không Logo)
+                  📥 Tải Video (Proxy)
                 </button>
+                <a class="dl-btn dl-btn--fallback" href="${d.play}" download="${videoFilename}" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;padding:10px 14px;font-size:13px;white-space:nowrap;">
+                  🌐 Tải trực tiếp
+                </a>
                 ${d.music ? `
                   <button class="dl-btn dl-btn--audio" onclick="window._dlBlob('${d.music}','${audioFilename}')">
-                    🎵 Tải Nhạc Nền (MP3)
+                    🎵 Tải Nhạc (Proxy)
                   </button>
+                  <a class="dl-btn dl-btn--fallback" href="${d.music}" download="${audioFilename}" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;padding:10px 14px;font-size:13px;white-space:nowrap;">
+                    🎵 Nhạc trực tiếp
+                  </a>
                 ` : ''}
               </div>
             </div>
@@ -262,9 +268,14 @@ async function fetchMediaDownload(url) {
             const btnClass = item.type === 'audio' ? 'dl-btn dl-btn--audio' : 'dl-btn dl-btn--video';
             const filename = `media_${idx + 1}.${ext}`;
             pickerHtml += `
-              <button class="${btnClass}" onclick="window._dlBlob('${item.url}','${filename}')" style="margin-top:5px;font-size:12px;padding:6px 12px;">
-                📥 Tải ${typeLabel} ${idx + 1}
-              </button>
+              <div style="display:flex;gap:6px;align-items:center;margin-top:5px;width:100%;flex-wrap:wrap;">
+                <button class="${btnClass}" onclick="window._dlBlob('${item.url}','${filename}')" style="font-size:11px;padding:6px 12px;white-space:nowrap;">
+                  📥 Tải ${typeLabel} ${idx + 1} (Proxy)
+                </button>
+                <a class="dl-btn dl-btn--fallback" href="${item.url}" download="${filename}" target="_blank" style="font-size:11px;padding:6px 12px;text-decoration:none;display:inline-flex;align-items:center;white-space:nowrap;">
+                  🌐 Tải trực tiếp
+                </a>
+              </div>
             `;
           });
 
@@ -299,10 +310,13 @@ async function fetchMediaDownload(url) {
                   <div class="dl-title">${title}</div>
                   <div class="dl-author" style="font-size:12px;opacity:0.7;">📄 ${filename}</div>
                 </div>
-                <div class="dl-buttons">
-                  <button class="dl-btn dl-btn--video" id="btnStartDownload">
-                    📥 Bắt đầu tải xuống
+                <div class="dl-buttons" style="display:flex;gap:8px;flex-wrap:wrap;width:100%;">
+                  <button class="dl-btn dl-btn--video" id="btnStartDownload" style="white-space:nowrap;">
+                    📥 Tải qua Máy chủ (Proxy)
                   </button>
+                  <a class="dl-btn dl-btn--fallback" href="${downloadUrl}" download="${filename}" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;font-size:13px;white-space:nowrap;">
+                    🌐 Tải trực tiếp (Trình duyệt)
+                  </a>
                 </div>
               </div>
             </div>
