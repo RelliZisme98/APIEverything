@@ -164,8 +164,7 @@ export function renderDownloader() {
 
   btn.addEventListener('click', () => {
     const url = input.value.trim();
-    if (!url) return;
-    fetchMediaDownload(url);
+    if (url) fetchMediaDownload(url);
   });
 
   input.addEventListener('keypress', (e) => {
@@ -176,20 +175,32 @@ export function renderDownloader() {
   });
 }
 
-
 async function fetchMediaDownload(url) {
-  const resultDiv = document.getElementById('dlResultContainer');
-  if (!resultDiv) return;
 
+  const cleanUrl = encodeURIComponent(url);
+  const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+
+  // Display loading screen with IMMEDIATE fallback links
   resultDiv.innerHTML = `
-    <div style="text-align: center; padding: 30px;">
-      <span class="status-dot dot-yellow"></span> Đang phân tích liên kết &amp; lấy link tải...
+    <div style="text-align: center; padding: 24px; border: 1px dashed rgba(255,255,255,0.1); border-radius: 12px; background: rgba(255,255,255,0.01);">
+      <div style="margin-bottom:12px;">
+        <span class="status-dot dot-yellow" style="display:inline-block;animation: pulse 1s infinite alternate;"></span>
+        <span style="font-weight:700;color:var(--text-secondary);">Đang phân tích liên kết &amp; lấy link tải...</span>
+      </div>
+      <div style="font-size:11px; color:var(--text-muted); line-height:1.4;">
+        Hệ thống đang gọi server giải mã (khoảng 3-6s).<br>
+        Nếu đợi lâu, bạn có thể click tải trực tiếp qua các cổng phụ nhanh dưới đây:
+      </div>
+      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:12px;">
+        <a class="dl-btn dl-btn--fallback" href="https://y2mate.is/analyze?url=${cleanUrl}" target="_blank" style="padding:6px 12px;font-size:11px;text-decoration:none;">📺 Y2Mate</a>
+        <a class="dl-btn dl-btn--fallback" href="https://9xbuddy.xyz/process?url=${cleanUrl}" target="_blank" style="padding:6px 12px;font-size:11px;text-decoration:none;">🚀 9XBuddy</a>
+        <a class="dl-btn dl-btn--fallback" href="https://savefrom.net/?url=${cleanUrl}" target="_blank" style="padding:6px 12px;font-size:11px;text-decoration:none;">🌐 SaveFrom</a>
+      </div>
     </div>
   `;
 
   // Detect platform
   const isTikTok = url.includes('tiktok.com');
-  const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
 
   if (isTikTok) {
     try {
@@ -238,132 +249,95 @@ async function fetchMediaDownload(url) {
     }
   }
 
-  // Generic/YouTube/Fallback Downloader using Cobalt API directly from browser
-  // (bypasses CF Worker datacenter IP block — uses user's home/4G IP)
-  const cobaltInstances = [
-    'https://api.cobalt.blackcat.sweeux.org',
-    'https://rue-cobalt.xenon.zone'
-  ];
+  // Call our own CF Worker proxy to process Cobalt request (handles Turnstile/CORS securely)
+  try {
+    const response = await fetch('/api/downloader', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ url })
+    });
 
-  for (const instance of cobaltInstances) {
-    try {
-      const response = await fetch(instance, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ url })
-      });
+    if (response.ok) {
+      const data = await response.json();
 
-      if (response.ok) {
-        const data = await response.json();
+      // Support Cobalt v10 Picker/Slideshow (e.g., Instagram carousels)
+      if (data.status === 'picker' && Array.isArray(data.picker)) {
+        let pickerHtml = '';
+        data.picker.forEach((item, idx) => {
+          const ext = item.type === 'photo' ? 'jpg' : item.type === 'audio' ? 'mp3' : 'mp4';
+          const typeLabel = item.type === 'photo' ? 'Ảnh' : item.type === 'audio' ? 'Âm thanh' : 'Video';
+          const btnClass = item.type === 'audio' ? 'dl-btn dl-btn--audio' : 'dl-btn dl-btn--video';
+          const filename = `media_${idx + 1}.${ext}`;
+          pickerHtml += `
+            <div style="display:flex;gap:6px;align-items:center;margin-top:5px;width:100%;flex-wrap:wrap;">
+              <button class="${btnClass}" onclick="window._dlBlob('${item.url}','${filename}')" style="font-size:11px;padding:6px 12px;white-space:nowrap;">
+                📥 Tải ${typeLabel} ${idx + 1} (Proxy)
+              </button>
+              <a class="dl-btn dl-btn--fallback" href="${item.url}" download="${filename}" target="_blank" style="font-size:11px;padding:6px 12px;text-decoration:none;display:inline-flex;align-items:center;white-space:nowrap;">
+                🌐 Tải trực tiếp
+              </a>
+            </div>
+          `;
+        });
 
-        // Support Cobalt v10 Picker/Slideshow (e.g., Instagram carousels)
-        if (data.status === 'picker' && Array.isArray(data.picker)) {
-          let pickerHtml = '';
-          data.picker.forEach((item, idx) => {
-            const ext = item.type === 'photo' ? 'jpg' : item.type === 'audio' ? 'mp3' : 'mp4';
-            const typeLabel = item.type === 'photo' ? 'Ảnh' : item.type === 'audio' ? 'Âm thanh' : 'Video';
-            const btnClass = item.type === 'audio' ? 'dl-btn dl-btn--audio' : 'dl-btn dl-btn--video';
-            const filename = `media_${idx + 1}.${ext}`;
-            pickerHtml += `
-              <div style="display:flex;gap:6px;align-items:center;margin-top:5px;width:100%;flex-wrap:wrap;">
-                <button class="${btnClass}" onclick="window._dlBlob('${item.url}','${filename}')" style="font-size:11px;padding:6px 12px;white-space:nowrap;">
-                  📥 Tải ${typeLabel} ${idx + 1} (Proxy)
+        resultDiv.innerHTML = `
+          <div class="dl-result-card">
+            <div style="font-size: 32px; padding: 20px;">📦</div>
+            <div class="dl-info">
+              <div>
+                <div class="dl-title">${isYouTube ? 'YouTube Playlist / Album' : 'Danh sách tệp phương tiện'}</div>
+                <div class="dl-author">Đã trích xuất danh sách liên kết thành công.</div>
+              </div>
+              <div class="dl-buttons" style="flex-wrap: wrap; gap: 8px;">
+                ${pickerHtml}
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      if (data.status === 'stream' || data.status === 'redirect' || data.status === 'tunnel' || data.url) {
+        const downloadUrl = data.url;
+        // Use filename from Cobalt if provided, otherwise guess from URL
+        const filename = data.filename || (isYouTube ? 'youtube_video.mp4' : 'media_download.mp4');
+        const title = data.filename ? data.filename.replace(/\s*\(.*?\)\s*/g, ' ').trim() : (isYouTube ? 'YouTube Video' : 'Video Phương Tiện');
+
+        resultDiv.innerHTML = `
+          <div class="dl-result-card">
+            <div style="font-size: 32px; padding: 20px;">📦</div>
+            <div class="dl-info">
+              <div>
+                <div class="dl-title">${title}</div>
+                <div class="dl-author" style="font-size:12px;opacity:0.7;">📄 ${filename}</div>
+              </div>
+              <div class="dl-buttons" style="display:flex;gap:8px;flex-wrap:wrap;width:100%;">
+                <button class="dl-btn dl-btn--video" id="btnStartDownload" style="white-space:nowrap;">
+                  📥 Tải qua Máy chủ (Proxy)
                 </button>
-                <a class="dl-btn dl-btn--fallback" href="${item.url}" download="${filename}" target="_blank" style="font-size:11px;padding:6px 12px;text-decoration:none;display:inline-flex;align-items:center;white-space:nowrap;">
-                  🌐 Tải trực tiếp
+                <a class="dl-btn dl-btn--fallback" href="${downloadUrl}" download="${filename}" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;font-size:13px;white-space:nowrap;">
+                  🌐 Tải trực tiếp (Trình duyệt)
                 </a>
               </div>
-            `;
-          });
-
-          resultDiv.innerHTML = `
-            <div class="dl-result-card">
-              <div style="font-size: 32px; padding: 20px;">📦</div>
-              <div class="dl-info">
-                <div>
-                  <div class="dl-title">${isYouTube ? 'YouTube Playlist / Album' : 'Danh sách tệp phương tiện'}</div>
-                  <div class="dl-author">Đã trích xuất danh sách liên kết thành công.</div>
-                </div>
-                <div class="dl-buttons" style="flex-wrap: wrap; gap: 8px;">
-                  ${pickerHtml}
-                </div>
-              </div>
             </div>
-          `;
-          return;
-        }
+          </div>
+        `;
 
-        if (data.status === 'stream' || data.status === 'redirect' || data.status === 'tunnel' || data.url) {
-          const downloadUrl = data.url;
-          // Use filename from Cobalt if provided, otherwise guess from URL
-          const filename = data.filename || (isYouTube ? 'youtube_video.mp4' : 'media_download.mp4');
-          const title = data.filename ? data.filename.replace(/\s*\(.*?\)\s*/g, ' ').trim() : (isYouTube ? 'YouTube Video' : 'Video Phương Tiện');
+        // Store data for button
+        document.getElementById('btnStartDownload').addEventListener('click', () => {
+          blobDownload(downloadUrl, filename);
+        });
 
-          resultDiv.innerHTML = `
-            <div class="dl-result-card">
-              <div style="font-size: 32px; padding: 20px;">📦</div>
-              <div class="dl-info">
-                <div>
-                  <div class="dl-title">${title}</div>
-                  <div class="dl-author" style="font-size:12px;opacity:0.7;">📄 ${filename}</div>
-                </div>
-                <div class="dl-buttons" style="display:flex;gap:8px;flex-wrap:wrap;width:100%;">
-                  <button class="dl-btn dl-btn--video" id="btnStartDownload" style="white-space:nowrap;">
-                    📥 Tải qua Máy chủ (Proxy)
-                  </button>
-                  <a class="dl-btn dl-btn--fallback" href="${downloadUrl}" download="${filename}" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;font-size:13px;white-space:nowrap;">
-                    🌐 Tải trực tiếp (Trình duyệt)
-                  </a>
-                </div>
-              </div>
-            </div>
-          `;
-
-          // Store data for button
-          document.getElementById('btnStartDownload').addEventListener('click', () => {
-            blobDownload(downloadUrl, filename);
-          });
-
-          // Register global helper for picker buttons
-          window._dlBlob = blobDownload;
-
-          return;
-        }
+        // Register global helper for picker buttons
+        window._dlBlob = blobDownload;
+        return;
       }
-    } catch (err) {
-      console.warn(`[Cobalt instance ${instance} failed]`, err);
     }
+  } catch (err) {
+    console.warn('[Worker Downloader API failed]', err);
   }
-
-  // Fallback helper links if both APIs fail
-  const cleanUrl = encodeURIComponent(url);
-  resultDiv.innerHTML = `
-    <div class="dl-result-card" style="border-color: rgba(251,191,36,0.3); background: rgba(251,191,36,0.03);">
-      <div style="font-size: 32px; padding: 20px;">⚠️</div>
-      <div class="dl-info">
-        <div>
-          <div class="dl-title" style="color: var(--accent-yellow);">Máy chủ bận / Định dạng cần chuyển hướng</div>
-          <div class="dl-author">Không thể tự động giải mã link trực tiếp. Bạn có thể sử dụng các cổng tải chất lượng cao miễn phí sau:</div>
-        </div>
-        <div class="dl-buttons">
-          <a class="dl-btn dl-btn--fallback" href="https://9xbuddy.xyz/process?url=${cleanUrl}" target="_blank">
-            🚀 Tải qua 9XBuddy
-          </a>
-          <a class="dl-btn dl-btn--fallback" href="https://savefrom.net/?url=${cleanUrl}" target="_blank">
-            🌐 Tải qua SaveFrom
-          </a>
-          ${isYouTube ? `
-            <a class="dl-btn dl-btn--fallback" href="https://y2mate.is/analyze?url=${cleanUrl}" target="_blank">
-              📺 Tải qua Y2Mate
-            </a>
-          ` : ''}
-        </div>
-      </div>
-    </div>
-  `;
 }
 
 // Register global helper so inline onclick handlers in picker work

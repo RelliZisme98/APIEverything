@@ -1228,6 +1228,7 @@ async function handleDownloader(request) {
 
     const cobaltInstances = [
       'https://api.cobalt.blackcat.sweeux.org',
+      'https://cobalt.k6.cz',
       'https://rue-cobalt.xenon.zone'
     ];
 
@@ -1241,7 +1242,8 @@ async function handleDownloader(request) {
           },
           body: JSON.stringify({
             url: url,
-            filenamePattern: 'basic'
+            filenamePattern: 'basic',
+            alwaysProxy: true
           }),
           signal: AbortSignal.timeout(6000)
         });
@@ -1258,7 +1260,7 @@ async function handleDownloader(request) {
       }
     }
 
-    return cors(JSON.stringify({ error: 'Tất cả các máy chủ tải xuống đều bận, vui lòng thử lại sau.' }), 502);
+    return cors(JSON.stringify({ error: 'Tất cả các máy chủ tải xuống đều bận hoặc không hỗ trợ định dạng này. Vui lòng thử các cổng tải trực tiếp.' }), 502);
   } catch (err) {
     return cors(JSON.stringify({ error: err.message }), 500);
   }
