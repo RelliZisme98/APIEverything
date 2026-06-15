@@ -644,17 +644,25 @@ async function handleFootball(request) {
   const type   = searchParams.get('type')   ?? 'scoreboard';
   const id     = searchParams.get('id')     ?? '';
 
+  const forwardParams = new URLSearchParams();
+  for (const [key, value] of searchParams.entries()) {
+    if (key !== 'league' && key !== 'type' && key !== 'id') {
+      forwardParams.append(key, value);
+    }
+  }
+  const suffix = forwardParams.toString();
+
   let url;
   if (type === 'table') {
-    url = `https://site.api.espn.com/apis/v2/sports/soccer/${league}/standings`;
+    url = `https://site.api.espn.com/apis/v2/sports/soccer/${league}/standings` + (suffix ? `?${suffix}` : '');
   } else if (type === 'scoreboard') {
-    url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/scoreboard`;
+    url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/scoreboard` + (suffix ? `?${suffix}` : '');
   } else if (type === 'summary') {
-    url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/summary?event=${id}`;
+    url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/summary?event=${id}` + (suffix ? `&${suffix}` : '');
   } else if (type === 'team') {
-    url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/teams/${id}`;
+    url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/teams/${id}` + (suffix ? `?${suffix}` : '');
   } else if (type === 'team-schedule') {
-    url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/teams/${id}/schedule`;
+    url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/teams/${id}/schedule` + (suffix ? `?${suffix}` : '');
   } else {
     return cors(JSON.stringify({ error: 'unknown type' }), 400);
   }
