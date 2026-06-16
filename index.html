@@ -85,9 +85,9 @@
           <span class="nav-label">Giá Vàng</span>
           <span class="nav-badge">LIVE</span>
         </button>
-        <button class="sidebar-nav-item" data-section="exchange" onclick="switchSection('exchange')">
+        <button class="sidebar-nav-item active" data-section="exchange" onclick="switchSection('exchange')">
           <span class="nav-icon">💱</span>
-          <span class="nav-label">Tỷ Giá Ngoại Tệ</span>
+          <span class="nav-label">Tỷ Giá & Quy Đổi</span>
           <span class="nav-badge">LIVE</span>
         </button>
         <button class="sidebar-nav-item" data-section="gas" onclick="switchSection('gas')">
@@ -144,11 +144,7 @@
 
         <!-- Nav: Công cụ -->
         <div class="sidebar-section-label" style="padding-left:0;margin-top:6px;">🔧 Công cụ</div>
-        <button class="sidebar-nav-item" data-section="bank-rates" onclick="switchSection('bank-rates')">
-          <span class="nav-icon">🏦</span>
-          <span class="nav-label">Tỷ Giá Ngân Hàng</span>
-          <span class="nav-badge">VCB</span>
-        </button>
+
 
         <button class="sidebar-nav-item" data-section="tax-calc" onclick="switchSection('tax-calc')">
           <span class="nav-icon">🧮</span>
@@ -306,37 +302,59 @@
 
       <!-- ════════ SECTION: EXCHANGE ════════ -->
       <section class="content-section" id="section-exchange">
-        <div class="page-title"><span class="page-icon">💱</span> Tỷ Giá Ngoại Tệ</div>
+        <div class="page-title"><span class="page-icon">💱</span> Tỷ Giá &amp; Quy Đổi</div>
         <div class="row-2" style="margin-bottom:20px;">
+          
+          <!-- Card 1: Bảng Tỷ Giá (Vietcombank & Quốc Tế) -->
           <div class="card">
-            <div class="card-header">
-              <div class="card-title"><span class="icon">💱</span> Tỷ Giá → VND</div>
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <div class="card-title" style="display: flex; align-items: center; gap: 8px;">
+                <span class="icon">💱</span>
+                <div class="fx-tabs">
+                  <button class="fx-tab-btn active" onclick="switchFxTab('vcb')" id="fxTab-vcb">Vietcombank</button>
+                  <button class="fx-tab-btn" onclick="switchFxTab('intl')" id="fxTab-intl">Quốc Tế</button>
+                </div>
+              </div>
               <span class="card-badge badge-live"><span class="status-dot dot-green"></span>LIVE</span>
             </div>
-            <table class="fx-table">
-              <tbody id="fxBody">
-                <tr>
-                  <td colspan="3">
-                    <div class="skeleton skel-line"></div>
-                  </td>
-                </tr>
-                <tr>
-                  <td colspan="3">
-                    <div class="skeleton skel-line"></div>
-                  </td>
-                </tr>
-                <tr>
-                  <td colspan="3">
-                    <div class="skeleton skel-line"></div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="api-note" style="margin-top:10px;">
-              <small id="fxSourceNote">Nguồn: Frankfurter (ECB) / ExchangeRate API · Tỷ giá có thể chênh lệch với ngân
-                hàng thương mại</small>
+
+            <!-- Tab content VCB -->
+            <div class="fx-tab-content active" id="fxContent-vcb" style="margin-top: 10px;">
+              <div id="bankRatesContent">
+                <div class="skeleton skel-line"></div>
+                <div class="skeleton skel-line"></div>
+                <div class="skeleton skel-line"></div>
+              </div>
+            </div>
+
+            <!-- Tab content Quốc Tế -->
+            <div class="fx-tab-content" id="fxContent-intl" style="margin-top: 10px;">
+              <table class="fx-table">
+                <tbody id="fxBody">
+                  <tr>
+                    <td colspan="3">
+                      <div class="skeleton skel-line"></div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colspan="3">
+                      <div class="skeleton skel-line"></div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colspan="3">
+                      <div class="skeleton skel-line"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="api-note" style="margin-top:10px;">
+                <small id="fxSourceNote">Nguồn: Frankfurter (ECB) / ExchangeRate API · Tỷ giá tham chiếu</small>
+              </div>
             </div>
           </div>
+
+          <!-- Card 2: Quy Đổi -->
           <div class="card">
             <div class="card-header">
               <div class="card-title"><span class="icon">🧮</span> Công Cụ Quy Đổi Tỷ Giá</div>
@@ -370,6 +388,7 @@
               </div>
             </div>
           </div>
+
         </div>
       </section>
 
@@ -493,17 +512,7 @@
         </div>
       </section>
 
-      <!-- ════════ SECTION: BANK RATES ════════ -->
-      <section class="content-section" id="section-bank-rates">
-        <div class="page-title"><span class="page-icon">🏦</span> Tỷ Giá Ngân Hàng</div>
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title"><span class="icon">🏦</span> Tỷ Giá Vietcombank (VCB)</div>
-            <span class="card-badge badge-live"><span class="status-dot dot-green"></span>LIVE</span>
-          </div>
-          <div id="bankRatesContent"></div>
-        </div>
-      </section>
+
 
 
 
@@ -682,6 +691,17 @@
       document.getElementById('sidebar').classList.remove('open');
       document.getElementById('sidebarOverlay').classList.remove('visible');
     }
+
+    // ── Switch Fx Tab ──
+    function switchFxTab(tabName) {
+      document.querySelectorAll('.fx-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.id === `fxTab-${tabName}`);
+      });
+      document.querySelectorAll('.fx-tab-content').forEach(content => {
+        content.classList.toggle('active', content.id === `fxContent-${tabName}`);
+      });
+    }
+    window.switchFxTab = switchFxTab;
   </script>
 
 </body>

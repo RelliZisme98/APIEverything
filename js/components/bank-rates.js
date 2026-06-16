@@ -11,7 +11,7 @@ export async function renderBankRates(containerId = 'bankRatesContent') {
   if (!el) return;
   el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-muted);">🏦 Đang tải tỷ giá VCB...</div>`;
   try {
-    const res = await fetch(`https://everything.rellia.org/vcb-rates`);
+    const res = await fetch(`/vcb-rates`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (!data?.rates?.length) throw new Error('No data');

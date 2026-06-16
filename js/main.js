@@ -90,6 +90,9 @@ async function loadCrypto() {
 // ════════════════════════════════════════════════════════════
 async function loadExchange() {
   try {
+    // Tải song song hoặc ngầm tỷ giá Vietcombank
+    renderBankRates().catch(e => console.warn('[VCB Rates]', e));
+
     const rows = await fetchExchangeRates();
     renderExchangeTable(rows);
     renderTicker();
@@ -224,7 +227,6 @@ window.switchSection = (id) => {
   }
   if (!_rendered.has(id)) {
     _rendered.add(id);
-    if (id === 'bank-rates')  renderBankRates();
     if (id === 'tax-calc')    renderTaxCalc();
     if (id === 'lottery')     renderLottery();
     if (id === 'world-clock') renderWorldClock();
@@ -262,8 +264,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAQI();
     loadVNIndex();
     loadNews();
-    // Refresh bank rates if rendered
-    if (_rendered.has('bank-rates')) renderBankRates();
   }, 60_000);
 });
 
