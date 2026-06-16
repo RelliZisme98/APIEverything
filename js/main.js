@@ -112,10 +112,9 @@ async function loadExchange() {
 // ════════════════════════════════════════════════════════════
 async function loadGold() {
   try {
-    const { price, source } = await fetchGoldPrice();
-    if (price) {
-      state.goldData = { price, source };
-      renderGold(price, source);
+    const data = await fetchGoldPrice();
+    if (data && data.price) {
+      renderGold(data.price, data.source);
     } else {
       renderGoldFallback();
     }
