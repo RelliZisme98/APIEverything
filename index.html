@@ -167,15 +167,11 @@
         </button>
         <button class="sidebar-nav-item" data-section="downloader" onclick="switchSection('downloader')">
           <span class="nav-icon">📥</span>
-          <span class="nav-label">Tải Video & Nhạc</span>
+          <span class="nav-label">Tải &amp; Công Cụ File</span>
         </button>
         <button class="sidebar-nav-item" data-section="media" onclick="switchSection('media')">
           <span class="nav-icon">🎬</span>
           <span class="nav-label">Phim & Trò Chơi</span>
-        </button>
-        <button class="sidebar-nav-item" data-section="file-tools" onclick="switchSection('file-tools')">
-          <span class="nav-icon">📁</span>
-          <span class="nav-label">Công Cụ File</span>
         </button>
       </div>
 
@@ -599,12 +595,17 @@
 
       <!-- ════════ SECTION: DOWNLOADER ════════ -->
       <section class="content-section" id="section-downloader">
-        <div class="page-title"><span class="page-icon">📥</span> Tải Video &amp; Nhạc</div>
+        <div class="page-title"><span class="page-icon">📥</span> Tải &amp; Công Cụ File</div>
+        <div class="vl-tab-bar" style="margin-bottom: 16px;">
+          <button class="vl-tab active" id="dlTab-media" onclick="switchDownloaderTab('media')" style="background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.4);color:#60a5fa;">📥 Tải Video &amp; Nhạc</button>
+          <button class="vl-tab" id="dlTab-files" onclick="switchDownloaderTab('files')">📁 Công Cụ File</button>
+        </div>
         <div class="card">
-          <div class="card-header">
-            <div class="card-title"><span class="icon">📥</span> Trích Xuất Link Tải Phương Tiện</div>
+          <div class="card-header" id="dlCardHeader">
+            <div class="card-title" id="dlCardTitle"><span class="icon">📥</span> Trích Xuất Link Tải Phương Tiện</div>
           </div>
           <div id="downloaderContent"></div>
+          <div id="fileToolsContent" style="display: none;"></div>
         </div>
       </section>
 
@@ -616,18 +617,6 @@
             <div class="card-title"><span class="icon">🎬</span> Lịch Phim Chiếu Rạp &amp; Game Hot</div>
           </div>
           <div id="mediaContent"></div>
-        </div>
-      </section>
-
-      <!-- ════════ SECTION: FILE TOOLS ════════ -->
-      <section class="content-section" id="section-file-tools">
-        <div class="page-title"><span class="page-icon">📁</span> Công Cụ File</div>
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title"><span class="icon">⚙️</span> Chuyển Đổi, Nén Ảnh &amp; ZIP</div>
-            <span class="card-badge badge-manual">CLIENT-ONLY</span>
-          </div>
-          <div id="fileToolsContent"></div>
         </div>
       </section>
 

@@ -369,3 +369,58 @@ async function fetchMediaDownload(url) {
 
 // Register global helper so inline onclick handlers in picker work
 window._dlBlob = blobDownload;
+
+window.switchDownloaderTab = (tab) => {
+  const tabMedia = document.getElementById('dlTab-media');
+  const tabFiles = document.getElementById('dlTab-files');
+  const contentMedia = document.getElementById('downloaderContent');
+  const contentFiles = document.getElementById('fileToolsContent');
+  const cardHeader = document.getElementById('dlCardHeader');
+  const cardTitle = document.getElementById('dlCardTitle');
+
+  if (!tabMedia || !tabFiles || !contentMedia || !contentFiles) return;
+
+  // Remove existing badge if any
+  const existingBadge = cardHeader?.querySelector('.card-badge');
+  if (existingBadge) existingBadge.remove();
+
+  if (tab === 'media') {
+    tabMedia.classList.add('active');
+    tabMedia.style.background = 'rgba(96,165,250,0.12)';
+    tabMedia.style.borderColor = 'rgba(96,165,250,0.4)';
+    tabMedia.style.color = '#60a5fa';
+
+    tabFiles.classList.remove('active');
+    tabFiles.style.background = '';
+    tabFiles.style.borderColor = '';
+    tabFiles.style.color = '';
+
+    if (cardTitle) cardTitle.innerHTML = `<span class="icon">📥</span> Trích Xuất Link Tải Phương Tiện`;
+
+    contentMedia.style.display = 'block';
+    contentFiles.style.display = 'none';
+  } else {
+    tabMedia.classList.remove('active');
+    tabMedia.style.background = '';
+    tabMedia.style.borderColor = '';
+    tabMedia.style.color = '';
+
+    tabFiles.classList.add('active');
+    tabFiles.style.background = 'rgba(52,211,153,0.12)';
+    tabFiles.style.borderColor = 'rgba(52,211,153,0.4)';
+    tabFiles.style.color = '#34d399';
+
+    if (cardTitle) cardTitle.innerHTML = `<span class="icon">⚙️</span> Chuyển Đổi, Nén Ảnh &amp; ZIP`;
+    
+    // Add client-only badge
+    if (cardHeader) {
+      const badge = document.createElement('span');
+      badge.className = 'card-badge badge-manual';
+      badge.textContent = 'CLIENT-ONLY';
+      cardHeader.appendChild(badge);
+    }
+
+    contentMedia.style.display = 'none';
+    contentFiles.style.display = 'block';
+  }
+};

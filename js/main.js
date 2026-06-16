@@ -236,9 +236,12 @@ window.switchSection = (id) => {
     if (id === 'travel')      renderTravel();
     if (id === 'todo')        renderTodo();
     if (id === 'lookup')      renderLookup();
-    if (id === 'downloader')  renderDownloader();
+    if (id === 'downloader')  {
+      renderDownloader();
+      renderFileTools();
+      renderAudioTools();
+    }
     if (id === 'media')       renderMedia();
-    if (id === 'file-tools')  { renderFileTools(); renderAudioTools(); }
   }
 };
 
