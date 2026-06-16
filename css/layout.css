@@ -189,31 +189,24 @@ select.field-input {
   cursor: pointer;
 }
 
-select.field-input option,
-select.field-input optgroup {
-  background-color: #0f1b2d;
-  color: #e8f0fe;
-}
-
-select.field-input optgroup {
-  font-weight: 700;
-  font-size: 11px;
-  color: #60a5fa;
-  letter-spacing: 0.04em;
-}
-
 select.po-select,
 select.wc-add-dropdown {
   background-color: #0f1b2d;
   color: var(--text-primary);
 }
 
-select.po-select option,
-select.wc-add-dropdown option,
-select.po-select optgroup,
-select.wc-add-dropdown optgroup {
+/* Global dropdown options styling to prevent visibility issues in dark mode */
+select option,
+select optgroup {
   background-color: #0f1b2d;
   color: #e8f0fe;
+}
+
+select optgroup {
+  font-weight: 700;
+  font-size: 11px;
+  color: #60a5fa;
+  letter-spacing: 0.04em;
 }
 
 /* ── Responsive ── */

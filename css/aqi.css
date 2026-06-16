@@ -182,3 +182,16 @@
 
 .aqi-city-dropdown:hover { border-color: rgba(96,165,250,0.4); }
 .aqi-city-dropdown:focus { outline: none; border-color: var(--accent-blue); }
+
+.aqi-city-dropdown option,
+.aqi-city-dropdown optgroup {
+  background-color: #0f1b2d;
+  color: #e8f0fe;
+}
+
+.aqi-city-dropdown optgroup {
+  font-weight: 700;
+  font-size: 11px;
+  color: var(--accent-blue);
+  letter-spacing: 0.04em;
+}
