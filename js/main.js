@@ -17,6 +17,7 @@ import { fetchCryptoMarkets } from './api/crypto.js';
 import { fetchExchangeRates } from './api/exchange.js';
 import { fetchWeather, fetchForecast } from './api/weather.js';
 import { fetchGoldPrice }     from './api/gold.js';
+import { fetchGasPrice }      from './api/gas.js';
 
 // ── Feature Components ──
 import { initTrafficCard }                      from './components/traffic.js';
@@ -124,6 +125,17 @@ async function loadGold() {
   }
 }
 
+// ─── GAS ────────────────────────────────────────────────────
+async function loadGas() {
+  try {
+    await fetchGasPrice();
+    renderGas();
+  } catch (err) {
+    console.warn('[Gas]', err);
+    renderGas();
+  }
+}
+
 // ════════════════════════════════════════════════════════════
 // WEATHER
 // ════════════════════════════════════════════════════════════
@@ -161,6 +173,7 @@ async function refreshAll() {
     loadCrypto(),
     loadExchange(),
     loadGold(),
+    loadGas(),
     loadWeather(),
     loadVNIndex(),
     loadNews(),
@@ -244,6 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCrypto();
     loadExchange();
     loadGold();
+    loadGas();
     loadWeather();
     loadAQI();
     loadVNIndex();

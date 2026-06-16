@@ -377,9 +377,15 @@
       <section class="content-section" id="section-gas">
         <div class="page-title"><span class="page-icon">⛽</span> Giá Xăng Dầu</div>
         <div class="card">
-          <div class="card-header">
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
             <div class="card-title"><span class="icon">⛽</span> Giá Xăng Dầu Việt Nam</div>
-            <span class="card-badge badge-manual"><span class="status-dot dot-yellow"></span>CẬP NHẬT</span>
+            <div class="gas-controls" style="display: flex; align-items: center; gap: 8px;">
+              <select id="gasRegionSelect" style="background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 2px 6px; font-size: 11px; outline: none; cursor: pointer;">
+                <option value="1" style="background: var(--bg-card); color: var(--text-main);">Khu vực 1</option>
+                <option value="2" style="background: var(--bg-card); color: var(--text-main);">Khu vực 2</option>
+              </select>
+              <span class="card-badge badge-manual" id="gasLiveBadge"><span class="status-dot dot-yellow"></span>ƯỚC TÍNH</span>
+            </div>
           </div>
           <div class="gas-grid" id="gasGrid"></div>
           <div class="gas-updated" id="gasUpdated"></div>

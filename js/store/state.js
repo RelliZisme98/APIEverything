@@ -13,6 +13,7 @@ export const state = {
   fxData:       [],
   weatherData:  null,
   goldData:     null,
+  gasData:      null,
   lastUpdate:   null,
   usdToVndLive: null,
 };

@@ -769,6 +769,63 @@ async function handleGold(request, env) {
   }
 }
 
+// ─── /gas (proxy bảo mật lấy giá xăng dầu thực tế) ─────────────────
+const PLX_API_URL = 'https://portals.petrolimex.com.vn/~apis/portals/cms.item/search?x-request=eyJGaWx0ZXJCeSI6eyJBbmQiOlt7IlN5c3RlbUlEIjp7IkVxdWFscyI6IjY3ODNkYzEyNzFmZjQ0OWU5NWI3NGE5NTIwOTY0MTY5In19LHsiUmVwb3NpdG9yeUlEIjp7IkVxdWFscyI6ImE5NTQ1MWUyM2I0NzRmZTU4ODZiZmI3Y2Y4NDNmNTNjIn19LHsiUmVwb3NpdG9yeUVudGl0eUlEIjp7IkVxdWFscyI6IjM4MDEzNzhmZTFlMDQ1YjFhZmExMGRlN2M1Nzc2MTI0In19LHsiU3RhdHVzIjp7IkVxdWFscyI6IlB1Ymxpc2hlZCJ9fV19LCJTb3J0QnkiOnsiTGFzdE1vZGlmaWVkIjoiRGVzY2VuZGluZyJ9LCJQYWdpbmF0aW9uIjp7IlRvdGFsUmVjb3JkcyI6LTEsIlRvdGFsUGFnZXMiOjAsIlBhZ2VTaXplIjowLCJQYWdlTnVtYmVyIjowfX0';
+
+async function handleGas(request, env) {
+  if (request.method === 'OPTIONS') return preflight();
+
+  try {
+    const res = await fetch(PLX_API_URL, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json',
+        'Referer': 'https://www.petrolimex.com.vn/',
+      },
+      signal: AbortSignal.timeout(6000)
+    });
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status} từ Petrolimex API`);
+    }
+
+    const data = await res.json();
+    const objects = data.Objects || [];
+    if (objects.length === 0) {
+      throw new Error('Petrolimex API trả về danh sách rỗng');
+    }
+
+    // Sắp xếp theo DisplayOrder
+    objects.sort((a, b) => (a.DIsplayOrder || a.OrderIndex || 99) - (b.DIsplayOrder || b.OrderIndex || 99));
+
+    // Lấy ngày LastModified mới nhất
+    const latestModified = objects
+      .map(o => o.LastModified)
+      .filter(Boolean)
+      .sort()
+      .reverse()[0];
+
+    const priceDate = latestModified ? latestModified.slice(0, 10) : null;
+
+    const prices = objects.map(item => ({
+      name: item.Title,
+      r1: item.Zone1Price,
+      r2: item.Zone2Price,
+      lastModified: item.LastModified,
+    })).filter(p => p.name && p.r1 > 0);
+
+    return new Response(JSON.stringify({
+      success: true,
+      priceDate,
+      prices,
+      source: 'Petrolimex API'
+    }), {
+      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public, max-age=600' }
+    });
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
 // ─── /aqi (proxy bảo mật — token lưu trong env.AQICN_TOKEN) ─────────
 async function handleAQI(request, env) {
   if (request.method === 'OPTIONS') return preflight();
@@ -1551,6 +1608,7 @@ export default {
     // ── Routes bảo mật (key ẩn trong Cloudflare Secrets) ──
     if (pathname === '/weather')       return handleWeather(request, env);
     if (pathname === '/gold')          return handleGold(request, env);
+    if (pathname === '/gas')           return handleGas(request, env);
     if (pathname === '/aqi')           return handleAQI(request, env);
 
     // Serve static assets for everything else
