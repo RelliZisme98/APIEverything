@@ -294,3 +294,41 @@
 .vl-stat-bar-wrap { flex:1; height:8px; background:rgba(255,255,255,0.06); border-radius:4px; overflow:hidden; }
 .vl-stat-bar { height:100%; border-radius:4px; transition:width .5s ease; }
 .vl-stat-cnt { font-size:11px; color:var(--text-muted); width:50px; text-align:right; font-family:'JetBrains Mono',monospace; }
+
+/* ── Lottery Stats and Predict ── */
+.lot-stat-ball {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  margin: 2px;
+}
+
+.lot-stats-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.lot-stats-table th {
+  font-size: 9px;
+  padding: 6px 10px;
+}
+
+.lot-stats-table td {
+  padding: 6px 10px;
+}
+
+@media (max-width: 768px) {
+  .lot-stats-container {
+    grid-template-columns: 1fr !important;
+  }
+}
+
