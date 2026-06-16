@@ -15,7 +15,23 @@ import { state, CONFIG } from '../store/state.js';
  * @returns {Promise<{price: number, source: string}>}
  */
 export async function fetchGoldPrice() {
-  // ── Strategy 1: PAX Gold via CoinGecko (free, no key, highly reliable peg to XAU spot) ──
+  // ── Strategy 1: Worker proxy /gold (returns world spot and live domestic gold prices) ──
+  try {
+    const res = await fetch('/gold', { signal: AbortSignal.timeout(8000) });
+    if (res.ok) {
+      const d = await res.json();
+      if (d.price) {
+        state.goldData = {
+          price: d.price,
+          source: d.source || 'Worker Proxy',
+          vnPrices: d.vnPrices || null,
+        };
+        return state.goldData;
+      }
+    }
+  } catch { /* fall through */ }
+
+  // ── Strategy 2: PAX Gold via CoinGecko (free, no key, reliable XAU spot peg) ──
   try {
     const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=pax-gold&vs_currencies=usd', {
       signal: AbortSignal.timeout(6000),
@@ -24,26 +40,14 @@ export async function fetchGoldPrice() {
       const data = await res.json();
       const price = data?.['pax-gold']?.usd;
       if (price) {
-        state.goldData = { price, source: 'CoinGecko (PAXG)' };
-        return state.goldData;
-      }
-    }
-  } catch { /* fall through */ }
-
-  // ── Strategy 2: GoldAPI.io qua worker proxy (key ẩn trong Cloudflare Secrets) ──
-  try {
-    const res = await fetch('/gold', { signal: AbortSignal.timeout(8000) });
-    if (res.ok) {
-      const d = await res.json();
-      if (d.price) {
-        state.goldData = { price: d.price, source: 'goldapi.io' };
+        state.goldData = { price, source: 'CoinGecko (PAXG)', vnPrices: null };
         return state.goldData;
       }
     }
   } catch { /* fall through */ }
 
   // ── Strategy 3: Static fallback ──
-  const fallback = { price: null, source: 'fallback' };
+  const fallback = { price: null, source: 'fallback', vnPrices: null };
   state.goldData = fallback;
   return fallback;
 }

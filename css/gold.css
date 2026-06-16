@@ -186,3 +186,19 @@
   color: var(--text-muted);
   margin-top: 8px;
 }
+
+.gold-live-badge {
+  display: inline-block;
+  background: rgba(52, 211, 153, 0.15);
+  color: var(--accent-green);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 1px 4px;
+  border-radius: 4px;
+  margin-left: 5px;
+  vertical-align: middle;
+  letter-spacing: 0.05em;
+  line-height: 1;
+}

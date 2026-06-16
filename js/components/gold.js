@@ -6,7 +6,7 @@
 import { fmtPrice }       from '../utils/formatters.js';
 import { computeGoldVnd } from '../api/gold.js';
 import { GOLD_BRANDS, computeBrandPrices } from '../data/gold-brands.js';
-import { CONFIG } from '../store/state.js';
+import { CONFIG, state } from '../store/state.js';
 
 // Track active display unit
 let activeUnit = 'chi'; // 'chi' | 'luong'
@@ -21,8 +21,10 @@ export function renderGold(xauUsd, source = '', containerId = 'goldContent') {
   const el = document.getElementById(containerId);
   if (!el) return;
 
-  const { xauVnd, perChiVnd, sjcPerChiVnd } = computeGoldVnd(xauUsd);
+  const { xauVnd, perChiVnd } = computeGoldVnd(xauUsd);
   const perLuongVnd = Math.round(perChiVnd * 10);
+  const vnPrices = state.goldData?.vnPrices;
+  const isEstimated = !vnPrices;
 
   el.innerHTML = `
     <!-- ── Spot price header ── -->
@@ -45,8 +47,8 @@ export function renderGold(xauUsd, source = '', containerId = 'goldContent') {
 
     <!-- ── Brand comparison table ── -->
     <div class="gold-brands-label">
-      🏪 Giá ước tính tại các thương hiệu VN
-      <span class="gold-brands-note">(dựa trên giá quốc tế + phí)</span>
+      🏪 ${isEstimated ? 'Giá ước tính tại các thương hiệu VN' : 'Giá thực tế tại các thương hiệu VN'}
+      <span class="gold-brands-note">${isEstimated ? '(dựa trên giá quốc tế + phí)' : '(Cập nhật thời gian thực)'}</span>
     </div>
     <div class="gold-brand-table" id="goldBrandTable">
       ${renderBrandRows(xauUsd, activeUnit)}
@@ -54,7 +56,7 @@ export function renderGold(xauUsd, source = '', containerId = 'goldContent') {
 
     <!-- ── Disclaimer ── -->
     <div class="gold-disclaimer">
-      ⚠️ Giá thương hiệu là <strong>ước tính</strong> dựa trên giá quốc tế + phụ phí thông thường.
+      ⚠️ ${isEstimated ? 'Giá thương hiệu là <strong>ước tính</strong> dựa trên giá quốc tế + phụ phí thông thường.' : 'Giá được cập nhật từ các cửa hàng tại Việt Nam.'}
       Giá thực tế có thể khác — nhấn tên thương hiệu để xem giá chính xác.
     </div>
     <div class="gold-updated">⏱️ Cập nhật: ${new Date().toLocaleTimeString('vi-VN')}</div>
@@ -65,10 +67,39 @@ export function renderGold(xauUsd, source = '', containerId = 'goldContent') {
  * Render brand comparison rows.
  */
 function renderBrandRows(xauUsd, unit) {
+  const vnPrices = state.goldData?.vnPrices;
+
   return GOLD_BRANDS.map(brand => {
-    const prices = computeBrandPrices(brand, xauUsd, CONFIG.usdToVnd);
-    const buy  = unit === 'chi' ? prices.buyPerChi  : prices.buyPerLuong;
-    const sell = unit === 'chi' ? prices.sellPerChi : prices.sellPerLuong;
+    let buy, sell;
+    let isEstimated = true;
+
+    if (vnPrices) {
+      let liveData = null;
+      if (brand.id === 'sjc') {
+        liveData = vnPrices.SJL1L10 || vnPrices.VNGSJC || vnPrices.BTSJC;
+      } else if (brand.id === 'doji') {
+        liveData = vnPrices.DOHCML || vnPrices.DOHNL || vnPrices.DOJINHTV;
+      } else if (brand.id === 'pnj') {
+        liveData = vnPrices.PQHN24NTT;
+      } else if (brand.id === 'btmc') {
+        liveData = vnPrices.BT9999NTT || vnPrices.BTSJC;
+      } else if (brand.id === 'baotinviet') {
+        liveData = vnPrices.BT9999NTT || vnPrices.VNGSJC;
+      }
+
+      if (liveData && liveData.buy && liveData.sell) {
+        // Vang.Today API returns per lượng (1 tael = 10 chỉ)
+        buy = unit === 'chi' ? Math.round(liveData.buy / 10) : liveData.buy;
+        sell = unit === 'chi' ? Math.round(liveData.sell / 10) : liveData.sell;
+        isEstimated = false;
+      }
+    }
+
+    if (isEstimated) {
+      const prices = computeBrandPrices(brand, xauUsd, CONFIG.usdToVnd);
+      buy  = unit === 'chi' ? prices.buyPerChi  : prices.buyPerLuong;
+      sell = unit === 'chi' ? prices.sellPerChi : prices.sellPerLuong;
+    }
 
     return `
       <div class="gold-brand-row">
@@ -79,7 +110,7 @@ function renderBrandRows(xauUsd, unit) {
           <div>
             <a class="gold-brand-name" href="${brand.url}" target="_blank" rel="noopener"
                style="color:${brand.color};">${brand.name}</a>
-            <div class="gold-brand-type">${brand.type}</div>
+            <div class="gold-brand-type">${brand.type} ${!isEstimated ? `<span class="gold-live-badge">Live</span>` : ''}</div>
           </div>
         </div>
         <div class="gold-brand-prices">
@@ -109,13 +140,11 @@ export function switchGoldUnit(unit) {
   });
 
   // Re-render brand rows with stored xauUsd from state
-  import('../store/state.js').then(({ state }) => {
-    const xauUsd = state.goldData?.price;
-    if (xauUsd) {
-      const table = document.getElementById('goldBrandTable');
-      if (table) table.innerHTML = renderBrandRows(xauUsd, unit);
-    }
-  });
+  const xauUsd = state.goldData?.price;
+  if (xauUsd) {
+    const table = document.getElementById('goldBrandTable');
+    if (table) table.innerHTML = renderBrandRows(xauUsd, unit);
+  }
 }
 
 /**

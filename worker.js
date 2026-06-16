@@ -718,18 +718,52 @@ async function handleWeather(request, env) {
 // ─── /gold (proxy bảo mật — key lưu trong env.GOLD_API_KEY) ─────────
 async function handleGold(request, env) {
   if (request.method === 'OPTIONS') return preflight();
+
+  // 1. Thử lấy giá vàng thực tế trong nước và thế giới từ Vang.Today (miễn phí, có CORS, có giá VN thực tế)
+  try {
+    const res = await fetch('https://www.vang.today/api/prices', {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+      signal: AbortSignal.timeout(6000)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.prices) {
+        const xau = data.prices.XAUUSD;
+        return new Response(JSON.stringify({
+          price: xau ? xau.buy : null,
+          source: 'Vang.Today',
+          vnPrices: data.prices,
+          timestamp: data.timestamp
+        }), {
+          headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public, max-age=120' }
+        });
+      }
+    }
+  } catch (err) {
+    console.warn('[Worker] Vang.Today failed:', err.message);
+  }
+
+  // 2. Dự phòng: Lấy từ GoldAPI.io (yêu cầu key ẩn trong secrets)
   const key = env.GOLD_API_KEY;
-  if (!key) return cors(JSON.stringify({ error: 'GOLD_API_KEY chưa được cấu hình trong Cloudflare Secrets.' }), 503);
+  if (!key) {
+    return cors(JSON.stringify({ error: 'Không thể tải giá vàng và GOLD_API_KEY chưa được cấu hình.' }), 503);
+  }
 
   try {
     const res  = await fetch('https://www.goldapi.io/api/XAU/USD', {
       headers: { 'x-access-token': key, 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' },
+      signal: AbortSignal.timeout(6000)
     });
-    const body = await res.text();
-    return new Response(body, {
-      status: res.status,
-      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=120' },
-    });
+    if (res.ok) {
+      const body = await res.json();
+      return new Response(JSON.stringify({
+        price: body.price,
+        source: 'goldapi.io'
+      }), {
+        status: res.status,
+        headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public, max-age=120' },
+      });
+    }
   } catch (err) {
     return cors(JSON.stringify({ error: err.message }), 500);
   }
