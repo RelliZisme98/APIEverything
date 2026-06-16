@@ -1,0 +1,20 @@
+name = "apieverything"
+main = "worker.js"
+compatibility_date = "2026-06-10"
+compatibility_flags = ["nodejs_compat"]
+
+[observability]
+enabled = true
+
+[assets]
+directory = "."
+binding = "ASSETS"
+
+[vars]
+SUPABASE_URL = "https://kavodsarpdvzmaqrkunv.supabase.co"
+
+[env.staging]
+name = "apieverything-staging"
+
+[env.staging.vars]
+SUPABASE_URL = "https://kavodsarpdvzmaqrkunv.supabase.co"
