@@ -18,5 +18,16 @@
   ],
   "vars": {
     "SUPABASE_URL": "https://kavodsarpdvzmaqrkunv.supabase.co"
+  },
+  "env": {
+    "staging": {
+      "name": "apieverything-staging",
+      "routes": [
+        { "pattern": "everything-staging.rellia.org", "custom_domain": true }
+      ],
+      "vars": {
+        "SUPABASE_URL": "https://kavodsarpdvzmaqrkunv.supabase.co"
+      }
+    }
   }
 }
