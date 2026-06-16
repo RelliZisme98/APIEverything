@@ -292,3 +292,59 @@
   color: var(--text-muted);
 }
 
+/* ══════════════════════════════════════════
+   HOURLY FORECAST STRIP
+   ══════════════════════════════════════════ */
+.wh-strip {
+  display: flex;
+  overflow-x: auto;
+  gap: 8px;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  margin-bottom: 14px;
+}
+
+.wh-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  text-align: center;
+  min-width: 80px;
+  flex-shrink: 0;
+  transition: background 0.2s, transform 0.18s, border-color 0.2s;
+  cursor: default;
+}
+
+.wh-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(96, 165, 250, 0.25);
+  transform: translateY(-2px);
+}
+
+.wh-time {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.wh-temp {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-yellow);
+  margin: 4px 0;
+}
+
+.wh-icon {
+  font-size: 22px;
+  margin: 4px 0;
+}
+
+.wh-pop {
+  font-size: 9px;
+  color: #38bdf8;
+  font-weight: 600;
+}
+
+

@@ -52,6 +52,7 @@ import { renderGold, renderGoldFallback } from './components/gold.js';
 import {
   renderWeather,
   renderForecast,
+  renderHourly,
   renderWeatherLoading,
   renderWeatherError,
   setWeatherBadge,
@@ -155,8 +156,9 @@ async function loadWeather(cityOverride) {
       fetchWeather(city),
       fetchForecast(city),
     ]);
-    renderWeather(data);
-    if (forecast?.length) renderForecast(forecast);
+    renderWeather(data, forecast?.todayMinMax);
+    if (forecast?.hourly?.length) renderHourly(forecast.hourly);
+    if (forecast?.daily?.length) renderForecast(forecast.daily);
     setWeatherBadge(true);
   } catch (err) {
     console.warn('[Weather]', err);

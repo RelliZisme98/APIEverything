@@ -54,7 +54,7 @@ export function renderQuickCities(containerId = 'weatherQuickCities') {
  * Render successful weather data.
  * @param {Object} d – OWM weather response
  */
-export function renderWeather(d, containerId = 'weatherContent') {
+export function renderWeather(d, todayMinMax = null, containerId = 'weatherContent') {
   const el = document.getElementById(containerId);
   if (!el) return;
 
@@ -63,8 +63,8 @@ export function renderWeather(d, containerId = 'weatherContent') {
   const theme    = getTheme(iconCode);
   const temp     = Math.round(d.main.temp);
   const feels    = Math.round(d.main.feels_like);
-  const tempMin  = Math.round(d.main.temp_min);
-  const tempMax  = Math.round(d.main.temp_max);
+  const tempMin  = todayMinMax ? Math.round(todayMinMax.min) : Math.round(d.main.temp_min);
+  const tempMax  = todayMinMax ? Math.round(todayMinMax.max) : Math.round(d.main.temp_max);
   const humidity = d.main.humidity;
   const pressure = d.main.pressure;
   const windKmh  = (d.wind.speed * 3.6).toFixed(0);
@@ -140,6 +140,7 @@ export function renderWeather(d, containerId = 'weatherContent') {
       </div>
     </div>
 
+    <div id="weatherHourly" style="margin-top:14px;"></div>
     <div id="weatherForecast"></div>
 
     <div style="font-size:11px;color:var(--text-muted);margin-top:10px;text-align:right;">
@@ -222,4 +223,28 @@ export function setWeatherBadge(isLive, badgeId = 'weatherBadge') {
     badge.className = 'card-badge badge-needkey';
     badge.innerHTML = `<span class="status-dot dot-red"></span>CẦN KEY`;
   }
+}
+
+/** Render 24h hourly forecast strip */
+export function renderHourly(hours, containerId = 'weatherHourly') {
+  const el = document.getElementById(containerId);
+  if (!el || !hours?.length) return;
+
+  const cards = hours.map(h => {
+    const icon = WEATHER_ICONS[h.icon] ?? '🌡️';
+    const popText = h.pop > 0 ? `🌧️ ${h.pop}%` : '☀️ Khô';
+    return `
+      <div class="wh-card">
+        <div class="wh-time">${h.time}</div>
+        <div class="wh-icon">${icon}</div>
+        <div class="wh-temp">${h.temp}°</div>
+        <div class="wh-pop">${popText}</div>
+      </div>
+    `;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="wf-section-label">🕒 Dự báo theo giờ (24h tới)</div>
+    <div class="wh-strip">${cards}</div>
+  `;
 }
