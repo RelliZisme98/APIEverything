@@ -4,6 +4,8 @@
 
 Mục tiêu: Push lên branch nào → tự động deploy đúng domain đó.
 
+> **Lưu ý quan trọng:** Dùng file `wrangler.toml` (không phải `wrangler.jsonc`) vì Wrangler 3.x chỉ đọc environments từ `.toml`.
+
 | Branch | Domain |
 |--------|--------|
 | `main` | `everything.rellia.org` |
@@ -87,27 +89,34 @@ jobs:
 
 ---
 
-### Bước 5 – Thêm env vào `wrangler.jsonc`
+### Bước 5 – Tạo file `wrangler.toml`
 
-Thêm block `"env"` vào file `wrangler.jsonc`:
+> ⚠️ Dùng `wrangler.toml` (không phải `wrangler.jsonc`) – Wrangler 3.x không đọc được `env` từ `.jsonc`.
+> Nếu đang có `wrangler.jsonc`, xóa nó đi trước: `Remove-Item wrangler.jsonc`
 
-```json
-{
-  "name": "apieverything",
-  "main": "worker.js",
-  ...
-  "env": {
-    "staging": {
-      "name": "apieverything-staging",
-      "routes": [
-        { "pattern": "everything-staging.rellia.org", "custom_domain": true }
-      ],
-      "vars": {
-        "SUPABASE_URL": "https://kavodsarpdvzmaqrkunv.supabase.co"
-      }
-    }
-  }
-}
+Tạo file `wrangler.toml`:
+
+```toml
+name = "apieverything"
+main = "worker.js"
+compatibility_date = "2026-06-10"
+compatibility_flags = ["nodejs_compat"]
+
+[observability]
+enabled = true
+
+[assets]
+directory = "."
+binding = "ASSETS"
+
+[vars]
+SUPABASE_URL = "https://kavodsarpdvzmaqrkunv.supabase.co"
+
+[env.staging]
+name = "apieverything-staging"
+
+[env.staging.vars]
+SUPABASE_URL = "https://kavodsarpdvzmaqrkunv.supabase.co"
 ```
 
 ---
@@ -170,21 +179,16 @@ git push origin staging
 
 Ví dụ thêm branch `dev` → domain `everything-dev.rellia.org`:
 
-### B1. Thêm vào `wrangler.jsonc`
+### B1. Thêm vào `wrangler.toml`
 
-```json
-"env": {
-  "staging": { ... },   // giữ nguyên
-  "dev": {              // thêm mới
-    "name": "apieverything-dev",
-    "routes": [
-      { "pattern": "everything-dev.rellia.org", "custom_domain": true }
-    ],
-    "vars": {
-      "SUPABASE_URL": "https://kavodsarpdvzmaqrkunv.supabase.co"
-    }
-  }
-}
+```toml
+# Giữ nguyên phần staging, thêm env mới bên dưới:
+
+[env.dev]
+name = "apieverything-dev"
+
+[env.dev.vars]
+SUPABASE_URL = "https://kavodsarpdvzmaqrkunv.supabase.co"
 ```
 
 ### B2. Thêm vào `deploy.yml`
