@@ -80,15 +80,15 @@ export const GOLD_BRANDS = [
     note: 'Bảo Tín Minh Châu · Uy tín hơn 30 năm',
   },
   {
-    id: 'baotinviet',
-    name: 'Bảo Tín Việt',
+    id: 'btmh',
+    name: 'Bảo Tín Mạnh Hải',
     icon: '🥇',
-    type: 'Vàng miếng (999.9)',
+    type: 'Vàng miếng & nhẫn (999.9)',
     buyPremium: 0.022,  // ~2.2%
     sellPremium: 0.065,  // ~6.5%
     color: '#fb923c',
-    url: 'https://baotinviet.com.vn/',
-    note: 'Công ty TNHH Bảo Tín Việt',
+    url: 'https://baotinmanhhai.vn/vi',
+    note: 'Bảo Tín Mạnh Hải · Uy tín từ 1992',
   },
 ];
 

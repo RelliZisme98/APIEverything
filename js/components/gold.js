@@ -83,7 +83,7 @@ function renderBrandRows(xauUsd, unit) {
         liveData = vnPrices.PQHN24NTT || vnPrices.VNGSJC;
       } else if (brand.id === 'btmc') {
         liveData = vnPrices.BT9999NTT || vnPrices.BTSJC;
-      } else if (brand.id === 'baotinviet') {
+      } else if (brand.id === 'btmh') {
         liveData = vnPrices.VNGSJC || vnPrices.BTSJC || vnPrices.BT9999NTT;
       }
 
