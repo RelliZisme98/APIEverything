@@ -76,15 +76,15 @@ function renderBrandRows(xauUsd, unit) {
     if (vnPrices) {
       let liveData = null;
       if (brand.id === 'sjc') {
-        liveData = vnPrices.SJL1L10 || vnPrices.VNGSJC || vnPrices.BTSJC;
+        liveData = vnPrices.VNGSJC || vnPrices.BTSJC || vnPrices.SJL1L10;
       } else if (brand.id === 'doji') {
-        liveData = vnPrices.DOHCML || vnPrices.DOHNL || vnPrices.DOJINHTV;
+        liveData = vnPrices.VNGSJC || vnPrices.BTSJC || vnPrices.DOHCML || vnPrices.DOHNL;
       } else if (brand.id === 'pnj') {
-        liveData = vnPrices.PQHN24NTT;
+        liveData = vnPrices.PQHN24NTT || vnPrices.VNGSJC;
       } else if (brand.id === 'btmc') {
         liveData = vnPrices.BT9999NTT || vnPrices.BTSJC;
       } else if (brand.id === 'baotinviet') {
-        liveData = vnPrices.BT9999NTT || vnPrices.VNGSJC;
+        liveData = vnPrices.VNGSJC || vnPrices.BTSJC || vnPrices.BT9999NTT;
       }
 
       if (liveData && liveData.buy && liveData.sell) {
