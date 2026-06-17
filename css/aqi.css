@@ -67,7 +67,25 @@
 .aqi-label  { font-size: 14px; font-weight: 700; margin-top: 2px; }
 
 .aqi-hero-right { flex: 1; min-width: 160px; }
-.aqi-city       { font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+.aqi-city       { font-size: 13px; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+
+.aqi-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.aqi-badge.real {
+  background: rgba(74,222,128,0.15);
+  color: #4ade80;
+  border: 1px solid rgba(74,222,128,0.25);
+}
+.aqi-badge.est {
+  background: rgba(251,146,60,0.15);
+  color: #fb923c;
+  border: 1px solid rgba(251,146,60,0.25);
+}
 
 /* Scale bar */
 .aqi-scale-bar {
