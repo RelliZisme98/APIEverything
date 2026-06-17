@@ -10,7 +10,7 @@
  */
 
 const CORS = {
-  'Access-Control-Allow-Origin':  '*',
+  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
 };
@@ -55,7 +55,7 @@ async function handleNewsRSS(request) {
 }
 
 // ─── /news-article ──────────────────────────────────────────────────
-const ALLOWED_ARTICLE_DOMAINS = ['vnexpress.net','tuoitre.vn','dantri.com.vn','thanhnien.vn','nhandan.vn'];
+const ALLOWED_ARTICLE_DOMAINS = ['vnexpress.net', 'tuoitre.vn', 'dantri.com.vn', 'thanhnien.vn', 'nhandan.vn'];
 
 async function handleNewsArticle(request) {
   if (request.method === 'OPTIONS') return preflight();
@@ -83,14 +83,14 @@ async function handleNewsArticle(request) {
 function extractArticle(html, url) {
   const get = (re) => { const m = html.match(re); return m ? decode(m[1].trim()) : ''; };
 
-  const title       = get(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)/i)
-                   || get(/<title[^>]*>([^<]+)<\/title>/i);
+  const title = get(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)/i)
+    || get(/<title[^>]*>([^<]+)<\/title>/i);
   const description = get(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)/i)
-                   || get(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']description["']/i);
-  const thumbnail   = get(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)/i)
-                   || get(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+    || get(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']description["']/i);
+  const thumbnail = get(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)/i)
+    || get(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
   const publishedAt = get(/published_time["']\s*content=["']([^"']+)/i)
-                   || get(/datePublished["']\s*:\s*["']([^"']+)/i);
+    || get(/datePublished["']\s*:\s*["']([^"']+)/i);
 
   // Extract main text from common containers
   const containers = [
@@ -119,7 +119,7 @@ function extractArticle(html, url) {
 }
 
 function decode(s) {
-  return s.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#039;/g,"'").replace(/&nbsp;/g,' ');
+  return s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&nbsp;/g, ' ');
 }
 
 // ─── /vnindex ────────────────────────────────────────────────────────
@@ -149,16 +149,16 @@ async function fetchYahooIndex(yfSym, symName) {
   const d = await res.json();
   const result = d?.chart?.result?.[0];
   if (!result) return null;
-  const meta   = result.meta;
-  const price  = meta.regularMarketPrice;
+  const meta = result.meta;
+  const price = meta.regularMarketPrice;
   if (!price) return null;
-  const prev   = meta.chartPreviousClose ?? meta.previousClose ?? price;
-  const high   = meta.regularMarketDayHigh   ?? price;
-  const low    = meta.regularMarketDayLow    ?? price;
-  const open   = meta.regularMarketOpen      ?? price;
-  const volume = meta.regularMarketVolume    ?? 0;
+  const prev = meta.chartPreviousClose ?? meta.previousClose ?? price;
+  const high = meta.regularMarketDayHigh ?? price;
+  const low = meta.regularMarketDayLow ?? price;
+  const open = meta.regularMarketOpen ?? price;
+  const volume = meta.regularMarketVolume ?? 0;
   const change = price - prev;
-  const pct    = prev ? (change / prev * 100) : 0;
+  const pct = prev ? (change / prev * 100) : 0;
   return {
     sym: symName, lastPrice: price, ot: +change.toFixed(2),
     changePc: +pct.toFixed(2), highPrice: high, lowPrice: low,
@@ -186,25 +186,25 @@ function basketToIndex(stocks, symName, label) {
 
   // Simple average of % changes (approximation)
   const changes = valid.map(s => parseFloat(s.changePc || 0));
-  const avgPct   = changes.reduce((a, b) => a + b, 0) / changes.length;
+  const avgPct = changes.reduce((a, b) => a + b, 0) / changes.length;
 
   // Sum last prices as proxy index level
   const sumPrice = valid.reduce((a, s) => a + parseFloat(s.lastPrice || 0), 0);
-  const highs    = valid.map(s => parseFloat(s.highPrice || s.lastPrice || 0));
-  const lows     = valid.map(s => parseFloat(s.lowPrice  || s.lastPrice || 0));
-  const volume   = valid.reduce((a, s) => a + parseInt(s.lot || 0), 0);
+  const highs = valid.map(s => parseFloat(s.highPrice || s.lastPrice || 0));
+  const lows = valid.map(s => parseFloat(s.lowPrice || s.lastPrice || 0));
+  const volume = valid.reduce((a, s) => a + parseInt(s.lot || 0), 0);
 
   return {
-    sym:       symName,
+    sym: symName,
     lastPrice: +sumPrice.toFixed(2),
-    ot:        +(sumPrice * avgPct / 100).toFixed(2),
-    changePc:  +avgPct.toFixed(2),
-    highPrice: +highs.reduce((a,b)=>a+b,0).toFixed(2),
-    lowPrice:  +lows.reduce((a,b)=>a+b,0).toFixed(2),
-    openPrice: +(sumPrice / (1 + avgPct/100)).toFixed(2),
-    lot:       volume,
-    r:         +(sumPrice / (1 + avgPct/100)).toFixed(2),
-    isBasket:  true,  // flag to indicate it's approximate
+    ot: +(sumPrice * avgPct / 100).toFixed(2),
+    changePc: +avgPct.toFixed(2),
+    highPrice: +highs.reduce((a, b) => a + b, 0).toFixed(2),
+    lowPrice: +lows.reduce((a, b) => a + b, 0).toFixed(2),
+    openPrice: +(sumPrice / (1 + avgPct / 100)).toFixed(2),
+    lot: volume,
+    r: +(sumPrice / (1 + avgPct / 100)).toFixed(2),
+    isBasket: true,  // flag to indicate it's approximate
     basketCount: valid.length,
   };
 }
@@ -212,7 +212,7 @@ function basketToIndex(stocks, symName, label) {
 async function handleVNIndex(request) {
   if (request.method === 'OPTIONS') return preflight();
   const params = new URL(request.url).searchParams;
-  const type   = params.get('type') ?? 'stocks';
+  const type = params.get('type') ?? 'stocks';
   const custom = params.get('symbols') ?? '';
 
   // ── INDEX: Yahoo Finance (query2, symbol ^VNINDEX.VN) + VPS basket cho VN30/HNX ──
@@ -267,9 +267,9 @@ async function handleVNIndex(request) {
 
   // ── STOCKS: VPS direct ──
   let path;
-  if (type === 'vn30')              path = `/getliststockdata/${VN30_BASKET}`;
+  if (type === 'vn30') path = `/getliststockdata/${VN30_BASKET}`;
   else if (type === 'custom' && custom) path = `/getliststockdata/${custom}`;
-  else                              path = '/getliststockdata/VCB,BID,CTG,TCB,VPB,MBB,HPG,VIC,VHM,VNM,MSN,SAB,GAS,PLX,FPT';
+  else path = '/getliststockdata/VCB,BID,CTG,TCB,VPB,MBB,HPG,VIC,VHM,VNM,MSN,SAB,GAS,PLX,FPT';
 
 
   try {
@@ -288,14 +288,14 @@ async function handleVNIndex(request) {
 // ─── /power-outage ───────────────────────────────────────────────────
 async function handlePowerOutage(request) {
   if (request.method === 'OPTIONS') return preflight();
-  const url    = new URL(request.url);
+  const url = new URL(request.url);
   const action = url.searchParams.get('action');
-  const evn    = url.searchParams.get('evn') ?? 'spc'; // spc | hanoi | cpc | npc
+  const evn = url.searchParams.get('evn') ?? 'spc'; // spc | hanoi | cpc | npc
 
   const BROWSER_HEADERS = {
-    'User-Agent':       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
-    'Accept':           'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    'Accept-Language':  'vi-VN,vi;q=0.9,en-US;q=0.8',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8',
     'X-Requested-With': 'XMLHttpRequest',
   };
 
@@ -308,13 +308,13 @@ async function handlePowerOutage(request) {
         const maDviCha = url.searchParams.get('pMA_DVICTREN') || '';
         upstreamUrl = `https://cskh.evnspc.vn/TraCuu/GetDanhMucDienLuc?pMA_DVICTREN=${encodeURIComponent(maDviCha)}`;
       } else if (action === 'tracuu') {
-        const madvi   = url.searchParams.get('madvi')   || '';
-        const tuNgay  = url.searchParams.get('tuNgay')  || '';
+        const madvi = url.searchParams.get('madvi') || '';
+        const tuNgay = url.searchParams.get('tuNgay') || '';
         const denNgay = url.searchParams.get('denNgay') || '';
         upstreamUrl = `https://cskh.evnspc.vn/TraCuu/GetThongTinLichNgungGiamCungCapDien?madvi=${encodeURIComponent(madvi)}&tuNgay=${encodeURIComponent(tuNgay)}&denNgay=${encodeURIComponent(denNgay)}&ChucNang=MaDonVi`;
       } else if (action === 'tracuu-makh') {
-        const maKH    = url.searchParams.get('maKH')    || '';
-        const tuNgay  = url.searchParams.get('tuNgay')  || '';
+        const maKH = url.searchParams.get('maKH') || '';
+        const tuNgay = url.searchParams.get('tuNgay') || '';
         const denNgay = url.searchParams.get('denNgay') || '';
         upstreamUrl = `https://cskh.evnspc.vn/TraCuu/GetThongTinLichNgungGiamCungCapDien?maKH=${encodeURIComponent(maKH)}&tuNgay=${encodeURIComponent(tuNgay)}&denNgay=${encodeURIComponent(denNgay)}&ChucNang=MaKhachHang`;
       } else {
@@ -340,7 +340,7 @@ async function handlePowerOutage(request) {
         // EVNHANOI: /api/power-outage?keyword=...&fromDate=...&toDate=...
         const keyword = url.searchParams.get('keyword') || '';
         const fromDate = url.searchParams.get('fromDate') || '';
-        const toDate   = url.searchParams.get('toDate')   || '';
+        const toDate = url.searchParams.get('toDate') || '';
         upstreamUrl = `https://evnhanoi.vn/api/power-outage/search?keyword=${encodeURIComponent(keyword)}&fromDate=${encodeURIComponent(fromDate)}&toDate=${encodeURIComponent(toDate)}&size=50`;
       } else if (action === 'tracuu-makh') {
         const maKH = url.searchParams.get('maKH') || '';
@@ -363,10 +363,10 @@ async function handlePowerOutage(request) {
   if (evn === 'cpc') {
     BROWSER_HEADERS['Referer'] = 'https://cskh.cpc.vn/';
     try {
-      const keyword  = url.searchParams.get('keyword')  || '';
-      const fromDate = url.searchParams.get('fromDate')  || '';
-      const toDate   = url.searchParams.get('toDate')    || '';
-      const province = url.searchParams.get('province')  || '';
+      const keyword = url.searchParams.get('keyword') || '';
+      const fromDate = url.searchParams.get('fromDate') || '';
+      const toDate = url.searchParams.get('toDate') || '';
+      const province = url.searchParams.get('province') || '';
 
       // CPC has a JSON search API
       const upstreamUrl = `https://cskh.cpc.vn/api/power-outage/list?province=${encodeURIComponent(province)}&fromDate=${encodeURIComponent(fromDate)}&toDate=${encodeURIComponent(toDate)}&keyword=${encodeURIComponent(keyword)}&pageSize=50&pageIndex=1`;
@@ -386,10 +386,10 @@ async function handlePowerOutage(request) {
   if (evn === 'npc') {
     BROWSER_HEADERS['Referer'] = 'https://cskh.npc.com.vn/';
     try {
-      const maKH     = url.searchParams.get('maKH')     || '';
-      const fromDate = url.searchParams.get('fromDate')  || '';
-      const toDate   = url.searchParams.get('toDate')    || '';
-      const province = url.searchParams.get('province')  || '';
+      const maKH = url.searchParams.get('maKH') || '';
+      const fromDate = url.searchParams.get('fromDate') || '';
+      const toDate = url.searchParams.get('toDate') || '';
+      const province = url.searchParams.get('province') || '';
 
       let upstreamUrl;
       if (maKH) {
@@ -419,7 +419,7 @@ async function handlePhatNguoi(request) {
   if (request.method === 'GET') return cors(JSON.stringify({ status: 'ok' }));
   if (request.method === 'POST') {
     try {
-      const body     = await request.text();
+      const body = await request.text();
       const upstream = await fetch('https://api.phatnguoi.vn/phat-nguoi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' },
@@ -447,18 +447,18 @@ async function handleVCBRates(request) {
 
     // Parse XML to JSON
     const dateMatch = xml.match(/<DateTime>([^<]+)<\/DateTime>/);
-    const updated   = dateMatch ? dateMatch[1].trim() : '';
+    const updated = dateMatch ? dateMatch[1].trim() : '';
 
     const rates = [];
     const rateRegex = /<Exrate CurrencyCode="(\w+)" CurrencyName="([^"]+)" Buy="([^"]+)" Transfer="([^"]+)" Sell="([^"]+)" \/>/g;
     let m;
     while ((m = rateRegex.exec(xml)) !== null) {
       rates.push({
-        code:     m[1].trim(),
-        name:     m[2].trim(),
-        buy:      m[3].trim(),
+        code: m[1].trim(),
+        name: m[2].trim(),
+        buy: m[3].trim(),
         transfer: m[4].trim(),
-        sell:     m[5].trim(),
+        sell: m[5].trim(),
       });
     }
 
@@ -476,7 +476,7 @@ async function handleLottery(request) {
   if (request.method === 'OPTIONS') return preflight();
   const params = new URL(request.url).searchParams;
   const region = params.get('region') ?? 'mien-bac';
-  const date   = params.get('date');   // DD-MM-YYYY or empty for today
+  const date = params.get('date');   // DD-MM-YYYY or empty for today
 
   // Validate region (allow alphanumeric + dash)
   if (!/^[a-z-]+$/.test(region)) return cors('{"error":"invalid region"}', 400);
@@ -505,7 +505,7 @@ async function handleLottery(request) {
 
     // Extract date from the HTML
     const dateMatch = html.match(/Ng[àa]y:\s*(?:<[^>]+>)*([0-9\/]+)/i)
-                   || js.match(/value="(\d{2}-\d{2}-\d{4})" selected/);
+      || js.match(/value="(\d{2}-\d{2}-\d{4})" selected/);
     const drawDate = dateMatch ? dateMatch[1] : (date ?? 'N/A');
 
     // Extract prizes using regex on the appended HTML
@@ -514,10 +514,10 @@ async function handleLottery(request) {
     const prizeRe = /<td[^>]*class="([^"]*giai[^"]*l[^"]*)"[^>]*>([\s\S]*?)<\/td>[\s\S]*?<td[^>]*class="([^"]*giai[^"]*)"[^>]*>([\s\S]*?)<\/td>/gi;
     while ((m = prizeRe.exec(html)) !== null) {
       const label = m[2].replace(/<[^>]+>/g, '').replace(/&[a-z]+;/gi, (e) => {
-        const map = {'&agrave;':'à','&igrave;':'ì','&aacute;':'á','&eacute;':'é','&nbsp;':' '};
+        const map = { '&agrave;': 'à', '&igrave;': 'ì', '&aacute;': 'á', '&eacute;': 'é', '&nbsp;': ' ' };
         return map[e] ?? e;
       }).trim();
-      const nums  = m[4].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+      const nums = m[4].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
       if (label && nums) prizes.push({ label, numbers: nums });
     }
 
@@ -542,9 +542,9 @@ async function handleLottery(request) {
 async function handleVietlott(request) {
   if (request.method === 'OPTIONS') return preflight();
   const params = new URL(request.url).searchParams;
-  const game   = params.get('game') ?? 'power655';
-  const date   = params.get('date') ?? '';
-  const page   = parseInt(params.get('page') ?? '0');
+  const game = params.get('game') ?? 'power655';
+  const date = params.get('date') ?? '';
+  const page = parseInt(params.get('page') ?? '0');
 
   const GAME_MAP = {
     power655: 'XS655', mega645: 'XS645', max4d: 'XS4D', keno: 'KENO',
@@ -576,8 +576,8 @@ async function handleVietlott(request) {
           const history = data.data.map(d => ({
             drawCode: d.drawCode || '',
             drawDate: d.drawDate || '',
-            numbers:  d.winningNumbers || d.numbers || [],
-            jackpot:  d.jackpot1 || d.jackpot || 0,
+            numbers: d.winningNumbers || d.numbers || [],
+            jackpot: d.jackpot1 || d.jackpot || 0,
           }));
           return new Response(JSON.stringify({ game, history }), {
             headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=300' },
@@ -590,13 +590,13 @@ async function handleVietlott(request) {
           drawDate: latest.drawDate || dateStr,
           drawCode: latest.drawCode || '',
           numbers: latest.winningNumbers || latest.numbers || [],
-          jackpot:  latest.jackpot1 || latest.jackpot || 0,
+          jackpot: latest.jackpot1 || latest.jackpot || 0,
           nextJackpot: latest.nextJackpot || 0,
           history: data.data.slice(0, 10).map(d => ({
             drawCode: d.drawCode || '',
             drawDate: d.drawDate || '',
-            numbers:  d.winningNumbers || d.numbers || [],
-            jackpot:  d.jackpot1 || d.jackpot || 0,
+            numbers: d.winningNumbers || d.numbers || [],
+            jackpot: d.jackpot1 || d.jackpot || 0,
           })),
         }), {
           headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=300' },
@@ -641,8 +641,8 @@ async function handleFootball(request) {
   if (request.method === 'OPTIONS') return preflight();
   const { searchParams } = new URL(request.url);
   const league = searchParams.get('league') ?? 'eng.1';
-  const type   = searchParams.get('type')   ?? 'scoreboard';
-  const id     = searchParams.get('id')     ?? '';
+  const type = searchParams.get('type') ?? 'scoreboard';
+  const id = searchParams.get('id') ?? '';
 
   const forwardParams = new URLSearchParams();
   for (const [key, value] of searchParams.entries()) {
@@ -668,7 +668,7 @@ async function handleFootball(request) {
   }
 
   try {
-    const res  = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
     if (!res.ok) throw new Error(`upstream ${res.status}`);
     const data = await res.text();
     return new Response(data, {
@@ -685,14 +685,14 @@ async function handleWeather(request, env) {
   const key = env.OWM_API_KEY;
   if (!key) return cors(JSON.stringify({ error: 'OWM_API_KEY chưa được cấu hình trong Cloudflare Secrets.' }), 503);
 
-  const params   = new URL(request.url).searchParams;
+  const params = new URL(request.url).searchParams;
   const endpoint = params.get('endpoint') ?? 'weather'; // 'weather' | 'forecast' | 'air_pollution'
-  const q        = params.get('q')        ?? '';
-  const lat      = params.get('lat')      ?? '';
-  const lon      = params.get('lon')      ?? '';
-  const cnt      = params.get('cnt')      ?? '';
-  const lang     = params.get('lang')     ?? 'vi';
-  const units    = params.get('units')    ?? 'metric';
+  const q = params.get('q') ?? '';
+  const lat = params.get('lat') ?? '';
+  const lon = params.get('lon') ?? '';
+  const cnt = params.get('cnt') ?? '';
+  const lang = params.get('lang') ?? 'vi';
+  const units = params.get('units') ?? 'metric';
 
   let upstreamUrl;
   if (endpoint === 'air_pollution') {
@@ -704,7 +704,7 @@ async function handleWeather(request, env) {
   }
 
   try {
-    const res  = await fetch(upstreamUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    const res = await fetch(upstreamUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
     const body = await res.text();
     return new Response(body, {
       status: res.status,
@@ -750,7 +750,7 @@ async function handleGold(request, env) {
   }
 
   try {
-    const res  = await fetch('https://www.goldapi.io/api/XAU/USD', {
+    const res = await fetch('https://www.goldapi.io/api/XAU/USD', {
       headers: { 'x-access-token': key, 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' },
       signal: AbortSignal.timeout(6000)
     });
@@ -822,7 +822,23 @@ async function handleGas(request, env) {
       headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public, max-age=600' }
     });
   } catch (err) {
-    return cors(JSON.stringify({ error: err.message }), 500);
+    // Petrolimex blocks non-VN IPs → timeout. Serve static fallback so UI shows "ƯỚC TÍNH" badge.
+    console.warn('[Gas] Petrolimex unreachable, using static fallback:', err.message);
+    return new Response(JSON.stringify({
+      success: true,
+      priceDate: '2026-06-11',
+      source: 'static',
+      prices: [
+        { name: 'Xăng RON95-III',        r1: 21470, r2: 21980 },
+        { name: 'Xăng E5 RON92',          r1: 20920, r2: 21430 },
+        { name: 'Dầu Diesel 0,05S',       r1: 19940, r2: 20450 },
+        { name: 'Dầu Diesel 0,001S',      r1: 21490, r2: 22000 },
+        { name: 'Dầu hỏa 2-K',           r1: 25890, r2: 26400 },
+        { name: 'Dầu Mazut 180CST 3,5S',  r1: 15800, r2: 15800 },
+      ],
+    }), {
+      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public, max-age=600' }
+    });
   }
 }
 
@@ -833,11 +849,14 @@ async function handleAQI(request, env) {
   if (!token) return cors(JSON.stringify({ error: 'AQICN_TOKEN chưa được cấu hình trong Cloudflare Secrets.' }), 503);
 
   const station = new URL(request.url).searchParams.get('station') ?? 'ho-chi-minh-city';
-  // Chỉ cho phép ký tự an toàn (@, chữ số, chữ thường, gạch ngang)
-  if (!/^[@a-z0-9\-]+$/.test(station)) return cors(JSON.stringify({ error: 'invalid station' }), 400);
+  // Allow: named stations (letters, dash), numeric IDs (@123), geo:lat;lon (digits, dot, colon, semicolons)
+  if (!/^[@a-z0-9\-.:;]+$/.test(station)) return cors(JSON.stringify({ error: 'invalid station' }), 400);
+
+  // geo: format must NOT be percent-encoded — pass as-is into the path
+  const stationPath = station.startsWith('geo:') ? station : encodeURIComponent(station);
 
   try {
-    const res  = await fetch(`https://api.waqi.info/feed/${encodeURIComponent(station)}/?token=${token}`, {
+    const res = await fetch(`https://api.waqi.info/feed/${stationPath}/?token=${token}`, {
       headers: { 'User-Agent': 'Mozilla/5.0' },
     });
     const body = await res.text();
@@ -853,10 +872,10 @@ async function handleAQI(request, env) {
 // ─── /api/todos (proxy bảo mật bảo vệ Supabase URL và Key) ────────
 async function handleTodos(request, env) {
   if (request.method === 'OPTIONS') return preflight();
-  
+
   const url = env.SUPABASE_URL ? env.SUPABASE_URL.trim().replace(/^['"]|['"]$/g, '') : '';
   const key = env.SUPABASE_KEY ? env.SUPABASE_KEY.trim().replace(/^['"]|['"]$/g, '') : '';
-  
+
   const { searchParams } = new URL(request.url);
   if (searchParams.get('diagnostic') === 'true') {
     return cors(JSON.stringify({
@@ -876,7 +895,7 @@ async function handleTodos(request, env) {
 
   // Diagnostic format check
   if (!key.startsWith('eyJ')) {
-    return cors(JSON.stringify({ 
+    return cors(JSON.stringify({
       error: 'SUPABASE_KEY on Cloudflare is invalid. It must start with "eyJ" (the JWT anon public key), but it currently starts with: ' + key.substring(0, 15) + '... (Length: ' + key.length + ')'
     }), 400);
   }
@@ -941,7 +960,7 @@ async function handleTodos(request, env) {
 // ─── /api/spam-check ────────────────────────────────────────────────
 async function handleSpamCheck(request) {
   if (request.method === 'OPTIONS') return preflight();
-  
+
   const { searchParams } = new URL(request.url);
   const q = searchParams.get('q')?.trim() || '';
 
@@ -960,7 +979,7 @@ async function handleSpamCheck(request) {
       const res = await fetch(`https://api.xposedornot.com/v1/check-email/${encodeURIComponent(q)}`, {
         headers: { 'User-Agent': 'Mozilla/5.0' }
       });
-      
+
       const text = await res.text();
       if (res.status === 404 || text.includes('"Error":"Not found"') || text.includes('"email":null')) {
         return cors(JSON.stringify({
@@ -1002,13 +1021,13 @@ async function handleSpamCheck(request) {
     let carrier = "Không rõ";
     const prefix = phoneClean.startsWith('0') ? phoneClean.substring(1, 3) : phoneClean.substring(0, 2);
     const prefix3 = phoneClean.startsWith('0') ? phoneClean.substring(1, 4) : phoneClean.substring(0, 3);
-    
+
     const viettel = ['86', '96', '97', '98', '32', '33', '34', '35', '36', '37', '38', '39'];
     const mobi = ['89', '90', '93', '70', '79', '77', '76', '78'];
     const vina = ['88', '91', '94', '81', '82', '83', '84', '85'];
     const vnm = ['92', '52', '56', '58'];
     const gmobile = ['99', '59'];
-    
+
     if (viettel.includes(prefix)) carrier = "Viettel";
     else if (mobi.includes(prefix)) carrier = "MobiFone";
     else if (vina.includes(prefix)) carrier = "VinaPhone";
@@ -1049,7 +1068,7 @@ async function handleTaxLookup(request) {
 
   if (isNumericMST) {
     const cleanMST = q.replace(/[^0-9]/g, '');
-    
+
     // 1. Try Minh Chuyen API
     try {
       const res = await fetch(`https://mst.minhchuyen.online/api/mst/${cleanMST}`, {
@@ -1180,13 +1199,13 @@ let lastCachedTime = 0;
 
 async function handleMoviesNowPlaying(request) {
   if (request.method === 'OPTIONS') return preflight();
-  
+
   const cacheDuration = 4 * 60 * 60 * 1000; // 4 hours
   const now = Date.now();
   if (cachedMovies && (now - lastCachedTime < cacheDuration)) {
     return cors(JSON.stringify(cachedMovies));
   }
-  
+
   try {
     const url = 'https://www.themoviedb.org/movie/now-playing?language=vi-VN';
     const res = await fetch(url, {
@@ -1196,11 +1215,11 @@ async function handleMoviesNowPlaying(request) {
       },
       signal: AbortSignal.timeout(6000)
     });
-    
+
     if (!res.ok) {
       throw new Error(`TMDB search failed with status ${res.status}`);
     }
-    
+
     const html = await res.text();
     const movieLinkRegex = /\/movie\/([0-9]+)/g;
     const movieIds = [];
@@ -1208,7 +1227,7 @@ async function handleMoviesNowPlaying(request) {
     while ((match = movieLinkRegex.exec(html)) !== null) {
       movieIds.push(match[1]);
     }
-    
+
     const uniqueIds = Array.from(new Set(movieIds)).slice(0, 6);
     const detailPromises = uniqueIds.map(async (id) => {
       try {
@@ -1222,33 +1241,33 @@ async function handleMoviesNowPlaying(request) {
         });
         if (!dRes.ok) return null;
         const dHtml = await dRes.text();
-        
+
         const ogTitleMatch = dHtml.match(/<meta property="og:title" content="([^"]+)"/i);
         let title = ogTitleMatch ? ogTitleMatch[1].replace(" — The Movie Database (TMDb)", "").trim() : '';
-        
+
         const ogDescMatch = dHtml.match(/<meta property="og:description" content="([^"]+)"/i);
         let overview = ogDescMatch ? ogDescMatch[1].trim() : '';
-        
+
         const posterMatch = dHtml.match(/class="poster"[^>]*src="https:\/\/image.tmdb.org\/t\/p\/[^\/]+(\/[^"]+)"/i) ||
-                            dHtml.match(/src="https:\/\/image.tmdb.org\/t\/p\/[^\/]+(\/[^"]+)"[^>]*class="poster"/i) ||
-                            dHtml.match(/class="poster"[^>]*src="https:\/\/media.themoviedb.org\/t\/p\/[^\/]+(\/[^"]+)"/i) ||
-                            dHtml.match(/src="https:\/\/media.themoviedb.org\/t\/p\/[^\/]+(\/[^"]+)"[^>]*class="poster"/i) ||
-                            dHtml.match(/https:\/\/(?:media|image)\.themoviedb\.org\/t\/p\/[^\/]+(\/[a-zA-Z0-9_\-\.]+\.jpg)/i);
+          dHtml.match(/src="https:\/\/image.tmdb.org\/t\/p\/[^\/]+(\/[^"]+)"[^>]*class="poster"/i) ||
+          dHtml.match(/class="poster"[^>]*src="https:\/\/media.themoviedb.org\/t\/p\/[^\/]+(\/[^"]+)"/i) ||
+          dHtml.match(/src="https:\/\/media.themoviedb.org\/t\/p\/[^\/]+(\/[^"]+)"[^>]*class="poster"/i) ||
+          dHtml.match(/https:\/\/(?:media|image)\.themoviedb\.org\/t\/p\/[^\/]+(\/[a-zA-Z0-9_\-\.]+\.jpg)/i);
         const posterPath = posterMatch ? posterMatch[1] : '';
-        
+
         const releaseMatch = dHtml.match(/class="release"[^>]*>\s*([^\n<]+)/i) ||
-                             dHtml.match(/"release_date":"([^"]+)"/i);
+          dHtml.match(/"release_date":"([^"]+)"/i);
         let releaseDate = releaseMatch ? releaseMatch[1].trim() : '';
         releaseDate = releaseDate.replace(/\s*\([A-Z]+\)$/, '');
-        
+
         const scoreMatch = dHtml.match(/data-percent="([0-9\.]+)"/i);
         const voteAverage = scoreMatch ? parseFloat(scoreMatch[1]) / 10 : 7.5;
-        
-        const ytMatch = dHtml.match(/youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/i) || 
-                        dHtml.match(/embed\/([a-zA-Z0-9_-]{11})/i) ||
-                        dHtml.match(/"key":"([a-zA-Z0-9_-]{11})"/);
+
+        const ytMatch = dHtml.match(/youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/i) ||
+          dHtml.match(/embed\/([a-zA-Z0-9_-]{11})/i) ||
+          dHtml.match(/"key":"([a-zA-Z0-9_-]{11})"/);
         const trailerId = ytMatch ? ytMatch[1] : '';
-        
+
         return {
           title,
           overview,
@@ -1261,16 +1280,16 @@ async function handleMoviesNowPlaying(request) {
         return null;
       }
     });
-    
+
     const resolvedMovies = await Promise.all(detailPromises);
     const validMovies = resolvedMovies.filter(m => m !== null);
-    
+
     if (validMovies.length > 0) {
       cachedMovies = validMovies;
       lastCachedTime = now;
       return cors(JSON.stringify(validMovies));
     }
-    
+
     throw new Error("No movies resolved.");
   } catch (err) {
     console.warn("Live movie scrape failed, using static list:", err.message);
@@ -1374,8 +1393,8 @@ async function handleDownloader(request) {
 // ─── /api/download-proxy (stream file từ URL về qua Worker) ─────────────────
 async function handleDownloadProxy(request) {
   if (request.method === 'OPTIONS') return preflight();
-  const params   = new URL(request.url).searchParams;
-  const fileUrl  = params.get('url');
+  const params = new URL(request.url).searchParams;
+  const fileUrl = params.get('url');
   const filename = params.get('filename') || 'download';
 
   if (!fileUrl) {
@@ -1419,7 +1438,7 @@ async function handleDownloadProxy(request) {
     const upstream = await fetch(fileUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Referer':    'https://cobalt.tools/',
+        'Referer': 'https://cobalt.tools/',
       },
       signal: AbortSignal.timeout(30000),
     });
@@ -1430,7 +1449,7 @@ async function handleDownloadProxy(request) {
 
     // Forward the stream directly – no buffering in Worker memory
     const contentType = upstream.headers.get('content-type') || 'application/octet-stream';
-    const contentLen  = upstream.headers.get('content-length');
+    const contentLen = upstream.headers.get('content-length');
 
     const respHeaders = {
       'Content-Type': contentType,
@@ -1473,7 +1492,7 @@ async function handleExchange(request) {
 
   // Try Frankfurter
   try {
-    const targetUrl = to 
+    const targetUrl = to
       ? `https://api.frankfurter.app/latest?from=${from}&to=${to}`
       : `https://api.frankfurter.app/latest?from=${from}`;
     const res = await fetch(targetUrl, {
@@ -1528,10 +1547,10 @@ async function handleExchange(request) {
 }
 
 // ─── /api/crypto (CoinGecko Proxy) ──────────────────────────────────
-async function handleCrypto(request) {
+async function handleCrypto(request, env) {
   if (request.method === 'OPTIONS') return preflight();
-  const { search } = new URL(request.url);
-  const targetPath = new URL(request.url).searchParams.get('path') || 'coins/markets';
+  const reqUrl = new URL(request.url);
+  const targetPath = reqUrl.searchParams.get('path') || 'coins/markets';
 
   const cacheUrl = new URL(request.url);
   const cacheKey = new Request(cacheUrl.toString(), request);
@@ -1546,22 +1565,30 @@ async function handleCrypto(request) {
     }
   }
 
-  // Build the target URL
-  const targetUrl = `https://api.coingecko.com/api/v3/${targetPath}${search}`;
+  // Build the CoinGecko URL — strip our internal `path` param before forwarding
+  const cgParams = new URLSearchParams(reqUrl.searchParams);
+  cgParams.delete('path');
+  const cgQuery = cgParams.toString() ? `?${cgParams.toString()}` : '';
+  const targetUrl = `https://api.coingecko.com/api/v3/${targetPath}${cgQuery}`;
+
+  // Attach CoinGecko Demo API key if configured (improves rate limits significantly)
+  const cgHeaders = {
+    'User-Agent': 'Mozilla/5.0',
+    'Accept': 'application/json',
+  };
+  const cgKey = env?.COINGECKO_API_KEY;
+  if (cgKey) cgHeaders['x-cg-demo-api-key'] = cgKey;
 
   try {
     const res = await fetch(targetUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0',
-        'Accept': 'application/json',
-      },
+      headers: cgHeaders,
       signal: AbortSignal.timeout(8000),
     });
     if (res.ok) {
       const data = await res.json();
       const headers = {
         'Content-Type': 'application/json; charset=utf-8',
-        'Cache-Control': 'public, max-age=90',
+        'Cache-Control': 'public, max-age=120',
         ...CORS
       };
       const response = new Response(JSON.stringify(data), { status: 200, headers });
@@ -1586,30 +1613,30 @@ export default {
   async fetch(request, env) {
     const { pathname } = new URL(request.url);
 
-    if (pathname === '/phat-nguoi')    return handlePhatNguoi(request);
-    if (pathname === '/news-rss')      return handleNewsRSS(request);
-    if (pathname === '/news-article')  return handleNewsArticle(request);
-    if (pathname === '/vnindex')       return handleVNIndex(request);
-    if (pathname === '/power-outage')  return handlePowerOutage(request);
-    if (pathname === '/vcb-rates')     return handleVCBRates(request);
-    if (pathname === '/lottery')       return handleLottery(request);
-    if (pathname === '/football')      return handleFootball(request);
-    if (pathname === '/api/todos')     return handleTodos(request, env);
+    if (pathname === '/phat-nguoi') return handlePhatNguoi(request);
+    if (pathname === '/news-rss') return handleNewsRSS(request);
+    if (pathname === '/news-article') return handleNewsArticle(request);
+    if (pathname === '/vnindex') return handleVNIndex(request);
+    if (pathname === '/power-outage') return handlePowerOutage(request);
+    if (pathname === '/vcb-rates') return handleVCBRates(request);
+    if (pathname === '/lottery') return handleLottery(request);
+    if (pathname === '/football') return handleFootball(request);
+    if (pathname === '/api/todos') return handleTodos(request, env);
     if (pathname === '/api/spam-check') return handleSpamCheck(request);
     if (pathname === '/api/tax-lookup') return handleTaxLookup(request);
-    if (pathname === '/api/downloader')         return handleDownloader(request);
-    if (pathname === '/api/download-proxy')      return handleDownloadProxy(request);
+    if (pathname === '/api/downloader') return handleDownloader(request);
+    if (pathname === '/api/download-proxy') return handleDownloadProxy(request);
     if (pathname === '/api/movies-now-playing') return handleMoviesNowPlaying(request);
-    if (pathname === '/api/exchange')            return handleExchange(request);
-    if (pathname === '/api/crypto')              return handleCrypto(request);
-    if (pathname === '/vietlott')      return handleVietlott(request);
+    if (pathname === '/api/exchange') return handleExchange(request);
+    if (pathname === '/api/crypto') return handleCrypto(request, env);
+    if (pathname === '/vietlott') return handleVietlott(request);
 
 
     // ── Routes bảo mật (key ẩn trong Cloudflare Secrets) ──
-    if (pathname === '/weather')       return handleWeather(request, env);
-    if (pathname === '/gold')          return handleGold(request, env);
-    if (pathname === '/gas')           return handleGas(request, env);
-    if (pathname === '/aqi')           return handleAQI(request, env);
+    if (pathname === '/weather') return handleWeather(request, env);
+    if (pathname === '/gold') return handleGold(request, env);
+    if (pathname === '/gas') return handleGas(request, env);
+    if (pathname === '/aqi') return handleAQI(request, env);
 
     // Serve static assets for everything else
     return env.ASSETS.fetch(request);
