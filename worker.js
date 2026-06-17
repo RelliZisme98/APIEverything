@@ -822,7 +822,23 @@ async function handleGas(request, env) {
       headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public, max-age=600' }
     });
   } catch (err) {
-    return cors(JSON.stringify({ error: err.message }), 500);
+    // Petrolimex blocks non-VN IPs → timeout. Serve static fallback so UI shows "ƯỚC TÍNH" badge.
+    console.warn('[Gas] Petrolimex unreachable, using static fallback:', err.message);
+    return new Response(JSON.stringify({
+      success: true,
+      priceDate: '2026-06-11',
+      source: 'static',
+      prices: [
+        { name: 'Xăng RON95-III',        r1: 21470, r2: 21980 },
+        { name: 'Xăng E5 RON92',          r1: 20920, r2: 21430 },
+        { name: 'Dầu Diesel 0,05S',       r1: 19940, r2: 20450 },
+        { name: 'Dầu Diesel 0,001S',      r1: 21490, r2: 22000 },
+        { name: 'Dầu hỏa 2-K',           r1: 25890, r2: 26400 },
+        { name: 'Dầu Mazut 180CST 3,5S',  r1: 15800, r2: 15800 },
+      ],
+    }), {
+      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public, max-age=600' }
+    });
   }
 }
 
