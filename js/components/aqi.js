@@ -8,7 +8,7 @@ const AQI_CITIES = [
   // ── Miền Nam ──
   {
     label: 'TP.HCM', group: 'Miền Nam',
-    station: 'ho-chi-minh-city',
+    station: 'geo:10.8231;106.6297',    // geo lookup — US Consulate station đã offline
     owmFallback: true, owmLat: 10.8231, owmLon: 106.6297,
     owmName: 'Hồ Chí Minh, Vietnam',
   },
@@ -98,7 +98,7 @@ const AQI_CITIES = [
   },
 ];
 
-let currentStation = 'ho-chi-minh-city';
+let currentStation = 'geo:10.8231;106.6297';
 let currentCity    = AQI_CITIES[0];
 
 export async function renderAQI(containerId = 'aqiContent') {

@@ -849,11 +849,14 @@ async function handleAQI(request, env) {
   if (!token) return cors(JSON.stringify({ error: 'AQICN_TOKEN chưa được cấu hình trong Cloudflare Secrets.' }), 503);
 
   const station = new URL(request.url).searchParams.get('station') ?? 'ho-chi-minh-city';
-  // Chỉ cho phép ký tự an toàn (@, chữ số, chữ thường, gạch ngang)
-  if (!/^[@a-z0-9\-]+$/.test(station)) return cors(JSON.stringify({ error: 'invalid station' }), 400);
+  // Allow: named stations (letters, dash), numeric IDs (@123), geo:lat;lon (digits, dot, colon, semicolons)
+  if (!/^[@a-z0-9\-.:;]+$/.test(station)) return cors(JSON.stringify({ error: 'invalid station' }), 400);
+
+  // geo: format must NOT be percent-encoded — pass as-is into the path
+  const stationPath = station.startsWith('geo:') ? station : encodeURIComponent(station);
 
   try {
-    const res = await fetch(`https://api.waqi.info/feed/${encodeURIComponent(station)}/?token=${token}`, {
+    const res = await fetch(`https://api.waqi.info/feed/${stationPath}/?token=${token}`, {
       headers: { 'User-Agent': 'Mozilla/5.0' },
     });
     const body = await res.text();
