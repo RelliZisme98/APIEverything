@@ -1528,7 +1528,7 @@ async function handleExchange(request) {
 }
 
 // ─── /api/crypto (CoinGecko Proxy) ──────────────────────────────────
-async function handleCrypto(request) {
+async function handleCrypto(request, env) {
   if (request.method === 'OPTIONS') return preflight();
   const reqUrl = new URL(request.url);
   const targetPath = reqUrl.searchParams.get('path') || 'coins/markets';
@@ -1552,19 +1552,24 @@ async function handleCrypto(request) {
   const cgQuery = cgParams.toString() ? `?${cgParams.toString()}` : '';
   const targetUrl = `https://api.coingecko.com/api/v3/${targetPath}${cgQuery}`;
 
+  // Attach CoinGecko Demo API key if configured (improves rate limits significantly)
+  const cgHeaders = {
+    'User-Agent': 'Mozilla/5.0',
+    'Accept': 'application/json',
+  };
+  const cgKey = env?.COINGECKO_API_KEY;
+  if (cgKey) cgHeaders['x-cg-demo-api-key'] = cgKey;
+
   try {
     const res = await fetch(targetUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0',
-        'Accept': 'application/json',
-      },
+      headers: cgHeaders,
       signal: AbortSignal.timeout(8000),
     });
     if (res.ok) {
       const data = await res.json();
       const headers = {
         'Content-Type': 'application/json; charset=utf-8',
-        'Cache-Control': 'public, max-age=90',
+        'Cache-Control': 'public, max-age=120',
         ...CORS
       };
       const response = new Response(JSON.stringify(data), { status: 200, headers });
@@ -1604,7 +1609,7 @@ export default {
     if (pathname === '/api/download-proxy')      return handleDownloadProxy(request);
     if (pathname === '/api/movies-now-playing') return handleMoviesNowPlaying(request);
     if (pathname === '/api/exchange')            return handleExchange(request);
-    if (pathname === '/api/crypto')              return handleCrypto(request);
+    if (pathname === '/api/crypto')              return handleCrypto(request, env);
     if (pathname === '/vietlott')      return handleVietlott(request);
 
 
