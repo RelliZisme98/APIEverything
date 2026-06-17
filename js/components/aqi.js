@@ -8,7 +8,7 @@ const AQI_CITIES = [
   // ── Miền Nam ──
   {
     label: 'TP.HCM', group: 'Miền Nam',
-    station: 'geo:10.8231;106.6297',    // geo lookup — US Consulate station đã offline
+    station: 'ho-chi-minh-city',        // Trạm Lãnh sự quán Mỹ đã offline -> sẽ tự động fallback sang OWM
     owmFallback: true, owmLat: 10.8231, owmLon: 106.6297,
     owmName: 'Hồ Chí Minh, Vietnam',
   },
@@ -40,13 +40,13 @@ const AQI_CITIES = [
   // ── Miền Trung ──
   {
     label: 'Đà Nẵng', group: 'Miền Trung',
-    station: null,   // AQICN @4629 trỏ sai → dùng OWM trực tiếp
+    station: '@1584',  // Trạm active Đà Nẵng
     owmFallback: true, owmLat: 16.0544, owmLon: 108.2022,
     owmName: 'Đà Nẵng, Vietnam',
   },
   {
     label: 'Huế', group: 'Miền Trung',
-    station: null,   // AQICN @5505 offline → dùng OWM
+    station: '@12488',   // Trạm active Huế
     owmFallback: true, owmLat: 16.4674, owmLon: 107.5905,
     owmName: 'Huế, Vietnam',
   },
@@ -78,7 +78,7 @@ const AQI_CITIES = [
   },
   {
     label: 'Hạ Long', group: 'Miền Bắc',
-    station: null,
+    station: '@13444',  // Trạm active Quảng Ninh/Minh Thành
     owmFallback: true, owmLat: 20.9557, owmLon: 107.0614,
     owmName: 'Hạ Long, Vietnam',
   },
@@ -98,7 +98,7 @@ const AQI_CITIES = [
   },
 ];
 
-let currentStation = 'geo:10.8231;106.6297';
+let currentStation = 'ho-chi-minh-city';
 let currentCity    = AQI_CITIES[0];
 
 export async function renderAQI(containerId = 'aqiContent') {
@@ -165,7 +165,8 @@ export async function renderAQI(containerId = 'aqiContent') {
     }
 
     const level  = aqiLevel(aqi);
-    const city   = data.city?.name ?? currentCity.label;
+    const city   = currentCity.label;
+    const stationName = data.city?.name ?? currentCity.label;
     const updated = data.time?.s ?? '';
     const iaqi   = data.iaqi ?? {};
 
@@ -212,7 +213,7 @@ export async function renderAQI(containerId = 'aqiContent') {
         </div>
       </div>
       <div class="aqi-standard-note">
-        ℹ️ Tiêu chuẩn <strong>US AQI (EPA)</strong> · Trạm: ${city}
+        ℹ️ Tiêu chuẩn <strong>US AQI (EPA)</strong> · Trạm đo: ${stationName}
         &nbsp;· Giá trị có thể khác với IQAir (dùng tiêu chuẩn CN AQI)
       </div>
       ${pollutantCards.length ? `
@@ -319,7 +320,7 @@ function renderFromOWM(el, selectorHtml, owmData, cityConf) {
         </div>
       </div>
       <div class="aqi-hero-right">
-        <div class="aqi-city">📍 ${cityConf.owmName}</div>
+        <div class="aqi-city">📍 ${cityConf.label}</div>
         <div class="aqi-scale">
           <div class="aqi-scale-bar"><div class="aqi-scale-fill" style="width:${Math.min(aqi/300*100,100)}%;background:${level.color};"></div></div>
           <div class="aqi-scale-labels">
