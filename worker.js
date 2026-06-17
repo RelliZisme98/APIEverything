@@ -1530,8 +1530,8 @@ async function handleExchange(request) {
 // ─── /api/crypto (CoinGecko Proxy) ──────────────────────────────────
 async function handleCrypto(request) {
   if (request.method === 'OPTIONS') return preflight();
-  const { search } = new URL(request.url);
-  const targetPath = new URL(request.url).searchParams.get('path') || 'coins/markets';
+  const reqUrl = new URL(request.url);
+  const targetPath = reqUrl.searchParams.get('path') || 'coins/markets';
 
   const cacheUrl = new URL(request.url);
   const cacheKey = new Request(cacheUrl.toString(), request);
@@ -1546,8 +1546,11 @@ async function handleCrypto(request) {
     }
   }
 
-  // Build the target URL
-  const targetUrl = `https://api.coingecko.com/api/v3/${targetPath}${search}`;
+  // Build the CoinGecko URL — strip our internal `path` param before forwarding
+  const cgParams = new URLSearchParams(reqUrl.searchParams);
+  cgParams.delete('path');
+  const cgQuery = cgParams.toString() ? `?${cgParams.toString()}` : '';
+  const targetUrl = `https://api.coingecko.com/api/v3/${targetPath}${cgQuery}`;
 
   try {
     const res = await fetch(targetUrl, {
