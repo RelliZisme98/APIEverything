@@ -152,7 +152,7 @@ export async function renderAQI(containerId = 'aqiContent') {
           </div>
         </div>
         <div class="aqi-hero-right">
-          <div class="aqi-city">📍 ${city}</div>
+          <div class="aqi-city">📍 ${city} <span class="aqi-badge real">Trạm thực tế</span></div>
           <div class="aqi-scale">
             <div class="aqi-scale-bar">
               <div class="aqi-scale-fill" style="width:${Math.min(aqi/300*100,100)}%;background:${level.color};"></div>
@@ -274,7 +274,7 @@ function renderFromOWM(el, selectorHtml, owmData, cityConf) {
         </div>
       </div>
       <div class="aqi-hero-right">
-        <div class="aqi-city">📍 ${cityConf.label}</div>
+        <div class="aqi-city">📍 ${cityConf.label} <span class="aqi-badge est">Dữ liệu mô phỏng</span></div>
         <div class="aqi-scale">
           <div class="aqi-scale-bar"><div class="aqi-scale-fill" style="width:${Math.min(aqi/300*100,100)}%;background:${level.color};"></div></div>
           <div class="aqi-scale-labels">
