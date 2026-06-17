@@ -5,100 +5,54 @@
 import { fetchAQI, aqiLevel } from '../api/aqi.js';
 
 const AQI_CITIES = [
-  // ── Miền Nam ──
+  // ── Miền Bắc ──
   {
-    label: 'TP.HCM', group: 'Miền Nam',
-    station: 'ho-chi-minh-city',        // Trạm Lãnh sự quán Mỹ đã offline -> sẽ tự động fallback sang OWM
-    owmFallback: true, owmLat: 10.8231, owmLon: 106.6297,
-    owmName: 'Hồ Chí Minh, Vietnam',
+    label: 'Hà Nội', group: 'Miền Bắc',
+    station: '@1583',  // Trạm hoạt động tốt
+    owmFallback: true, owmLat: 21.0285, owmLon: 105.8542,
+    owmName: 'Hà Nội, Vietnam',
   },
   {
-    label: 'Cần Thơ', group: 'Miền Nam',
-    station: '@13687',
-    owmFallback: true, owmLat: 10.0452, owmLon: 105.7469,
-    owmName: 'Cần Thơ, Vietnam',
+    label: 'Hạ Long', group: 'Miền Bắc',
+    station: '@13444',  // Trạm Quảng Ninh/Minh Thành hoạt động tốt
+    owmFallback: true, owmLat: 20.9557, owmLon: 107.0614,
+    owmName: 'Hạ Long, Vietnam',
   },
   {
-    label: 'Bình Dương', group: 'Miền Nam',
-    station: null,
-    owmFallback: true, owmLat: 11.1333, owmLon: 106.5497,
-    owmName: 'Bình Dương, Vietnam',
+    label: 'Thái Nguyên', group: 'Miền Bắc',
+    station: '@13027',  // Trạm hoạt động tốt
+    owmFallback: true, owmLat: 21.5928, owmLon: 105.8442,
+    owmName: 'Thái Nguyên, Vietnam',
   },
   {
-    label: 'Biên Hòa', group: 'Miền Nam',
-    station: null,
-    owmFallback: true, owmLat: 10.9541, owmLon: 106.8345,
-    owmName: 'Biên Hòa, Vietnam',
+    label: 'Việt Trì', group: 'Miền Bắc',
+    station: '@5506',  // Trạm hoạt động tốt
+    owmFallback: true, owmLat: 21.3225, owmLon: 105.4019,
+    owmName: 'Việt Trì, Vietnam',
   },
   {
-    label: 'Vũng Tàu', group: 'Miền Nam',
-    station: null,
-    owmFallback: true, owmLat: 10.4103, owmLon: 107.1364,
-    owmName: 'Vũng Tàu, Vietnam',
+    label: 'Cao Bằng', group: 'Miền Bắc',
+    station: '@13688',  // Trạm hoạt động tốt
+    owmFallback: true, owmLat: 22.6689, owmLon: 106.2581,
+    owmName: 'Cao Bằng, Vietnam',
   },
 
   // ── Miền Trung ──
   {
     label: 'Đà Nẵng', group: 'Miền Trung',
-    station: '@1584',  // Trạm active Đà Nẵng
+    station: '@1584',  // Trạm hoạt động tốt
     owmFallback: true, owmLat: 16.0544, owmLon: 108.2022,
     owmName: 'Đà Nẵng, Vietnam',
   },
   {
     label: 'Huế', group: 'Miền Trung',
-    station: '@12488',   // Trạm active Huế
+    station: '@12488',   // Trạm hoạt động tốt
     owmFallback: true, owmLat: 16.4674, owmLon: 107.5905,
     owmName: 'Huế, Vietnam',
   },
-  {
-    label: 'Nha Trang', group: 'Miền Trung',
-    station: null,
-    owmFallback: true, owmLat: 12.2388, owmLon: 109.1967,
-    owmName: 'Nha Trang, Vietnam',
-  },
-  {
-    label: 'Quy Nhơn', group: 'Miền Trung',
-    station: null,
-    owmFallback: true, owmLat: 13.7829, owmLon: 109.2196,
-    owmName: 'Quy Nhơn, Vietnam',
-  },
-
-  // ── Miền Bắc ──
-  {
-    label: 'Hà Nội', group: 'Miền Bắc',
-    station: '@1583',  // Hanoi US Embassy - verified
-    owmFallback: true, owmLat: 21.0285, owmLon: 105.8542,
-    owmName: 'Hà Nội, Vietnam',
-  },
-  {
-    label: 'Hải Phòng', group: 'Miền Bắc',
-    station: null,
-    owmFallback: true, owmLat: 20.8449, owmLon: 106.6881,
-    owmName: 'Hải Phòng, Vietnam',
-  },
-  {
-    label: 'Hạ Long', group: 'Miền Bắc',
-    station: '@13444',  // Trạm active Quảng Ninh/Minh Thành
-    owmFallback: true, owmLat: 20.9557, owmLon: 107.0614,
-    owmName: 'Hạ Long, Vietnam',
-  },
-
-  // ── Tây Nguyên ──
-  {
-    label: 'Đà Lạt', group: 'Tây Nguyên',
-    station: null,
-    owmFallback: true, owmLat: 11.9404, owmLon: 108.4583,
-    owmName: 'Đà Lạt, Vietnam',
-  },
-  {
-    label: 'Buôn Ma Thuột', group: 'Tây Nguyên',
-    station: null,
-    owmFallback: true, owmLat: 12.6670, owmLon: 108.0377,
-    owmName: 'Buôn Ma Thuột, Vietnam',
-  },
 ];
 
-let currentStation = 'ho-chi-minh-city';
+let currentStation = '@1583';
 let currentCity    = AQI_CITIES[0];
 
 export async function renderAQI(containerId = 'aqiContent') {
