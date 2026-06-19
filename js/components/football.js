@@ -990,3 +990,51 @@ function renderStats(el, data) {
       ${renderCol('Vua kiến tạo', '🅰️', assistsData)}
     </div>`;
 }
+
+/**
+ * Fetch live football matches for the ticker tape.
+ */
+export async function fetchLiveScores() {
+  const liveMatches = [];
+  const leagueShortNames = {
+    pl: 'Ngoại hạng Anh',
+    laliga: 'La Liga',
+    seriea: 'Serie A',
+    ucl: 'UCL',
+    wc: 'World Cup'
+  };
+
+  try {
+    const promises = Object.entries(LEAGUES).map(async ([key, l]) => {
+      try {
+        const res = await fetch(API({ league: l.id, type: 'scoreboard' }), { signal: AbortSignal.timeout(6000) });
+        if (!res.ok) return;
+        const data = await res.json();
+        const events = data.events || [];
+        for (const e of events) {
+          const status = e.status?.type;
+          if (status?.state === 'in') { // live match
+            const competition = e.competitions?.[0];
+            const competitors = competition?.competitors || [];
+            const home = competitors.find(c => c.homeAway === 'home') || {};
+            const away = competitors.find(c => c.homeAway === 'away') || {};
+            liveMatches.push({
+              league: leagueShortNames[key] || key.toUpperCase(),
+              home: home.team?.abbreviation || home.team?.shortDisplayName || home.team?.displayName || 'HOME',
+              away: away.team?.abbreviation || away.team?.shortDisplayName || away.team?.displayName || 'AWAY',
+              homeScore: home.score ?? 0,
+              awayScore: away.score ?? 0,
+              time: status.detail || 'LIVE'
+            });
+          }
+        }
+      } catch (err) {
+        console.warn(`[Football Live] failed to fetch league ${key}:`, err.message);
+      }
+    });
+    await Promise.all(promises);
+  } catch (err) {
+    console.warn('[Football Live] error:', err.message);
+  }
+  return liveMatches;
+}

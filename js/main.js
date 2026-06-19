@@ -33,7 +33,7 @@ import { renderBankRates }   from './components/bank-rates.js';
 import { renderTaxCalc }     from './components/tax-calc.js';
 import { renderLottery }     from './components/lottery.js';
 import { renderWorldClock, destroyWorldClock } from './components/world-clock.js';
-import { renderFootball }    from './components/football.js';
+import { renderFootball, fetchLiveScores }    from './components/football.js';
 import { renderTravel }      from './components/travel.js';
 import { renderTodo }        from './components/todo.js';
 import { renderLookup }      from './components/lookup.js';
@@ -130,9 +130,11 @@ async function loadGold() {
     } else {
       renderGoldFallback();
     }
+    renderTicker();
   } catch (err) {
     console.warn('[Gold]', err);
     renderGoldFallback();
+    renderTicker();
   }
 }
 
@@ -141,9 +143,11 @@ async function loadGas() {
   try {
     await fetchGasPrice();
     renderGas();
+    renderTicker();
   } catch (err) {
     console.warn('[Gas]', err);
     renderGas();
+    renderTicker();
   }
 }
 
@@ -188,10 +192,12 @@ async function loadWeather(cityOverride) {
 
     if (forecast?.daily?.length) renderForecast(forecast.daily);
     setWeatherBadge(true);
+    renderTicker();
   } catch (err) {
     console.warn('[Weather]', err);
     renderWeatherError(err.message);
     setWeatherBadge(false);
+    renderTicker();
   }
 }
 
@@ -211,6 +217,7 @@ async function refreshAll() {
     loadVNIndex(),
     loadNews(),
     loadAQI(),
+    loadLiveFootball(),
   ]);
 
   if (btn) btn.classList.remove('spinning');
@@ -235,6 +242,17 @@ async function loadVNIndex(isSilent = false) { await renderVNIndex('vnindexConte
 
 // ── News load ──
 async function loadNews(isSilent = false) { await renderNews('newsContent', isSilent); }
+
+// ── Football Live load ──
+async function loadLiveFootball() {
+  try {
+    const liveMatches = await fetchLiveScores();
+    state.liveFootballMatches = liveMatches || [];
+    renderTicker();
+  } catch (err) {
+    console.warn('[Live Football]', err);
+  }
+}
 
 // ── Lazy-load new features on first visit ──
 const _rendered = new Set();
@@ -297,6 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAQI(true);
     loadVNIndex(true);
     loadNews(true);
+    loadLiveFootball();
   }, 60_000);
 });
 

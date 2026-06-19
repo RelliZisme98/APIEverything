@@ -3,6 +3,8 @@
  * Hỗ trợ: AQICN station + OWM fallback + Dropdown chọn thành phố
  */
 import { fetchAQI, aqiLevel } from '../api/aqi.js';
+import { state } from '../store/state.js';
+import { renderTicker } from './ticker.js';
 
 const AQI_CITIES = [
   // ── Miền Bắc ──
@@ -121,6 +123,8 @@ export async function renderAQI(containerId = 'aqiContent', isSilent = false) {
     }
 
     const level  = aqiLevel(aqi);
+    state.aqiData = { city: currentCity.label, aqi, label: level.label };
+    renderTicker();
     const city   = currentCity.label;
     const stationName = data.city?.name ?? currentCity.label;
     const updated = data.time?.s ?? '';
@@ -250,6 +254,9 @@ function renderFromOWM(el, selectorHtml, owmData, cityConf) {
   const pm25   = comp.pm2_5 ?? 0;
   const aqi    = owmPm25ToAQI(pm25);
   const level  = aqiLevelFn(aqi);
+
+  state.aqiData = { city: cityConf.label, aqi, label: level.label };
+  renderTicker();
 
   const pollCards = [
     { label: 'PM2.5', val: pm25?.toFixed(1),     unit: 'µg/m³' },
