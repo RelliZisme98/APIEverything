@@ -286,6 +286,13 @@ async function handleVNIndex(request) {
 }
 
 // ─── /power-outage ───────────────────────────────────────────────────
+
+// Helper: lấy ngày hôm nay theo múi giờ VN (ICT +7), trả về yyyy-mm-dd
+function todayVN() {
+  return new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }))
+    .toISOString().split('T')[0];
+}
+
 async function handlePowerOutage(request) {
   if (request.method === 'OPTIONS') return preflight();
   const url = new URL(request.url);
@@ -317,6 +324,12 @@ async function handlePowerOutage(request) {
         const tuNgay = url.searchParams.get('tuNgay') || '';
         const denNgay = url.searchParams.get('denNgay') || '';
         upstreamUrl = `https://cskh.evnspc.vn/TraCuu/GetThongTinLichNgungGiamCungCapDien?maKH=${encodeURIComponent(maKH)}&tuNgay=${encodeURIComponent(tuNgay)}&denNgay=${encodeURIComponent(denNgay)}&ChucNang=MaKhachHang`;
+      } else if (action === 'today') {
+        // Auto-fetch hôm nay: dùng madvi='' (toàn quốc miền Nam), date=today
+        const today = todayVN();
+        const [yy, mm, dd] = today.split('-');
+        const tuNgay = `${dd}-${mm}-${yy}`;
+        upstreamUrl = `https://cskh.evnspc.vn/TraCuu/GetThongTinLichNgungGiamCungCapDien?madvi=&tuNgay=${encodeURIComponent(tuNgay)}&denNgay=${encodeURIComponent(tuNgay)}&ChucNang=MaDonVi`;
       } else {
         return cors(JSON.stringify({ error: 'Invalid action' }), 400);
       }
@@ -337,14 +350,17 @@ async function handlePowerOutage(request) {
     try {
       let upstreamUrl;
       if (action === 'tracuu') {
-        // EVNHANOI: /api/power-outage?keyword=...&fromDate=...&toDate=...
         const keyword = url.searchParams.get('keyword') || '';
         const fromDate = url.searchParams.get('fromDate') || '';
         const toDate = url.searchParams.get('toDate') || '';
-        upstreamUrl = `https://evnhanoi.vn/api/power-outage/search?keyword=${encodeURIComponent(keyword)}&fromDate=${encodeURIComponent(fromDate)}&toDate=${encodeURIComponent(toDate)}&size=50`;
+        upstreamUrl = `https://evnhanoi.vn/api/power-outage/search?keyword=${encodeURIComponent(keyword)}&fromDate=${encodeURIComponent(fromDate)}&toDate=${encodeURIComponent(toDate)}&size=100`;
       } else if (action === 'tracuu-makh') {
         const maKH = url.searchParams.get('maKH') || '';
         upstreamUrl = `https://evnhanoi.vn/api/power-outage/search?keyword=${encodeURIComponent(maKH)}&size=50`;
+      } else if (action === 'today') {
+        // Auto-fetch hôm nay: keyword trống, fromDate=toDate=today
+        const today = todayVN();
+        upstreamUrl = `https://evnhanoi.vn/api/power-outage/search?keyword=&fromDate=${today}&toDate=${today}&size=200`;
       } else {
         return cors(JSON.stringify({ error: 'Invalid action' }), 400);
       }
@@ -363,13 +379,17 @@ async function handlePowerOutage(request) {
   if (evn === 'cpc') {
     BROWSER_HEADERS['Referer'] = 'https://cskh.cpc.vn/';
     try {
-      const keyword = url.searchParams.get('keyword') || '';
-      const fromDate = url.searchParams.get('fromDate') || '';
-      const toDate = url.searchParams.get('toDate') || '';
-      const province = url.searchParams.get('province') || '';
-
-      // CPC has a JSON search API
-      const upstreamUrl = `https://cskh.cpc.vn/api/power-outage/list?province=${encodeURIComponent(province)}&fromDate=${encodeURIComponent(fromDate)}&toDate=${encodeURIComponent(toDate)}&keyword=${encodeURIComponent(keyword)}&pageSize=50&pageIndex=1`;
+      let upstreamUrl;
+      if (action === 'today') {
+        const today = todayVN();
+        upstreamUrl = `https://cskh.cpc.vn/api/power-outage/list?province=&fromDate=${today}&toDate=${today}&keyword=&pageSize=200&pageIndex=1`;
+      } else {
+        const keyword = url.searchParams.get('keyword') || '';
+        const fromDate = url.searchParams.get('fromDate') || '';
+        const toDate = url.searchParams.get('toDate') || '';
+        const province = url.searchParams.get('province') || '';
+        upstreamUrl = `https://cskh.cpc.vn/api/power-outage/list?province=${encodeURIComponent(province)}&fromDate=${encodeURIComponent(fromDate)}&toDate=${encodeURIComponent(toDate)}&keyword=${encodeURIComponent(keyword)}&pageSize=50&pageIndex=1`;
+      }
 
       const upstream = await fetch(upstreamUrl, { headers: { ...BROWSER_HEADERS, 'Accept': 'application/json' } });
       const body = await upstream.text();
@@ -394,6 +414,9 @@ async function handlePowerOutage(request) {
       let upstreamUrl;
       if (maKH) {
         upstreamUrl = `https://cskh.npc.com.vn/TraCuu/GetLichNgungCungCapDienTheoMaKH?maKH=${encodeURIComponent(maKH)}&tuNgay=${encodeURIComponent(fromDate)}&denNgay=${encodeURIComponent(toDate)}`;
+      } else if (action === 'today') {
+        const today = todayVN();
+        upstreamUrl = `https://cskh.npc.com.vn/TraCuu/GetLichNgungCungCapDienTheoKhuVuc?tinh=&tuNgay=${today}&denNgay=${today}`;
       } else {
         upstreamUrl = `https://cskh.npc.com.vn/TraCuu/GetLichNgungCungCapDienTheoKhuVuc?tinh=${encodeURIComponent(province)}&tuNgay=${encodeURIComponent(fromDate)}&denNgay=${encodeURIComponent(toDate)}`;
       }
