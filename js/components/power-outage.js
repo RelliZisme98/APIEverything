@@ -31,8 +31,21 @@ function getOfficialUrl(key) {
 function parseJsonItems(body) {
   try {
     const json = JSON.parse(body);
-    if (json.error) return [];
-    return Array.isArray(json) ? json : (json.data || json.items || json.result || json.content || []);
+    if (!json || json.error) return [];
+    // Direct array
+    if (Array.isArray(json)) return json;
+    // Spring Boot Pageable: { content: [...], totalElements: N }
+    if (Array.isArray(json.content)) return json.content;
+    // Wrapped: { data: [...] } or { data: { content: [...] } }
+    if (json.data) {
+      if (Array.isArray(json.data)) return json.data;
+      if (Array.isArray(json.data?.content)) return json.data.content;
+    }
+    // Other common wrappers
+    for (const key of ['items', 'result', 'results', 'records', 'list']) {
+      if (Array.isArray(json[key])) return json[key];
+    }
+    return [];
   } catch { return []; }
 }
 

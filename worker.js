@@ -289,8 +289,11 @@ async function handleVNIndex(request) {
 
 // Helper: lấy ngày hôm nay theo múi giờ VN (ICT +7), trả về yyyy-mm-dd
 function todayVN() {
-  return new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }))
-    .toISOString().split('T')[0];
+  const ict = new Date(Date.now() + 7 * 60 * 60 * 1000); // UTC + 7h
+  const y = ict.getUTCFullYear();
+  const m = String(ict.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(ict.getUTCDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }
 
 async function handlePowerOutage(request) {
