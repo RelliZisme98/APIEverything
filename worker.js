@@ -361,9 +361,24 @@ async function handlePowerOutage(request) {
         const maKH = url.searchParams.get('maKH') || '';
         upstreamUrl = `https://evnhanoi.vn/api/power-outage/search?keyword=${encodeURIComponent(maKH)}&size=50`;
       } else if (action === 'today') {
-        // Auto-fetch hôm nay: keyword trống, fromDate=toDate=today
         const today = todayVN();
         upstreamUrl = `https://evnhanoi.vn/api/power-outage/search?keyword=&fromDate=${today}&toDate=${today}&size=200`;
+      } else if (action === 'debug') {
+        // Debug: trả về raw response để kiểm tra format thực tế
+        const today = todayVN();
+        upstreamUrl = `https://evnhanoi.vn/api/power-outage/search?keyword=&fromDate=${today}&toDate=${today}&size=5`;
+        const upstream = await fetch(upstreamUrl, { headers: { ...BROWSER_HEADERS, 'Accept': 'application/json' } });
+        const body = await upstream.text();
+        const respHeaders = {};
+        upstream.headers.forEach((v, k) => { respHeaders[k] = v; });
+        return cors(JSON.stringify({
+          status: upstream.status,
+          contentType: upstream.headers.get('content-type'),
+          url: upstreamUrl,
+          today,
+          responseHeaders: respHeaders,
+          bodySnippet: body.slice(0, 500),
+        }), 200);
       } else {
         return cors(JSON.stringify({ error: 'Invalid action' }), 400);
       }
@@ -377,6 +392,7 @@ async function handlePowerOutage(request) {
       return cors(JSON.stringify({ error: err.message }), 500);
     }
   }
+
 
   // ── EVNCPC (Miền Trung & Tây Nguyên) ──────────────────────────────
   if (evn === 'cpc') {
