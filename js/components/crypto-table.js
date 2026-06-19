@@ -18,7 +18,7 @@ export function renderCryptoTable(coins, tbodyId = 'cryptoTableBody') {
     const chg7  = c.price_change_percentage_7d_in_currency;
 
     return `
-      <tr>
+      <tr onclick="window.selectCrypto('${c.id}')" style="cursor: pointer;">
         <td class="ct-rank">${i + 1}</td>
         <td>
           <div class="ct-coin">

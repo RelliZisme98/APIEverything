@@ -1,455 +1,274 @@
 /**
  * components/power-outage.js
- * In-page power outage lookup via Cloudflare proxy → EVNSPC API
- * Sub-unit dropdowns use static hardcoded data (no proxy needed).
+ * Dashboard lịch cúp điện hôm nay
  */
 
 import APP_CONFIG from '../../config.js';
-import { EVNSPC_COMPANIES, EVNSPC_SUB_UNITS } from '../data/evnspc-units.js';
 
 const PROXY = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.port)
   ? window.location.origin
   : (APP_CONFIG.TRAFFIC_PROXY_URL || window.location.origin);
 
-// ── EVN regions cho tra cứu proxy ──────────────────────────────────────────
-const OTHER_EVN = [
+// ── Ngày hôm nay (ISO yyyy-mm-dd) cho pre-fill link ────────────────────────
+function todayISO() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${dd}`;
+}
+
+function todayLabel() {
+  return new Date().toLocaleDateString('vi-VN', {
+    weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
+  });
+}
+
+// ── Cấu hình các vùng EVN ──────────────────────────────────────────────────
+// noAutoLoad: true  → API yêu cầu auth / không public → chỉ hiện link tra cứu
+// noAutoLoad: false → thử auto-load qua proxy worker
+const EVN_REGIONS = [
   {
-    key: 'hanoi', label: 'EVNHANOI – Hà Nội', color: '#60a5fa', hotline: '1900 1288',
-    provinces: ['Hà Nội'],
-    fields: [
-      { id: 'hn_keyword', label: 'Tên khu vực / Quận / Phường', placeholder: 'VD: Hoàn Kiếm, Đống Đa...' },
-      { id: 'hn_from',    label: 'Từ ngày', type: 'date' },
-      { id: 'hn_to',      label: 'Đến ngày', type: 'date' },
-    ],
+    key: 'hanoi', short: 'Hà Nội', label: 'EVNHANOI – Hà Nội',
+    icon: '🏙️', color: '#60a5fa', hotline: '1900 1288', format: 'json',
+    noAutoLoad: true,
+    officialUrl: () => `https://evnhanoi.vn/search/power-cut`,
+    note: 'API yêu cầu xác thực — tra cứu trực tiếp trên trang chính thức',
   },
   {
-    key: 'npc', label: 'EVNNPC – Miền Bắc (27 tỉnh)', color: '#a78bfa', hotline: '1900 6769',
-    provinces: ['Vĩnh Phúc','Bắc Ninh','Quảng Ninh','Hải Dương','Hải Phòng','Hưng Yên','Thái Bình','Hà Nam','Nam Định','Ninh Bình','Hà Giang','Cao Bằng','Bắc Kạn','Tuyên Quang','Lào Cai','Yên Bái','Thái Nguyên','Lạng Sơn','Bắc Giang','Phú Thọ','Điện Biên','Lai Châu','Sơn La','Hòa Bình','Thanh Hóa','Nghệ An','Hà Tĩnh'],
-    fields: [
-      { id: 'npc_province', label: 'Tỉnh thành', type: 'province' },
-      { id: 'npc_from',     label: 'Từ ngày', type: 'date' },
-      { id: 'npc_to',       label: 'Đến ngày', type: 'date' },
-      { id: 'npc_makh',     label: 'Mã khách hàng (nếu có)', placeholder: 'VD: PB012345...' },
-    ],
+    key: 'npc', short: 'Miền Bắc', label: 'EVNNPC – Miền Bắc (27 tỉnh)',
+    icon: '🏔️', color: '#a78bfa', hotline: '1900 6769', format: 'html',
+    noAutoLoad: true,
+    officialUrl: () => `https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungGiamCungCapDien`,
+    note: 'API không phản hồi ổn định — tra cứu trực tiếp trên trang chính thức',
   },
   {
-    key: 'cpc', label: 'EVNCPC – Miền Trung & Tây Nguyên', color: '#fbbf24', hotline: '1900 1909',
-    provinces: ['Đà Nẵng','Quảng Nam','Quảng Ngãi','Bình Định','Phú Yên','Khánh Hòa','Ninh Thuận','Bình Thuận','Kon Tum','Gia Lai','Đắk Lắk','Đắk Nông','Lâm Đồng','Quảng Bình','Quảng Trị','Thừa Thiên Huế'],
-    fields: [
-      { id: 'cpc_province', label: 'Tỉnh thành', type: 'province' },
-      { id: 'cpc_keyword',  label: 'Tên khu vực / Từ khóa', placeholder: 'VD: Ngũ Hành Sơn...' },
-      { id: 'cpc_from',     label: 'Từ ngày', type: 'date' },
-      { id: 'cpc_to',       label: 'Đến ngày', type: 'date' },
-    ],
+    key: 'cpc', short: 'Miền Trung', label: 'EVNCPC – Miền Trung & Tây Nguyên',
+    icon: '🌊', color: '#fbbf24', hotline: '1900 1909', format: 'json',
+    noAutoLoad: true,
+    officialUrl: () => `https://cskh.cpc.vn/tra-cuu/lich-tam-ngung-cung-cap-dien/khu-vuc`,
+    note: 'API không phản hồi ổn định — tra cứu trực tiếp trên trang chính thức',
+  },
+  {
+    key: 'spc', short: 'Miền Nam', label: 'EVNSPC – Miền Nam (21 tỉnh)',
+    icon: '🌴', color: '#34d399', hotline: '1900 1006', format: 'html',
+    noAutoLoad: false,
+    officialUrl: () => `https://cskh.evnspc.vn/TraCuu/LichNgungGiamCungCapDien`,
+    note: null,
   },
 ];
 
-function fmtDate(d) {
-  // dd-mm-yyyy
-  const dd = String(d.getDate()).padStart(2,'0');
-  const mm = String(d.getMonth()+1).padStart(2,'0');
-  return `${dd}-${mm}-${d.getFullYear()}`;
+// ── Parse JSON ──────────────────────────────────────────────────────────────
+function parseJsonItems(body) {
+  try {
+    const json = JSON.parse(body);
+    if (!json) return [];
+    if (json.data?.listLichCatDienEvn) return json.data.listLichCatDienEvn;
+    if (Array.isArray(json)) return json;
+    if (Array.isArray(json.content)) return json.content;
+    if (json.data) {
+      if (Array.isArray(json.data)) return json.data;
+      if (Array.isArray(json.data?.content)) return json.data.content;
+    }
+    if (json.error || json.isError) return [];
+    for (const key of ['items', 'result', 'results', 'records', 'list']) {
+      if (Array.isArray(json[key])) return json[key];
+    }
+    return [];
+  } catch { return []; }
 }
 
-function dateRange(days = 14) {
-  const now = new Date();
-  const end = new Date(now); end.setDate(end.getDate() + days);
-  return { from: fmtDate(now), to: fmtDate(end) };
+// ── Parse HTML table ────────────────────────────────────────────────────────
+function parseHtmlItems(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const rows = doc.querySelectorAll('tr');
+  if (rows.length <= 1) return [];
+  const headers = [...rows[0].querySelectorAll('th, td')].map(c => c.textContent.trim());
+  const items = [];
+  for (let i = 1; i < rows.length; i++) {
+    const cells = [...rows[i].querySelectorAll('td')];
+    if (!cells.length) continue;
+    const obj = { _raw: cells.map(c => c.textContent.trim()) };
+    cells.forEach((td, idx) => { obj[headers[idx] || `col${idx}`] = td.textContent.trim(); });
+    items.push(obj);
+  }
+  return items;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ── Render card JSON ────────────────────────────────────────────────────────
+function renderJsonCard(it, color) {
+  const area     = it.tenDonVi || it.area || it.khuVuc || it.tenKhuVuc || it.addressDescription || '—';
+  const reason   = it.noidung  || it.reason || it.lyDo || it.noiDung || it.content || '';
+  const timeInfo = it.khoangThoiGian || '';
+  const timeFrom = it.fromTime || it.tuGio || it.startTime || it.powerCutFrom || '';
+  const timeTo   = it.toTime   || it.denGio || it.endTime   || it.powerCutTo   || '';
+  const status   = it.trangthai || it.status || it.trangThai || '';
+  const district = it.khuVuc  || it.district || it.quan || it.huyen || '';
+  const ngay     = it.ngayTHien || '';
+  const isActive = status && (status.includes('thực hiện') || status.toLowerCase().includes('đang'));
+  const badge    = status ? `<span class="po-status-badge" style="background:${isActive ? 'rgba(239,68,68,0.15)' : 'rgba(34,197,94,0.15)'};color:${isActive ? '#f87171' : '#4ade80'}">${status}</span>` : '';
+  const time     = timeInfo || (timeFrom ? `${timeFrom}${timeTo ? ' → ' + timeTo : ''}` : '');
+  return `<div class="po-card" style="border-left-color:${color}">
+    <div class="po-card-header"><span class="po-card-area">⚡ ${area}</span>${badge}</div>
+    ${ngay ? `<div class="po-card-meta">📅 ${ngay}</div>` : ''}
+    ${district && district !== area ? `<div class="po-card-meta">📍 ${district}</div>` : ''}
+    ${time ? `<div class="po-card-time">🕐 ${time}</div>` : ''}
+    ${reason ? `<div class="po-card-reason">📋 ${reason}</div>` : ''}
+  </div>`;
+}
+
+// ── Render card HTML ────────────────────────────────────────────────────────
+function renderHtmlCard(item, color) {
+  const [col0, col1, col2, col3, col4] = item._raw || [];
+  if (!col0) return '';
+  return `<div class="po-card" style="border-left-color:${color}">
+    <div class="po-card-header"><span class="po-card-area">⚡ ${col0}</span></div>
+    ${(col1 || col2) ? `<div class="po-card-time">🕐 ${col1 || ''}${col2 ? ' → ' + col2 : ''}</div>` : ''}
+    ${col3 ? `<div class="po-card-meta">📍 ${col3}</div>` : ''}
+    ${col4 ? `<div class="po-card-reason">📋 ${col4}</div>` : ''}
+  </div>`;
+}
+
+// ── Official link block ─────────────────────────────────────────────────────
+function renderOfficialBlock(region) {
+  return `
+    <div class="po-official-block">
+      <div class="po-official-info">
+        <span class="po-official-note">ℹ️ ${region.note}</span>
+      </div>
+      <a href="${region.officialUrl()}" target="_blank" rel="noopener" class="po-official-btn" style="background:${region.color}22;border-color:${region.color}44;color:${region.color}">
+        🔍 Tra cứu lịch cúp điện hôm nay ↗
+      </a>
+    </div>`;
+}
+
+// ── Auto-load một vùng ─────────────────────────────────────────────────────
+async function loadRegionToday(region) {
+  const bodyEl  = document.getElementById(`po-body-${region.key}`);
+  const badgeEl = document.getElementById(`po-count-${region.key}`);
+  if (!bodyEl) return;
+
+  if (region.noAutoLoad) {
+    if (badgeEl) { badgeEl.textContent = 'Tra cứu'; badgeEl.style.background = `${region.color}22`; badgeEl.style.color = region.color; }
+    bodyEl.innerHTML = renderOfficialBlock(region);
+    return;
+  }
+
+  try {
+    const res  = await fetch(`${PROXY}/power-outage?evn=${region.key}&action=today`, { signal: AbortSignal.timeout(15000) });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const text  = await res.text();
+    const items = region.format === 'json' ? parseJsonItems(text) : parseHtmlItems(text);
+
+    if (badgeEl) {
+      badgeEl.textContent  = items.length > 0 ? `${items.length} lịch` : 'Không có';
+      badgeEl.style.color  = items.length > 0 ? region.color : 'var(--text-muted)';
+      badgeEl.style.background = items.length > 0 ? `${region.color}22` : 'rgba(100,100,100,0.12)';
+    }
+
+    if (!items.length) {
+      bodyEl.innerHTML = `
+        <div class="po-empty">✅ Không có lịch cúp điện hôm nay tại vùng này.</div>
+        <div style="margin-top:8px;text-align:center">
+          <a href="${region.officialUrl()}" target="_blank" rel="noopener" class="po-official-link">Xác nhận trên trang chính thức ↗</a>
+        </div>`;
+      return;
+    }
+
+    const cards = items.map(it => region.format === 'json' ? renderJsonCard(it, region.color) : renderHtmlCard(it, region.color)).join('');
+    bodyEl.innerHTML = `<div class="po-cards-grid">${cards}</div>`;
+
+  } catch (err) {
+    if (badgeEl) { badgeEl.textContent = 'Lỗi'; badgeEl.style.color = '#f87171'; badgeEl.style.background = 'rgba(248,113,113,0.1)'; }
+    bodyEl.innerHTML = `
+      <div class="po-error">⚠️ Không thể tải tự động: ${err.message}</div>
+      ${renderOfficialBlock(region)}`;
+  }
+}
+
+// ── Toggle collapse ────────────────────────────────────────────────────────
+function poToggleRegion(key) {
+  const body    = document.getElementById(`po-body-${key}`);
+  const chevron = document.getElementById(`po-chevron-${key}`);
+  if (!body) return;
+  const collapsed = body.style.display === 'none';
+  body.style.display = collapsed ? '' : 'none';
+  if (chevron) chevron.style.transform = collapsed ? 'rotate(0deg)' : 'rotate(-90deg)';
+}
+
+// ── Refresh all ────────────────────────────────────────────────────────────
+async function poRefreshAll() {
+  const icon = document.getElementById('poRefreshIcon');
+  if (icon) icon.style.animation = 'spin 1s linear infinite';
+
+  EVN_REGIONS.forEach(r => {
+    const badge = document.getElementById(`po-count-${r.key}`);
+    const body  = document.getElementById(`po-body-${r.key}`);
+    if (!r.noAutoLoad) {
+      if (badge) { badge.textContent = 'Đang tải...'; badge.style.background = 'rgba(100,100,100,0.15)'; badge.style.color = 'var(--text-muted)'; }
+      if (body)  body.innerHTML = `<div class="po-loading"><span class="po-spinner"></span> Đang tải...</div>`;
+    }
+  });
+
+  await Promise.allSettled(EVN_REGIONS.map(r => loadRegionToday(r)));
+
+  if (icon) icon.style.animation = '';
+}
+
+// ── Main render ────────────────────────────────────────────────────────────
 export function renderPowerOutage(containerId = 'powerContent') {
   const el = document.getElementById(containerId);
   if (!el) return;
 
-  const { from, to } = dateRange(14);
+  // Cập nhật badge của card trên giao diện chính
+  const card = el.closest('.card');
+  if (card) {
+    const badge = card.querySelector('.card-badge');
+    if (badge) {
+      badge.textContent = 'BẢN ĐỒ TOÀN QUỐC';
+      badge.className = 'card-badge badge-live';
+      badge.style.background = 'rgba(96, 165, 250, 0.15)';
+      badge.style.color = '#60a5fa';
+    }
+  }
 
   el.innerHTML = `
-    <!-- ── Tab switcher ── -->
-    <div class="po-tabs">
-      <button class="po-tab active" id="poTabEvnspc" onclick="poSwitchTab('evnspc')">🌴 EVNSPC (miền Nam)</button>
-      <button class="po-tab" id="poTabOther" onclick="poSwitchTab('other')">🗺️ Vùng khác</button>
-    </div>
-
-    <!-- ══ EVNSPC Panel ══ -->
-    <div id="poPanelEvnspc" class="po-panel">
-      <div class="po-section-label">Tra cứu trực tiếp – dữ liệu từ EVNSPC</div>
-
-      <!-- Mode tabs -->
-      <div class="po-mode-tabs">
-        <button class="po-mode-tab active" id="poModeUnit" onclick="poSwitchMode('unit')">Theo đơn vị quản lý</button>
-        <button class="po-mode-tab" id="poModeMakh" onclick="poSwitchMode('makh')">Theo mã khách hàng</button>
+    <div style="position: relative; width: 100%; height: 780px; overflow: hidden; border-radius: 8px; background: #ffffff;">
+      <!-- Loader giao diện tối (Dark Mode) khớp với dashboard -->
+      <div id="po-iframe-loader" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #121214; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; color: #a0a0ab; font-size: 14px;">
+        <div style="width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.08); border-top-color: #60a5fa; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 12px;"></div>
+        <span>Đang kết nối tới máy chủ bản đồ toàn quốc...</span>
       </div>
-
-      <!-- Form: by unit -->
-      <div id="poFormUnit">
-        <div class="po-form-grid">
-          <div class="po-field">
-            <label class="po-label">Công ty Điện lực</label>
-            <select class="po-select" id="poCompanySelect" onchange="poLoadDienLuc()">
-              <option value="">-- Chọn Công ty Điện lực --</option>
-              ${EVNSPC_COMPANIES.map(c => `<option value="${c.ma}">${c.ten}</option>`).join('')}
-            </select>
-          </div>
-          <div class="po-field">
-            <label class="po-label">Điện lực / Huyện</label>
-            <select class="po-select" id="poDienLucSelect">
-              <option value="">-- Chọn Công ty trước --</option>
-            </select>
-          </div>
-          <div class="po-field">
-            <label class="po-label">Từ ngày</label>
-            <input class="po-input" type="date" id="poFromDate" value="${new Date().toISOString().split('T')[0]}" />
-          </div>
-          <div class="po-field">
-            <label class="po-label">Đến ngày</label>
-            <input class="po-input" type="date" id="poToDate" value="${new Date(Date.now()+14*86400000).toISOString().split('T')[0]}" />
-          </div>
-        </div>
-        <button class="po-search-btn" onclick="poSearchByUnit()">⚡ Tra cứu lịch cúp điện</button>
-      </div>
-
-      <!-- Form: by customer ID -->
-      <div id="poFormMakh" style="display:none;">
-        <div class="po-form-grid">
-          <div class="po-field" style="grid-column:1/-1;">
-            <label class="po-label">Mã khách hàng <span style="color:var(--text-muted);font-weight:400;">(in trên hóa đơn tiền điện)</span></label>
-            <input class="po-input" type="text" id="poMaKHInput" placeholder="VD: PE0012345678" />
-          </div>
-          <div class="po-field">
-            <label class="po-label">Từ ngày</label>
-            <input class="po-input" type="date" id="poFromDateMakh" value="${new Date().toISOString().split('T')[0]}" />
-          </div>
-          <div class="po-field">
-            <label class="po-label">Đến ngày</label>
-            <input class="po-input" type="date" id="poToDateMakh" value="${new Date(Date.now()+14*86400000).toISOString().split('T')[0]}" />
-          </div>
-        </div>
-        <button class="po-search-btn" onclick="poSearchByMakh()">⚡ Tra cứu theo mã khách hàng</button>
-      </div>
-
-      <!-- Result area -->
-      <div id="poResult"></div>
-    </div>
-
-    <!-- ══ Other regions panel ══ -->
-    <div id="poPanelOther" class="po-panel" style="display:none;">
-      <div class="po-section-label">Tra cứu trực tiếp lịch cúp điện – các vùng khác</div>
-
-      <!-- Sub-tabs for each EVN -->
-      <div class="po-evn-tabs" id="poEvnTabs">
-        ${OTHER_EVN.map((e, i) => `
-          <button class="po-evn-tab ${i === 0 ? 'active' : ''}"
-                  onclick="window.poSwitchEvn('${e.key}')"
-                  style="--evn-color:${e.color};"
-                  data-evn="${e.key}">
-            🔌 ${e.label.split('–')[0].trim()}
-          </button>`).join('')}
-      </div>
-
-      <!-- Forms for each EVN -->
-      ${OTHER_EVN.map((evn, i) => `
-        <div class="po-evn-form" id="poEvnForm_${evn.key}" style="${i !== 0 ? 'display:none;' : ''}">
-          <div class="po-other-meta" style="border-color:${evn.color}30;">
-            <span style="color:${evn.color};font-weight:700;">🔌 ${evn.label}</span>
-            <span style="font-size:11px;color:var(--text-muted);">📞 Tổng đài: <strong>${evn.hotline}</strong></span>
-          </div>
-          <div class="po-form-grid">
-            ${evn.fields.map(f => {
-              if (f.type === 'province') {
-                return `<div class="po-field">
-                  <label class="po-label">${f.label}</label>
-                  <select class="po-select" id="${f.id}">
-                    <option value="">-- Chọn tỉnh thành --</option>
-                    ${evn.provinces.map(p => `<option value="${p}">${p}</option>`).join('')}
-                  </select>
-                </div>`;
-              } else if (f.type === 'date') {
-                const defaultVal = f.id.includes('to')
-                  ? new Date(Date.now() + 14*86400000).toISOString().split('T')[0]
-                  : new Date().toISOString().split('T')[0];
-                return `<div class="po-field">
-                  <label class="po-label">${f.label}</label>
-                  <input class="po-input" type="date" id="${f.id}" value="${defaultVal}" />
-                </div>`;
-              } else {
-                return `<div class="po-field">
-                  <label class="po-label">${f.label}</label>
-                  <input class="po-input" type="text" id="${f.id}" placeholder="${f.placeholder || ''}" />
-                </div>`;
-              }
-            }).join('')}
-          </div>
-          <button class="po-search-btn" onclick="window.poSearchOther('${evn.key}')">⚡ Tra cứu lịch cúp điện</button>
-          <div id="poOtherResult_${evn.key}" class="po-other-result"></div>
-
-          <!-- Fallback link -->
-          <div class="po-other-fallback" style="border-color:${evn.color}20;">
-            <span style="font-size:11px;color:var(--text-muted);">Nếu không tìm thấy kết quả, truy cập cổng chính thức:</span>
-            <a href="${evn.key === 'hanoi' ? 'https://evnhanoi.vn/search/power-cut' : evn.key === 'npc' ? 'https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungGiamCungCapDien' : 'https://cskh.cpc.vn/tra-cuu/lich-tam-ngung-cung-cap-dien/khu-vuc'}"
-               target="_blank" rel="noopener" class="lot-link" style="font-size:11px;padding:4px 12px;">Cổng tra cứu chính thức ↗</a>
-          </div>
-        </div>`).join('')}
-
-      <div class="po-hotline" style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:16px;">
-        <span style="font-size:20px;">📞</span>
-        <div>
-          <div class="po-hotline-num" style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--accent-cyan);">1900 1006</div>
-          <div class="po-hotline-sub" style="font-size:11px;color:var(--text-muted);">Tổng đài chăm sóc khách hàng EVN Toàn Quốc</div>
-        </div>
-      </div>
+      
+      <iframe id="po-iframe" src="https://lichcupdien.app" style="width: 100%; height: 100%; border: none; opacity: 0; transition: opacity 0.3s;" allowfullscreen></iframe>
     </div>
   `;
 
-  // Expose globals
-  window.poSwitchTab    = poSwitchTab;
-  window.poSwitchMode   = poSwitchMode;
-  window.poLoadDienLuc  = poLoadDienLuc;
-  window.poSearchByUnit = poSearchByUnit;
-  window.poSearchByMakh = poSearchByMakh;
-  window.poSwitchEvn    = poSwitchEvn;
-  window.poSearchOther  = poSearchOther;
-}
-
-// ── Tab switcher ──────────────────────────────────────────────────────────
-function poSwitchTab(tab) {
-  document.getElementById('poPanelEvnspc').style.display = tab === 'evnspc' ? '' : 'none';
-  document.getElementById('poPanelOther').style.display  = tab === 'other'  ? '' : 'none';
-  document.getElementById('poTabEvnspc').classList.toggle('active', tab === 'evnspc');
-  document.getElementById('poTabOther').classList.toggle('active',  tab === 'other');
-}
-
-// ── Mode switcher ─────────────────────────────────────────────────────────
-function poSwitchMode(mode) {
-  document.getElementById('poFormUnit').style.display  = mode === 'unit' ? '' : 'none';
-  document.getElementById('poFormMakh').style.display  = mode === 'makh' ? '' : 'none';
-  document.getElementById('poModeUnit').classList.toggle('active', mode === 'unit');
-  document.getElementById('poModeMakh').classList.toggle('active', mode === 'makh');
-}
-
-// ── Load sub-dropdown: Điện lực theo Công ty (từ dữ liệu tĩnh) ──────────
-function poLoadDienLuc() {
-  const maCty  = document.getElementById('poCompanySelect')?.value;
-  const select = document.getElementById('poDienLucSelect');
-  if (!select) return;
-
-  if (!maCty) {
-    select.innerHTML = '<option value="">-- Chọn Công ty trước --</option>';
-    return;
-  }
-
-  const subs = EVNSPC_SUB_UNITS[maCty] || [];
-  if (subs.length === 0) {
-    select.innerHTML = `<option value="${maCty}">-- Toàn bộ khu vực --</option>`;
-    return;
-  }
-
-  select.innerHTML = '<option value="">-- Chọn Điện lực / Huyện --</option>'
-    + subs.map(s => `<option value="${s.ma}">${s.ten}</option>`).join('');
-}
-
-// ── Search by unit ────────────────────────────────────────────────────────
-async function poSearchByUnit() {
-  const madvi   = document.getElementById('poDienLucSelect')?.value
-               || document.getElementById('poCompanySelect')?.value;
-  const fromRaw = document.getElementById('poFromDate')?.value;
-  const toRaw   = document.getElementById('poToDate')?.value;
-  const result  = document.getElementById('poResult');
-
-  if (!madvi) { showPoError(result, 'Vui lòng chọn Điện lực trước khi tra cứu.'); return; }
-  if (!fromRaw || !toRaw) { showPoError(result, 'Vui lòng chọn khoảng thời gian.'); return; }
-
-  const tuNgay  = fromRaw.split('-').reverse().join('-'); // yyyy-mm-dd → dd-mm-yyyy
-  const denNgay = toRaw.split('-').reverse().join('-');
-
-  await doSearch(result, `${PROXY}/power-outage?action=tracuu&madvi=${encodeURIComponent(madvi)}&tuNgay=${encodeURIComponent(tuNgay)}&denNgay=${encodeURIComponent(denNgay)}`);
-}
-
-// ── Search by customer ID ─────────────────────────────────────────────────
-async function poSearchByMakh() {
-  const maKH    = document.getElementById('poMaKHInput')?.value?.trim();
-  const fromRaw = document.getElementById('poFromDateMakh')?.value;
-  const toRaw   = document.getElementById('poToDateMakh')?.value;
-  const result  = document.getElementById('poResult');
-
-  if (!maKH) { showPoError(result, 'Vui lòng nhập mã khách hàng.'); return; }
-
-  const tuNgay  = fromRaw.split('-').reverse().join('-');
-  const denNgay = toRaw.split('-').reverse().join('-');
-
-  await doSearch(result, `${PROXY}/power-outage?action=tracuu-makh&maKH=${encodeURIComponent(maKH)}&tuNgay=${encodeURIComponent(tuNgay)}&denNgay=${encodeURIComponent(denNgay)}`);
-}
-
-// ── Core search + render ──────────────────────────────────────────────────
-async function doSearch(result, url) {
-  result.innerHTML = `<div class="po-loading">⏳ Đang tra cứu dữ liệu từ EVNSPC...</div>`;
-
-  try {
-    const res  = await fetch(url);
-    const html = await res.text();
-
-    if (!html || html.trim() === '' || html.includes('"error"')) {
-      result.innerHTML = `<div class="po-empty">📭 Không tìm thấy lịch cúp điện trong khoảng thời gian này.</div>`;
-      return;
-    }
-
-    // Parse và render bảng từ HTML response
-    renderPoTable(result, html);
-  } catch (err) {
-    showPoError(result, `Không thể kết nối proxy: ${err.message}. Đảm bảo Cloudflare Function đã deploy.`);
-  }
-}
-
-// ── Parse HTML response → render table ───────────────────────────────────
-function renderPoTable(el, html) {
-  const parser = new DOMParser();
-  const doc    = parser.parseFromString(html, 'text/html');
-
-  // EVNSPC trả về bảng HTML hoặc JSON
-  const rows = doc.querySelectorAll('tr');
-
-  if (rows.length <= 1) {
-    el.innerHTML = `<div class="po-empty">📭 Không có lịch cúp điện trong khoảng thời gian đã chọn.</div>`;
-    return;
-  }
-
-  // Build clean table
-  let tableHtml = `
-    <div class="po-result-wrap animate-fade-in-up">
-      <div class="po-result-header">
-        <span class="po-result-icon">⚡</span>
-        <span class="po-result-title">Kết quả lịch cúp điện</span>
-        <span class="po-result-count">${rows.length - 1} lịch</span>
-      </div>
-      <div style="overflow-x:auto;">
-        <table class="po-table">
-          <thead><tr>`;
-
-  // Header row
-  const headerCells = rows[0].querySelectorAll('th, td');
-  headerCells.forEach(th => {
-    tableHtml += `<th>${th.textContent.trim()}</th>`;
-  });
-  tableHtml += `</tr></thead><tbody>`;
-
-  // Data rows
-  for (let i = 1; i < rows.length; i++) {
-    const cells = rows[i].querySelectorAll('td');
-    if (!cells.length) continue;
-    tableHtml += `<tr>`;
-    cells.forEach(td => {
-      tableHtml += `<td>${td.textContent.trim()}</td>`;
-    });
-    tableHtml += `</tr>`;
-  }
-
-  tableHtml += `</tbody></table></div></div>`;
-  el.innerHTML = tableHtml;
-}
-
-function showPoError(el, msg) {
-  el.innerHTML = `<div class="po-error">⚠️ ${msg}</div>`;
-}
-
-/** Legacy compat */
-export function searchPowerOutage() {}
-
-// ── Sub-tab switcher for Other EVN regions ────────────────────────────────
-function poSwitchEvn(key) {
-  OTHER_EVN.forEach(e => {
-    const form = document.getElementById(`poEvnForm_${e.key}`);
-    const tab  = document.querySelector(`[data-evn="${e.key}"]`);
-    if (form) form.style.display = e.key === key ? '' : 'none';
-    if (tab)  tab.classList.toggle('active', e.key === key);
-  });
-}
-
-// ── Search other EVN regions via proxy ───────────────────────────────────
-async function poSearchOther(evnKey) {
-  const resultEl = document.getElementById(`poOtherResult_${evnKey}`);
-  if (!resultEl) return;
-
-  resultEl.innerHTML = `<div class="po-loading">⏳ Đang tra cứu qua proxy ${evnKey.toUpperCase()}...</div>`;
-
-  let url = `${PROXY}/power-outage?evn=${evnKey}`;
-
-  if (evnKey === 'hanoi') {
-    const keyword  = document.getElementById('hn_keyword')?.value?.trim() || '';
-    const fromDate = document.getElementById('hn_from')?.value || '';
-    const toDate   = document.getElementById('hn_to')?.value   || '';
-    if (!keyword && !fromDate) {
-      resultEl.innerHTML = `<div class="po-error">⚠️ Vui lòng nhập tên khu vực hoặc chọn khoảng thời gian.</div>`;
-      return;
-    }
-    url += `&action=tracuu&keyword=${encodeURIComponent(keyword)}&fromDate=${encodeURIComponent(fromDate)}&toDate=${encodeURIComponent(toDate)}`;
-
-  } else if (evnKey === 'npc') {
-    const province = document.getElementById('npc_province')?.value || '';
-    const maKH     = document.getElementById('npc_makh')?.value?.trim() || '';
-    const fromDate = document.getElementById('npc_from')?.value || '';
-    const toDate   = document.getElementById('npc_to')?.value   || '';
-    if (!province && !maKH) {
-      resultEl.innerHTML = `<div class="po-error">⚠️ Vui lòng chọn tỉnh thành hoặc nhập mã khách hàng.</div>`;
-      return;
-    }
-    url += `&action=tracuu&province=${encodeURIComponent(province)}&maKH=${encodeURIComponent(maKH)}&fromDate=${encodeURIComponent(fromDate)}&toDate=${encodeURIComponent(toDate)}`;
-
-  } else if (evnKey === 'cpc') {
-    const province = document.getElementById('cpc_province')?.value || '';
-    const keyword  = document.getElementById('cpc_keyword')?.value?.trim() || '';
-    const fromDate = document.getElementById('cpc_from')?.value || '';
-    const toDate   = document.getElementById('cpc_to')?.value   || '';
-    if (!province && !keyword) {
-      resultEl.innerHTML = `<div class="po-error">⚠️ Vui lòng chọn tỉnh thành hoặc nhập từ khóa khu vực.</div>`;
-      return;
-    }
-    url += `&action=tracuu&province=${encodeURIComponent(province)}&keyword=${encodeURIComponent(keyword)}&fromDate=${encodeURIComponent(fromDate)}&toDate=${encodeURIComponent(toDate)}`;
-  }
-
-  try {
-    const res  = await fetch(url);
-    const body = await res.text();
-
-    // Try JSON first (EVNHANOI, EVNCPC return JSON)
-    try {
-      const json = JSON.parse(body);
-      if (json.error) throw new Error(json.error);
-
-      // Normalise: EVNHANOI & CPC return an array or {data:[...]}
-      const items = Array.isArray(json) ? json : (json.data || json.items || json.result || []);
-      if (!items.length) {
-        resultEl.innerHTML = `<div class="po-empty">📭 Không có lịch cúp điện trong khoảng thời gian này.</div>`;
-        return;
+  // Thêm CSS hiệu ứng xoay cho spinner nếu chưa có
+  if (!document.getElementById('po-spinner-style')) {
+    const style = document.createElement('style');
+    style.id = 'po-spinner-style';
+    style.innerHTML = `
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
       }
+    `;
+    document.head.appendChild(style);
+  }
 
-      const rows = items.map(it => `
-        <tr>
-          <td>${it.area || it.khuVuc || it.tenKhuVuc || '—'}</td>
-          <td>${it.reason || it.lyDo || it.noiDung || '—'}</td>
-          <td>${it.fromDate || it.tuNgay || it.startTime || '—'}</td>
-          <td>${it.toDate   || it.denNgay || it.endTime   || '—'}</td>
-        </tr>`).join('');
-
-      resultEl.innerHTML = `
-        <div class="po-result-wrap animate-fade-in-up">
-          <div class="po-result-header">
-            <span class="po-result-icon">⚡</span>
-            <span class="po-result-title">Lịch cúp điện ${evnKey.toUpperCase()}</span>
-            <span class="po-result-count">${items.length} lịch</span>
-          </div>
-          <div style="overflow-x:auto;">
-            <table class="po-table">
-              <thead><tr><th>Khu vực</th><th>Lý do</th><th>Từ ngày</th><th>Đến ngày</th></tr></thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-        </div>`;
-
-    } catch (_) {
-      // Fall back to HTML table parsing (EVNNPC)
-      renderPoTable(resultEl, body);
-    }
-  } catch (err) {
-    resultEl.innerHTML = `<div class="po-error">⚠️ Không thể kết nối proxy: ${err.message}</div>`;
+  const iframe = document.getElementById('po-iframe');
+  const loader = document.getElementById('po-iframe-loader');
+  if (iframe && loader) {
+    iframe.addEventListener('load', () => {
+      loader.style.display = 'none';
+      iframe.style.opacity = '1';
+    });
   }
 }
+
+export function searchPowerOutage() {}

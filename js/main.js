@@ -15,7 +15,7 @@ import { state } from './store/state.js';
 // ── API ──
 import { fetchCryptoMarkets } from './api/crypto.js';
 import { fetchExchangeRates } from './api/exchange.js';
-import { fetchWeather, fetchForecast } from './api/weather.js';
+import { fetchWeather, fetchForecast, fetchHourlyForecastFromOpenMeteo } from './api/weather.js';
 import { fetchGoldPrice }     from './api/gold.js';
 import { fetchGasPrice }      from './api/gas.js';
 
@@ -46,6 +46,7 @@ import { renderTicker }        from './components/ticker.js';
 import { renderCryptoGrid }    from './components/crypto-grid.js';
 import { renderCryptoTable }   from './components/crypto-table.js';
 import { renderMarketStats }   from './components/market-stats.js';
+import { selectCrypto }        from './components/crypto-detail.js';
 import { renderExchangeTable } from './components/exchange.js';
 import { renderGas }           from './components/gas.js';
 import { renderGold, renderGoldFallback } from './components/gold.js';
@@ -56,6 +57,7 @@ import {
   renderWeatherLoading,
   renderWeatherError,
   setWeatherBadge,
+  renderWindyMap,
 } from './components/weather.js';
 
 // ════════════════════════════════════════════════════════════
@@ -72,6 +74,11 @@ async function loadCrypto() {
     renderCryptoGrid(coins);
     renderCryptoTable(coins);
     renderMarketStats(coins);
+    
+    // Automatically select the active coin or default to the first coin (Bitcoin)
+    const currentActiveId = window.activeCryptoId || (coins[0]?.id) || 'bitcoin';
+    selectCrypto(currentActiveId);
+
     renderTicker();
   } catch (err) {
     console.warn('[Crypto]', err);
@@ -157,7 +164,28 @@ async function loadWeather(cityOverride) {
       fetchForecast(city),
     ]);
     renderWeather(data, forecast?.todayMinMax);
-    if (forecast?.hourly?.length) renderHourly(forecast.hourly);
+
+    // Fetch and render true hourly weather forecast (1-hour interval) from Open-Meteo
+    const lat = data.coord?.lat;
+    const lon = data.coord?.lon;
+    if (lat != null && lon != null) {
+      const hourlyList = await fetchHourlyForecastFromOpenMeteo(lat, lon).catch(() => null);
+      if (hourlyList && hourlyList.length) {
+        renderHourly(hourlyList);
+      } else if (forecast?.hourly?.length) {
+        renderHourly(forecast.hourly);
+      }
+
+      // Only load/reload Windy map if coordinates changed or map container is empty
+      const mapEl = document.getElementById('weatherWindyMap');
+      const hasIframe = mapEl && mapEl.querySelector('iframe');
+      if (!hasIframe || mapEl.dataset.lat != lat || mapEl.dataset.lon != lon) {
+        renderWindyMap(lat, lon);
+      }
+    } else {
+      if (forecast?.hourly?.length) renderHourly(forecast.hourly);
+    }
+
     if (forecast?.daily?.length) renderForecast(forecast.daily);
     setWeatherBadge(true);
   } catch (err) {
@@ -200,13 +228,13 @@ window.selectCity        = (city) => {
 };
 
 // ── AQI load ──
-async function loadAQI() { await renderAQI(); }
+async function loadAQI(isSilent = false) { await renderAQI('aqiContent', isSilent); }
 
 // ── VN-Index load ──
-async function loadVNIndex() { await renderVNIndex(); }
+async function loadVNIndex(isSilent = false) { await renderVNIndex('vnindexContent', isSilent); }
 
 // ── News load ──
-async function loadNews() { await renderNews(); }
+async function loadNews(isSilent = false) { await renderNews('newsContent', isSilent); }
 
 // ── Lazy-load new features on first visit ──
 const _rendered = new Set();
@@ -265,10 +293,10 @@ document.addEventListener('DOMContentLoaded', () => {
     loadExchange();
     loadGold();
     loadGas();
-    loadWeather();
-    loadAQI();
-    loadVNIndex();
-    loadNews();
+    loadWeather(null, true);
+    loadAQI(true);
+    loadVNIndex(true);
+    loadNews(true);
   }, 60_000);
 });
 

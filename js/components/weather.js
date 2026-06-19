@@ -77,7 +77,19 @@ export function renderWeather(d, todayMinMax = null, containerId = 'weatherConte
   // Heat index level
   const heatLevel = temp >= 38 ? '🔴 Nguy hiểm' : temp >= 35 ? '🟠 Rất nóng' : temp >= 32 ? '🟡 Nóng' : '';
 
-  el.innerHTML = `
+  // Create sub-containers if they don't exist
+  let heroStatsEl = el.querySelector('#weatherHeroAndStats');
+  if (!heroStatsEl) {
+    el.innerHTML = `
+      <div id="weatherHeroAndStats"></div>
+      <div id="weatherHourly" style="margin-top:14px;"></div>
+      <div id="weatherWindyMap" style="margin-top:14px;"></div>
+      <div id="weatherForecast"></div>
+    `;
+    heroStatsEl = el.querySelector('#weatherHeroAndStats');
+  }
+
+  heroStatsEl.innerHTML = `
     <!-- ── Hero weather display ── -->
     <div class="weather-hero animate-fade-in-up"
          style="background:${theme.grad};border:1px solid ${theme.border};border-radius:var(--radius-sm);padding:16px;margin-bottom:14px;">
@@ -140,14 +152,73 @@ export function renderWeather(d, todayMinMax = null, containerId = 'weatherConte
       </div>
     </div>
 
-    <div id="weatherHourly" style="margin-top:14px;"></div>
-    <div id="weatherForecast"></div>
-
     <div style="font-size:11px;color:var(--text-muted);margin-top:10px;text-align:right;">
       ⏱️ ${new Date().toLocaleTimeString('vi-VN')} · OpenWeatherMap
     </div>
   `;
 }
+
+/** Render Windy interactive weather map radar widget */
+export function renderWindyMap(lat, lon, containerId = 'weatherWindyMap') {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+
+  // Store coordinates and default overlay in dataset
+  el.dataset.lat = lat;
+  el.dataset.lon = lon;
+  el.dataset.overlay = 'rain';
+
+  const getIframeUrl = (overlay) => {
+    return `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lon}&zoom=6&level=surface&overlay=${overlay}&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1`;
+  };
+
+  el.innerHTML = `
+    <div class="wf-section-label" style="margin-bottom: 8px;">🌀 Bản đồ thời tiết Windy</div>
+    
+    <div class="windy-controls" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+      <button class="windy-tab-btn active" data-overlay="rain" onclick="window.changeWindyOverlay('rain')">🌧️ Mưa & Sét</button>
+      <button class="windy-tab-btn" data-overlay="wind" onclick="window.changeWindyOverlay('wind')">💨 Gió & Bão</button>
+      <button class="windy-tab-btn" data-overlay="clouds" onclick="window.changeWindyOverlay('clouds')">☁️ Mây che phủ</button>
+      <button class="windy-tab-btn" data-overlay="temp" onclick="window.changeWindyOverlay('temp')">🌡️ Nhiệt độ</button>
+      <button class="windy-tab-btn" data-overlay="radar" onclick="window.changeWindyOverlay('radar')">📡 Radar thời tiết</button>
+    </div>
+
+    <div class="windy-map-wrap" style="position:relative;width:100%;height:380px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid rgba(255,255,255,0.08);">
+      <iframe 
+        id="windyIframe"
+        src="${getIframeUrl('rain')}" 
+        width="100%" 
+        height="100%" 
+        style="border:none;background:var(--bg-card);" 
+        frameborder="0">
+      </iframe>
+    </div>
+  `;
+}
+
+// Global function to toggle Windy overlay
+window.changeWindyOverlay = (overlay) => {
+  const container = document.getElementById('weatherWindyMap');
+  const iframe = document.getElementById('windyIframe');
+  if (!container || !iframe) return;
+
+  const lat = container.dataset.lat;
+  const lon = container.dataset.lon;
+  if (!lat || !lon) return;
+
+  // Update active state of control buttons
+  const buttons = container.querySelectorAll('.windy-tab-btn');
+  buttons.forEach(btn => {
+    if (btn.dataset.overlay === overlay) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+
+  // Update iframe URL
+  iframe.src = `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lon}&zoom=6&level=surface&overlay=${overlay}&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1`;
+};
 
 /** Render 5-day daily forecast strip */
 export function renderForecast(days, containerId = 'weatherForecast') {

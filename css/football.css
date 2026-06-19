@@ -340,3 +340,191 @@
 .fb-date-btn { padding:6px 14px; border-radius:20px; border:1px solid var(--border); background:rgba(255,255,255,0.04); color:var(--text-muted); cursor:pointer; font-size:12px; font-weight:600; font-family:'Inter',sans-serif; transition:all .2s; }
 .fb-date-btn:hover { background:rgba(255,255,255,0.08); color:var(--text-primary); }
 .fb-date-btn.active { background:rgba(251,146,60,0.15); border-color:rgba(251,146,60,0.4); color:#fb923c; }
+
+/* ── Rosters Extensions ── */
+.fb-roster-sub-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 10px;
+  margin-bottom: 6px;
+}
+.fb-player-name-col {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.fb-player-jersey {
+  display: inline-block;
+  width: 16px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.fb-player-badges {
+  font-size: 11px;
+  margin-left: 6px;
+  opacity: 0.9;
+}
+.fb-player-item--sub {
+  opacity: 0.75;
+}
+.fb-player-item--sub:hover {
+  opacity: 1;
+}
+.fb-player-rating {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 800;
+  width: 24px;
+  height: 18px;
+  border-radius: 4px;
+  margin-left: 6px;
+  flex-shrink: 0;
+}
+
+/* ── Scorers & POTM ── */
+.fb-scorers-container {
+  display: flex;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-top: 6px;
+  margin-bottom: 12px;
+  font-size: 11px;
+}
+.fb-scorers-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.home-scorers {
+  align-items: flex-start;
+  text-align: left;
+}
+.away-scorers {
+  align-items: flex-end;
+  text-align: right;
+}
+.fb-scorers-divider {
+  width: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 0 10px;
+}
+.fb-scorer-item {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.fb-potm-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: 20px;
+  padding: 4px 12px;
+  margin-bottom: 12px;
+  font-size: 11px;
+}
+.fb-potm-badge {
+  color: #fbbf24;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.fb-potm-info {
+  color: var(--text-secondary);
+}
+.fb-potm-rating {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  color: #fbbf24;
+}
+
+/* ── League Stats Tab ── */
+.fb-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 12px;
+}
+@media (min-width: 768px) {
+  .fb-stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.fb-leader-col {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 14px;
+}
+.fb-leader-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 8px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.fb-leader-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.fb-leader-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  transition: transform 0.2s, background 0.2s;
+}
+.fb-leader-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+  transform: translateX(4px);
+}
+.fb-leader-rank {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  width: 20px;
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: center;
+  margin-right: 8px;
+}
+.fb-leader-name {
+  font-size: 12px;
+  color: var(--text-primary);
+}
+.fb-leader-team {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.fb-leader-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--accent-blue);
+  background: rgba(96, 165, 250, 0.1);
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+.fb-leader-col:nth-child(2) .fb-leader-val {
+  color: var(--accent-yellow);
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+}
