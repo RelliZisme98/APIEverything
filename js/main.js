@@ -42,6 +42,7 @@ import { renderMedia }       from './components/media.js';
 import { renderFileTools, renderAudioTools } from './components/file-tools.js';
 
 // ── Render Components ──
+import { initAIAssistant }     from './components/ai-assistant.js';
 import { renderTicker }        from './components/ticker.js';
 import { renderCryptoGrid }    from './components/crypto-grid.js';
 import { renderCryptoTable }   from './components/crypto-table.js';
@@ -300,6 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderPowerOutage();
   renderQuickCities();
   initTrafficCard();
+  initAIAssistant();
   // Pre-render static/no-API sections immediately
   renderTaxCalc();
   _rendered.add('tax-calc');

@@ -1936,6 +1936,77 @@ async function handleCrypto(request, env) {
 
   return cors(JSON.stringify({ error: 'Failed to fetch fresh or cached crypto data' }), 502);
 }
+async function handleAI(request, env) {
+  if (request.method === 'OPTIONS') return preflight();
+  if (request.method !== 'POST') {
+    return cors(JSON.stringify({ error: 'POST method required' }), 405);
+  }
+
+  if (!env.AI) {
+    return cors(JSON.stringify({ error: 'Workers AI is not configured. Please add the AI binding in wrangler.toml.' }), 503);
+  }
+
+  try {
+    const { prompt, context, history } = await request.json();
+
+    // Compile RAG context from the current frontend state
+    let contextStr = 'Dưới đây là thông tin hiện tại từ các widget trên Dashboard:\n';
+
+    if (context) {
+      if (context.weather) {
+        contextStr += `- Thời tiết: ${JSON.stringify(context.weather)}\n`;
+      }
+      if (context.aqi) {
+        contextStr += `- Chất lượng không khí (AQI): ${JSON.stringify(context.aqi)}\n`;
+      }
+      if (context.gas) {
+        contextStr += `- Giá xăng dầu lẻ: ${JSON.stringify(context.gas)}\n`;
+      }
+      if (context.gold) {
+        contextStr += `- Giá vàng (Thế giới/SJC): ${JSON.stringify(context.gold)}\n`;
+      }
+      if (context.vnindex) {
+        contextStr += `- Chỉ số chứng khoán: ${JSON.stringify(context.vnindex)}\n`;
+      }
+      if (context.liveFootball && context.liveFootball.length > 0) {
+        contextStr += `- Trận bóng đá đang diễn ra trực tiếp (Live): ${JSON.stringify(context.liveFootball)}\n`;
+      }
+      if (context.powerOutages && context.powerOutages.length > 0) {
+        contextStr += `- Lịch mất điện (EVN): ${JSON.stringify(context.powerOutages.slice(0, 10))}\n`;
+      }
+    }
+
+    const systemPrompt = `Bạn là Trợ lý ảo Antigravity, được tích hợp trên Dashboard đa năng.
+Hãy trả lời thắc mắc của người dùng bằng tiếng Việt một cách tự nhiên, thân thiện và ngắn gọn (1-3 câu, tối đa 4 câu).
+Sử dụng các thông tin thực tế từ Dashboard ở trên để trả lời trực tiếp. Nếu không có thông tin hoặc thông tin không liên quan, hãy trả lời lịch sự rằng bạn chưa có dữ liệu đó.
+Thêm biểu tượng cảm xúc (emoji) phù hợp để câu trả lời sinh động hơn.
+
+Bối cảnh Dashboard:
+${contextStr}`;
+
+    const messages = [
+      { role: 'system', content: systemPrompt }
+    ];
+
+    if (Array.isArray(history)) {
+      messages.push(...history.slice(-6));
+    }
+
+    messages.push({ role: 'user', content: prompt });
+
+    const result = await env.AI.run('@cf/meta/llama-3-8b-instruct', {
+      messages,
+      temperature: 0.6,
+      max_tokens: 512
+    });
+
+    return new Response(JSON.stringify({ response: result.response }), {
+      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS },
+    });
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
 
 
 export default {
@@ -1959,6 +2030,7 @@ export default {
     if (pathname === '/api/exchange') return handleExchange(request);
     if (pathname === '/api/crypto') return handleCrypto(request, env);
     if (pathname === '/vietlott') return handleVietlott(request);
+    if (pathname === '/api/ai') return handleAI(request, env);
 
 
     // ── Routes bảo mật (key ẩn trong Cloudflare Secrets) ──

@@ -13,6 +13,9 @@ binding = "ASSETS"
 [vars]
 SUPABASE_URL = "https://kavodsarpdvzmaqrkunv.supabase.co"
 
+[ai]
+binding = "AI"
+
 [env.staging]
 name = "apieverything-staging"
 
