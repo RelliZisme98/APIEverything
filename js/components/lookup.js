@@ -332,6 +332,63 @@ function handleSpamCheck() {
     return;
   }
 
+  // Client-side validations
+  if (input.includes('@')) {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!emailRegex.test(input)) {
+      resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Định dạng email không hợp lệ (Ví dụ: ten@domain.com).</div>`;
+      return;
+    }
+  } else {
+    let phoneClean = input.replace(/[^0-9]/g, '');
+    if (phoneClean.startsWith('84') && phoneClean.length > 10) {
+      phoneClean = '0' + phoneClean.substring(2);
+    }
+
+    let hasCarrier = false;
+    if (phoneClean.startsWith('02')) {
+      if (phoneClean.length !== 11) {
+        resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Số điện thoại cố định (bàn) phải có đúng 11 chữ số.</div>`;
+        return;
+      }
+      hasCarrier = true;
+    } else if (phoneClean.startsWith('1800') || phoneClean.startsWith('1900')) {
+      if (phoneClean.length !== 8 && phoneClean.length !== 10) {
+        resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Số hotline (1800/1900) phải có 8 hoặc 10 chữ số.</div>`;
+        return;
+      }
+      hasCarrier = true;
+    } else if (/^0[35789]/.test(phoneClean)) {
+      if (phoneClean.length !== 10) {
+        resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Số điện thoại di động Việt Nam phải có đúng 10 chữ số.</div>`;
+        return;
+      }
+
+      const prefix2 = phoneClean.substring(1, 3);
+      const prefix3 = phoneClean.substring(1, 4);
+
+      const viettel = ['86', '96', '97', '98', '32', '33', '34', '35', '36', '37', '38', '39'];
+      const mobi = ['89', '90', '93', '70', '79', '77', '76', '78'];
+      const vina = ['88', '91', '94', '81', '82', '83', '84', '85'];
+      const vnm = ['92', '52', '56', '58'];
+      const gmobile = ['99', '59'];
+      const mvno = ['87', '55'];
+
+      hasCarrier = viettel.includes(prefix2) || 
+                   mobi.includes(prefix2) || 
+                   vina.includes(prefix2) || 
+                   vnm.includes(prefix2) || 
+                   gmobile.includes(prefix2) || 
+                   mvno.includes(prefix2) || 
+                   mvno.includes(prefix3);
+    }
+
+    if (!hasCarrier) {
+      resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Số điện thoại không đúng định dạng di động (10 số), cố định (11 số) hoặc hotline Việt Nam.</div>`;
+      return;
+    }
+  }
+
   resDiv.innerHTML = `<span class="status-dot dot-yellow"></span> Đang truy vấn cơ sở dữ liệu bảo mật...`;
 
   try {
@@ -409,6 +466,21 @@ async function handleTaxCheck() {
   if (!input) {
     resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Vui lòng nhập mã số thuế hoặc tên doanh nghiệp cần tra cứu.</div>`;
     return;
+  }
+
+  // Client-side validations
+  const isNumericMST = /^[0-9]+[0-9-]*$/.test(input);
+  if (isNumericMST) {
+    const cleanMST = input.replace(/[^0-9]/g, '');
+    if (cleanMST.length !== 10 && cleanMST.length !== 13) {
+      resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Mã số thuế Việt Nam hợp lệ phải có đúng 10 chữ số (doanh nghiệp chính) hoặc 13 chữ số (chi nhánh).</div>`;
+      return;
+    }
+  } else {
+    if (input.length < 2) {
+      resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Vui lòng nhập từ khóa tra cứu có độ dài từ 2 ký tự trở lên.</div>`;
+      return;
+    }
   }
 
   resDiv.innerHTML = `<span class="status-dot dot-yellow"></span> Đang truy vấn Cổng thông tin Doanh nghiệp...`;

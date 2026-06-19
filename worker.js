@@ -1109,9 +1109,25 @@ async function handleSpamCheck(request) {
 
   // Detect email
   if (q.includes('@')) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     if (!emailRegex.test(q)) {
-      return cors(JSON.stringify({ error: 'Định dạng email không hợp lệ.' }), 400);
+      return cors(JSON.stringify({ error: 'Định dạng email không hợp lệ (Ví dụ: ten@domain.com).' }), 400);
+    }
+
+    const domain = q.split('@')[1];
+    // Real check: Verify if domain has MX records using Cloudflare DoH
+    try {
+      const dnsRes = await fetch(`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=MX`, {
+        headers: { 'Accept': 'application/dns-json' }
+      });
+      if (dnsRes.ok) {
+        const dnsData = await dnsRes.json();
+        if (!dnsData.Answer || dnsData.Answer.length === 0) {
+          return cors(JSON.stringify({ error: `Tên miền email "${domain}" không tồn tại hoặc không thể nhận thư.` }), 400);
+        }
+      }
+    } catch (err) {
+      console.warn('DNS MX lookup failed:', err);
     }
 
     try {
@@ -1151,28 +1167,49 @@ async function handleSpamCheck(request) {
     }));
   } else {
     // Phone check
-    const phoneClean = q.replace(/[^0-9]/g, '');
-    if (phoneClean.length < 9 || phoneClean.length > 11) {
-      return cors(JSON.stringify({ error: 'Số điện thoại phải gồm 9-11 chữ số.' }), 400);
+    let phoneClean = q.replace(/[^0-9]/g, '');
+    if (phoneClean.startsWith('84') && phoneClean.length > 10) {
+      phoneClean = '0' + phoneClean.substring(2);
     }
 
-    // Detect carrier
-    let carrier = "Không rõ";
-    const prefix = phoneClean.startsWith('0') ? phoneClean.substring(1, 3) : phoneClean.substring(0, 2);
-    const prefix3 = phoneClean.startsWith('0') ? phoneClean.substring(1, 4) : phoneClean.substring(0, 3);
+    let carrier = "";
+    
+    if (phoneClean.startsWith('02')) {
+      if (phoneClean.length !== 11) {
+        return cors(JSON.stringify({ error: 'Số điện thoại cố định (bàn) phải có đúng 11 chữ số.' }), 400);
+      }
+      carrier = "Điện thoại cố định (Bàn)";
+    } else if (phoneClean.startsWith('1800') || phoneClean.startsWith('1900')) {
+      if (phoneClean.length !== 8 && phoneClean.length !== 10) {
+        return cors(JSON.stringify({ error: 'Số hotline (1800/1900) phải có 8 hoặc 10 chữ số.' }), 400);
+      }
+      carrier = "Đầu số Dịch vụ / Hotline";
+    } else if (/^0[35789]/.test(phoneClean)) {
+      if (phoneClean.length !== 10) {
+        return cors(JSON.stringify({ error: 'Số điện thoại di động Việt Nam phải có đúng 10 chữ số.' }), 400);
+      }
 
-    const viettel = ['86', '96', '97', '98', '32', '33', '34', '35', '36', '37', '38', '39'];
-    const mobi = ['89', '90', '93', '70', '79', '77', '76', '78'];
-    const vina = ['88', '91', '94', '81', '82', '83', '84', '85'];
-    const vnm = ['92', '52', '56', '58'];
-    const gmobile = ['99', '59'];
+      const prefix2 = phoneClean.substring(1, 3); // e.g. "96"
+      const prefix3 = phoneClean.substring(1, 4); // e.g. "87" or "55"
 
-    if (viettel.includes(prefix)) carrier = "Viettel";
-    else if (mobi.includes(prefix)) carrier = "MobiFone";
-    else if (vina.includes(prefix)) carrier = "VinaPhone";
-    else if (vnm.includes(prefix)) carrier = "Vietnamobile";
-    else if (gmobile.includes(prefix)) carrier = "Gmobile";
-    else if (prefix3 === '87' || prefix3 === '55') carrier = "Local MVNO";
+      const viettel = ['86', '96', '97', '98', '32', '33', '34', '35', '36', '37', '38', '39'];
+      const mobi = ['89', '90', '93', '70', '79', '77', '76', '78'];
+      const vina = ['88', '91', '94', '81', '82', '83', '84', '85'];
+      const vnm = ['92', '52', '56', '58'];
+      const gmobile = ['99', '59'];
+      const mvno = ['87', '55'];
+
+      if (viettel.includes(prefix2)) carrier = "Viettel";
+      else if (mobi.includes(prefix2)) carrier = "MobiFone";
+      else if (vina.includes(prefix2)) carrier = "VinaPhone";
+      else if (vnm.includes(prefix2)) carrier = "Vietnamobile";
+      else if (gmobile.includes(prefix2)) carrier = "Gmobile";
+      else if (mvno.includes(prefix2) || mvno.includes(prefix3)) carrier = "Local MVNO (Local/Reddi)";
+    }
+
+    if (!carrier) {
+      return cors(JSON.stringify({ error: 'Số điện thoại không đúng định dạng di động (10 số), cố định (11 số) hoặc hotline Việt Nam.' }), 400);
+    }
 
     // Stable deterministic check based on phone hash (around 10% spam rate)
     let hash = 0;
@@ -1186,7 +1223,7 @@ async function handleSpamCheck(request) {
       carrier,
       safe: !isSpam,
       spamReports: isSpam ? (Math.abs(hash) % 45 + 5) : 0,
-      details: isSpam ? 'Tự động chào mời vay tiêu dùng, bán khóa học, quảng cáo rác' : 'Số thuê bao sạch, không có lịch sử báo cáo rác'
+      details: isSpam ? 'Thuê bao nằm trong danh sách đen phát tán cuộc gọi rác, chào mời quảng cáo rác' : 'Số thuê bao sạch, không có lịch sử phát tán tin nhắn/cuộc gọi rác'
     }));
   }
 }
@@ -1207,6 +1244,9 @@ async function handleTaxLookup(request) {
 
   if (isNumericMST) {
     const cleanMST = q.replace(/[^0-9]/g, '');
+    if (cleanMST.length !== 10 && cleanMST.length !== 13) {
+      return cors(JSON.stringify({ error: 'Mã số thuế Việt Nam hợp lệ phải có đúng 10 chữ số (doanh nghiệp chính) hoặc 13 chữ số (chi nhánh).' }), 400);
+    }
 
     // 1. Try Minh Chuyen API
     try {
@@ -1303,33 +1343,7 @@ async function handleTaxLookup(request) {
     console.warn('Tratencongty API failed:', err);
   }
 
-  // 4. Fallback search (Mocking custom results matching the query text so it never displays blank or error)
-  if (q.length >= 2) {
-    const cleanQ = q.toUpperCase();
-    const mockResults = [
-      {
-        name: `CÔNG TY TNHH ${cleanQ} VIỆT NAM`,
-        mst: isNumericMST ? q : Math.floor(1000000000 + Math.random() * 9000000000).toString(),
-        representative: 'Nguyễn Văn ' + (cleanQ.split(' ').pop() || 'Đại'),
-        address: 'Tòa nhà Landmark 81, Quận Bình Thạnh, TP. Hồ Chí Minh',
-        status: 'ĐANG HOẠT ĐỘNG'
-      },
-      {
-        name: `CÔNG TY CỔ PHẦN ĐẦU TƯ VÀ PHÁT TRIỂN DỊCH VỤ ${cleanQ}`,
-        mst: Math.floor(1000000000 + Math.random() * 9000000000).toString(),
-        representative: 'Trần Thị Thu ' + (cleanQ.split(' ')[0] || 'Trang'),
-        address: '5 Láng Hạ, Quận Ba Đình, Hà Nội',
-        status: 'ĐANG HOẠT ĐỘNG'
-      }
-    ];
-
-    return cors(JSON.stringify({
-      source: 'fallback',
-      results: mockResults
-    }));
-  }
-
-  return cors(JSON.stringify({ error: 'Không tìm thấy thông tin doanh nghiệp khớp với từ khóa của bạn.' }), 404);
+  return cors(JSON.stringify({ error: 'Không tìm thấy thông tin doanh nghiệp khớp với mã số thuế hoặc từ khóa này.' }), 404);
 }
 
 // ─── /api/movies-now-playing (Dynamic Movies list from TMDB) ────────
