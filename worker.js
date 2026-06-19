@@ -663,6 +663,8 @@ async function handleFootball(request) {
     url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/teams/${id}` + (suffix ? `?${suffix}` : '');
   } else if (type === 'team-schedule') {
     url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/teams/${id}/schedule` + (suffix ? `?${suffix}` : '');
+  } else if (type === 'statistics') {
+    url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/statistics` + (suffix ? `?${suffix}` : '');
   } else {
     return cors(JSON.stringify({ error: 'unknown type' }), 400);
   }

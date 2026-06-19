@@ -85,6 +85,7 @@ function buildShell(el) {
   const tabs = [
     { key:'fixtures', label:'📅 Trận Đấu' },
     { key:'table',    label:'📊 Bảng Xếp Hạng' },
+    { key:'stats',    label:'🏆 Thống Kê' },
   ].map(t =>
     `<button class="fb-tab ${t.key===_tab?'active':''}" onclick="window._fbTab('${t.key}')"
        style="${t.key===_tab?`border-color:${lg.color}40;color:${lg.color};background:${lg.color}0d;`:''}">${t.label}</button>`
@@ -128,7 +129,7 @@ function buildShell(el) {
 // ── Data loading ───────────────────────────────────────────────────
 async function loadLeagueData(silent = false) {
   const leagueId = LEAGUES[_league].id;
-  const type = _tab === 'fixtures' ? 'scoreboard' : 'table';
+  const type = _tab === 'fixtures' ? 'scoreboard' : _tab === 'table' ? 'table' : 'statistics';
   const cacheKey = `${_league}_${type}_${_dateOffset}`;
   const main = document.getElementById('fbMain');
   if (!main) return;
@@ -158,11 +159,12 @@ async function loadLeagueData(silent = false) {
 function renderMain() {
   const main = document.getElementById('fbMain');
   if (!main) return;
-  const type = _tab === 'fixtures' ? 'scoreboard' : 'table';
+  const type = _tab === 'fixtures' ? 'scoreboard' : _tab === 'table' ? 'table' : 'statistics';
   const data = _cache[`${_league}_${type}_${_dateOffset}`];
   if (!data) { main.innerHTML = `<div class="fb-loading">⚽ Đang tải...</div>`; return; }
 
   if (_tab === 'table') renderTable(main, data);
+  else if (_tab === 'stats') renderStats(main, data);
   else renderFixtureList(main, data);
 }
 
@@ -383,7 +385,11 @@ function renderMatchDetail(el, data, lg) {
   const rostersList = Array.isArray(data.rosters) ? data.rosters : [];
   let rosterHtml = '';
 
-  const calculatePlayerRating = (player) => {
+  const competitors = data.header?.competitions?.[0]?.competitors || [];
+  const homeComp = competitors.find(c => c.homeAway === 'home') || {};
+  const awayComp = competitors.find(c => c.homeAway === 'away') || {};
+
+  const calculatePlayerRating = (player, teamWon, teamConceded) => {
     const stats = player.stats || [];
     const getVal = (name) => {
       const s = stats.find(x => x.name === name);
@@ -400,7 +406,39 @@ function renderMatchDetail(el, data, lg) {
       return null;
     }
 
-    let rating = 6.0; // Base rating for active participation
+    let rating = 6.0; // Baseline
+
+    const isGK = player.position?.abbreviation === 'G' || player.position?.name?.toLowerCase().includes('goalkeeper');
+    const posName = player.position?.name?.toLowerCase() || '';
+    const posAbbr = player.position?.abbreviation?.toLowerCase() || '';
+    const isDF = posAbbr.includes('d') || posName.includes('defender') || posName.includes('back');
+    const isMF = posAbbr.includes('m') || posName.includes('midfielder');
+
+    // Base adjustments based on team result
+    if (teamWon) {
+      rating += 0.4;
+    } else if (teamConceded > 0 && !teamWon) {
+      rating -= 0.2;
+    }
+
+    // Clean sheet or goals conceded impact
+    if (teamConceded === 0) {
+      if (isGK) rating += 0.8;
+      else if (isDF) rating += 0.5;
+      else if (isMF) rating += 0.1;
+    } else {
+      // Conceded goals
+      if (isGK) {
+        rating -= teamConceded * 0.45;
+      } else if (isDF) {
+        rating -= teamConceded * 0.15;
+      }
+    }
+
+    // Baseline for playing full match (helps defenders in losing teams)
+    if (starter && !player.subbedOut) {
+      rating += 0.3;
+    }
 
     const goals = getVal('totalGoals');
     const assists = getVal('goalAssists');
@@ -412,27 +450,70 @@ function renderMatchDetail(el, data, lg) {
     const redCards = getVal('redCards');
     const ownGoals = getVal('ownGoals');
     const saves = getVal('saves');
-    const goalsConceded = getVal('goalsConceded');
 
-    rating += goals * 1.5;
-    rating += assists * 1.0;
-    rating += (shotsOnTarget || 0) * 0.3;
-    rating += (totalShots - shotsOnTarget > 0 ? (totalShots - shotsOnTarget) * 0.1 : 0);
-    rating += foulsSuffered * 0.1;
-    rating -= foulsCommitted * 0.1;
+    // Offensive contribution
+    if (goals > 0) rating += goals * 1.0;
+    if (assists > 0) rating += assists * 0.7;
+
+    // Shots and Saves
+    if (shotsOnTarget > 0) {
+      rating += shotsOnTarget * 0.25;
+    } else if (totalShots > 0) {
+      rating += totalShots * 0.05;
+    }
+
+    if (isGK && saves > 0) {
+      rating += saves * 0.25;
+    }
+
+    // Micro stats
+    rating += foulsSuffered * 0.05;
+    rating -= foulsCommitted * 0.05;
     rating -= yellowCards * 0.5;
     rating -= redCards * 1.5;
     rating -= ownGoals * 2.0;
 
-    const isGK = player.position?.abbreviation === 'G' || player.position?.name?.toLowerCase().includes('goalkeeper');
-    if (isGK) {
-      rating += saves * 0.4;
-      rating -= goalsConceded * 0.4;
+    // Subbed out penalty
+    if (player.subbedOut) {
+      rating -= 0.1;
     }
 
     rating = Math.max(3.0, Math.min(10.0, rating));
     return rating.toFixed(1);
   };
+
+  // Find Player of the Match (POTM)
+  let potmPlayer = null;
+  let maxRating = 0;
+
+  rostersList.forEach(teamRoster => {
+    const side = teamRoster.homeAway;
+    const teamId = teamRoster.team?.id;
+    const comp = competitors.find(c => c.team?.id === teamId) || (side === 'home' ? homeComp : awayComp);
+    const opponentComp = competitors.find(c => c.team?.id !== teamId) || (side === 'home' ? awayComp : homeComp);
+    
+    const teamWon = comp.winner === true;
+    const teamConceded = parseInt(opponentComp.score) || 0;
+
+    const list = teamRoster.roster || [];
+    list.forEach(p => {
+      const ratingStr = calculatePlayerRating(p, teamWon, teamConceded);
+      if (ratingStr) {
+        const ratingVal = parseFloat(ratingStr);
+        if (ratingVal > maxRating) {
+          maxRating = ratingVal;
+          potmPlayer = {
+            id: p.athlete?.id,
+            name: p.athlete?.displayName,
+            jersey: p.jersey,
+            position: p.position?.displayName,
+            teamName: teamRoster.team?.displayName,
+            rating: ratingStr
+          };
+        }
+      }
+    });
+  });
 
   const formatPlayerStats = (player) => {
     const stats = player.stats || [];
@@ -461,6 +542,13 @@ function renderMatchDetail(el, data, lg) {
   
   const getRoster = (side) => {
     const teamData = rostersList.find(r => r.homeAway === side) || {};
+    const teamId = teamData.team?.id;
+    const comp = competitors.find(c => c.team?.id === teamId) || (side === 'home' ? homeComp : awayComp);
+    const opponentComp = competitors.find(c => c.team?.id !== teamId) || (side === 'home' ? awayComp : homeComp);
+    
+    const teamWon = comp.winner === true;
+    const teamConceded = parseInt(opponentComp.score) || 0;
+
     const list = teamData.roster || [];
     const starters = list.filter(p => p.starter);
     const subs = list.filter(p => !p.starter);
@@ -468,16 +556,20 @@ function renderMatchDetail(el, data, lg) {
 
     const renderPlayer = (p) => {
       const statBadges = formatPlayerStats(p);
-      const rating = calculatePlayerRating(p);
+      const rating = calculatePlayerRating(p, teamWon, teamConceded);
       const ratingHtml = rating 
         ? `<span class="fb-player-rating" style="background:${parseFloat(rating) >= 7.0 ? 'rgba(74,222,128,0.15)' : parseFloat(rating) >= 6.0 ? 'rgba(251,146,60,0.15)' : 'rgba(248,113,113,0.15)'};color:${parseFloat(rating) >= 7.0 ? '#4ade80' : parseFloat(rating) >= 6.0 ? '#fb923c' : '#f87171'};border:1px solid ${parseFloat(rating) >= 7.0 ? 'rgba(74,222,128,0.3)' : parseFloat(rating) >= 6.0 ? 'rgba(251,146,60,0.3)' : 'rgba(248,113,113,0.3)'};">${rating}</span>`
         : '';
+
+      const isPOTM = potmPlayer && p.athlete?.id === potmPlayer.id;
+      const potmCrown = isPOTM ? '👑 ' : '';
+      const potmStyle = isPOTM ? 'style="background: rgba(251, 191, 36, 0.06); border: 1px solid rgba(251, 191, 36, 0.2) !important;"' : '';
         
       return `
-        <div class="fb-player-item ${p.starter ? '' : 'fb-player-item--sub'}">
+        <div class="fb-player-item ${p.starter ? '' : 'fb-player-item--sub'}" ${potmStyle}>
           <div class="fb-player-name-col">
             <span class="fb-player-jersey">${p.jersey || '-'}</span>
-            <strong>${p.athlete?.displayName || ''}</strong>
+            <strong>${potmCrown}${p.athlete?.displayName || ''}</strong>
             ${statBadges}
           </div>
           <div style="display:flex;align-items:center;gap:6px;">
@@ -518,7 +610,80 @@ function renderMatchDetail(el, data, lg) {
       </div>`;
   }
 
-  // 4. Info Card
+  // 4. Extract scorers from keyEvents
+  const homeTeamId = teams[0]?.team?.id;
+  const awayTeamId = teams[1]?.team?.id;
+  const homeGoals = [];
+  const awayGoals = [];
+
+  keyEvents.forEach(ev => {
+    const type = ev.type?.type || '';
+    if (type.startsWith('goal') || ev.scoringPlay === true) {
+      const time = ev.clock?.displayValue || '';
+      const rawName = ev.participants?.[0]?.athlete?.displayName || ev.shortText || '';
+      
+      let displayPlayer = rawName;
+      if (rawName.includes(' Goal')) {
+        displayPlayer = rawName.split(' Goal')[0];
+      } else if (rawName.includes(' (')) {
+        displayPlayer = rawName.split(' (')[0];
+      }
+
+      // Check if it's an Own Goal (OG) or penalty (PEN)
+      const typeText = ev.type?.text || '';
+      let suffix = '';
+      if (typeText.toLowerCase().includes('own goal')) {
+        suffix = ' (OG)';
+      } else if (typeText.toLowerCase().includes('penalty')) {
+        suffix = ' (P)';
+      }
+
+      const goalStr = `${displayPlayer}${suffix} (${time})`;
+
+      if (ev.team?.id === homeTeamId) {
+        homeGoals.push(goalStr);
+      } else if (ev.team?.id === awayTeamId) {
+        awayGoals.push(goalStr);
+      }
+    }
+  });
+
+  let headerAddonsHtml = '';
+  let scorersHtml = '';
+  if (homeGoals.length > 0 || awayGoals.length > 0) {
+    scorersHtml = `
+      <div class="fb-scorers-container">
+        <div class="fb-scorers-col home-scorers">
+          ${homeGoals.map(g => `<div class="fb-scorer-item">⚽ ${g}</div>`).join('')}
+        </div>
+        <div class="fb-scorers-divider"></div>
+        <div class="fb-scorers-col away-scorers">
+          ${awayGoals.map(g => `<div class="fb-scorer-item">⚽ ${g}</div>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  let potmHtml = '';
+  if (potmPlayer) {
+    potmHtml = `
+      <div class="fb-potm-container">
+        <span class="fb-potm-badge">👑 POTM</span>
+        <span class="fb-potm-info">
+          <strong>${potmPlayer.name}</strong> (${potmPlayer.teamName}) - 
+          <span class="fb-potm-rating">${potmPlayer.rating}</span>
+        </span>
+      </div>`;
+  }
+
+  if (scorersHtml || potmHtml) {
+    headerAddonsHtml = `
+      <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+        ${scorersHtml}
+        <div>${potmHtml}</div>
+      </div>`;
+  }
+
+  // 5. Info Card
   const info = data.gameInfo || {};
   const ref = info.referee?.displayName ? ` · ⚖️ Trọng tài: ${info.referee.displayName}` : '';
   const venue = [info.venue?.fullName, info.venue?.address?.city].filter(Boolean).join(' - ');
@@ -528,6 +693,7 @@ function renderMatchDetail(el, data, lg) {
     <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;padding:4px 0;">
       ${venueStr}${ref}
     </div>
+    ${headerAddonsHtml}
     ${statsHtml}
     ${timelineHtml}
     ${rosterHtml}
@@ -761,4 +927,66 @@ function closeTeamPanel() {
   const overlay = document.getElementById('fbTeamOverlay');
   if (panel)   panel.classList.remove('open');
   if (overlay) overlay.classList.remove('visible');
+}
+
+// ── League Stats Tab ───────────────────────────────────────────────
+function renderStats(el, data) {
+  const lg = LEAGUES[_league];
+  const statsList = data.stats || [];
+
+  if (!statsList.length) {
+    el.innerHTML = `<div class="fb-empty">📊 Hiện chưa có dữ liệu thống kê cá nhân.</div>`;
+    return;
+  }
+
+  const goalsData = statsList.find(s => s.name === 'goalsLeaders') || statsList[0];
+  const assistsData = statsList.find(s => s.name === 'assistsLeaders') || statsList[1];
+
+  const renderLeaderRow = (ldr, index) => {
+    const athlete = ldr.athlete || {};
+    const team = athlete.team || {};
+    const teamLogo = team.logos?.[0]?.href || '';
+    
+    // Find player image or default to jersey
+    const athleteImg = athlete.jerseyImage?.[0]?.href || athlete.headshot || '';
+    const imgHtml = athleteImg 
+      ? `<img src="${athleteImg}" alt="" style="width:28px;height:28px;object-fit:contain;border-radius:50%;background:rgba(255,255,255,0.05);margin-right:8px;border:1px solid rgba(255,255,255,0.1)" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2228%22 height=%2228%22><rect width=%22100%%22 height=%22100%%22 fill=%22%232a2a2a%22/><text x=%2250%%22 y=%2260%%22 font-size=%2210%22 fill=%22%23666%22 font-family=%22sans-serif%22 font-weight=%22bold%22 text-anchor=%22middle%22>${athlete.jersey || '-'}</text></svg>'">`
+      : `<div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--text-muted);margin-right:8px;">${athlete.jersey || '-'}</div>`;
+
+    return `
+      <div class="fb-leader-row">
+        <div style="display:flex;align-items:center;">
+          <span class="fb-leader-rank">${index + 1}</span>
+          ${imgHtml}
+          <div style="display:flex;flex-direction:column;">
+            <span class="fb-leader-name"><strong>${athlete.displayName || 'Cầu thủ'}</strong></span>
+            <span class="fb-leader-team" style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text-muted);margin-top:2px;">
+              ${badge(teamLogo, 12)} ${team.displayName || ''}
+            </span>
+          </div>
+        </div>
+        <span class="fb-leader-val">${ldr.value}</span>
+      </div>`;
+  };
+
+  const renderCol = (title, icon, dataObj) => {
+    const leaders = dataObj?.leaders || [];
+    const listHtml = leaders.slice(0, 15).map((ldr, idx) => renderLeaderRow(ldr, idx)).join('');
+    
+    return `
+      <div class="fb-leader-col">
+        <h3 class="fb-leader-title">
+          <span>${icon} ${title}</span>
+        </h3>
+        <div class="fb-leader-list">
+          ${listHtml || '<div class="fb-empty">Chưa có dữ liệu</div>'}
+        </div>
+      </div>`;
+  };
+
+  el.innerHTML = `
+    <div class="fb-stats-grid">
+      ${renderCol('Vua phá lưới', '⚽', goalsData)}
+      ${renderCol('Vua kiến tạo', '🅰️', assistsData)}
+    </div>`;
 }
