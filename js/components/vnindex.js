@@ -22,11 +22,13 @@ const STOCK_SECTORS = {
   GAS: 'Dầu khí',   PLX: 'Xăng dầu',  FPT: 'Công nghệ',
 };
 
-export async function renderVNIndex(containerId = 'vnindexContent') {
+export async function renderVNIndex(containerId = 'vnindexContent', isSilent = false) {
   const el = document.getElementById(containerId);
   if (!el) return;
 
-  el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;">📈 Đang tải dữ liệu chứng khoán...</div>`;
+  if (!isSilent) {
+    el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;">📈 Đang tải dữ liệu chứng khoán...</div>`;
+  }
 
   try {
     const [result, stocks] = await Promise.all([fetchVNIndex(), fetchTopStocks()]);

@@ -228,13 +228,13 @@ window.selectCity        = (city) => {
 };
 
 // ── AQI load ──
-async function loadAQI() { await renderAQI(); }
+async function loadAQI(isSilent = false) { await renderAQI('aqiContent', isSilent); }
 
 // ── VN-Index load ──
-async function loadVNIndex() { await renderVNIndex(); }
+async function loadVNIndex(isSilent = false) { await renderVNIndex('vnindexContent', isSilent); }
 
 // ── News load ──
-async function loadNews() { await renderNews(); }
+async function loadNews(isSilent = false) { await renderNews('newsContent', isSilent); }
 
 // ── Lazy-load new features on first visit ──
 const _rendered = new Set();
@@ -293,10 +293,10 @@ document.addEventListener('DOMContentLoaded', () => {
     loadExchange();
     loadGold();
     loadGas();
-    loadWeather();
-    loadAQI();
-    loadVNIndex();
-    loadNews();
+    loadWeather(null, true);
+    loadAQI(true);
+    loadVNIndex(true);
+    loadNews(true);
   }, 60_000);
 });
 

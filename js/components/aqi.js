@@ -55,11 +55,13 @@ const AQI_CITIES = [
 let currentStation = '@1583';
 let currentCity    = AQI_CITIES[0];
 
-export async function renderAQI(containerId = 'aqiContent') {
+export async function renderAQI(containerId = 'aqiContent', isSilent = false) {
   const el = document.getElementById(containerId);
   if (!el) return;
 
-  el.innerHTML = `<div class="aqi-loading">🌍 Đang tải dữ liệu chất lượng không khí...</div>`;
+  if (!isSilent) {
+    el.innerHTML = `<div class="aqi-loading">🌍 Đang tải dữ liệu chất lượng không khí...</div>`;
+  }
 
   // Find current city config
   currentCity = AQI_CITIES.find(c => (c.station && c.station === currentStation) || (!c.station && c.owmName === currentStation))

@@ -6,11 +6,13 @@ import { fetchNews, fetchArticle, relativeTime, FEEDS } from '../api/news.js';
 let currentSource = 'vnexpress';
 let currentArticles = [];
 
-export async function renderNews(containerId = 'newsContent') {
+export async function renderNews(containerId = 'newsContent', isSilent = false) {
   const el = document.getElementById(containerId);
   if (!el) return;
 
-  el.innerHTML = `<div class="news-loading">📰 Đang tải tin tức...</div>`;
+  if (!isSilent) {
+    el.innerHTML = `<div class="news-loading">📰 Đang tải tin tức...</div>`;
+  }
 
   // Source tabs
   const tabs = () => Object.entries(FEEDS).map(([key, feed]) => `
