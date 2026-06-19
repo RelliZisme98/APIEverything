@@ -1994,7 +1994,7 @@ ${contextStr}`;
 
     messages.push({ role: 'user', content: prompt });
 
-    const result = await env.AI.run('@cf/meta/llama-3-8b-instruct', {
+    const result = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
       messages,
       temperature: 0.6,
       max_tokens: 512
