@@ -350,14 +350,14 @@ async function handlePowerOutage(request) {
   // ── EVNHANOI (Hà Nội) ──────────────────────────────────────────────
   if (evn === 'hanoi') {
     BROWSER_HEADERS['Referer'] = 'https://evnhanoi.vn/';
-    BROWSER_HEADERS['Origin']  = 'https://evnhanoi.vn';
+    BROWSER_HEADERS['Origin'] = 'https://evnhanoi.vn';
     try {
       let upstreamUrl, body, method = 'POST';
 
       if (action === 'tracuu') {
-        const keyword  = url.searchParams.get('keyword')  || '';
+        const keyword = url.searchParams.get('keyword') || '';
         const fromDate = url.searchParams.get('fromDate') || '';
-        const toDate   = url.searchParams.get('toDate')   || '';
+        const toDate = url.searchParams.get('toDate') || '';
         upstreamUrl = 'https://evnhanoi.vn/api/TraCuu/LichCatDien';
         body = JSON.stringify({ ngayBatDau: fromDate, ngayKetThuc: toDate, maDViQly: '', maTram: '', key: keyword });
       } else if (action === 'today') {
@@ -884,12 +884,12 @@ async function handleGas(request, env) {
 
   // Baseline static fallback values (updated to June 18, 2026)
   const defaultPrices = [
-    { name: 'Xăng RON95-III',        r1: 20750, r2: 21160 },
-    { name: 'Xăng E5 RON92',          r1: 20120, r2: 20520 },
-    { name: 'Dầu Diesel 0,05S',       r1: 23530, r2: 24000 },
-    { name: 'Dầu Diesel 0,001S',      r1: 25430, r2: 25930 },
-    { name: 'Dầu hỏa 2-K',           r1: 22690, r2: 23140 },
-    { name: 'Dầu Mazut 180CST 3,5S',  r1: 15800, r2: 15800 },
+    { name: 'Xăng RON95-III', r1: 20750, r2: 21160 },
+    { name: 'Xăng E5 RON92', r1: 20120, r2: 20520 },
+    { name: 'Dầu Diesel 0,05S', r1: 23530, r2: 24000 },
+    { name: 'Dầu Diesel 0,001S', r1: 25430, r2: 25930 },
+    { name: 'Dầu hỏa 2-K', r1: 22690, r2: 23140 },
+    { name: 'Dầu Mazut 180CST 3,5S', r1: 15800, r2: 15800 },
   ];
   let priceDate = '2026-06-18';
   let source = 'static';
@@ -956,7 +956,7 @@ async function handleGas(request, env) {
       // Extract date from URL slug: "ngay-18-6-2026" → "2026-06-18"
       const dateSlug = artUrl.match(/ngay-(\d{1,2})-(\d{1,2})-(\d{4})/i);
       if (dateSlug) {
-        priceDate = `${dateSlug[3]}-${String(dateSlug[2]).padStart(2,'0')}-${String(dateSlug[1]).padStart(2,'0')}`;
+        priceDate = `${dateSlug[3]}-${String(dateSlug[2]).padStart(2, '0')}-${String(dateSlug[1]).padStart(2, '0')}`;
       }
 
       console.log('[Gas] Tier-2 scraping Petrolimex article:', artUrl, '→', priceDate);
@@ -1242,7 +1242,7 @@ async function handleSpamCheck(request) {
     }
 
     let carrier = "";
-    
+
     if (phoneClean.startsWith('02')) {
       if (phoneClean.length !== 11) {
         return cors(JSON.stringify({ error: 'Số điện thoại cố định (bàn) phải có đúng 11 chữ số.' }), 400);
@@ -1788,8 +1788,8 @@ const COINGECKO_TO_BINANCE = {
 
 async function fetchBinancePrices() {
   const symbols = [
-    "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", 
-    "DOGEUSDT", "ADAUSDT", "AVAXUSDT", "LINKUSDT", "DOTUSDT", 
+    "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT",
+    "DOGEUSDT", "ADAUSDT", "AVAXUSDT", "LINKUSDT", "DOTUSDT",
     "TRXUSDT", "MATICUSDT", "LTCUSDT", "USDCUSDT"
   ];
   const url = `https://api.binance.com/api/v3/ticker/24hr?symbols=${JSON.stringify(symbols)}`;
@@ -1976,7 +1976,7 @@ async function handleAI(request, env) {
       }
     }
 
-    const systemPrompt = `Bạn là Trợ lý ảo Antigravity, được tích hợp trên Dashboard đa năng.
+    const systemPrompt = `Bạn là Trợ lý ảo AI, được tích hợp trên Dashboard đa năng.
 Hãy trả lời thắc mắc của người dùng bằng tiếng Việt một cách tự nhiên, thân thiện và ngắn gọn (1-3 câu, tối đa 4 câu).
 Sử dụng các thông tin thực tế từ Dashboard ở trên để trả lời trực tiếp. Nếu không có thông tin hoặc thông tin không liên quan, hãy trả lời lịch sự rằng bạn chưa có dữ liệu đó.
 Thêm biểu tượng cảm xúc (emoji) phù hợp để câu trả lời sinh động hơn.

@@ -33,7 +33,7 @@ export function initAIAssistant() {
       <div class="ai-chatbox-header">
         <div class="ai-chatbox-title">
           <div class="ai-status-dot"></div>
-          <strong>Trợ Lý Antigravity</strong>
+          <strong>Trợ Lý AI</strong>
         </div>
         <button id="aiChatClose" class="ai-chat-close">✕</button>
       </div>
