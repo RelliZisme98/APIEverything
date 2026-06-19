@@ -5,6 +5,8 @@
  * - HNX: VPS HNX stocks basket (approximate)
  */
 import { fetchVNIndex, fetchTopStocks } from '../api/vnindex.js';
+import { state } from '../store/state.js';
+import { renderTicker } from './ticker.js';
 
 const INDEX_META = {
   'VNINDEX':     { label: 'VN-Index',  color: '#60a5fa', exchange: 'HOSE' },
@@ -32,6 +34,10 @@ export async function renderVNIndex(containerId = 'vnindexContent', isSilent = f
 
   try {
     const [result, stocks] = await Promise.all([fetchVNIndex(), fetchTopStocks()]);
+
+    // Lưu trữ dữ liệu vào global state và kích hoạt render lại ticker
+    state.vnindexData = result;
+    renderTicker();
 
     // ── Market status banner ──
     const marketStatus = result?.marketStatus ?? 'unknown';

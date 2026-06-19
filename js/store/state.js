@@ -14,6 +14,9 @@ export const state = {
   weatherData:  null,
   goldData:     null,
   gasData:      null,
+  vnindexData:  null,
+  aqiData:      null,
+  liveFootballMatches: [],
   lastUpdate:   null,
   usdToVndLive: null,
 };
