@@ -46,6 +46,7 @@ import { renderTicker }        from './components/ticker.js';
 import { renderCryptoGrid }    from './components/crypto-grid.js';
 import { renderCryptoTable }   from './components/crypto-table.js';
 import { renderMarketStats }   from './components/market-stats.js';
+import { selectCrypto }        from './components/crypto-detail.js';
 import { renderExchangeTable } from './components/exchange.js';
 import { renderGas }           from './components/gas.js';
 import { renderGold, renderGoldFallback } from './components/gold.js';
@@ -72,6 +73,11 @@ async function loadCrypto() {
     renderCryptoGrid(coins);
     renderCryptoTable(coins);
     renderMarketStats(coins);
+    
+    // Automatically select the active coin or default to the first coin (Bitcoin)
+    const currentActiveId = window.activeCryptoId || (coins[0]?.id) || 'bitcoin';
+    selectCrypto(currentActiveId);
+
     renderTicker();
   } catch (err) {
     console.warn('[Crypto]', err);

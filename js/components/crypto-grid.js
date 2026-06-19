@@ -17,9 +17,11 @@ export function renderCryptoGrid(coins, containerId = 'cryptoGrid') {
     const chg   = c.price_change_percentage_24h ?? 0;
     const sign  = chg >= 0 ? '+' : '';
     const cls   = changeClass(chg);
+    const isActive = window.activeCryptoId === c.id;
+    const activeCls = isActive ? 'active' : '';
 
     return `
-      <div class="crypto-item animate-fade-in-up">
+      <div class="crypto-item animate-fade-in-up ${activeCls}" onclick="window.selectCrypto('${c.id}')" style="cursor: pointer;">
         <div class="crypto-top">
           <div class="crypto-name">
             <img class="crypto-icon" src="${c.image}" alt="${c.symbol}" loading="lazy" />
