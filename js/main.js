@@ -15,7 +15,7 @@ import { state } from './store/state.js';
 // ── API ──
 import { fetchCryptoMarkets } from './api/crypto.js';
 import { fetchExchangeRates } from './api/exchange.js';
-import { fetchWeather, fetchForecast } from './api/weather.js';
+import { fetchWeather, fetchForecast, fetchHourlyForecastFromOpenMeteo } from './api/weather.js';
 import { fetchGoldPrice }     from './api/gold.js';
 import { fetchGasPrice }      from './api/gas.js';
 
@@ -57,6 +57,7 @@ import {
   renderWeatherLoading,
   renderWeatherError,
   setWeatherBadge,
+  renderWindyMap,
 } from './components/weather.js';
 
 // ════════════════════════════════════════════════════════════
@@ -163,7 +164,22 @@ async function loadWeather(cityOverride) {
       fetchForecast(city),
     ]);
     renderWeather(data, forecast?.todayMinMax);
-    if (forecast?.hourly?.length) renderHourly(forecast.hourly);
+
+    // Fetch and render true hourly weather forecast (1-hour interval) from Open-Meteo
+    const lat = data.coord?.lat;
+    const lon = data.coord?.lon;
+    if (lat != null && lon != null) {
+      const hourlyList = await fetchHourlyForecastFromOpenMeteo(lat, lon).catch(() => null);
+      if (hourlyList && hourlyList.length) {
+        renderHourly(hourlyList);
+      } else if (forecast?.hourly?.length) {
+        renderHourly(forecast.hourly);
+      }
+      renderWindyMap(lat, lon);
+    } else {
+      if (forecast?.hourly?.length) renderHourly(forecast.hourly);
+    }
+
     if (forecast?.daily?.length) renderForecast(forecast.daily);
     setWeatherBadge(true);
   } catch (err) {

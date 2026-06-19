@@ -141,10 +141,29 @@ export function renderWeather(d, todayMinMax = null, containerId = 'weatherConte
     </div>
 
     <div id="weatherHourly" style="margin-top:14px;"></div>
+    <div id="weatherWindyMap" style="margin-top:14px;"></div>
     <div id="weatherForecast"></div>
 
     <div style="font-size:11px;color:var(--text-muted);margin-top:10px;text-align:right;">
       ⏱️ ${new Date().toLocaleTimeString('vi-VN')} · OpenWeatherMap
+    </div>
+  `;
+}
+
+/** Render Windy interactive weather map radar widget */
+export function renderWindyMap(lat, lon, containerId = 'weatherWindyMap') {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = `
+    <div class="wf-section-label" style="margin-bottom: 6px;">🌀 Bản đồ thời tiết Windy (Mưa, Gió, Mây & Bão)</div>
+    <div class="windy-map-wrap" style="position:relative;width:100%;height:380px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid rgba(255,255,255,0.08);">
+      <iframe 
+        src="https://embed.windy.com/embed2.html?lat=${lat}&lon=${lon}&zoom=6&level=surface&overlay=rain&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1" 
+        width="100%" 
+        height="100%" 
+        style="border:none;background:var(--bg-card);" 
+        frameborder="0">
+      </iframe>
     </div>
   `;
 }
