@@ -1685,6 +1685,78 @@ async function handleExchange(request) {
   return cors(JSON.stringify({ error: 'Failed to fetch exchange rates' }), 502);
 }
 
+const COINGECKO_TO_BINANCE = {
+  'bitcoin': 'BTCUSDT',
+  'ethereum': 'ETHUSDT',
+  'tether': 'USDTUSDT',
+  'bnb': 'BNBUSDT',
+  'solana': 'SOLUSDT',
+  'usd-coin': 'USDCUSDT',
+  'xrp': 'XRPUSDT',
+  'dogecoin': 'DOGEUSDT',
+  'cardano': 'ADAUSDT',
+  'avalanche-2': 'AVAXUSDT',
+  'chainlink': 'LINKUSDT',
+  'polkadot': 'DOTUSDT',
+  'tron': 'TRXUSDT',
+  'matic-network': 'MATICUSDT',
+  'litecoin': 'LTCUSDT'
+};
+
+async function fetchBinancePrices() {
+  const symbols = [
+    "BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT", 
+    "DOGEUSDT", "ADAUSDT", "AVAXUSDT", "LINKUSDT", "DOTUSDT", 
+    "TRXUSDT", "MATICUSDT", "LTCUSDT", "USDCUSDT"
+  ];
+  const url = `https://api.binance.com/api/v3/ticker/24hr?symbols=${JSON.stringify(symbols)}`;
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(4000) });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (err) {
+    console.warn('Binance fetch failed:', err.message);
+  }
+  return null;
+}
+
+function mergeBinancePrices(cgData, binanceTicker) {
+  if (!binanceTicker || !Array.isArray(binanceTicker) || !cgData || !Array.isArray(cgData)) return cgData;
+
+  const binanceMap = {};
+  for (const item of binanceTicker) {
+    binanceMap[item.symbol] = {
+      price: parseFloat(item.lastPrice),
+      changePercent: parseFloat(item.priceChangePercent),
+      high: parseFloat(item.highPrice),
+      low: parseFloat(item.lowPrice),
+      volume: parseFloat(item.quoteVolume)
+    };
+  }
+
+  return cgData.map(coin => {
+    const binanceSymbol = COINGECKO_TO_BINANCE[coin.id];
+    if (binanceSymbol && binanceMap[binanceSymbol]) {
+      const bData = binanceMap[binanceSymbol];
+      if (!isNaN(bData.price) && bData.price > 0) {
+        coin.current_price = bData.price;
+        coin.price_change_percentage_24h = bData.changePercent;
+        coin.high_24h = bData.high;
+        coin.low_24h = bData.low;
+        coin.total_volume = bData.volume;
+        if (coin.circulating_supply) {
+          coin.market_cap = coin.circulating_supply * bData.price;
+        }
+      }
+    } else if (coin.id === 'tether') {
+      coin.current_price = 1.0;
+      coin.price_change_percentage_24h = 0.0;
+    }
+    return coin;
+  });
+}
+
 // ─── /api/crypto (CoinGecko Proxy) ──────────────────────────────────
 async function handleCrypto(request, env) {
   if (request.method === 'OPTIONS') return preflight();
@@ -1695,10 +1767,20 @@ async function handleCrypto(request, env) {
   const cacheKey = new Request(cacheUrl.toString(), request);
   const cache = typeof caches !== 'undefined' ? caches.default : null;
 
+  let fallbackCachedData = null;
   if (cache && request.method === 'GET') {
     try {
       const cachedResponse = await cache.match(cacheKey);
-      if (cachedResponse) return cachedResponse;
+      if (cachedResponse) {
+        const cachedDate = cachedResponse.headers.get('Date');
+        if (cachedDate) {
+          const ageSeconds = (Date.now() - new Date(cachedDate).getTime()) / 1000;
+          if (ageSeconds < 120) { // Fresh cache (under 2 mins)
+            return cachedResponse;
+          }
+        }
+        fallbackCachedData = await cachedResponse.json().catch(() => null);
+      }
     } catch (e) {
       console.warn('Crypto cache match failed:', e.message);
     }
@@ -1718,33 +1800,58 @@ async function handleCrypto(request, env) {
   const cgKey = env?.COINGECKO_API_KEY;
   if (cgKey) cgHeaders['x-cg-demo-api-key'] = cgKey;
 
+  let data = null;
+  let fetchedOk = false;
+
   try {
     const res = await fetch(targetUrl, {
       headers: cgHeaders,
       signal: AbortSignal.timeout(8000),
     });
     if (res.ok) {
-      const data = await res.json();
-      const headers = {
-        'Content-Type': 'application/json; charset=utf-8',
-        'Cache-Control': 'public, max-age=120',
-        ...CORS
-      };
-      const response = new Response(JSON.stringify(data), { status: 200, headers });
-
-      if (cache && request.method === 'GET') {
-        try {
-          await cache.put(cacheKey, response.clone());
-        } catch (e) {
-          console.warn('Crypto cache put failed:', e.message);
-        }
-      }
-      return response;
+      data = await res.json();
+      fetchedOk = true;
+    } else {
+      console.warn(`CoinGecko fetch failed with status: ${res.status}`);
     }
-    return cors(JSON.stringify({ error: `CoinGecko returned status ${res.status}` }), res.status);
   } catch (err) {
-    return cors(JSON.stringify({ error: err.message }), 500);
+    console.warn('CoinGecko fetch error:', err.message);
   }
+
+  // If CoinGecko failed but we have stale cache, use it!
+  if (!fetchedOk && fallbackCachedData) {
+    data = fallbackCachedData;
+    fetchedOk = true;
+  }
+
+  if (fetchedOk && data) {
+    // If it's markets list, merge fresh Binance prices
+    if (targetPath === 'coins/markets') {
+      const binanceData = await fetchBinancePrices();
+      if (binanceData) {
+        data = mergeBinancePrices(data, binanceData);
+      }
+    }
+
+    const headers = {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'public, max-age=120',
+      'Date': new Date().toUTCString(),
+      ...CORS
+    };
+    const response = new Response(JSON.stringify(data), { status: 200, headers });
+
+    if (cache && request.method === 'GET') {
+      try {
+        await cache.put(cacheKey, response.clone());
+      } catch (e) {
+        console.warn('Crypto cache put failed:', e.message);
+      }
+    }
+    return response;
+  }
+
+  return cors(JSON.stringify({ error: 'Failed to fetch fresh or cached crypto data' }), 502);
 }
 
 
