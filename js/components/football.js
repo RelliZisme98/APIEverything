@@ -298,13 +298,13 @@ function renderMatchDetail(el, data, lg) {
     const homeStats = teams[0].statistics || [];
     const awayStats = teams[1].statistics || [];
     
-    // Core statistics we want to display
+    // Core statistics mapping to match actual ESPN API keys
     const statKeys = [
-      { name: 'possession', label: 'Kiểm soát bóng (%)' },
-      { name: 'shots', label: 'Tổng cú sút' },
-      { name: 'shotsOnGoal', label: 'Sút trúng đích' },
-      { name: 'fouls', label: 'Phạm lỗi' },
-      { name: 'corners', label: 'Phạt góc' },
+      { name: 'possessionPct', label: 'Kiểm soát bóng (%)' },
+      { name: 'totalShots', label: 'Tổng cú sút' },
+      { name: 'shotsOnTarget', label: 'Sút trúng đích' },
+      { name: 'foulsCommitted', label: 'Phạm lỗi' },
+      { name: 'wonCorners', label: 'Phạt góc' },
       { name: 'yellowCards', label: 'Thẻ vàng' },
       { name: 'redCards', label: 'Thẻ đỏ' },
     ];
@@ -352,8 +352,8 @@ function renderMatchDetail(el, data, lg) {
   let timelineHtml = '';
   if (keyEvents.length > 0) {
     const list = keyEvents.map(ev => {
-      const time = ev.play?.clock?.displayValue || '';
-      const text = ev.play?.text || '';
+      const time = ev.clock?.displayValue || '';
+      const text = ev.text || '';
       const type = ev.type?.text || 'Sự kiện';
       
       let icon = '⚽';
@@ -361,27 +361,30 @@ function renderMatchDetail(el, data, lg) {
       else if (type.includes('Red')) icon = '🟥';
       else if (type.includes('Substitution')) icon = '🔄';
 
+      // Skip event descriptions that are blank
+      if (!text && !time) return '';
+
       return `
         <div class="fb-timeline-item">
-          <span class="fb-timeline-time">${time}</span>
+          <span class="fb-timeline-time">${time || '0\''}</span>
           <span class="fb-timeline-icon">${icon}</span>
-          <span class="fb-timeline-text">${text}</span>
+          <span class="fb-timeline-text">${text || type}</span>
         </div>`;
-    }).join('');
+    }).filter(Boolean).join('');
 
-    timelineHtml = `
+    timelineHtml = list ? `
       <div class="fb-stats-container" style="margin-top: 14px;">
         <div class="fb-detail-sec-title">⏱️ Diễn biến chính</div>
         <div class="fb-timeline-list">${list}</div>
-      </div>`;
+      </div>` : '';
   }
 
   // 3. Lineups / Rosters
-  const rosters = data.rosters || {};
+  const rostersList = Array.isArray(data.rosters) ? data.rosters : [];
   let rosterHtml = '';
   
   const getRoster = (side) => {
-    const teamData = rosters[side] || {};
+    const teamData = rostersList.find(r => r.homeAway === side) || {};
     const list = teamData.roster || [];
     const starters = list.filter(p => p.starter);
     if (!starters.length) return '';
