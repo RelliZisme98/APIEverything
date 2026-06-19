@@ -175,7 +175,13 @@ async function loadWeather(cityOverride) {
       } else if (forecast?.hourly?.length) {
         renderHourly(forecast.hourly);
       }
-      renderWindyMap(lat, lon);
+
+      // Only load/reload Windy map if coordinates changed or map container is empty
+      const mapEl = document.getElementById('weatherWindyMap');
+      const hasIframe = mapEl && mapEl.querySelector('iframe');
+      if (!hasIframe || mapEl.dataset.lat != lat || mapEl.dataset.lon != lon) {
+        renderWindyMap(lat, lon);
+      }
     } else {
       if (forecast?.hourly?.length) renderHourly(forecast.hourly);
     }
