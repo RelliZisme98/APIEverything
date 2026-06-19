@@ -31,17 +31,19 @@ function getOfficialUrl(key) {
 function parseJsonItems(body) {
   try {
     const json = JSON.parse(body);
-    if (!json || json.error) return [];
+    if (!json) return [];
+    // EVNHANOI real API: { isError, data: { listLichCatDienEvn: [...] } }
+    if (json.data?.listLichCatDienEvn) return json.data.listLichCatDienEvn;
     // Direct array
     if (Array.isArray(json)) return json;
-    // Spring Boot Pageable: { content: [...], totalElements: N }
+    // Spring Boot Pageable: { content: [...] }
     if (Array.isArray(json.content)) return json.content;
-    // Wrapped: { data: [...] } or { data: { content: [...] } }
+    // Wrapped { data: [...] }
     if (json.data) {
       if (Array.isArray(json.data)) return json.data;
       if (Array.isArray(json.data?.content)) return json.data.content;
     }
-    // Other common wrappers
+    if (json.error || json.isError) return [];
     for (const key of ['items', 'result', 'results', 'records', 'list']) {
       if (Array.isArray(json[key])) return json[key];
     }
@@ -68,20 +70,25 @@ function parseHtmlItems(html) {
 
 // ── Render card (JSON) ──────────────────────────────────────────────────────
 function renderJsonCard(it, color) {
-  const area     = it.area || it.khuVuc || it.tenKhuVuc || it.dienLuc || it.addressDescription || '—';
-  const reason   = it.reason || it.lyDo || it.noiDung || it.content || '';
+  // EVNHANOI real API fields: tenDonVi, ngayTHien, khoangThoiGian, khuVuc, noidung, trangthai
+  const area     = it.tenDonVi || it.area || it.khuVuc || it.tenKhuVuc || it.addressDescription || '—';
+  const reason   = it.noidung  || it.reason || it.lyDo || it.noiDung || it.content || '';
+  const timeInfo = it.khoangThoiGian || '';
   const timeFrom = it.fromTime || it.tuGio || it.startTime || it.powerCutFrom || '';
   const timeTo   = it.toTime   || it.denGio || it.endTime   || it.powerCutTo   || '';
-  const status   = it.status  || it.trangThai || '';
-  const district = it.district || it.quan || it.huyen || '';
+  const status   = it.trangthai || it.status || it.trangThai || '';
+  const district = it.khuVuc  || it.district || it.quan || it.huyen || '';
+  const ngay     = it.ngayTHien || '';
   const isActive = status && (status.includes('thực hiện') || status.toLowerCase().includes('đang'));
   const statusBadge = status
     ? `<span class="po-status-badge" style="background:${isActive ? 'rgba(239,68,68,0.15)' : 'rgba(34,197,94,0.15)'};color:${isActive ? '#f87171' : '#4ade80'}">${status}</span>`
     : '';
+  const timeDisplay = timeInfo || (timeFrom ? `${timeFrom}${timeTo ? ' → ' + timeTo : ''}` : '');
   return `<div class="po-card" style="border-left-color:${color}">
     <div class="po-card-header"><span class="po-card-area">⚡ ${area}</span>${statusBadge}</div>
-    ${district ? `<div class="po-card-meta">📍 ${district}</div>` : ''}
-    ${(timeFrom || timeTo) ? `<div class="po-card-time">🕐 ${timeFrom}${timeTo ? ' → ' + timeTo : ''}</div>` : ''}
+    ${ngay ? `<div class="po-card-meta">📅 ${ngay}</div>` : ''}
+    ${district && district !== area ? `<div class="po-card-meta">📍 ${district}</div>` : ''}
+    ${timeDisplay ? `<div class="po-card-time">🕐 ${timeDisplay}</div>` : ''}
     ${reason ? `<div class="po-card-reason">📋 ${reason}</div>` : ''}
   </div>`;
 }

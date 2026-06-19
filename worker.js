@@ -350,41 +350,48 @@ async function handlePowerOutage(request) {
   // ── EVNHANOI (Hà Nội) ──────────────────────────────────────────────
   if (evn === 'hanoi') {
     BROWSER_HEADERS['Referer'] = 'https://evnhanoi.vn/';
+    BROWSER_HEADERS['Origin']  = 'https://evnhanoi.vn';
     try {
-      let upstreamUrl;
+      let upstreamUrl, body, method = 'POST';
+
       if (action === 'tracuu') {
-        const keyword = url.searchParams.get('keyword') || '';
+        const keyword  = url.searchParams.get('keyword')  || '';
         const fromDate = url.searchParams.get('fromDate') || '';
-        const toDate = url.searchParams.get('toDate') || '';
-        upstreamUrl = `https://evnhanoi.vn/api/power-outage/search?keyword=${encodeURIComponent(keyword)}&fromDate=${encodeURIComponent(fromDate)}&toDate=${encodeURIComponent(toDate)}&size=100`;
-      } else if (action === 'tracuu-makh') {
-        const maKH = url.searchParams.get('maKH') || '';
-        upstreamUrl = `https://evnhanoi.vn/api/power-outage/search?keyword=${encodeURIComponent(maKH)}&size=50`;
+        const toDate   = url.searchParams.get('toDate')   || '';
+        upstreamUrl = 'https://evnhanoi.vn/api/TraCuu/LichCatDien';
+        body = JSON.stringify({ ngayBatDau: fromDate, ngayKetThuc: toDate, maDViQly: '', maTram: '', key: keyword });
       } else if (action === 'today') {
         const today = todayVN();
-        upstreamUrl = `https://evnhanoi.vn/api/power-outage/search?keyword=&fromDate=${today}&toDate=${today}&size=200`;
+        upstreamUrl = 'https://evnhanoi.vn/api/TraCuu/LichCatDien';
+        body = JSON.stringify({ ngayBatDau: today, ngayKetThuc: today, maDViQly: '', maTram: '', key: '' });
       } else if (action === 'debug') {
-        // Debug: trả về raw response để kiểm tra format thực tế
         const today = todayVN();
-        upstreamUrl = `https://evnhanoi.vn/api/power-outage/search?keyword=&fromDate=${today}&toDate=${today}&size=5`;
-        const upstream = await fetch(upstreamUrl, { headers: { ...BROWSER_HEADERS, 'Accept': 'application/json' } });
-        const body = await upstream.text();
+        upstreamUrl = 'https://evnhanoi.vn/api/TraCuu/LichCatDien';
+        const reqBody = JSON.stringify({ ngayBatDau: today, ngayKetThuc: today, maDViQly: '', maTram: '', key: '' });
+        const upstream = await fetch(upstreamUrl, {
+          method: 'POST',
+          headers: { ...BROWSER_HEADERS, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: reqBody,
+        });
+        const respBody = await upstream.text();
         const respHeaders = {};
         upstream.headers.forEach((v, k) => { respHeaders[k] = v; });
         return cors(JSON.stringify({
-          status: upstream.status,
-          contentType: upstream.headers.get('content-type'),
-          url: upstreamUrl,
-          today,
-          responseHeaders: respHeaders,
-          bodySnippet: body.slice(0, 500),
+          status: upstream.status, contentType: upstream.headers.get('content-type'),
+          url: upstreamUrl, today, reqBody, responseHeaders: respHeaders,
+          bodySnippet: respBody.slice(0, 1000),
         }), 200);
       } else {
         return cors(JSON.stringify({ error: 'Invalid action' }), 400);
       }
-      const upstream = await fetch(upstreamUrl, { headers: { ...BROWSER_HEADERS, 'Accept': 'application/json' } });
-      const body = await upstream.text();
-      return new Response(body, {
+
+      const upstream = await fetch(upstreamUrl, {
+        method,
+        headers: { ...BROWSER_HEADERS, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body,
+      });
+      const respBody = await upstream.text();
+      return new Response(respBody, {
         status: upstream.status,
         headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=300', ...CORS },
       });
@@ -392,8 +399,6 @@ async function handlePowerOutage(request) {
       return cors(JSON.stringify({ error: err.message }), 500);
     }
   }
-
-
   // ── EVNCPC (Miền Trung & Tây Nguyên) ──────────────────────────────
   if (evn === 'cpc') {
     BROWSER_HEADERS['Referer'] = 'https://cskh.cpc.vn/';
