@@ -718,13 +718,33 @@ async function handleFootball(request) {
 
   try {
     const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-    if (!res.ok) throw new Error(`upstream ${res.status}`);
+    if (!res.ok) {
+      const fallback = {
+        events: [],
+        children: [],
+        stats: [],
+        message: `Upstream returned status ${res.status}`
+      };
+      return new Response(JSON.stringify(fallback), {
+        headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS },
+        status: 200
+      });
+    }
     const data = await res.text();
     return new Response(data, {
       headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=60' },
     });
   } catch (err) {
-    return cors(JSON.stringify({ error: err.message }), 500);
+    const fallback = {
+      events: [],
+      children: [],
+      stats: [],
+      error: err.message
+    };
+    return new Response(JSON.stringify(fallback), {
+      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS },
+      status: 200
+    });
   }
 }
 
