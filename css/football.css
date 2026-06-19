@@ -340,3 +340,49 @@
 .fb-date-btn { padding:6px 14px; border-radius:20px; border:1px solid var(--border); background:rgba(255,255,255,0.04); color:var(--text-muted); cursor:pointer; font-size:12px; font-weight:600; font-family:'Inter',sans-serif; transition:all .2s; }
 .fb-date-btn:hover { background:rgba(255,255,255,0.08); color:var(--text-primary); }
 .fb-date-btn.active { background:rgba(251,146,60,0.15); border-color:rgba(251,146,60,0.4); color:#fb923c; }
+
+/* ── Rosters Extensions ── */
+.fb-roster-sub-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 10px;
+  margin-bottom: 6px;
+}
+.fb-player-name-col {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.fb-player-jersey {
+  display: inline-block;
+  width: 16px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.fb-player-badges {
+  font-size: 11px;
+  margin-left: 6px;
+  opacity: 0.9;
+}
+.fb-player-item--sub {
+  opacity: 0.75;
+}
+.fb-player-item--sub:hover {
+  opacity: 1;
+}
+.fb-player-rating {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 800;
+  width: 24px;
+  height: 18px;
+  border-radius: 4px;
+  margin-left: 6px;
+  flex-shrink: 0;
+}

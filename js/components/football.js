@@ -382,23 +382,126 @@ function renderMatchDetail(el, data, lg) {
   // 3. Lineups / Rosters
   const rostersList = Array.isArray(data.rosters) ? data.rosters : [];
   let rosterHtml = '';
+
+  const calculatePlayerRating = (player) => {
+    const stats = player.stats || [];
+    const getVal = (name) => {
+      const s = stats.find(x => x.name === name);
+      return s ? parseInt(s.value) || 0 : 0;
+    };
+
+    const appearances = getVal('appearances');
+    const subIns = getVal('subIns');
+    const subbedIn = player.subbedIn;
+    const starter = player.starter;
+    
+    // If did not play, return null
+    if (!starter && !subbedIn && appearances === 0 && subIns === 0) {
+      return null;
+    }
+
+    let rating = 6.0; // Base rating for active participation
+
+    const goals = getVal('totalGoals');
+    const assists = getVal('goalAssists');
+    const shotsOnTarget = getVal('shotsOnTarget');
+    const totalShots = getVal('totalShots');
+    const foulsSuffered = getVal('foulsSuffered');
+    const foulsCommitted = getVal('foulsCommitted');
+    const yellowCards = getVal('yellowCards');
+    const redCards = getVal('redCards');
+    const ownGoals = getVal('ownGoals');
+    const saves = getVal('saves');
+    const goalsConceded = getVal('goalsConceded');
+
+    rating += goals * 1.5;
+    rating += assists * 1.0;
+    rating += (shotsOnTarget || 0) * 0.3;
+    rating += (totalShots - shotsOnTarget > 0 ? (totalShots - shotsOnTarget) * 0.1 : 0);
+    rating += foulsSuffered * 0.1;
+    rating -= foulsCommitted * 0.1;
+    rating -= yellowCards * 0.5;
+    rating -= redCards * 1.5;
+    rating -= ownGoals * 2.0;
+
+    const isGK = player.position?.abbreviation === 'G' || player.position?.name?.toLowerCase().includes('goalkeeper');
+    if (isGK) {
+      rating += saves * 0.4;
+      rating -= goalsConceded * 0.4;
+    }
+
+    rating = Math.max(3.0, Math.min(10.0, rating));
+    return rating.toFixed(1);
+  };
+
+  const formatPlayerStats = (player) => {
+    const stats = player.stats || [];
+    const getVal = (name) => {
+      const s = stats.find(x => x.name === name);
+      return s ? parseInt(s.value) || 0 : 0;
+    };
+    const goals = getVal('totalGoals');
+    const assists = getVal('goalAssists');
+    const yc = getVal('yellowCards');
+    const rc = getVal('redCards');
+    const saves = getVal('saves');
+    
+    const badges = [];
+    if (goals > 0) badges.push(`⚽${goals > 1 ? `x${goals}` : ''}`);
+    if (assists > 0) badges.push(`🅰️${assists > 1 ? `x${assists}` : ''}`);
+    if (rc > 0) badges.push('🟥');
+    else if (yc > 0) badges.push('🟨');
+    if (saves > 0 && player.position?.abbreviation === 'G') badges.push(`🧤${saves}`);
+    
+    if (player.subbedIn) badges.push('⬆️');
+    if (player.subbedOut) badges.push('⬇️');
+
+    return badges.length ? `<span class="fb-player-badges">${badges.join(' ')}</span>` : '';
+  };
   
   const getRoster = (side) => {
     const teamData = rostersList.find(r => r.homeAway === side) || {};
     const list = teamData.roster || [];
     const starters = list.filter(p => p.starter);
-    if (!starters.length) return '';
+    const subs = list.filter(p => !p.starter);
+    if (!starters.length && !subs.length) return '';
+
+    const renderPlayer = (p) => {
+      const statBadges = formatPlayerStats(p);
+      const rating = calculatePlayerRating(p);
+      const ratingHtml = rating 
+        ? `<span class="fb-player-rating" style="background:${parseFloat(rating) >= 7.0 ? 'rgba(74,222,128,0.15)' : parseFloat(rating) >= 6.0 ? 'rgba(251,146,60,0.15)' : 'rgba(248,113,113,0.15)'};color:${parseFloat(rating) >= 7.0 ? '#4ade80' : parseFloat(rating) >= 6.0 ? '#fb923c' : '#f87171'};border:1px solid ${parseFloat(rating) >= 7.0 ? 'rgba(74,222,128,0.3)' : parseFloat(rating) >= 6.0 ? 'rgba(251,146,60,0.3)' : 'rgba(248,113,113,0.3)'};">${rating}</span>`
+        : '';
+        
+      return `
+        <div class="fb-player-item ${p.starter ? '' : 'fb-player-item--sub'}">
+          <div class="fb-player-name-col">
+            <span class="fb-player-jersey">${p.jersey || '-'}</span>
+            <strong>${p.athlete?.displayName || ''}</strong>
+            ${statBadges}
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="fb-player-pos">${p.position?.displayName || ''}</span>
+            ${ratingHtml}
+          </div>
+        </div>`;
+    };
 
     return `
       <div class="fb-roster-col">
-        <h4>${side === 'home' ? '🏠 Chủ nhà' : '✈️ Khách'} (Sơ đồ: ${teamData.formation || 'N/A'})</h4>
+        <h4 style="border-bottom: 2px solid ${side === 'home' ? 'var(--accent-blue)' : 'var(--accent-yellow)'}; padding-bottom: 6px; margin-bottom: 10px;">
+          ${side === 'home' ? '🏠 Chủ nhà' : '✈️ Khách'} (Sơ đồ: ${teamData.formation || 'N/A'})
+        </h4>
+        <div class="fb-roster-sub-title">🏃 Đá chính</div>
         <div class="fb-roster-list">
-          ${starters.map(p => `
-            <div class="fb-player-item">
-              <span>${p.jersey || ''}. <strong>${p.athlete?.displayName || ''}</strong></span>
-              <span class="fb-player-pos">${p.position?.displayName || ''}</span>
-            </div>`).join('')}
+          ${starters.map(renderPlayer).join('')}
         </div>
+        ${subs.length ? `
+          <div class="fb-roster-sub-title">🛋️ Dự bị</div>
+          <div class="fb-roster-list">
+            ${subs.map(renderPlayer).join('')}
+          </div>
+        ` : ''}
       </div>`;
   };
 
@@ -407,7 +510,7 @@ function renderMatchDetail(el, data, lg) {
   if (homeRosterHtml || awayRosterHtml) {
     rosterHtml = `
       <div class="fb-stats-container" style="margin-top: 14px;">
-        <div class="fb-detail-sec-title">🏃 Đội hình xuất phát</div>
+        <div class="fb-detail-sec-title">🏃 Đội hình & Cầu thủ</div>
         <div class="fb-roster-grid">
           ${homeRosterHtml}
           ${awayRosterHtml}
