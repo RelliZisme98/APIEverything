@@ -25,6 +25,7 @@ let currentLotteryDate = new Date();
 let currentVietlottGame = 'power655';
 let lastTraditionalData = null;
 let currentTraditionalTab = 'result'; // 'result' | 'stats' | 'predict'
+let isTodayNotDrawn = false;
 
 function formatDate(d) {
   const dd = String(d.getDate()).padStart(2, '0');
@@ -179,6 +180,8 @@ async function fetchAndRender() {
   const dateStr = todayRequested ? '' : formatDate(currentLotteryDate);
   const url = `/lottery?region=${region.id}${dateStr ? '&date=' + dateStr : ''}`;
 
+  isTodayNotDrawn = false;
+
   try {
     const res  = await fetch(url);
     const data = await res.json();
@@ -189,26 +192,7 @@ async function fetchAndRender() {
       const todayFormatted = formatDate(new Date());              // DD-MM-YYYY
       const normalizeD = (s) => s.replace(/\//g,'-');
       if (normalizeD(returnedDate) !== normalizeD(todayFormatted)) {
-        // Results belong to another day — today not drawn yet
-        const drawTime = DRAW_TIMES[currentLotteryId] ?? '18:10';
-        el.innerHTML = `
-          <div class="lot-wrap">
-            <div class="lot-header" style="border-color:${region.color}30;background:${region.color}06;">
-              <span style="color:${region.color};">${region.label}</span>
-              <span class="lot-date">${new Date().toLocaleDateString('vi-VN', { weekday:'long', day:'2-digit', month:'2-digit', year:'numeric' })}</span>
-            </div>
-            <div style="text-align:center;padding:30px;">
-              <div style="font-size:36px;margin-bottom:10px;">⏳</div>
-              <div style="font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">Chưa có kết quả hôm nay</div>
-              <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">
-                Dự kiến quay lúc <strong style="color:${region.color};">${drawTime}</strong> (giờ Việt Nam)
-              </div>
-              <button class="lot-nav-btn" onclick="window.lotNavDate(-1)" style="background:${region.color}12;border-color:${region.color}40;color:${region.color};">
-                ◀ Xem kết quả hôm qua
-              </button>
-            </div>
-          </div>`;
-        return;
+        isTodayNotDrawn = true;
       }
     }
 
@@ -233,16 +217,70 @@ async function fetchAndRender() {
     lastTraditionalData = data;
     renderSubTabBar();
 
-    if (currentTraditionalTab === 'result') {
-      renderPrizes(el, data, region);
-    } else if (currentTraditionalTab === 'stats') {
-      renderTraditionalStats(el, data, region);
-    } else if (currentTraditionalTab === 'predict') {
-      renderTraditionalPredict(el, data, region);
+    if (isTodayNotDrawn) {
+      if (currentTraditionalTab === 'result') {
+        renderTodayNotDrawnPlaceholder(el, region);
+      } else if (currentTraditionalTab === 'stats') {
+        renderTodayNotDrawnStatsPlaceholder(el, region);
+      } else if (currentTraditionalTab === 'predict') {
+        renderTraditionalPredict(el, data, region);
+      }
+    } else {
+      if (currentTraditionalTab === 'result') {
+        renderPrizes(el, data, region);
+      } else if (currentTraditionalTab === 'stats') {
+        renderTraditionalStats(el, data, region);
+      } else if (currentTraditionalTab === 'predict') {
+        renderTraditionalPredict(el, data, region);
+      }
     }
   } catch (err) {
     el.innerHTML = `<div class="error-msg">⚠️ Lỗi tải dữ liệu: ${err.message}</div>`;
   }
+}
+
+function renderTodayNotDrawnPlaceholder(el, region) {
+  const drawTime = DRAW_TIMES[currentLotteryId] ?? '18:10';
+  el.innerHTML = `
+    <div class="lot-wrap">
+      <div class="lot-header" style="border-color:${region.color}30;background:${region.color}06;">
+        <span style="color:${region.color};">${region.label}</span>
+        <span class="lot-date">${new Date().toLocaleDateString('vi-VN', { weekday:'long', day:'2-digit', month:'2-digit', year:'numeric' })}</span>
+      </div>
+      <div style="text-align:center;padding:30px;">
+        <div style="font-size:36px;margin-bottom:10px;">⏳</div>
+        <div style="font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">Chưa có kết quả hôm nay</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">
+          Dự kiến quay lúc <strong style="color:${region.color};">${drawTime}</strong> (giờ Việt Nam)
+        </div>
+        <div style="margin-bottom: 12px; font-size:12px; color:var(--text-muted);">
+          Bạn có thể xem **Dự đoán / Soi cầu** hôm nay ở tab phía trên!
+        </div>
+        <button class="lot-nav-btn" onclick="window.lotNavDate(-1)" style="background:${region.color}12;border-color:${region.color}40;color:${region.color};">
+          ◀ Xem kết quả hôm qua
+        </button>
+      </div>
+    </div>`;
+}
+
+function renderTodayNotDrawnStatsPlaceholder(el, region) {
+  el.innerHTML = `
+    <div class="lot-wrap">
+      <div class="lot-header" style="border-color:${region.color}30;background:${region.color}06;">
+        <span style="color:${region.color};">📊 Đầu/Đuôi Lô Tô - ${region.label}</span>
+        <span class="lot-date">${new Date().toLocaleDateString('vi-VN', { weekday:'long', day:'2-digit', month:'2-digit', year:'numeric' })}</span>
+      </div>
+      <div style="text-align:center;padding:30px;">
+        <div style="font-size:36px;margin-bottom:10px;">📊</div>
+        <div style="font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">Chưa có kết quả quay số hôm nay</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">
+          Bảng thống kê đầu đuôi loto tự động hiển thị sau khi có kết quả chính thức.
+        </div>
+        <button class="btn-primary" onclick="window.switchLotSubTab('predict')" style="background:${region.color};border-color:${region.color};color:#000;font-weight:700;padding:6px 16px;font-size:12px;">
+          🔮 Xem nhận định & soi cầu hôm nay
+        </button>
+      </div>
+    </div>`;
 }
 
 function cleanLabel(raw) {
@@ -405,12 +443,22 @@ window.switchLotSubTab = (tab) => {
   if (lastTraditionalData) {
     const el = document.getElementById('lotteryData');
     const region = LOTTERY_REGIONS.find(r => r.id === currentLotteryId);
-    if (tab === 'result') {
-      renderPrizes(el, lastTraditionalData, region);
-    } else if (tab === 'stats') {
-      renderTraditionalStats(el, lastTraditionalData, region);
-    } else if (tab === 'predict') {
-      renderTraditionalPredict(el, lastTraditionalData, region);
+    if (isTodayNotDrawn) {
+      if (tab === 'result') {
+        renderTodayNotDrawnPlaceholder(el, region);
+      } else if (tab === 'stats') {
+        renderTodayNotDrawnStatsPlaceholder(el, region);
+      } else if (tab === 'predict') {
+        renderTraditionalPredict(el, lastTraditionalData, region);
+      }
+    } else {
+      if (tab === 'result') {
+        renderPrizes(el, lastTraditionalData, region);
+      } else if (tab === 'stats') {
+        renderTraditionalStats(el, lastTraditionalData, region);
+      } else if (tab === 'predict') {
+        renderTraditionalPredict(el, lastTraditionalData, region);
+      }
     }
   }
 };
