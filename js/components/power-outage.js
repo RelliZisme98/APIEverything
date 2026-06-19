@@ -224,58 +224,51 @@ export function renderPowerOutage(containerId = 'powerContent') {
   const el = document.getElementById(containerId);
   if (!el) return;
 
+  // Cập nhật badge của card trên giao diện chính
+  const card = el.closest('.card');
+  if (card) {
+    const badge = card.querySelector('.card-badge');
+    if (badge) {
+      badge.textContent = 'BẢN ĐỒ TOÀN QUỐC';
+      badge.className = 'card-badge badge-live';
+      badge.style.background = 'rgba(96, 165, 250, 0.15)';
+      badge.style.color = '#60a5fa';
+    }
+  }
+
   el.innerHTML = `
-    <div class="po-dashboard">
-      <div class="po-dash-header">
-        <div class="po-dash-title">
-          <span class="po-dash-icon">⚡</span>
-          <div>
-            <div class="po-dash-heading">Lịch Cúp Điện Hôm Nay</div>
-            <div class="po-dash-date">${todayLabel()}</div>
-          </div>
-        </div>
-        <button class="po-refresh-btn" onclick="window.poRefreshAll()" title="Tải lại dữ liệu">
-          <span id="poRefreshIcon">🔄</span> Làm mới
-        </button>
+    <div style="position: relative; width: 100%; height: 780px; overflow: hidden; border-radius: 8px; background: #ffffff;">
+      <!-- Loader giao diện tối (Dark Mode) khớp với dashboard -->
+      <div id="po-iframe-loader" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #121214; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; color: #a0a0ab; font-size: 14px;">
+        <div style="width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.08); border-top-color: #60a5fa; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 12px;"></div>
+        <span>Đang kết nối tới máy chủ bản đồ toàn quốc...</span>
       </div>
-
-      <div class="po-regions">
-        ${EVN_REGIONS.map(r => `
-          <div class="po-region-wrap" id="po-region-${r.key}">
-            <div class="po-region-header" onclick="window.poToggleRegion('${r.key}')">
-              <div class="po-region-left">
-                <span class="po-region-icon">${r.icon}</span>
-                <div>
-                  <div class="po-region-name" style="color:${r.color}">${r.short}</div>
-                  <div class="po-region-label">${r.label}</div>
-                </div>
-              </div>
-              <div class="po-region-right">
-                <span class="po-region-count" id="po-count-${r.key}" style="background:rgba(100,100,100,0.15);color:var(--text-muted)">${r.noAutoLoad ? 'Tra cứu' : 'Đang tải...'}</span>
-                <span class="po-region-hotline">📞 ${r.hotline}</span>
-                <span class="po-chevron" id="po-chevron-${r.key}">▼</span>
-              </div>
-            </div>
-            <div class="po-region-body" id="po-body-${r.key}">
-              <div class="po-loading"><span class="po-spinner"></span> Đang tải...</div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-
-      <div class="po-dash-footer">
-        📞 <strong>1900 1288</strong> — EVNHANOI &nbsp;|&nbsp;
-        <strong>1900 6769</strong> — EVNNPC &nbsp;|&nbsp;
-        <strong>1900 1909</strong> — EVNCPC &nbsp;|&nbsp;
-        <strong>1900 1006</strong> — EVNSPC
-      </div>
+      
+      <iframe id="po-iframe" src="https://lichcupdien.app" style="width: 100%; height: 100%; border: none; opacity: 0; transition: opacity 0.3s;" allowfullscreen></iframe>
     </div>
   `;
 
-  window.poToggleRegion = poToggleRegion;
-  window.poRefreshAll   = poRefreshAll;
+  // Thêm CSS hiệu ứng xoay cho spinner nếu chưa có
+  if (!document.getElementById('po-spinner-style')) {
+    const style = document.createElement('style');
+    style.id = 'po-spinner-style';
+    style.innerHTML = `
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+  }
 
-  poRefreshAll();
+  const iframe = document.getElementById('po-iframe');
+  const loader = document.getElementById('po-iframe-loader');
+  if (iframe && loader) {
+    iframe.addEventListener('load', () => {
+      loader.style.display = 'none';
+      iframe.style.opacity = '1';
+    });
+  }
 }
 
 export function searchPowerOutage() {}
