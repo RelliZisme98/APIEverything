@@ -184,10 +184,15 @@ async function loadWeather(cityOverride, isSilent = false) {
         renderHourly(forecast.hourly);
       }
 
-      // Only load/reload Windy map if coordinates changed or map container is empty
+      // Only load/reload Windy map if coordinates changed significantly or map container is empty
       const mapEl = document.getElementById('weatherWindyMap');
       const hasIframe = mapEl && mapEl.querySelector('iframe');
-      if (!hasIframe || mapEl.dataset.lat != lat || mapEl.dataset.lon != lon) {
+      const savedLat = mapEl ? parseFloat(mapEl.dataset.lat) : NaN;
+      const savedLon = mapEl ? parseFloat(mapEl.dataset.lon) : NaN;
+      const latChanged = isNaN(savedLat) || Math.abs(savedLat - lat) > 0.01;
+      const lonChanged = isNaN(savedLon) || Math.abs(savedLon - lon) > 0.01;
+
+      if (!hasIframe || latChanged || lonChanged) {
         renderWindyMap(lat, lon);
       }
     } else {

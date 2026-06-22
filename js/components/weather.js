@@ -46,7 +46,7 @@ export function renderQuickCities(containerId = 'weatherQuickCities') {
   if (!el) return;
 
   el.innerHTML = QUICK_CITIES.map(c => `
-    <button class="weather-city-chip" onclick="selectCity('${c.query}')">${c.label}</button>
+    <button type="button" class="weather-city-chip" onclick="selectCity('${c.query}')">${c.label}</button>
   `).join('');
 }
 
@@ -190,6 +190,7 @@ export function renderWindyMap(lat, lon, containerId = 'weatherWindyMap') {
         width="100%" 
         height="100%" 
         style="border:none;background:var(--bg-card);" 
+        sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
         frameborder="0">
       </iframe>
     </div>
