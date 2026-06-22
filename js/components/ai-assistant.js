@@ -21,7 +21,7 @@ export function initAIAssistant() {
   widget.id = 'aiWidgetContainer';
   widget.innerHTML = `
     <!-- Floating Bubble -->
-    <button id="aiBubble" class="ai-bubble" title="Trò chuyện với Trợ lý AI">
+    <button id="aiBubble" class="ai-bubble show-tooltip" title="Trò chuyện với Trợ lý AI">
       <div class="ai-bubble-inner">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ai-icon"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
       </div>
@@ -112,12 +112,19 @@ export function initAIAssistant() {
     // Disable mic button if speech recognition is not supported
     micBtn.style.display = 'none';
   }
+
+  // Remove tooltip after 10 seconds
+  setTimeout(() => {
+    const bubble = document.getElementById('aiBubble');
+    if (bubble) bubble.classList.remove('show-tooltip');
+  }, 10000);
 }
 
 function toggleChat(forceState) {
   isChatOpen = typeof forceState === 'boolean' ? forceState : !isChatOpen;
   const chatBox = document.getElementById('aiChatBox');
   const bubble = document.getElementById('aiBubble');
+  if (bubble) bubble.classList.remove('show-tooltip');
   if (isChatOpen) {
     chatBox.classList.add('open');
     bubble.classList.add('active');
@@ -200,11 +207,59 @@ async function handleSend() {
   }
 }
 
+function formatMarkdown(text) {
+  if (!text) return '';
+  // Escape HTML first
+  let html = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  // Convert bold: **text** -> <strong>text</strong>
+  html = html.replace(/\*\*([\s\S]*?)\*\*/g, '<strong>$1</strong>');
+
+  // Convert line breaks and bullet list items
+  const lines = html.split('\n');
+  let inList = false;
+  let result = [];
+
+  for (let line of lines) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+      if (!inList) {
+        result.push('<ul class="ai-list">');
+        inList = true;
+      }
+      const itemContent = trimmed.substring(2);
+      result.push(`<li>${itemContent}</li>`);
+    } else {
+      if (inList) {
+        result.push('</ul>');
+        inList = false;
+      }
+      if (trimmed) {
+        result.push(`<p>${line}</p>`);
+      } else {
+        result.push('<br/>');
+      }
+    }
+  }
+  if (inList) {
+    result.push('</ul>');
+  }
+
+  return result.join('\n');
+}
+
 function appendMessage(text, role) {
   const body = document.getElementById('aiChatBody');
   const msg = document.createElement('div');
   msg.className = `ai-msg ai-msg--${role}`;
-  msg.textContent = text;
+  if (role === 'user' || role === 'system') {
+    msg.textContent = text;
+  } else {
+    msg.innerHTML = formatMarkdown(text);
+  }
   body.appendChild(msg);
   body.scrollTop = body.scrollHeight;
 }
