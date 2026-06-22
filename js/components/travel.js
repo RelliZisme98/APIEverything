@@ -1,4 +1,5 @@
 /* ── Travel & Flight Component – Full VN airports + schedule view ── */
+import { state } from '../store/state.js';
 
 const VN_AIRPORTS = [
   // Miền Bắc
@@ -54,6 +55,25 @@ const ROUTE_SCHEDULES = {
     { airline:'VJ', flights:['VJ580','VJ582'], times:['07:30','14:00','19:00'], duration:75 },
   ],
 };
+
+// Populate flight schedules in state for AI assistant
+try {
+  state.flightSchedules = {
+    airports: VN_AIRPORTS.map(a => ({ name: a.name, code: a.code, airport: a.airport, region: a.region })),
+    airlines: AIRLINES_VN.map(a => ({ code: a.code, name: a.name })),
+    typicalRoutes: Object.entries(ROUTE_SCHEDULES).map(([route, scheds]) => ({
+      route,
+      options: scheds.map(s => ({
+        airline: s.airline,
+        flights: s.flights,
+        times: s.times,
+        duration: s.duration
+      }))
+    }))
+  };
+} catch (e) {
+  console.warn('[Travel] failed to populate state.flightSchedules:', e);
+}
 
 function getAirport(key) { return VN_AIRPORTS.find(a => a.key === key); }
 

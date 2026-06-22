@@ -1957,7 +1957,10 @@ async function handleAI(request, env) {
         contextStr += `- Lịch âm hôm nay: ${context.lunarCalendar}\n`;
       }
       if (context.weather) {
-        contextStr += `- Thời tiết: ${JSON.stringify(context.weather)}\n`;
+        contextStr += `- Thời tiết hiện tại: ${JSON.stringify(context.weather)}\n`;
+        if (context.weather.forecast) {
+          contextStr += `- Dự báo thời tiết 5 ngày tới: ${JSON.stringify(context.weather.forecast)}\n`;
+        }
       }
       if (context.aqi) {
         contextStr += `- Chất lượng không khí (AQI): ${JSON.stringify(context.aqi)}\n`;
@@ -1973,6 +1976,9 @@ async function handleAI(request, env) {
       }
       if (context.liveFootball && context.liveFootball.length > 0) {
         contextStr += `- Trận bóng đá đang diễn ra trực tiếp (Live): ${JSON.stringify(context.liveFootball)}\n`;
+      }
+      if (context.footballMatches && context.footballMatches.length > 0) {
+        contextStr += `- Các trận đấu bóng đá (Kết quả gần đây, đang diễn ra & sắp tới): ${JSON.stringify(context.footballMatches)}\n`;
       }
       if (context.powerOutages && context.powerOutages.length > 0) {
         contextStr += `- Lịch mất điện (EVN): ${JSON.stringify(context.powerOutages.slice(0, 10))}\n`;
@@ -2004,11 +2010,24 @@ async function handleAI(request, env) {
       if (context.games && context.games.length > 0) {
         contextStr += `- Danh sách trò chơi điện tử hot: ${JSON.stringify(context.games)}\n`;
       }
+      if (context.upcomingEvents && context.upcomingEvents.length > 0) {
+        contextStr += `- Các ngày lễ và sự kiện sắp tới: ${JSON.stringify(context.upcomingEvents)}\n`;
+      }
+      if (context.flightSchedules) {
+        contextStr += `- Thông tin lịch bay mẫu và sân bay Việt Nam: ${JSON.stringify(context.flightSchedules)}\n`;
+      }
     }
 
-    const systemPrompt = `Bạn là Trợ lý ảo AI, được tích hợp trên Dashboard đa năng.
+    const systemPrompt = `Bạn là Trợ lý ảo AI, được tích hợp trên Dashboard đa năng (Rellia Đại Dashboard).
 Hãy trả lời thắc mắc của người dùng bằng tiếng Việt một cách tự nhiên, thân thiện và ngắn gọn (1-3 câu, tối đa 4 câu).
-Sử dụng các thông tin thực tế từ Dashboard ở trên để trả lời trực tiếp. Nếu không có thông tin hoặc thông tin không liên quan, hãy trả lời lịch sự rằng bạn chưa có dữ liệu đó.
+Sử dụng các thông tin thực tế từ Dashboard ở dưới để trả lời trực tiếp. Nếu không có thông tin hoặc thông tin không liên quan, hãy trả lời lịch sự rằng bạn chưa có dữ liệu đó.
+Đồng thời, bạn có thể giới thiệu cho người dùng các tính năng có sẵn trên Dashboard nếu họ hỏi về:
+- Tra cứu phạt nguội: Dashboard có tab "Tra Cứu Phạt Nguội" hiển thị cổng thông tin phạt nguội từ PhatNguoi.vn và Cổng CSGT.
+- Lịch cúp điện: Dashboard có tab "Lịch Cúp Điện" hiển thị lịch cúp điện hôm nay của các EVN miền Nam (SPC), miền Trung (CPC), miền Bắc (NPC) và Hà Nội.
+- Lịch âm dương & ngày lễ: Dashboard có tab "Lịch & Nghỉ Lễ" hiển thị lịch âm, lịch dương, các ngày lễ của Việt Nam và sự kiện cá nhân.
+- Tải video & nhạc hoặc Công cụ file: Dashboard có tab "Tải & Công Cụ File".
+- Tính thuế TNCN: Dashboard có tab "Tính Thuế TNCN".
+- Lịch bay & Di chuyển: Dashboard có tab "Lịch Bay & Di Chuyển" giúp tra cứu lịch bay các chặng nội địa (HAN-SGN, DAD-SGN...), tra cứu số hiệu chuyến bay (VN201, VJ100...) và ước tính chi phí di chuyển bằng máy bay, tàu hỏa, xe khách.
 Thêm biểu tượng cảm xúc (emoji) phù hợp để câu trả lời sinh động hơn.
 
 Bối cảnh Dashboard:

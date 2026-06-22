@@ -163,7 +163,14 @@ async function handleSend() {
     weather: state.weatherData ? {
       city: state.weatherData.name,
       temp: state.weatherData.main?.temp,
-      desc: state.weatherData.weather?.[0]?.description
+      desc: state.weatherData.weather?.[0]?.description,
+      forecast: state.weatherForecast?.daily ? state.weatherForecast.daily.map(d => ({
+        date: d.date,
+        tempMax: d.tempMax,
+        tempMin: d.tempMin,
+        desc: d.desc,
+        pop: d.pop
+      })) : null
     } : null,
     aqi: state.aqiData ? {
       city: state.aqiData.city,
@@ -180,6 +187,7 @@ async function handleSend() {
     } : null,
     vnindex: state.vnindexData ? state.vnindexData.indices : null,
     liveFootball: state.liveFootballMatches ? state.liveFootballMatches : null,
+    footballMatches: state.footballData || [],
     powerOutages: state.powerOutageData || [],
     lunarCalendar: lunarText,
     lottery: state.lotteryData ? state.lotteryData : null,
@@ -190,7 +198,9 @@ async function handleSend() {
     news: state.newsArticles ? state.newsArticles.slice(0, 5) : [],
     todos: state.todoTasks ? state.todoTasks : [],
     movies: state.moviesData ? state.moviesData : [],
-    games: state.gamesData ? state.gamesData : []
+    games: state.gamesData ? state.gamesData : [],
+    upcomingEvents: state.upcomingEvents || [],
+    flightSchedules: state.flightSchedules || null
   };
 
   try {

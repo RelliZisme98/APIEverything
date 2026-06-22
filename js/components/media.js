@@ -105,6 +105,31 @@ const CURATED_GAMES = [
   }
 ];
 
+let _loadedMovies = null;
+
+export async function loadMediaBackground() {
+  // Load Games
+  state.gamesData = CURATED_GAMES.map(g => ({ title: g.title, rating: g.rating, publisher: g.publisher }));
+
+  // Load Movies
+  if (!_loadedMovies) {
+    try {
+      const apiBase = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.TRAFFIC_PROXY_URL) 
+        ? APP_CONFIG.TRAFFIC_PROXY_URL.replace(/\/$/, '') 
+        : '';
+      const res = await fetch(`${apiBase}/api/movies-now-playing`);
+      if (res.ok) {
+        _loadedMovies = await res.json();
+      }
+    } catch (err) {
+      console.warn("Failed to fetch live movies:", err);
+    }
+  }
+
+  const movies = _loadedMovies || CURATED_MOVIES;
+  state.moviesData = movies.map(m => ({ title: m.title, release_date: m.release_date, vote_average: m.vote_average }));
+}
+
 export function renderMedia() {
   const container = document.getElementById('mediaContent');
   if (!container) return;
@@ -165,25 +190,8 @@ async function renderMoviesList() {
     </div>
   `;
 
-  let movies = [];
-  try {
-    const apiBase = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.TRAFFIC_PROXY_URL) 
-      ? APP_CONFIG.TRAFFIC_PROXY_URL.replace(/\/$/, '') 
-      : '';
-    const res = await fetch(`${apiBase}/api/movies-now-playing`);
-    if (res.ok) {
-      movies = await res.json();
-    }
-  } catch (err) {
-    console.warn("Failed to fetch live movies:", err);
-  }
-
-  // Fallback to static if empty or failed
-  if (!movies || movies.length === 0) {
-    movies = CURATED_MOVIES;
-  }
-
-  state.moviesData = movies.map(m => ({ title: m.title, release_date: m.release_date, vote_average: m.vote_average }));
+  await loadMediaBackground();
+  const movies = _loadedMovies || CURATED_MOVIES;
 
   grid.innerHTML = movies.map(movie => {
     const posterUrl = movie.poster_path 

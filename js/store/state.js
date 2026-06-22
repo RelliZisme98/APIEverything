@@ -12,11 +12,13 @@ export const state = {
   cryptoData:   [],
   fxData:       [],
   weatherData:  null,
+  weatherForecast: null,
   goldData:     null,
   gasData:      null,
   vnindexData:  null,
   aqiData:      null,
   liveFootballMatches: [],
+  footballData: [],
   lastUpdate:   null,
   usdToVndLive: null,
   lotteryData:  null,
@@ -27,6 +29,8 @@ export const state = {
   powerOutageData: [],
   moviesData:   [],
   gamesData:    [],
+  upcomingEvents: [],
+  flightSchedules: null,
 };
 
 
