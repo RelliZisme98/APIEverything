@@ -14,7 +14,7 @@ export function initAIAssistant() {
   // 1. Inject stylesheet dynamically
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = 'css/ai-assistant.css';
+  link.href = 'css/ai-assistant.css?v=1.0.1';
   document.head.appendChild(link);
 
   // 2. Create Chat elements
@@ -22,7 +22,7 @@ export function initAIAssistant() {
   widget.id = 'aiWidgetContainer';
   widget.innerHTML = `
     <!-- Floating Bubble -->
-    <button id="aiBubble" class="ai-bubble show-tooltip" title="Trò chuyện với Robot Trợ lý AI">
+    <button type="button" id="aiBubble" class="ai-bubble show-tooltip" title="Trò chuyện với Robot Trợ lý AI">
       <div class="ai-bubble-inner">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ai-icon">
           <rect x="3" y="11" width="18" height="10" rx="2" ry="2"></rect>
@@ -45,7 +45,7 @@ export function initAIAssistant() {
           <div class="ai-status-dot"></div>
           <strong>🤖 Robot Trợ Lý AI</strong>
         </div>
-        <button id="aiChatClose" class="ai-chat-close">✕</button>
+        <button type="button" id="aiChatClose" class="ai-chat-close">✕</button>
       </div>
       
       <div id="aiChatBody" class="ai-chatbox-body">
@@ -56,11 +56,11 @@ export function initAIAssistant() {
  
       <div class="ai-chatbox-footer">
         <input type="text" id="aiInput" placeholder="Hỏi tôi bất cứ điều gì..." autocomplete="off" />
-        <button id="aiMicBtn" class="ai-footer-btn ai-mic-btn" title="Nói để nhập liệu">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mic-icon"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+        <button type="button" id="aiMicBtn" class="ai-footer-btn ai-mic-btn" title="Nói để nhập liệu">
+          <svg style="pointer-events: none;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mic-icon"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
         </button>
-        <button id="aiSendBtn" class="ai-footer-btn ai-send-btn" title="Gửi">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="send-icon"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        <button type="button" id="aiSendBtn" class="ai-footer-btn ai-send-btn" title="Gửi">
+          <svg style="pointer-events: none;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="send-icon"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
         </button>
       </div>
     </div>
@@ -74,11 +74,25 @@ export function initAIAssistant() {
   const micBtn = document.getElementById('aiMicBtn');
   const input = document.getElementById('aiInput');
 
-  bubble.addEventListener('click', () => toggleChat());
-  closeBtn.addEventListener('click', () => toggleChat(false));
-  sendBtn.addEventListener('click', handleSend);
+  bubble.addEventListener('click', (e) => { e.preventDefault(); toggleChat(); });
+  closeBtn.addEventListener('click', (e) => { e.preventDefault(); toggleChat(false); });
+  
+  // Register click & pointerdown to bypass mouse/touch event interception on PCs
+  const onSendTrigger = (e) => {
+    if (e) {
+      if (typeof e.preventDefault === 'function') e.preventDefault();
+      if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
+    handleSend(e);
+  };
+  sendBtn.addEventListener('click', onSendTrigger);
+  sendBtn.addEventListener('pointerdown', onSendTrigger);
+
   input.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleSend();
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSend(e);
+    }
   });
 
   // 4. Voice typing using Web Speech API
@@ -150,11 +164,19 @@ function toggleChat(forceState) {
   }
 }
 
-async function handleSend() {
+let isSending = false;
+async function handleSend(e) {
+  if (e) {
+    if (typeof e.preventDefault === 'function') e.preventDefault();
+    if (typeof e.stopPropagation === 'function') e.stopPropagation();
+  }
+  if (isSending) return;
+
   const input = document.getElementById('aiInput');
   const text = input.value.trim();
   if (!text) return;
 
+  isSending = true;
   // Append user message
   appendMessage(text, 'user');
   input.value = '';
@@ -249,8 +271,11 @@ async function handleSend() {
   } catch (err) {
     removeTypingIndicator(typingId);
     appendMessage(`⚠️ Lỗi: Không thể kết nối với Trợ lý AI (${err.message})`, 'system');
+  } finally {
+    isSending = false;
   }
 }
+window.handleSend = handleSend;
 
 function formatMarkdown(text) {
   if (!text) return '';
