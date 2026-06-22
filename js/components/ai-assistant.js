@@ -12,6 +12,22 @@ let chatHistory = []; // Keep track of conversation history
 let isMuted = localStorage.getItem('ai_muted') === 'true';
 
 let voices = [];
+let currentAudio = null;
+let audioQueue = [];
+let currentQueueIndex = 0;
+
+function stopAudio() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
+  audioQueue = [];
+  currentQueueIndex = 0;
+  if (window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+  }
+}
+
 function loadVoices() {
   if (typeof window !== 'undefined' && window.speechSynthesis) {
     voices = window.speechSynthesis.getVoices();
@@ -28,7 +44,7 @@ export function initAIAssistant() {
   // 1. Inject stylesheet dynamically
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = 'css/ai-assistant.css?v=1.0.2';
+  link.href = 'css/ai-assistant.css?v=1.0.3';
   document.head.appendChild(link);
 
   // 2. Create Chat elements
@@ -99,8 +115,8 @@ export function initAIAssistant() {
     isMuted = !isMuted;
     localStorage.setItem('ai_muted', isMuted);
     muteBtn.innerHTML = isMuted ? '🔇' : '🔊';
-    if (isMuted && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
+    if (isMuted) {
+      stopAudio();
     }
   });
   
@@ -132,7 +148,7 @@ export function initAIAssistant() {
     recognition.maxAlternatives = 1;
 
     recognition.onstart = () => {
-      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      stopAudio();
       micBtn.classList.add('recording');
       input.placeholder = 'Đang lắng nghe...';
     };
@@ -189,13 +205,13 @@ function toggleChat(forceState) {
   } else {
     chatBox.classList.remove('open');
     bubble.classList.remove('active');
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    stopAudio();
   }
 }
 
 let isSending = false;
 async function handleSend(e) {
-  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  stopAudio();
   if (e) {
     if (typeof e.preventDefault === 'function') e.preventDefault();
     if (typeof e.stopPropagation === 'function') e.stopPropagation();
@@ -310,10 +326,8 @@ window.handleSend = handleSend;
 
 function speakText(text) {
   if (isMuted) return;
-  if (!window.speechSynthesis) return;
 
-  // Cancel any ongoing speech first to avoid queue buildup
-  window.speechSynthesis.cancel();
+  stopAudio();
 
   // Clean markdown syntax and emojis to ensure smooth speech synthesis
   let cleanText = text
@@ -324,6 +338,76 @@ function speakText(text) {
     .trim();
 
   if (!cleanText) return;
+
+  // Split into manageable chunks for Google Translate API limits (~200 chars)
+  const chunks = splitTextIntoChunks(cleanText, 180);
+  playAudioChunks(chunks, cleanText);
+}
+
+function splitTextIntoChunks(text, maxLength) {
+  const chunks = [];
+  let currentChunk = '';
+  
+  // Split by words to avoid cutting words in half
+  const words = text.split(' ');
+  for (const word of words) {
+    if ((currentChunk + ' ' + word).length > maxLength) {
+      if (currentChunk) chunks.push(currentChunk.trim());
+      currentChunk = word;
+    } else {
+      currentChunk = currentChunk ? currentChunk + ' ' + word : word;
+    }
+  }
+  if (currentChunk) {
+    chunks.push(currentChunk.trim());
+  }
+  return chunks;
+}
+
+function playAudioChunks(chunks, fullText) {
+  audioQueue = chunks;
+  currentQueueIndex = 0;
+  
+  // If no chunks, fallback
+  if (chunks.length === 0) {
+     speakTextNative(fullText);
+     return;
+  }
+  playNextChunk(fullText);
+}
+
+function playNextChunk(fullText) {
+  if (isMuted) return;
+  if (currentQueueIndex >= audioQueue.length) {
+    currentAudio = null;
+    return;
+  }
+
+  const textToPlay = audioQueue[currentQueueIndex];
+  // Using Google Translate extension endpoint for free, natural Vietnamese TTS
+  const url = `https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=vi&q=${encodeURIComponent(textToPlay)}`;
+  
+  currentAudio = new Audio(url);
+  currentAudio.onended = () => {
+    currentQueueIndex++;
+    playNextChunk(fullText);
+  };
+  currentAudio.onerror = (e) => {
+    console.warn('[AI Assistant] Google TTS audio playback error, falling back to native TTS for full text.', e);
+    stopAudio();
+    speakTextNative(fullText);
+  };
+  
+  currentAudio.play().catch(err => {
+    console.warn('[AI Assistant] Google TTS play() failed (often autoplay restriction), falling back to native TTS.', err);
+    stopAudio();
+    speakTextNative(fullText);
+  });
+}
+
+function speakTextNative(cleanText) {
+  if (isMuted) return;
+  if (!window.speechSynthesis) return;
 
   const utterance = new SpeechSynthesisUtterance(cleanText);
   utterance.lang = 'vi-VN';
