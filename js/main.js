@@ -40,6 +40,7 @@ import { renderLookup }      from './components/lookup.js';
 import { renderDownloader }  from './components/downloader.js';
 import { renderMedia, loadMediaBackground }       from './components/media.js';
 import { renderFileTools, renderAudioTools } from './components/file-tools.js';
+import { renderFocus } from './components/focus.js';
 
 // ── Render Components ──
 import { initAIAssistant }     from './components/ai-assistant.js?v=1.0.3';
@@ -454,6 +455,7 @@ window.switchSection = (id) => {
       renderAudioTools();
     }
     if (id === 'media')       renderMedia();
+    if (id === 'focus')       renderFocus();
   }
 };
 
