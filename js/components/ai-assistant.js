@@ -9,6 +9,7 @@ import { solarToLunar, canChiYear } from '../utils/lunar-calendar.js';
 
 let isChatOpen = false;
 let chatHistory = []; // Keep track of conversation history
+let isMuted = localStorage.getItem('ai_muted') === 'true';
 
 export function initAIAssistant() {
   // 1. Inject stylesheet dynamically
@@ -45,7 +46,10 @@ export function initAIAssistant() {
           <div class="ai-status-dot"></div>
           <strong>🤖 Robot Trợ Lý AI</strong>
         </div>
-        <button type="button" id="aiChatClose" class="ai-chat-close">✕</button>
+        <div class="ai-chatbox-actions">
+          <button type="button" id="aiMuteBtn" class="ai-mute-btn" title="Bật/Tắt giọng nói Robot">${isMuted ? '🔇' : '🔊'}</button>
+          <button type="button" id="aiChatClose" class="ai-chat-close">✕</button>
+        </div>
       </div>
       
       <div id="aiChatBody" class="ai-chatbox-body">
@@ -70,12 +74,22 @@ export function initAIAssistant() {
   // 3. Register Event Listeners
   const bubble = document.getElementById('aiBubble');
   const closeBtn = document.getElementById('aiChatClose');
+  const muteBtn = document.getElementById('aiMuteBtn');
   const sendBtn = document.getElementById('aiSendBtn');
   const micBtn = document.getElementById('aiMicBtn');
   const input = document.getElementById('aiInput');
 
   bubble.addEventListener('click', (e) => { e.preventDefault(); toggleChat(); });
   closeBtn.addEventListener('click', (e) => { e.preventDefault(); toggleChat(false); });
+  muteBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    isMuted = !isMuted;
+    localStorage.setItem('ai_muted', isMuted);
+    muteBtn.innerHTML = isMuted ? '🔇' : '🔊';
+    if (isMuted && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+  });
   
   // Register click & pointerdown to bypass mouse/touch event interception on PCs
   const onSendTrigger = (e) => {
@@ -105,6 +119,7 @@ export function initAIAssistant() {
     recognition.maxAlternatives = 1;
 
     recognition.onstart = () => {
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
       micBtn.classList.add('recording');
       input.placeholder = 'Đang lắng nghe...';
     };
@@ -161,11 +176,13 @@ function toggleChat(forceState) {
   } else {
     chatBox.classList.remove('open');
     bubble.classList.remove('active');
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
   }
 }
 
 let isSending = false;
 async function handleSend(e) {
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
   if (e) {
     if (typeof e.preventDefault === 'function') e.preventDefault();
     if (typeof e.stopPropagation === 'function') e.stopPropagation();
@@ -259,6 +276,7 @@ async function handleSend(e) {
 
     const data = await res.json();
     appendMessage(data.response, 'assistant');
+    speakText(data.response);
 
     // Update history
     chatHistory.push({ role: 'user', content: text });
@@ -276,6 +294,40 @@ async function handleSend(e) {
   }
 }
 window.handleSend = handleSend;
+
+function speakText(text) {
+  if (isMuted) return;
+  if (!window.speechSynthesis) return;
+
+  // Cancel any ongoing speech first to avoid queue buildup
+  window.speechSynthesis.cancel();
+
+  // Clean markdown syntax and emojis to ensure smooth speech synthesis
+  let cleanText = text
+    .replace(/\*\*([\s\S]*?)\*\*/g, '$1') // remove bold asterisks
+    .replace(/[-*#`_]/g, ' ')               // remove bullet dashes, headers, inline code, underscores
+    .replace(/[🤖🌤️🌦️⛈️☀️❄️💨🌫️🎈📉📈⚽🎟️🇻🇳🏆⭐⚠️🔴😊😂🤣😍👍👋]/gu, '') // remove common emojis
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (!cleanText) return;
+
+  const utterance = new SpeechSynthesisUtterance(cleanText);
+  utterance.lang = 'vi-VN';
+
+  // Find a Vietnamese voice if available
+  const voices = window.speechSynthesis.getVoices();
+  const viVoice = voices.find(voice => voice.lang.includes('vi') || voice.lang.includes('VI'));
+  if (viVoice) {
+    utterance.voice = viVoice;
+  }
+
+  // Optimize speech speed/pitch for natural communication
+  utterance.rate = 1.05; 
+  utterance.pitch = 1.0;
+
+  window.speechSynthesis.speak(utterance);
+}
 
 function formatMarkdown(text) {
   if (!text) return '';
