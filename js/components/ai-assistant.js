@@ -14,7 +14,7 @@ export function initAIAssistant() {
   // 1. Inject stylesheet dynamically
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = 'css/ai-assistant.css';
+  link.href = 'css/ai-assistant.css?v=1.0.1';
   document.head.appendChild(link);
 
   // 2. Create Chat elements
