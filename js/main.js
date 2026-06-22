@@ -155,12 +155,14 @@ async function loadGas() {
 // ════════════════════════════════════════════════════════════
 // WEATHER
 // ════════════════════════════════════════════════════════════
-async function loadWeather(cityOverride) {
+async function loadWeather(cityOverride, isSilent = false) {
   const city = cityOverride
     ?? document.getElementById('cityInput')?.value?.trim()
     ?? 'Ho Chi Minh City';
 
-  renderWeatherLoading();
+  if (!isSilent) {
+    renderWeatherLoading();
+  }
 
   try {
     // Fetch current weather + 5-day forecast in parallel
