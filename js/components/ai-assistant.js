@@ -128,6 +128,11 @@ export function initAIAssistant() {
     const bubble = document.getElementById('aiBubble');
     if (bubble) bubble.classList.remove('show-tooltip');
   }, 10000);
+
+  // Auto-open chatbox after 500ms so the user is greeted by the robot directly
+  setTimeout(() => {
+    toggleChat(true);
+  }, 500);
 }
 
 function toggleChat(forceState) {
