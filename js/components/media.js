@@ -281,7 +281,7 @@ function setupTrailerModal() {
           <button class="trailer-close" onclick="window.closeTrailerModal()">✕</button>
         </div>
         <div class="trailer-video-wrap">
-          <iframe src="https://www.youtube.com/embed/${youtubeId}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+          <iframe src="https://www.youtube.com/embed/${youtubeId}?autoplay=1" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-presentation" allowfullscreen></iframe>
         </div>
       </div>
     `;

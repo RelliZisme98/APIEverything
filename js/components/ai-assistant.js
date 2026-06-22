@@ -22,29 +22,38 @@ export function initAIAssistant() {
   widget.id = 'aiWidgetContainer';
   widget.innerHTML = `
     <!-- Floating Bubble -->
-    <button id="aiBubble" class="ai-bubble show-tooltip" title="Trò chuyện với Trợ lý AI">
+    <button id="aiBubble" class="ai-bubble show-tooltip" title="Trò chuyện với Robot Trợ lý AI">
       <div class="ai-bubble-inner">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ai-icon"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ai-icon">
+          <rect x="3" y="11" width="18" height="10" rx="2" ry="2"></rect>
+          <circle cx="8" cy="16" r="1.5"></circle>
+          <circle cx="16" cy="16" r="1.5"></circle>
+          <line x1="10" y1="19" x2="14" y2="19"></line>
+          <path d="M12 6V11"></path>
+          <circle cx="12" cy="4" r="2"></circle>
+          <path d="M2 15h1"></path>
+          <path d="M21 15h1"></path>
+        </svg>
       </div>
       <span class="ai-bubble-pulse"></span>
     </button>
-
+ 
     <!-- Chat Box -->
     <div id="aiChatBox" class="ai-chatbox">
       <div class="ai-chatbox-header">
         <div class="ai-chatbox-title">
           <div class="ai-status-dot"></div>
-          <strong>Trợ Lý AI</strong>
+          <strong>🤖 Robot Trợ Lý AI</strong>
         </div>
         <button id="aiChatClose" class="ai-chat-close">✕</button>
       </div>
       
       <div id="aiChatBody" class="ai-chatbox-body">
         <div class="ai-msg ai-msg--system">
-          Xin chào! Tôi là trợ lý ảo của Dashboard. Hãy hỏi tôi bất kỳ thông tin gì về thời tiết, chất lượng không khí (AQI), giá xăng, giá vàng, chứng khoán hay tỉ số bóng đá trực tiếp hôm nay nhé! 🤖
+          Xin chào! Tôi là Robot trợ lý ảo của Dashboard. Hãy hỏi tôi bất kỳ thông tin gì về thời tiết, chất lượng không khí (AQI), giá xăng, giá vàng, chứng khoán hay tỉ số bóng đá trực tiếp hôm nay nhé! 🤖
         </div>
       </div>
-
+ 
       <div class="ai-chatbox-footer">
         <input type="text" id="aiInput" placeholder="Hỏi tôi bất cứ điều gì..." autocomplete="off" />
         <button id="aiMicBtn" class="ai-footer-btn ai-mic-btn" title="Nói để nhập liệu">
