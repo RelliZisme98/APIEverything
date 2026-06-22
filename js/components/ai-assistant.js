@@ -5,6 +5,7 @@
  */
 
 import { state } from '../store/state.js';
+import { solarToLunar, canChiYear } from '../utils/lunar-calendar.js';
 
 let isChatOpen = false;
 let chatHistory = []; // Keep track of conversation history
@@ -148,6 +149,16 @@ async function handleSend() {
   const typingId = appendTypingIndicator();
 
   // Build Context for RAG
+  let lunarText = null;
+  try {
+    const now = new Date();
+    const lunar = solarToLunar(now.getDate(), now.getMonth() + 1, now.getFullYear());
+    const canchi = canChiYear(lunar.year);
+    lunarText = `${lunar.day}/${lunar.month} âm lịch (${canchi})`;
+  } catch (e) {
+    console.warn('[AI Assistant] Lunar Calendar calculation error:', e);
+  }
+
   const context = {
     weather: state.weatherData ? {
       city: state.weatherData.name,
@@ -169,7 +180,17 @@ async function handleSend() {
     } : null,
     vnindex: state.vnindexData ? state.vnindexData.indices : null,
     liveFootball: state.liveFootballMatches ? state.liveFootballMatches : null,
-    powerOutages: state.powerOutageData || []
+    powerOutages: state.powerOutageData || [],
+    lunarCalendar: lunarText,
+    lottery: state.lotteryData ? state.lotteryData : null,
+    vietlott: state.vietlottData ? state.vietlottData : null,
+    crypto: state.cryptoData ? state.cryptoData.slice(0, 10).map(c => ({ name: c.name, symbol: c.symbol, price: c.current_price, change: c.price_change_percentage_24h })) : [],
+    exchangeRates: state.fxData ? state.fxData.slice(0, 10) : [],
+    vcbRates: state.vcbRatesData ? state.vcbRatesData : null,
+    news: state.newsArticles ? state.newsArticles.slice(0, 5) : [],
+    todos: state.todoTasks ? state.todoTasks : [],
+    movies: state.moviesData ? state.moviesData : [],
+    games: state.gamesData ? state.gamesData : []
   };
 
   try {

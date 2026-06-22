@@ -19,6 +19,14 @@ export const state = {
   liveFootballMatches: [],
   lastUpdate:   null,
   usdToVndLive: null,
+  lotteryData:  null,
+  vietlottData: null,
+  newsArticles: [],
+  vcbRatesData: null,
+  todoTasks:    [],
+  powerOutageData: [],
+  moviesData:   [],
+  gamesData:    [],
 };
 
 

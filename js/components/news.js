@@ -2,6 +2,7 @@
  * components/news.js — RSS News reader with inline article viewer
  */
 import { fetchNews, fetchArticle, relativeTime, FEEDS } from '../api/news.js';
+import { state } from '../store/state.js';
 
 let currentSource = 'vnexpress';
 let currentArticles = [];
@@ -26,6 +27,12 @@ export async function renderNews(containerId = 'newsContent', isSilent = false) 
   try {
     const articles = await fetchNews(currentSource, 12);
     currentArticles = articles;
+    state.newsArticles = articles.map(a => ({
+      source: a.source,
+      title: a.title,
+      link: a.link,
+      pubDate: a.pubDate
+    }));
     const feed = FEEDS[currentSource];
 
     if (!articles.length) {

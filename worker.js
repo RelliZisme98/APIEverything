@@ -1953,6 +1953,9 @@ async function handleAI(request, env) {
     let contextStr = 'Dưới đây là thông tin hiện tại từ các widget trên Dashboard:\n';
 
     if (context) {
+      if (context.lunarCalendar) {
+        contextStr += `- Lịch âm hôm nay: ${context.lunarCalendar}\n`;
+      }
       if (context.weather) {
         contextStr += `- Thời tiết: ${JSON.stringify(context.weather)}\n`;
       }
@@ -1973,6 +1976,33 @@ async function handleAI(request, env) {
       }
       if (context.powerOutages && context.powerOutages.length > 0) {
         contextStr += `- Lịch mất điện (EVN): ${JSON.stringify(context.powerOutages.slice(0, 10))}\n`;
+      }
+      if (context.lottery) {
+        contextStr += `- Kết quả xổ số kiến thiết truyền thống (${context.lottery.regionName || context.lottery.region} ngày ${context.lottery.date}): ${JSON.stringify(context.lottery.prizes)}\n`;
+      }
+      if (context.vietlott) {
+        contextStr += `- Kết quả xổ số Vietlott (${context.vietlott.gameName || context.vietlott.game} ngày ${context.vietlott.drawDate}, kỳ quay #${context.vietlott.drawCode}): Các số trúng: ${JSON.stringify(context.vietlott.numbers)}, Jackpot: ${context.vietlott.jackpot}\n`;
+      }
+      if (context.crypto && context.crypto.length > 0) {
+        contextStr += `- Giá tiền mã hóa (Crypto): ${JSON.stringify(context.crypto)}\n`;
+      }
+      if (context.exchangeRates && context.exchangeRates.length > 0) {
+        contextStr += `- Tỷ giá ngoại tệ (USD/VND tự do...): ${JSON.stringify(context.exchangeRates)}\n`;
+      }
+      if (context.vcbRates && context.vcbRates.rates && context.vcbRates.rates.length > 0) {
+        contextStr += `- Tỷ giá ngoại tệ ngân hàng Vietcombank (VCB) cập nhật ${context.vcbRates.updated}: ${JSON.stringify(context.vcbRates.rates.slice(0, 10))}\n`;
+      }
+      if (context.news && context.news.length > 0) {
+        contextStr += `- Tin tức mới nhất hôm nay: ${JSON.stringify(context.news)}\n`;
+      }
+      if (context.todos && context.todos.length > 0) {
+        contextStr += `- Danh sách công việc cần làm (Todo) của người dùng: ${JSON.stringify(context.todos)}\n`;
+      }
+      if (context.movies && context.movies.length > 0) {
+        contextStr += `- Danh sách phim chiếu rạp hot: ${JSON.stringify(context.movies)}\n`;
+      }
+      if (context.games && context.games.length > 0) {
+        contextStr += `- Danh sách trò chơi điện tử hot: ${JSON.stringify(context.games)}\n`;
       }
     }
 

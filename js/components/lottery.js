@@ -3,6 +3,8 @@
  * Nguồn: Worker /lottery + /vietlott
  */
 
+import { state } from '../store/state.js';
+
 const LOTTERY_REGIONS = [
   { id: 'mien-bac',  label: '🎰 Miền Bắc',  color: '#f87171', drawDays: [0,1,2,3,4,5,6] },
   { id: 'tp-hcm',    label: '🏙️ TP. HCM',   color: '#60a5fa', drawDays: [1,6] },
@@ -186,6 +188,14 @@ async function fetchAndRender() {
     const res  = await fetch(url);
     const data = await res.json();
 
+    // Store in global state for AI assistant
+    state.lotteryData = {
+      region: region.id,
+      regionName: region.label,
+      date: data.date || formatDate(currentLotteryDate),
+      prizes: data.prizes ? data.prizes.map(p => ({ label: cleanLabel(p.label), numbers: p.numbers })) : []
+    };
+
     // ── Date mismatch: minhngoc returned previous day because today not drawn yet ──
     if (todayRequested && data.prizes?.length) {
       const returnedDate = (data.date ?? '').replace(/\//g, '-'); // normalize to DD-MM-YYYY
@@ -345,6 +355,16 @@ async function fetchVietlott() {
     const data = await res.json();
 
     if (data.error) throw new Error(data.error);
+
+    // Store in global state for AI assistant
+    state.vietlottData = {
+      game: game.id,
+      gameName: game.label,
+      drawDate: data.drawDate,
+      drawCode: data.drawCode,
+      numbers: data.numbers,
+      jackpot: data.jackpot
+    };
 
     const nums = Array.isArray(data.numbers) ? data.numbers : [];
     const jackpot = data.jackpot ? Number(data.jackpot).toLocaleString('vi-VN') + ' đ' : '—';
