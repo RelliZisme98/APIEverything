@@ -38,10 +38,11 @@ import { renderTravel }      from './components/travel.js';
 import { renderTodo }        from './components/todo.js';
 import { renderLookup }      from './components/lookup.js';
 import { renderDownloader }  from './components/downloader.js';
-import { renderMedia }       from './components/media.js';
+import { renderMedia, loadMediaBackground }       from './components/media.js';
 import { renderFileTools, renderAudioTools } from './components/file-tools.js';
 
 // ── Render Components ──
+import { initAIAssistant }     from './components/ai-assistant.js';
 import { renderTicker }        from './components/ticker.js';
 import { renderCryptoGrid }    from './components/crypto-grid.js';
 import { renderCryptoTable }   from './components/crypto-table.js';
@@ -154,12 +155,14 @@ async function loadGas() {
 // ════════════════════════════════════════════════════════════
 // WEATHER
 // ════════════════════════════════════════════════════════════
-async function loadWeather(cityOverride) {
+async function loadWeather(cityOverride, isSilent = false) {
   const city = cityOverride
     ?? document.getElementById('cityInput')?.value?.trim()
     ?? 'Ho Chi Minh City';
 
-  renderWeatherLoading();
+  if (!isSilent) {
+    renderWeatherLoading();
+  }
 
   try {
     // Fetch current weather + 5-day forecast in parallel
@@ -168,6 +171,7 @@ async function loadWeather(cityOverride) {
       fetchForecast(city),
     ]);
     renderWeather(data, forecast?.todayMinMax);
+    state.weatherForecast = forecast;
 
     // Fetch and render true hourly weather forecast (1-hour interval) from Open-Meteo
     const lat = data.coord?.lat;
@@ -180,10 +184,15 @@ async function loadWeather(cityOverride) {
         renderHourly(forecast.hourly);
       }
 
-      // Only load/reload Windy map if coordinates changed or map container is empty
+      // Only load/reload Windy map if coordinates changed significantly or map container is empty
       const mapEl = document.getElementById('weatherWindyMap');
       const hasIframe = mapEl && mapEl.querySelector('iframe');
-      if (!hasIframe || mapEl.dataset.lat != lat || mapEl.dataset.lon != lon) {
+      const savedLat = mapEl ? parseFloat(mapEl.dataset.lat) : NaN;
+      const savedLon = mapEl ? parseFloat(mapEl.dataset.lon) : NaN;
+      const latChanged = isNaN(savedLat) || Math.abs(savedLat - lat) > 0.01;
+      const lonChanged = isNaN(savedLon) || Math.abs(savedLon - lon) > 0.01;
+
+      if (!hasIframe || latChanged || lonChanged) {
         renderWindyMap(lat, lon);
       }
     } else {
@@ -218,6 +227,9 @@ async function refreshAll() {
     loadNews(),
     loadAQI(),
     loadLiveFootball(),
+    loadPowerOutages(),
+    loadLotteryBackground(),
+    loadMediaBackground(),
   ]);
 
   if (btn) btn.classList.remove('spinning');
@@ -246,11 +258,165 @@ async function loadNews(isSilent = false) { await renderNews('newsContent', isSi
 // ── Football Live load ──
 async function loadLiveFootball() {
   try {
-    const liveMatches = await fetchLiveScores();
-    state.liveFootballMatches = liveMatches || [];
+    const result = await fetchLiveScores();
+    state.liveFootballMatches = result?.live || [];
+    state.footballData = result?.all || [];
     renderTicker();
   } catch (err) {
     console.warn('[Live Football]', err);
+  }
+}
+
+// ── Background Power Outages load for AI ──
+async function loadPowerOutages() {
+  state.powerOutageData = [];
+  
+  // 1. EVNSPC (Miền Nam)
+  try {
+    const res = await fetch('/power-outage?evn=spc&action=today');
+    if (res.ok) {
+      const text = await res.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(text, 'text/html');
+      const rows = doc.querySelectorAll('tr');
+      const items = [];
+      if (rows.length > 1) {
+        const headers = [...rows[0].querySelectorAll('th, td')].map(c => c.textContent.trim());
+        for (let i = 1; i < rows.length; i++) {
+          const cells = [...rows[i].querySelectorAll('td')];
+          if (!cells.length) continue;
+          const obj = { _raw: cells.map(c => c.textContent.trim()) };
+          cells.forEach((td, idx) => {
+            const header = headers[idx] || `col${idx}`;
+            obj[header] = td.textContent.trim();
+          });
+          items.push(obj);
+        }
+      }
+      const formatted = items.slice(0, 10).map(item => ({
+        region: 'Miền Nam',
+        area: item._raw?.[0] || Object.values(item)[0] || '',
+        time: item._raw?.[1] || Object.values(item)[1] || '',
+        district: item._raw?.[3] || Object.values(item)[3] || '',
+        reason: item._raw?.[4] || Object.values(item)[4] || ''
+      }));
+      state.powerOutageData.push(...formatted);
+    }
+  } catch (err) {
+    console.warn('[Power Outages SPC Background Load]', err);
+  }
+
+  // 2. EVNCPC (Miền Trung)
+  try {
+    const resCPC = await fetch('/power-outage?evn=cpc&action=today');
+    if (resCPC.ok) {
+      const json = await resCPC.json();
+      const items = json.content || json.data || [];
+      const formatted = items.slice(0, 10).map(it => ({
+        region: 'Miền Trung',
+        area: it.khuVuc || it.tenDonVi || '',
+        time: it.khoangThoiGian || '',
+        reason: it.reason || it.noiDung || ''
+      }));
+      state.powerOutageData.push(...formatted);
+    }
+  } catch (err) {
+    console.warn('[Power Outages CPC Background Load]', err);
+  }
+
+  // 3. EVNHANOI (Hà Nội)
+  try {
+    const resHanoi = await fetch('/power-outage?evn=hanoi&action=today');
+    if (resHanoi.ok) {
+      const json = await resHanoi.json();
+      const items = json.data?.listLichCatDienEvn || json.data || [];
+      const formatted = items.slice(0, 10).map(it => ({
+        region: 'Hà Nội',
+        area: it.tenDonVi || it.tenKhuVuc || '',
+        time: it.khoangThoiGian || (it.tuGio && it.denGio ? `${it.tuGio} - ${it.denGio}` : ''),
+        reason: it.noidung || it.lyDo || ''
+      }));
+      state.powerOutageData.push(...formatted);
+    }
+  } catch (err) {
+    console.warn('[Power Outages Hanoi Background Load]', err);
+  }
+
+  // 4. EVNNPC (Miền Bắc)
+  try {
+    const resNPC = await fetch('/power-outage?evn=npc&action=today');
+    if (resNPC.ok) {
+      const text = await resNPC.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(text, 'text/html');
+      const rows = doc.querySelectorAll('tr');
+      const items = [];
+      if (rows.length > 1) {
+        const headers = [...rows[0].querySelectorAll('th, td')].map(c => c.textContent.trim());
+        for (let i = 1; i < rows.length; i++) {
+          const cells = [...rows[i].querySelectorAll('td')];
+          if (!cells.length) continue;
+          const obj = { _raw: cells.map(c => c.textContent.trim()) };
+          cells.forEach((td, idx) => {
+            const header = headers[idx] || `col${idx}`;
+            obj[header] = td.textContent.trim();
+          });
+          items.push(obj);
+        }
+      }
+      const formatted = items.slice(0, 10).map(item => ({
+        region: 'Miền Bắc',
+        area: item._raw?.[0] || Object.values(item)[0] || '',
+        time: item._raw?.[1] || Object.values(item)[1] || '',
+        district: item._raw?.[3] || Object.values(item)[3] || '',
+        reason: item._raw?.[4] || Object.values(item)[4] || ''
+      }));
+      state.powerOutageData.push(...formatted);
+    }
+  } catch (err) {
+    console.warn('[Power Outages NPC Background Load]', err);
+  }
+}
+
+// ── Background Lottery load for AI ──
+async function loadLotteryBackground() {
+  try {
+    const res = await fetch('/lottery?region=mien-bac');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.prizes) {
+        state.lotteryData = {
+          region: 'mien-bac',
+          regionName: 'Miền Bắc',
+          date: data.date || new Date().toLocaleDateString('vi-VN'),
+          prizes: data.prizes.map(p => ({
+            label: (p.label || '').replace(/&[a-z0-9#]+;/gi, '').replace(/<[^>]+>/g, '').trim(),
+            numbers: p.numbers
+          }))
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('[Lottery Background Load]', err);
+  }
+
+  try {
+    const res = await fetch('/vietlott?game=power655');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.numbers) {
+        state.vietlottData = {
+          game: 'power655',
+          gameName: 'Power 6/55',
+          drawDate: data.drawDate,
+          drawCode: data.drawCode,
+          numbers: data.numbers,
+          jackpot: data.jackpot
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('[Vietlott Background Load]', err);
   }
 }
 
@@ -300,6 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderPowerOutage();
   renderQuickCities();
   initTrafficCard();
+  initAIAssistant();
   // Pre-render static/no-API sections immediately
   renderTaxCalc();
   _rendered.add('tax-calc');
@@ -316,6 +483,9 @@ document.addEventListener('DOMContentLoaded', () => {
     loadVNIndex(true);
     loadNews(true);
     loadLiveFootball();
+    loadPowerOutages();
+    loadLotteryBackground();
+    loadMediaBackground();
   }, 60_000);
 });
 

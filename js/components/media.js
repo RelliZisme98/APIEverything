@@ -1,4 +1,5 @@
 import APP_CONFIG from '../../config.js';
+import { state } from '../store/state.js';
 
 /* ── Movies & Games Component ── */
 
@@ -104,6 +105,31 @@ const CURATED_GAMES = [
   }
 ];
 
+let _loadedMovies = null;
+
+export async function loadMediaBackground() {
+  // Load Games
+  state.gamesData = CURATED_GAMES.map(g => ({ title: g.title, rating: g.rating, publisher: g.publisher }));
+
+  // Load Movies
+  if (!_loadedMovies) {
+    try {
+      const apiBase = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.TRAFFIC_PROXY_URL) 
+        ? APP_CONFIG.TRAFFIC_PROXY_URL.replace(/\/$/, '') 
+        : '';
+      const res = await fetch(`${apiBase}/api/movies-now-playing`);
+      if (res.ok) {
+        _loadedMovies = await res.json();
+      }
+    } catch (err) {
+      console.warn("Failed to fetch live movies:", err);
+    }
+  }
+
+  const movies = _loadedMovies || CURATED_MOVIES;
+  state.moviesData = movies.map(m => ({ title: m.title, release_date: m.release_date, vote_average: m.vote_average }));
+}
+
 export function renderMedia() {
   const container = document.getElementById('mediaContent');
   if (!container) return;
@@ -164,23 +190,8 @@ async function renderMoviesList() {
     </div>
   `;
 
-  let movies = [];
-  try {
-    const apiBase = (typeof APP_CONFIG !== 'undefined' && APP_CONFIG.TRAFFIC_PROXY_URL) 
-      ? APP_CONFIG.TRAFFIC_PROXY_URL.replace(/\/$/, '') 
-      : '';
-    const res = await fetch(`${apiBase}/api/movies-now-playing`);
-    if (res.ok) {
-      movies = await res.json();
-    }
-  } catch (err) {
-    console.warn("Failed to fetch live movies:", err);
-  }
-
-  // Fallback to static if empty or failed
-  if (!movies || movies.length === 0) {
-    movies = CURATED_MOVIES;
-  }
+  await loadMediaBackground();
+  const movies = _loadedMovies || CURATED_MOVIES;
 
   grid.innerHTML = movies.map(movie => {
     const posterUrl = movie.poster_path 
@@ -211,6 +222,8 @@ async function renderMoviesList() {
 function renderGamesList() {
   const grid = document.getElementById('gamesGrid');
   if (!grid) return;
+
+  state.gamesData = CURATED_GAMES.map(g => ({ title: g.title, rating: g.rating, publisher: g.publisher }));
 
   grid.innerHTML = CURATED_GAMES.map(game => {
     const platformHTML = game.platforms.map(p => {
@@ -268,7 +281,7 @@ function setupTrailerModal() {
           <button class="trailer-close" onclick="window.closeTrailerModal()">✕</button>
         </div>
         <div class="trailer-video-wrap">
-          <iframe src="https://www.youtube.com/embed/${youtubeId}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+          <iframe src="https://www.youtube.com/embed/${youtubeId}?autoplay=1" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-presentation" allowfullscreen></iframe>
         </div>
       </div>
     `;

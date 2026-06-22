@@ -436,8 +436,8 @@
           <!-- City search -->
           <div class="weather-search">
             <input class="field-input" id="cityInput" type="text" placeholder="Nhập tên thành phố..."
-              value="Ho Chi Minh City" />
-            <button class="btn-primary" onclick="loadWeather()">Tìm</button>
+              value="Ho Chi Minh City" onkeydown="if(event.key === 'Enter') { event.preventDefault(); loadWeather(); }" />
+            <button type="button" class="btn-primary" onclick="loadWeather()">Tìm</button>
           </div>
           <!-- Dynamic content -->
           <div id="weatherContent">

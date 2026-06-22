@@ -350,14 +350,14 @@ async function handlePowerOutage(request) {
   // ── EVNHANOI (Hà Nội) ──────────────────────────────────────────────
   if (evn === 'hanoi') {
     BROWSER_HEADERS['Referer'] = 'https://evnhanoi.vn/';
-    BROWSER_HEADERS['Origin']  = 'https://evnhanoi.vn';
+    BROWSER_HEADERS['Origin'] = 'https://evnhanoi.vn';
     try {
       let upstreamUrl, body, method = 'POST';
 
       if (action === 'tracuu') {
-        const keyword  = url.searchParams.get('keyword')  || '';
+        const keyword = url.searchParams.get('keyword') || '';
         const fromDate = url.searchParams.get('fromDate') || '';
-        const toDate   = url.searchParams.get('toDate')   || '';
+        const toDate = url.searchParams.get('toDate') || '';
         upstreamUrl = 'https://evnhanoi.vn/api/TraCuu/LichCatDien';
         body = JSON.stringify({ ngayBatDau: fromDate, ngayKetThuc: toDate, maDViQly: '', maTram: '', key: keyword });
       } else if (action === 'today') {
@@ -718,13 +718,33 @@ async function handleFootball(request) {
 
   try {
     const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-    if (!res.ok) throw new Error(`upstream ${res.status}`);
+    if (!res.ok) {
+      const fallback = {
+        events: [],
+        children: [],
+        stats: [],
+        message: `Upstream returned status ${res.status}`
+      };
+      return new Response(JSON.stringify(fallback), {
+        headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS },
+        status: 200
+      });
+    }
     const data = await res.text();
     return new Response(data, {
       headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=60' },
     });
   } catch (err) {
-    return cors(JSON.stringify({ error: err.message }), 500);
+    const fallback = {
+      events: [],
+      children: [],
+      stats: [],
+      error: err.message
+    };
+    return new Response(JSON.stringify(fallback), {
+      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS },
+      status: 200
+    });
   }
 }
 
@@ -864,12 +884,12 @@ async function handleGas(request, env) {
 
   // Baseline static fallback values (updated to June 18, 2026)
   const defaultPrices = [
-    { name: 'Xăng RON95-III',        r1: 20750, r2: 21160 },
-    { name: 'Xăng E5 RON92',          r1: 20120, r2: 20520 },
-    { name: 'Dầu Diesel 0,05S',       r1: 23530, r2: 24000 },
-    { name: 'Dầu Diesel 0,001S',      r1: 25430, r2: 25930 },
-    { name: 'Dầu hỏa 2-K',           r1: 22690, r2: 23140 },
-    { name: 'Dầu Mazut 180CST 3,5S',  r1: 15800, r2: 15800 },
+    { name: 'Xăng RON95-III', r1: 20750, r2: 21160 },
+    { name: 'Xăng E5 RON92', r1: 20120, r2: 20520 },
+    { name: 'Dầu Diesel 0,05S', r1: 23530, r2: 24000 },
+    { name: 'Dầu Diesel 0,001S', r1: 25430, r2: 25930 },
+    { name: 'Dầu hỏa 2-K', r1: 22690, r2: 23140 },
+    { name: 'Dầu Mazut 180CST 3,5S', r1: 15800, r2: 15800 },
   ];
   let priceDate = '2026-06-18';
   let source = 'static';
@@ -936,7 +956,7 @@ async function handleGas(request, env) {
       // Extract date from URL slug: "ngay-18-6-2026" → "2026-06-18"
       const dateSlug = artUrl.match(/ngay-(\d{1,2})-(\d{1,2})-(\d{4})/i);
       if (dateSlug) {
-        priceDate = `${dateSlug[3]}-${String(dateSlug[2]).padStart(2,'0')}-${String(dateSlug[1]).padStart(2,'0')}`;
+        priceDate = `${dateSlug[3]}-${String(dateSlug[2]).padStart(2, '0')}-${String(dateSlug[1]).padStart(2, '0')}`;
       }
 
       console.log('[Gas] Tier-2 scraping Petrolimex article:', artUrl, '→', priceDate);
@@ -1916,6 +1936,126 @@ async function handleCrypto(request, env) {
 
   return cors(JSON.stringify({ error: 'Failed to fetch fresh or cached crypto data' }), 502);
 }
+async function handleAI(request, env) {
+  if (request.method === 'OPTIONS') return preflight();
+  if (request.method !== 'POST') {
+    return cors(JSON.stringify({ error: 'POST method required' }), 405);
+  }
+
+  if (!env.AI) {
+    return cors(JSON.stringify({ error: 'Workers AI is not configured. Please add the AI binding in wrangler.toml.' }), 503);
+  }
+
+  try {
+    const { prompt, context, history } = await request.json();
+
+    // Compile RAG context from the current frontend state
+    let contextStr = 'Dưới đây là thông tin hiện tại từ các widget trên Dashboard:\n';
+
+    if (context) {
+      if (context.lunarCalendar) {
+        contextStr += `- Lịch âm hôm nay: ${context.lunarCalendar}\n`;
+      }
+      if (context.weather) {
+        contextStr += `- Thời tiết hiện tại: ${JSON.stringify(context.weather)}\n`;
+        if (context.weather.forecast) {
+          contextStr += `- Dự báo thời tiết 5 ngày tới: ${JSON.stringify(context.weather.forecast)}\n`;
+        }
+      }
+      if (context.aqi) {
+        contextStr += `- Chất lượng không khí (AQI): ${JSON.stringify(context.aqi)}\n`;
+      }
+      if (context.gas) {
+        contextStr += `- Giá xăng dầu lẻ: ${JSON.stringify(context.gas)}\n`;
+      }
+      if (context.gold) {
+        contextStr += `- Giá vàng (Thế giới/SJC): ${JSON.stringify(context.gold)}\n`;
+      }
+      if (context.vnindex) {
+        contextStr += `- Chỉ số chứng khoán: ${JSON.stringify(context.vnindex)}\n`;
+      }
+      if (context.liveFootball && context.liveFootball.length > 0) {
+        contextStr += `- Trận bóng đá đang diễn ra trực tiếp (Live): ${JSON.stringify(context.liveFootball)}\n`;
+      }
+      if (context.footballMatches && context.footballMatches.length > 0) {
+        contextStr += `- Các trận đấu bóng đá (Kết quả gần đây, đang diễn ra & sắp tới): ${JSON.stringify(context.footballMatches)}\n`;
+      }
+      if (context.powerOutages && context.powerOutages.length > 0) {
+        contextStr += `- Lịch mất điện (EVN): ${JSON.stringify(context.powerOutages.slice(0, 10))}\n`;
+      }
+      if (context.lottery) {
+        contextStr += `- Kết quả xổ số kiến thiết truyền thống (${context.lottery.regionName || context.lottery.region} ngày ${context.lottery.date}): ${JSON.stringify(context.lottery.prizes)}\n`;
+      }
+      if (context.vietlott) {
+        contextStr += `- Kết quả xổ số Vietlott (${context.vietlott.gameName || context.vietlott.game} ngày ${context.vietlott.drawDate}, kỳ quay #${context.vietlott.drawCode}): Các số trúng: ${JSON.stringify(context.vietlott.numbers)}, Jackpot: ${context.vietlott.jackpot}\n`;
+      }
+      if (context.crypto && context.crypto.length > 0) {
+        contextStr += `- Giá tiền mã hóa (Crypto): ${JSON.stringify(context.crypto)}\n`;
+      }
+      if (context.exchangeRates && context.exchangeRates.length > 0) {
+        contextStr += `- Tỷ giá ngoại tệ (USD/VND tự do...): ${JSON.stringify(context.exchangeRates)}\n`;
+      }
+      if (context.vcbRates && context.vcbRates.rates && context.vcbRates.rates.length > 0) {
+        contextStr += `- Tỷ giá ngoại tệ ngân hàng Vietcombank (VCB) cập nhật ${context.vcbRates.updated}: ${JSON.stringify(context.vcbRates.rates.slice(0, 10))}\n`;
+      }
+      if (context.news && context.news.length > 0) {
+        contextStr += `- Tin tức mới nhất hôm nay: ${JSON.stringify(context.news)}\n`;
+      }
+      if (context.todos && context.todos.length > 0) {
+        contextStr += `- Danh sách công việc cần làm (Todo) của người dùng: ${JSON.stringify(context.todos)}\n`;
+      }
+      if (context.movies && context.movies.length > 0) {
+        contextStr += `- Danh sách phim chiếu rạp hot: ${JSON.stringify(context.movies)}\n`;
+      }
+      if (context.games && context.games.length > 0) {
+        contextStr += `- Danh sách trò chơi điện tử hot: ${JSON.stringify(context.games)}\n`;
+      }
+      if (context.upcomingEvents && context.upcomingEvents.length > 0) {
+        contextStr += `- Các ngày lễ và sự kiện sắp tới: ${JSON.stringify(context.upcomingEvents)}\n`;
+      }
+      if (context.flightSchedules) {
+        contextStr += `- Thông tin lịch bay mẫu và sân bay Việt Nam: ${JSON.stringify(context.flightSchedules)}\n`;
+      }
+    }
+
+    const systemPrompt = `Bạn là Trợ lý ảo AI, được tích hợp trên Dashboard đa năng (Rellia Đại Dashboard).
+Hãy trả lời thắc mắc của người dùng bằng tiếng Việt một cách tự nhiên, thân thiện. Đối với các câu hỏi thông thường, hãy trả lời ngắn gọn (1-3 câu, tối đa 4 câu). Tuy nhiên, nếu người dùng yêu cầu liệt kê danh sách (như lịch nghỉ lễ, lịch bay, tin tức, việc cần làm...), hãy liệt kê đầy đủ, chính xác và chi tiết toàn bộ thông tin có trong bối cảnh bên dưới mà không tự ý cắt xén hay bỏ sót bất kỳ mục nào.
+Sử dụng các thông tin thực tế từ Dashboard ở dưới để trả lời trực tiếp. Nếu không có thông tin hoặc thông tin không liên quan, hãy trả lời lịch sự rằng bạn chưa có dữ liệu đó.
+Đồng thời, bạn có thể giới thiệu cho người dùng các tính năng có sẵn trên Dashboard nếu họ hỏi về:
+- Tra cứu phạt nguội: Dashboard có tab "Tra Cứu Phạt Nguội" hiển thị cổng thông tin phạt nguội từ PhatNguoi.vn và Cổng CSGT.
+- Lịch cúp điện: Dashboard có tab "Lịch Cúp Điện" hiển thị lịch cúp điện hôm nay của các EVN miền Nam (SPC), miền Trung (CPC), miền Bắc (NPC) và Hà Nội.
+- Lịch âm dương & ngày lễ: Dashboard có tab "Lịch & Nghỉ Lễ" hiển thị lịch âm, lịch dương, các ngày lễ của Việt Nam và sự kiện cá nhân.
+- Tải video & nhạc hoặc Công cụ file: Dashboard có tab "Tải & Công Cụ File".
+- Tính thuế TNCN: Dashboard có tab "Tính Thuế TNCN".
+- Lịch bay & Di chuyển: Dashboard có tab "Lịch Bay & Di Chuyển" giúp tra cứu lịch bay các chặng nội địa (HAN-SGN, DAD-SGN...), tra cứu số hiệu chuyến bay (VN201, VJ100...) và ước tính chi phí di chuyển bằng máy bay, tàu hỏa, xe khách.
+Thêm biểu tượng cảm xúc (emoji) phù hợp để câu trả lời sinh động hơn.
+
+Bối cảnh Dashboard:
+${contextStr}`;
+
+    const messages = [
+      { role: 'system', content: systemPrompt }
+    ];
+
+    if (Array.isArray(history)) {
+      messages.push(...history.slice(-6));
+    }
+
+    messages.push({ role: 'user', content: prompt });
+
+    const result = await env.AI.run('@cf/meta/llama-3.1-8b-instruct-fast', {
+      messages,
+      temperature: 0.6,
+      max_tokens: 1024
+    });
+
+    return new Response(JSON.stringify({ response: result.response }), {
+      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS },
+    });
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
 
 
 export default {
@@ -1939,6 +2079,7 @@ export default {
     if (pathname === '/api/exchange') return handleExchange(request);
     if (pathname === '/api/crypto') return handleCrypto(request, env);
     if (pathname === '/vietlott') return handleVietlott(request);
+    if (pathname === '/api/ai') return handleAI(request, env);
 
 
     // ── Routes bảo mật (key ẩn trong Cloudflare Secrets) ──

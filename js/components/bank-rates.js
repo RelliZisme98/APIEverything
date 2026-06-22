@@ -1,6 +1,4 @@
-/**
- * components/bank-rates.js — Tỷ giá ngân hàng VCB
- */
+import { state } from '../store/state.js';
 
 const PRIORITY_CURRENCIES = ['USD','EUR','GBP','JPY','CNY','AUD','SGD','KRW','THB','HKD'];
 const FLAGS = { USD:'🇺🇸', EUR:'🇪🇺', GBP:'🇬🇧', JPY:'🇯🇵', CNY:'🇨🇳', AUD:'🇦🇺',
@@ -15,6 +13,12 @@ export async function renderBankRates(containerId = 'bankRatesContent') {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (!data?.rates?.length) throw new Error('No data');
+
+    // Store in global state for AI assistant
+    state.vcbRatesData = {
+      updated: data.updated,
+      rates: data.rates ? data.rates.map(r => ({ code: r.code, name: r.name, buy: r.buy, transfer: r.transfer, sell: r.sell })) : []
+    };
 
     const updated = data.updated ?? '';
     const rates   = data.rates;

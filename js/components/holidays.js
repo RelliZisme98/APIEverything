@@ -5,6 +5,7 @@
  */
 
 import { solarToLunar } from '../utils/lunar-calendar.js';
+import { state } from '../store/state.js';
 
 // Standard Solar Holidays and Events
 const STATIC_SOLAR_EVENTS = [
@@ -142,6 +143,15 @@ export function renderHolidays(containerId = 'holidaysContent') {
   const sortedUpcoming = upcomingList
     .filter(e => e.dateObj >= today)
     .sort((a, b) => a.dateObj - b.dateObj);
+
+  // Update state for AI assistant
+  state.upcomingEvents = sortedUpcoming.map(h => ({
+    name: h.name,
+    type: h.type,
+    date: h.dateObj.toLocaleDateString('vi-VN'),
+    daysLeft: Math.ceil((h.dateObj - today) / 86400000),
+    note: h.note || ''
+  }));
 
   // Render items
   const items = sortedUpcoming.slice(0, 15).map(h => {

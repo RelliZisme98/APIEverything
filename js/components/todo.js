@@ -1,4 +1,4 @@
-/* ── Todo Component — Enhanced with Calendar & Views ── */
+import { state } from '../store/state.js';
 
 let tasks = [];
 let hasDbConnection = false;
@@ -237,16 +237,29 @@ async function initProxyTodos() {
   }
 }
 
+function syncTodoState() {
+  state.todoTasks = tasks.map(t => ({
+    title: t.title,
+    desc: t.desc,
+    category: t.category,
+    status: t.status,
+    dueDate: t.dueDate,
+    priority: t.priority
+  }));
+}
+
 function loadTasks() {
   try {
     const raw = localStorage.getItem(LOCAL_TASKS_KEY);
     tasks = raw ? JSON.parse(raw) : [];
+    syncTodoState();
     populateCategoryDropdown(document.getElementById('todoCategorySelect')?.value || 'work');
   } catch (e) { tasks = []; }
 }
 
 function saveTasksLocally() {
   localStorage.setItem(LOCAL_TASKS_KEY, JSON.stringify(tasks));
+  syncTodoState();
 }
 
 // ── Render main view ──────────────────────────────────────────────────

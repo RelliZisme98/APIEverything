@@ -244,7 +244,7 @@ export function renderPowerOutage(containerId = 'powerContent') {
         <span>Đang kết nối tới máy chủ bản đồ toàn quốc...</span>
       </div>
       
-      <iframe id="po-iframe" src="https://lichcupdien.app" style="width: 100%; height: 100%; border: none; opacity: 0; transition: opacity 0.3s;" allowfullscreen></iframe>
+      <iframe id="po-iframe" src="https://lichcupdien.app" style="width: 100%; height: 100%; border: none; opacity: 0; transition: opacity 0.3s;" sandbox="allow-scripts allow-forms allow-same-origin allow-popups" allowfullscreen></iframe>
     </div>
   `;
 

@@ -996,12 +996,13 @@ function renderStats(el, data) {
  */
 export async function fetchLiveScores() {
   const liveMatches = [];
+  const allMatches = [];
   const leagueShortNames = {
     pl: 'Ngoại hạng Anh',
     laliga: 'La Liga',
     seriea: 'Serie A',
     ucl: 'UCL',
-    wc: 'World Cup'
+    wc: 'World Cup 2026'
   };
 
   try {
@@ -1013,11 +1014,23 @@ export async function fetchLiveScores() {
         const events = data.events || [];
         for (const e of events) {
           const status = e.status?.type;
+          const competition = e.competitions?.[0];
+          const competitors = competition?.competitors || [];
+          const home = competitors.find(c => c.homeAway === 'home') || {};
+          const away = competitors.find(c => c.homeAway === 'away') || {};
+
+          allMatches.push({
+            league: leagueShortNames[key] || key.toUpperCase(),
+            home: home.team?.displayName || 'HOME',
+            away: away.team?.displayName || 'AWAY',
+            homeScore: home.score ?? 0,
+            awayScore: away.score ?? 0,
+            status: status?.state || 'pre', // 'pre' | 'in' | 'post'
+            statusDetail: status?.detail || 'Chưa diễn ra',
+            date: e.date ? new Date(e.date).toLocaleString('vi-VN', { timeZone: VN_TZ }) : ''
+          });
+
           if (status?.state === 'in') { // live match
-            const competition = e.competitions?.[0];
-            const competitors = competition?.competitors || [];
-            const home = competitors.find(c => c.homeAway === 'home') || {};
-            const away = competitors.find(c => c.homeAway === 'away') || {};
             liveMatches.push({
               league: leagueShortNames[key] || key.toUpperCase(),
               home: home.team?.abbreviation || home.team?.shortDisplayName || home.team?.displayName || 'HOME',
@@ -1036,5 +1049,5 @@ export async function fetchLiveScores() {
   } catch (err) {
     console.warn('[Football Live] error:', err.message);
   }
-  return liveMatches;
+  return { live: liveMatches, all: allMatches };
 }

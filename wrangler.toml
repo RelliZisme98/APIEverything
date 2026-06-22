@@ -3,6 +3,10 @@ main = "worker.js"
 compatibility_date = "2026-06-10"
 compatibility_flags = ["nodejs_compat"]
 
+routes = [
+  { pattern = "everything.rellia.org", custom_domain = true }
+]
+
 [observability]
 enabled = true
 
@@ -13,8 +17,17 @@ binding = "ASSETS"
 [vars]
 SUPABASE_URL = "https://kavodsarpdvzmaqrkunv.supabase.co"
 
+[ai]
+binding = "AI"
+
 [env.staging]
 name = "apieverything-staging"
+routes = [
+  { pattern = "everything-staging.rellia.org", custom_domain = true }
+]
 
 [env.staging.vars]
 SUPABASE_URL = "https://kavodsarpdvzmaqrkunv.supabase.co"
+
+[env.staging.ai]
+binding = "AI"
