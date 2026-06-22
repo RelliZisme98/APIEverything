@@ -11,11 +11,24 @@ let isChatOpen = false;
 let chatHistory = []; // Keep track of conversation history
 let isMuted = localStorage.getItem('ai_muted') === 'true';
 
+let voices = [];
+function loadVoices() {
+  if (typeof window !== 'undefined' && window.speechSynthesis) {
+    voices = window.speechSynthesis.getVoices();
+  }
+}
+if (typeof window !== 'undefined' && window.speechSynthesis) {
+  loadVoices();
+  if (window.speechSynthesis.onvoiceschanged !== undefined) {
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }
+}
+
 export function initAIAssistant() {
   // 1. Inject stylesheet dynamically
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = 'css/ai-assistant.css?v=1.0.1';
+  link.href = 'css/ai-assistant.css?v=1.0.2';
   document.head.appendChild(link);
 
   // 2. Create Chat elements
@@ -315,11 +328,28 @@ function speakText(text) {
   const utterance = new SpeechSynthesisUtterance(cleanText);
   utterance.lang = 'vi-VN';
 
-  // Find a Vietnamese voice if available
-  const voices = window.speechSynthesis.getVoices();
-  const viVoice = voices.find(voice => voice.lang.includes('vi') || voice.lang.includes('VI'));
+  // Load voices if not cached yet
+  if (!voices || voices.length === 0) {
+    loadVoices();
+  }
+
+  // Find a Vietnamese voice: starts with 'vi' (e.g. vi-VN, vi)
+  let viVoice = voices.find(voice => {
+    const l = voice.lang.toLowerCase();
+    return l.startsWith('vi-') || l === 'vi';
+  });
+
+  // Fallback search: name contains "vietnamese" or "việt"
+  if (!viVoice) {
+    viVoice = voices.find(voice => {
+      const n = voice.name.toLowerCase();
+      return n.includes('vietnamese') || n.includes('việt');
+    });
+  }
+
   if (viVoice) {
     utterance.voice = viVoice;
+    utterance.lang = viVoice.lang;
   }
 
   // Optimize speech speed/pitch for natural communication

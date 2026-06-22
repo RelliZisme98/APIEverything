@@ -42,7 +42,7 @@ import { renderMedia, loadMediaBackground }       from './components/media.js';
 import { renderFileTools, renderAudioTools } from './components/file-tools.js';
 
 // ── Render Components ──
-import { initAIAssistant }     from './components/ai-assistant.js?v=1.0.1';
+import { initAIAssistant }     from './components/ai-assistant.js?v=1.0.2';
 import { renderTicker }        from './components/ticker.js';
 import { renderCryptoGrid }    from './components/crypto-grid.js';
 import { renderCryptoTable }   from './components/crypto-table.js';
