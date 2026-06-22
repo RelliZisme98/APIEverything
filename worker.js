@@ -2065,6 +2065,41 @@ ${contextStr}`;
 }
 
 
+// ─── /api/tts — Google Translate TTS Proxy ──────────────────────────────────
+// Bypasses CORS by fetching the audio server-side and streaming it back.
+async function handleTTS(request) {
+  if (request.method === 'OPTIONS') return preflight();
+  const url = new URL(request.url);
+  const text = url.searchParams.get('text');
+  if (!text || text.length > 500) {
+    return cors(JSON.stringify({ error: 'Missing or too-long text param (max 500 chars)' }), 400);
+  }
+
+  const ttsUrl = `https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=vi&q=${encodeURIComponent(text)}`;
+  try {
+    const res = await fetch(ttsUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+        'Referer': 'https://translate.google.com',
+      },
+    });
+    if (!res.ok) {
+      return cors(JSON.stringify({ error: `TTS upstream error ${res.status}` }), 502);
+    }
+    const audio = await res.arrayBuffer();
+    return new Response(audio, {
+      status: 200,
+      headers: {
+        'Content-Type': 'audio/mpeg',
+        'Cache-Control': 'public, max-age=3600',
+        ...CORS,
+      },
+    });
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
 export default {
   async fetch(request, env) {
     const { pathname } = new URL(request.url);
@@ -2086,7 +2121,8 @@ export default {
     if (pathname === '/api/exchange') return handleExchange(request);
     if (pathname === '/api/crypto') return handleCrypto(request, env);
     if (pathname === '/vietlott') return handleVietlott(request);
-    if (pathname === '/api/ai') return handleAI(request, env);
+    if (pathname === '/api/ai')  return handleAI(request, env);
+    if (pathname === '/api/tts')  return handleTTS(request);
 
 
     // ── Routes bảo mật (key ẩn trong Cloudflare Secrets) ──

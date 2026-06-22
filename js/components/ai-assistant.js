@@ -44,7 +44,7 @@ export function initAIAssistant() {
   // 1. Inject stylesheet dynamically
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = 'css/ai-assistant.css?v=1.0.3';
+  link.href = 'css/ai-assistant.css?v=1.0.4';
   document.head.appendChild(link);
 
   // 2. Create Chat elements
@@ -384,22 +384,25 @@ function playNextChunk(fullText) {
   }
 
   const textToPlay = audioQueue[currentQueueIndex];
-  // Using Google Translate extension endpoint for free, natural Vietnamese TTS
-  const url = `https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=vi&q=${encodeURIComponent(textToPlay)}`;
-  
+
+  // ╔═ CORE FIX: Route through /api/tts Cloudflare Worker proxy ═╗
+  // The Worker fetches Google Translate TTS server-side (no CORS),
+  // then streams back a real Vietnamese MP3 to the browser.
+  // This guarantees a natural Vietnamese voice on every device/OS.
+  const url = `/api/tts?text=${encodeURIComponent(textToPlay)}`;
+
   currentAudio = new Audio(url);
   currentAudio.onended = () => {
     currentQueueIndex++;
     playNextChunk(fullText);
   };
   currentAudio.onerror = (e) => {
-    console.warn('[AI Assistant] Google TTS audio playback error, falling back to native TTS for full text.', e);
+    console.warn('[AI TTS] Proxy error, falling back to native TTS.', e);
     stopAudio();
     speakTextNative(fullText);
   };
-  
   currentAudio.play().catch(err => {
-    console.warn('[AI Assistant] Google TTS play() failed (often autoplay restriction), falling back to native TTS.', err);
+    console.warn('[AI TTS] play() blocked (autoplay policy), falling back to native TTS.', err);
     stopAudio();
     speakTextNative(fullText);
   });

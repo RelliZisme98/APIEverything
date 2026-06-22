@@ -43,7 +43,7 @@ import { renderFileTools, renderAudioTools } from './components/file-tools.js';
 import { renderFocus } from './components/focus.js';
 
 // ── Render Components ──
-import { initAIAssistant }     from './components/ai-assistant.js?v=1.0.3';
+import { initAIAssistant }     from './components/ai-assistant.js?v=1.0.4';
 import { renderTicker }        from './components/ticker.js';
 import { renderCryptoGrid }    from './components/crypto-grid.js';
 import { renderCryptoTable }   from './components/crypto-table.js';
