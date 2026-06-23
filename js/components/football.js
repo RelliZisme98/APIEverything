@@ -138,6 +138,9 @@ async function loadLeagueData(silent = false) {
 
   try {
     const params = { league: leagueId, type };
+    if (type === 'statistics' || type === 'table') {
+      params.season = _league === 'wc' ? '2026' : '2025';
+    }
     if (type === 'scoreboard' && _dateOffset !== 0) {
       const base = new Date();
       base.setDate(base.getDate() + _dateOffset);

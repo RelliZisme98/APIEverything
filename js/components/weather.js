@@ -1,9 +1,5 @@
-/**
- * components/weather.js
- * Redesigned weather widget — better UX, quick cities, collapsible key input.
- */
-
 import { WEATHER_ICONS } from '../api/weather.js';
+import { state } from '../store/state.js';
 
 /** Popular Vietnamese cities for quick-select */
 const QUICK_CITIES = [
@@ -77,6 +73,27 @@ export function renderWeather(d, todayMinMax = null, containerId = 'weatherConte
   // Heat index level
   const heatLevel = temp >= 38 ? '🔴 Nguy hiểm' : temp >= 35 ? '🟠 Rất nóng' : temp >= 32 ? '🟡 Nóng' : '';
 
+  // Get AQI from state
+  const aqi = state.aqiData?.aqi;
+  const aqiLvl = getAqiLevel(aqi);
+  const aqiAdv = getAqiAdvice(aqi);
+
+  const iaqi = state.aqiData?.iaqi || {};
+  const pm25Val = iaqi.pm25?.v ?? state.aqiData?.components?.pm2_5;
+  const pm10Val = iaqi.pm10?.v ?? state.aqiData?.components?.pm10;
+  const o3Val = iaqi.o3?.v ?? state.aqiData?.components?.o3;
+
+  let pollutantsHtml = '';
+  if (pm25Val != null || pm10Val != null) {
+    pollutantsHtml = `
+      <div style="display:flex;gap:12px;margin-top:8px;font-size:11px;color:var(--text-muted);">
+        ${pm25Val != null ? `<span>PM2.5: <strong style="color:${aqiLvl.color};">${pm25Val.toFixed(1)}</strong> µg/m³</span>` : ''}
+        ${pm10Val != null ? `<span>PM10: <strong style="color:${aqiLvl.color};">${pm10Val.toFixed(1)}</strong> µg/m³</span>` : ''}
+        ${o3Val != null ? `<span>O₃: <strong style="color:${aqiLvl.color};">${o3Val.toFixed(1)}</strong> ppb</span>` : ''}
+      </div>
+    `;
+  }
+
   // Create sub-containers if they don't exist
   let heroStatsEl = el.querySelector('#weatherHeroAndStats');
   if (!heroStatsEl) {
@@ -149,6 +166,25 @@ export function renderWeather(d, todayMinMax = null, containerId = 'weatherConte
         <div class="wstat2-icon">☁️</div>
         <div class="wstat2-label">Mây che phủ</div>
         <div class="wstat2-val">${d.clouds?.all ?? '—'}%</div>
+      </div>
+    </div>
+
+    <!-- ── AQI Environmental block ── -->
+    <div class="weather-aqi-block animate-fade-in-up" style="background:${aqiLvl.bg};border:1px solid ${aqiLvl.color}25;border-radius:12px;padding:16px;margin-top:16px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:32px;">${aqiLvl.emoji}</span>
+        <div style="flex:1;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:13px;font-weight:700;color:var(--text-primary);">Chất lượng không khí (AQI)</span>
+            <span style="font-size:11px;font-weight:700;color:${aqiLvl.color};background:rgba(255,255,255,0.03);padding:2px 8px;border-radius:12px;border:1px solid ${aqiLvl.color}30;">
+              ${aqi != null ? aqi + ' · ' + aqiLvl.label : 'Chưa có dữ liệu'}
+            </span>
+          </div>
+          <div style="font-size:11px;color:var(--text-secondary);margin-top:4px;line-height:1.4;">
+            ${aqiAdv}
+          </div>
+          ${pollutantsHtml}
+        </div>
       </div>
     </div>
 
@@ -319,4 +355,24 @@ export function renderHourly(hours, containerId = 'weatherHourly') {
     <div class="wf-section-label">🕒 Dự báo theo giờ (24h tới)</div>
     <div class="wh-strip">${cards}</div>
   `;
+}
+
+function getAqiLevel(aqi) {
+  if (aqi == null) return { label: 'Chưa có dữ liệu', color: '#94a3b8', bg: 'rgba(148,163,184,0.05)', emoji: '❓' };
+  if (aqi <= 50)  return { label: 'Tốt',         color: '#4ade80', bg: 'rgba(74,222,128,0.05)',  emoji: '😊' };
+  if (aqi <= 100) return { label: 'Trung bình',   color: '#facc15', bg: 'rgba(250,204,21,0.05)',  emoji: '😐' };
+  if (aqi <= 150) return { label: 'Không tốt',    color: '#fb923c', bg: 'rgba(251,146,60,0.05)',  emoji: '😷' };
+  if (aqi <= 200) return { label: 'Có hại',       color: '#f87171', bg: 'rgba(248,113,113,0.05)', emoji: '🤢' };
+  if (aqi <= 300) return { label: 'Rất có hại',   color: '#c084fc', bg: 'rgba(192,132,252,0.05)', emoji: '☠️' };
+  return           { label: 'Nguy hiểm',          color: '#9f1239', bg: 'rgba(159,18,57,0.08)',  emoji: '☣️' };
+}
+
+function getAqiAdvice(aqi) {
+  if (aqi == null) return 'Không tìm thấy dữ liệu chất lượng không khí cho khu vực này.';
+  if (aqi <= 50)  return 'Chất lượng không khí sạch, thích hợp cho mọi hoạt động ngoài trời.';
+  if (aqi <= 100) return 'Chấp nhận được. Nhóm nhạy cảm nên hạn chế vận động mạnh ngoài trời.';
+  if (aqi <= 150) return 'Không tốt cho nhóm nhạy cảm. Trẻ em, người già nên hạn chế ra ngoài.';
+  if (aqi <= 200) return 'Có hại cho sức khỏe. Khuyến nghị đeo khẩu trang khi ra đường.';
+  if (aqi <= 300) return 'Rất có hại. Hạn chế ra ngoài, đóng cửa sổ, dùng máy lọc khí.';
+  return 'Nguy hiểm khẩn cấp. Tránh ra ngoài, đóng kín cửa phòng.';
 }

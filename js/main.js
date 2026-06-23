@@ -18,15 +18,12 @@ import { fetchExchangeRates } from './api/exchange.js';
 import { fetchWeather, fetchForecast, fetchHourlyForecastFromOpenMeteo } from './api/weather.js';
 import { fetchGoldPrice }     from './api/gold.js';
 import { fetchGasPrice }      from './api/gas.js';
+import { fetchAQI }           from './api/aqi.js';
 
 // ── Feature Components ──
-import { initTrafficCard }                      from './components/traffic.js';
+// ── Feature Components ──
 import { renderCalendar }                       from './components/calendar.js';
-import { renderPowerOutage, searchPowerOutage } from './components/power-outage.js';
-import { switchGoldUnit }                       from './components/gold.js';
 import { renderQuickCities }                    from './components/weather.js';
-import { renderAQI }                            from './components/aqi.js';
-import { renderVNIndex }                        from './components/vnindex.js';
 import { renderNews }                           from './components/news.js';
 // New feature components
 import { renderBankRates }   from './components/bank-rates.js';
@@ -41,17 +38,11 @@ import { renderDownloader }  from './components/downloader.js';
 import { renderMedia, loadMediaBackground }       from './components/media.js';
 import { renderFileTools, renderAudioTools } from './components/file-tools.js';
 import { renderFocus } from './components/focus.js';
+import { renderFinance, switchFinanceTab } from './components/finance.js';
 
 // ── Render Components ──
 import { initAIAssistant }     from './components/ai-assistant.js?v=1.0.4';
 import { renderTicker }        from './components/ticker.js';
-import { renderCryptoGrid }    from './components/crypto-grid.js';
-import { renderCryptoTable }   from './components/crypto-table.js';
-import { renderMarketStats }   from './components/market-stats.js';
-import { selectCrypto }        from './components/crypto-detail.js';
-import { renderExchangeTable } from './components/exchange.js';
-import { renderGas }           from './components/gas.js';
-import { renderGold, renderGoldFallback } from './components/gold.js';
 import {
   renderWeather,
   renderForecast,
@@ -73,25 +64,12 @@ startClock('clockDisplay');
 async function loadCrypto() {
   try {
     const coins = await fetchCryptoMarkets();
-    renderCryptoGrid(coins);
-    renderCryptoTable(coins);
-    renderMarketStats(coins);
-    
-    // Automatically select the active coin or default to the first coin (Bitcoin)
-    const currentActiveId = window.activeCryptoId || (coins[0]?.id) || 'bitcoin';
-    selectCrypto(currentActiveId);
-
+    state.cryptoData = coins;
+    renderFinance();
     renderTicker();
   } catch (err) {
     console.warn('[Crypto]', err);
-    const grid = document.getElementById('cryptoGrid');
-    if (grid) {
-      grid.innerHTML = `
-        <div class="error-msg" style="grid-column:1/-1;">
-          ⚠️ Không tải được dữ liệu crypto. Có thể do giới hạn tốc độ API (30 req/min).
-          Thử làm mới sau ít giây.
-        </div>`;
-    }
+    renderTicker();
   }
 }
 
@@ -100,24 +78,14 @@ async function loadCrypto() {
 // ════════════════════════════════════════════════════════════
 async function loadExchange() {
   try {
-    // Tải song song hoặc ngầm tỷ giá Vietcombank
     renderBankRates().catch(e => console.warn('[VCB Rates]', e));
 
     const rows = await fetchExchangeRates();
-    renderExchangeTable(rows);
+    state.fxData = rows;
+    renderFinance();
     renderTicker();
-
-    // After live USD/VND is fetched, re-render gold if already loaded
-    // so it shows VND values with the real-time rate, not the config.js fallback
-    if (state.goldData?.price) {
-      renderGold(state.goldData.price, state.goldData.source);
-    }
   } catch (err) {
     console.warn('[FX]', err);
-    const tbody = document.getElementById('fxBody');
-    if (tbody) {
-      tbody.innerHTML = `<tr><td colspan="3"><div class="error-msg">⚠️ Không tải được tỷ giá.</div></td></tr>`;
-    }
   }
 }
 
@@ -127,15 +95,11 @@ async function loadExchange() {
 async function loadGold() {
   try {
     const data = await fetchGoldPrice();
-    if (data && data.price) {
-      renderGold(data.price, data.source);
-    } else {
-      renderGoldFallback();
-    }
+    state.goldData = data;
+    renderFinance();
     renderTicker();
   } catch (err) {
     console.warn('[Gold]', err);
-    renderGoldFallback();
     renderTicker();
   }
 }
@@ -144,11 +108,11 @@ async function loadGold() {
 async function loadGas() {
   try {
     await fetchGasPrice();
-    renderGas();
+    renderFinance();
     renderTicker();
   } catch (err) {
     console.warn('[Gas]', err);
-    renderGas();
+    renderFinance();
     renderTicker();
   }
 }
@@ -171,12 +135,17 @@ async function loadWeather(cityOverride, isSilent = false) {
       fetchWeather(city),
       fetchForecast(city),
     ]);
-    renderWeather(data, forecast?.todayMinMax);
     state.weatherForecast = forecast;
 
-    // Fetch and render true hourly weather forecast (1-hour interval) from Open-Meteo
     const lat = data.coord?.lat;
     const lon = data.coord?.lon;
+    if (lat != null && lon != null) {
+      await loadAQI(lat, lon);
+    }
+
+    renderWeather(data, forecast?.todayMinMax);
+
+    // Fetch and render true hourly weather forecast (1-hour interval) from Open-Meteo
     if (lat != null && lon != null) {
       const hourlyList = await fetchHourlyForecastFromOpenMeteo(lat, lon).catch(() => null);
       if (hourlyList && hourlyList.length) {
@@ -226,7 +195,6 @@ async function refreshAll() {
     loadWeather(),
     loadVNIndex(),
     loadNews(),
-    loadAQI(),
     loadLiveFootball(),
     loadPowerOutages(),
     loadLotteryBackground(),
@@ -239,8 +207,6 @@ async function refreshAll() {
 
 window.refreshAll        = refreshAll;
 window.loadWeather       = loadWeather;
-window.searchPowerOutage = searchPowerOutage;
-window.switchGoldUnit    = switchGoldUnit;
 window.selectCity        = (city) => {
   const inp = document.getElementById('cityInput');
   if (inp) inp.value = city;
@@ -248,10 +214,73 @@ window.selectCity        = (city) => {
 };
 
 // ── AQI load ──
-async function loadAQI(isSilent = false) { await renderAQI('aqiContent', isSilent); }
+async function loadAQI(lat, lon) {
+  let targetLat = lat;
+  let targetLon = lon;
+  if (targetLat == null || targetLon == null) {
+    targetLat = state.weatherForecast?.lat ?? 10.823;
+    targetLon = state.weatherForecast?.lon ?? 106.6296;
+  }
+  try {
+    const aqiData = await fetchAQI(`geo:${targetLat};${targetLon}`);
+    if (aqiData && aqiData.aqi != null && aqiData.aqi !== '-') {
+      state.aqiData = {
+        aqi: aqiData.aqi,
+        iaqi: aqiData.iaqi || {},
+        components: aqiData.components || {}
+      };
+      return;
+    }
+
+    // Fallback: OWM Air Pollution
+    const res = await fetch(`/weather?endpoint=air_pollution&lat=${targetLat}&lon=${targetLon}`);
+    if (res.ok) {
+      const json = await res.json();
+      const list = json.list?.[0];
+      if (list) {
+        const pm25 = list.components?.pm2_5 || 0;
+        let aqi = 0;
+        if (pm25 <= 12) aqi = (50/12)*pm25;
+        else if (pm25 <= 35.4) aqi = 50 + (50/23.4)*(pm25-12);
+        else if (pm25 <= 55.4) aqi = 100 + (50/20)*(pm25-35.4);
+        else if (pm25 <= 150.4) aqi = 150 + (50/95)*(pm25-55.4);
+        else if (pm25 <= 250.4) aqi = 200 + (100/100)*(pm25-150.4);
+        else aqi = 300 + (200/250)*(pm25-250.4);
+
+        state.aqiData = {
+          aqi: Math.round(aqi),
+          iaqi: {
+            pm25: { v: pm25 },
+            pm10: { v: list.components?.pm10 },
+            o3: { v: list.components?.o3 }
+          },
+          components: list.components || {}
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('[AQI Load Error]', err);
+  }
+}
 
 // ── VN-Index load ──
-async function loadVNIndex(isSilent = false) { await renderVNIndex('vnindexContent', isSilent); }
+async function loadVNIndex(isSilent = false) {
+  const container = document.getElementById('vnindexContent');
+  if (container) {
+    await renderVNIndex('vnindexContent', isSilent);
+  } else {
+    // Background fetch only to populate global state for AI assistant
+    try {
+      const res = await fetch('/vnindex');
+      if (res.ok) {
+        state.vnindexData = await res.json();
+        renderTicker();
+      }
+    } catch (e) {
+      console.warn('[VNIndex bg fetch failed]', e);
+    }
+  }
+}
 
 // ── News load ──
 async function loadNews(isSilent = false) { await renderNews('newsContent', isSilent); }
@@ -442,6 +471,7 @@ window.switchSection = (id) => {
   }
   if (!_rendered.has(id)) {
     _rendered.add(id);
+    if (id === 'finance')     renderFinance();
     if (id === 'tax-calc')    renderTaxCalc();
     if (id === 'lottery')     renderLottery();
     if (id === 'world-clock') renderWorldClock();
@@ -463,11 +493,10 @@ window.switchSection = (id) => {
 // INIT
 // ════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
-  renderGas();
+  renderFinance();
+  _rendered.add('finance');
   renderCalendar();
-  renderPowerOutage();
   renderQuickCities();
-  initTrafficCard();
   initAIAssistant();
   // Pre-render static/no-API sections immediately
   renderTaxCalc();
@@ -481,7 +510,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadGold();
     loadGas();
     loadWeather(null, true);
-    loadAQI(true);
     loadVNIndex(true);
     loadNews(true);
     loadLiveFootball();

@@ -415,46 +415,186 @@ function playBeep() {
 // ══════════════════════════════════════════════════════
 // AMBIENT SOUND ENGINE
 // ══════════════════════════════════════════════════════
-window.focusToggleSound = function(id) {
-  const sound = SOUNDS.find(s => s.id === id);
-  if (!sound) return;
+// AMBIENT SOUND ENGINE
+// ══════════════════════════════════════════════════════
 
-  if (currentSoundId === id) {
-    // Stop current sound
-    stopAmbient();
-    return;
+function getAudioCtx() {
+  if (!webAudioCtx || webAudioCtx.state === 'closed') {
+    webAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = webAudioCtx.createGain();
+    masterGain.gain.value = ambientVolume;
+    masterGain.connect(webAudioCtx.destination);
   }
+  if (webAudioCtx.state === 'suspended') webAudioCtx.resume();
+  return webAudioCtx;
+}
 
-  // Stop previous
+// ── Create a noise buffer (reusable) ──
+function makeNoiseBuffer(ctx) {
+  const size = 2 * ctx.sampleRate;
+  const buf = ctx.createBuffer(1, size, ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < size; i++) d[i] = Math.random() * 2 - 1;
+  return buf;
+}
+
+// ── Generators (return array of started nodes) ──
+function genRain(ctx) {
+  const src = ctx.createBufferSource();
+  src.buffer = makeNoiseBuffer(ctx);
+  src.loop = true;
+  const lp = ctx.createBiquadFilter();
+  lp.type = 'lowpass'; lp.frequency.value = 500;
+  const lp2 = ctx.createBiquadFilter();
+  lp2.type = 'lowpass'; lp2.frequency.value = 2000;
+  src.connect(lp); lp.connect(lp2); lp2.connect(masterGain);
+  src.start();
+  return [src];
+}
+
+function genWhiteNoise(ctx) {
+  const src = ctx.createBufferSource();
+  src.buffer = makeNoiseBuffer(ctx);
+  src.loop = true;
+  src.connect(masterGain);
+  src.start();
+  return [src];
+}
+
+function genOcean(ctx) {
+  const nodes = [];
+  // Background noise base
+  const src = ctx.createBufferSource();
+  src.buffer = makeNoiseBuffer(ctx);
+  src.loop = true;
+  const lp = ctx.createBiquadFilter();
+  lp.type = 'lowpass'; lp.frequency.value = 700;
+  const waveGain = ctx.createGain();
+  waveGain.gain.value = 0.6;
+  src.connect(lp); lp.connect(waveGain); waveGain.connect(masterGain);
+  src.start();
+  nodes.push(src);
+  // LFO to simulate waves crashing (0.1 Hz)
+  const lfo = ctx.createOscillator();
+  lfo.type = 'sine'; lfo.frequency.value = 0.12;
+  const lfoGain = ctx.createGain();
+  lfoGain.gain.value = 0.4;
+  lfo.connect(lfoGain); lfoGain.connect(waveGain.gain);
+  lfo.start(); nodes.push(lfo);
+  return nodes;
+}
+
+function genForest(ctx) {
+  const nodes = [];
+  // Wind: low-pass filtered noise
+  const wind = ctx.createBufferSource();
+  wind.buffer = makeNoiseBuffer(ctx); wind.loop = true;
+  const lp = ctx.createBiquadFilter();
+  lp.type = 'bandpass'; lp.frequency.value = 300; lp.Q.value = 0.5;
+  const windGain = ctx.createGain(); windGain.gain.value = 0.3;
+  wind.connect(lp); lp.connect(windGain); windGain.connect(masterGain);
+  wind.start(); nodes.push(wind);
+  // Random bird chirps
+  function scheduleChirp() {
+    if (currentSoundId !== 'forest') return;
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = 2200 + Math.random() * 800;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.35);
+    setTimeout(scheduleChirp, 1200 + Math.random() * 3000);
+  }
+  setTimeout(scheduleChirp, 500);
+  return nodes;
+}
+
+function genCafe(ctx) {
+  const nodes = [];
+  // Ambient chatter: band-passed noise
+  const src = ctx.createBufferSource();
+  src.buffer = makeNoiseBuffer(ctx); src.loop = true;
+  const bp = ctx.createBiquadFilter();
+  bp.type = 'bandpass'; bp.frequency.value = 1800; bp.Q.value = 0.8;
+  const g = ctx.createGain(); g.gain.value = 0.25;
+  src.connect(bp); bp.connect(g); g.connect(masterGain);
+  src.start(); nodes.push(src);
+  // Coffee machine hiss
+  const src2 = ctx.createBufferSource();
+  src2.buffer = makeNoiseBuffer(ctx); src2.loop = true;
+  const hp = ctx.createBiquadFilter();
+  hp.type = 'highpass'; hp.frequency.value = 3000;
+  const g2 = ctx.createGain(); g2.gain.value = 0.08;
+  src2.connect(hp); hp.connect(g2); g2.connect(masterGain);
+  src2.start(); nodes.push(src2);
+  return nodes;
+}
+
+const WEB_AUDIO_GENS = { rain: genRain, white: genWhiteNoise, ocean: genOcean, forest: genForest, cafe: genCafe };
+
+// ── Toggle sound ──
+window.focusToggleSound = function(id) {
+  if (currentSoundId === id) { stopAmbient(); return; }
   stopAmbient();
-
-  // Play new
   currentSoundId = id;
-  ambientAudio = new Audio(sound.url);
-  ambientAudio.loop = true;
-  ambientAudio.volume = ambientVolume;
-  ambientAudio.play().catch(() => {
-    // autoplay blocked or CORS issue – silently fail
-    currentSoundId = null;
-    document.querySelectorAll('.ambient-sound-btn').forEach(b => b.classList.remove('playing'));
-  });
+
+  if (id === 'lofi') {
+    playLofiTrack(lofiTrackIndex);
+  } else if (WEB_AUDIO_GENS[id]) {
+    try {
+      const ctx = getAudioCtx();
+      webAudioNodes = WEB_AUDIO_GENS[id](ctx);
+    } catch(e) {
+      console.warn('[Focus] Web Audio error:', e);
+      currentSoundId = null; return;
+    }
+  }
 
   document.querySelectorAll('.ambient-sound-btn').forEach(b => b.classList.remove('playing'));
   const btn = document.getElementById(`ambient-${id}`);
   if (btn) btn.classList.add('playing');
+  const lofiBar = document.getElementById('lofiPlayer');
+  if (lofiBar) lofiBar.style.display = id === 'lofi' ? 'flex' : 'none';
+};
+
+function playLofiTrack(index) {
+  if (lofiAudio) { lofiAudio.pause(); lofiAudio = null; }
+  lofiTrackIndex = ((index % LOFI_TRACKS.length) + LOFI_TRACKS.length) % LOFI_TRACKS.length;
+  const track = LOFI_TRACKS[lofiTrackIndex];
+  lofiAudio = new Audio(track.url);
+  lofiAudio.volume = ambientVolume;
+  lofiAudio.onended = () => { if (currentSoundId === 'lofi') playLofiTrack(lofiTrackIndex + 1); };
+  lofiAudio.onerror = () => { if (currentSoundId === 'lofi') playLofiTrack(lofiTrackIndex + 1); };
+  lofiAudio.play().catch(() => { if (currentSoundId === 'lofi') playLofiTrack(lofiTrackIndex + 1); });
+  const titleEl = document.getElementById('lofiTrackTitle');
+  if (titleEl) titleEl.textContent = track.title;
+}
+
+window.focusLofiNext = function() {
+  if (currentSoundId !== 'lofi') return;
+  playLofiTrack(lofiTrackIndex + 1);
 };
 
 function stopAmbient() {
-  if (ambientAudio) {
-    ambientAudio.pause();
-    ambientAudio.src = '';
-    ambientAudio = null;
-  }
+  // Stop lofi
+  if (lofiAudio) { lofiAudio.pause(); lofiAudio.src = ''; lofiAudio = null; }
+  // Stop Web Audio
+  webAudioNodes.forEach(n => { try { n.stop?.(); n.disconnect?.(); } catch(e){} });
+  webAudioNodes = [];
+
   currentSoundId = null;
   document.querySelectorAll('.ambient-sound-btn').forEach(b => b.classList.remove('playing'));
+  const lofiBar = document.getElementById('lofiPlayer');
+  if (lofiBar) lofiBar.style.display = 'none';
 }
 
 window.focusSetVolume = function(val) {
   ambientVolume = parseInt(val) / 100;
-  if (ambientAudio) ambientAudio.volume = ambientVolume;
+  if (lofiAudio) lofiAudio.volume = ambientVolume;
+  if (masterGain) masterGain.gain.value = ambientVolume;
 };
+

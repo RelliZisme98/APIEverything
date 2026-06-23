@@ -1,0 +1,99 @@
+/**
+ * css/finance.css
+ * Styles for the consolidated financial markets dashboard.
+ */
+
+.finance-kpi-card {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.finance-kpi-card:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Specific hover effects for active indicators */
+.finance-kpi-card:nth-child(1):hover {
+  border-color: rgba(96, 165, 250, 0.4);
+  box-shadow: 0 8px 24px rgba(96, 165, 250, 0.15);
+}
+
+.finance-kpi-card:nth-child(2):hover {
+  border-color: rgba(251, 191, 36, 0.4);
+  box-shadow: 0 8px 24px rgba(251, 191, 36, 0.15);
+}
+
+.finance-kpi-card:nth-child(3):hover {
+  border-color: rgba(167, 139, 250, 0.4);
+  box-shadow: 0 8px 24px rgba(167, 139, 250, 0.15);
+}
+
+.finance-kpi-card:nth-child(4):hover {
+  border-color: rgba(52, 211, 153, 0.4);
+  box-shadow: 0 8px 24px rgba(52, 211, 153, 0.15);
+}
+
+/* Tab styles for the consolidated dashboard */
+.finance-tab-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.finance-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+}
+
+.finance-tab-btn.active {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #60a5fa;
+  font-weight: 600;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.1);
+}
+
+/* Layout layout overrides for sub-tabs */
+.crypto-wrap {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.crypto-left-pane {
+  flex: 1.2;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.crypto-right-pane {
+  flex: 0.8;
+  min-width: 300px;
+}
+
+.market-stats-box {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+}
