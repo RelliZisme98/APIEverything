@@ -56,6 +56,20 @@ const SOUNDS = [
   },
 ];
 
+// ── Lofi Playlist (Royalty-free) ───────────────────────
+const LOFI_TRACKS = [
+  { title: "Back Alley Daydream - Dave Crum", url: "https://archive.org/download/jamendo-605372/01-2258203-Dave%20Crum-Back%20Alley%20Daydream.mp3" },
+  { title: "Clouds on Repeat - Dave Crum", url: "https://archive.org/download/jamendo-605372/02-2258205-Dave%20Crum-Clouds%20on%20Repeat.mp3" },
+  { title: "Rain on the Skylight - Dave Crum", url: "https://archive.org/download/jamendo-605372/03-2258241-Dave%20Crum-Rain%20on%20the%20Skylight.mp3" },
+  { title: "Raindrops on Pine Needles - Dave Crum", url: "https://archive.org/download/jamendo-605372/04-2258243-Dave%20Crum-Raindrops%20on%20Pine%20Needles.mp3" },
+  { title: "Roots and Reflections - Dave Crum", url: "https://archive.org/download/jamendo-605372/05-2258244-Dave%20Crum-Roots%20and%20Reflections.mp3" },
+  { title: "Whispers Between Trees - Dave Crum", url: "https://archive.org/download/jamendo-605372/06-2258248-Dave%20Crum-Whispers%20Between%20Trees.mp3" },
+  { title: "Wind-Up Dreamscape - Dave Crum", url: "https://archive.org/download/jamendo-605372/07-2258249-Dave%20Crum-Wind-Up%20Dreamscape.mp3" },
+  { title: "Waves on Cassette - Dave Crum", url: "https://archive.org/download/jamendo-605372/08-2258247-Dave%20Crum-Waves%20on%20Cassette.mp3" },
+  { title: "Umbrellas and Echoes - Dave Crum", url: "https://archive.org/download/jamendo-605372/09-2258246-Dave%20Crum-Umbrellas%20and%20Echoes.mp3" },
+  { title: "The Wind Knows My Name - Dave Crum", url: "https://archive.org/download/jamendo-605372/10-2258245-Dave%20Crum-The%20Wind%20Knows%20My%20Name.mp3" }
+];
+
 const TIPS = [
   '💡 Tập trung vào một nhiệm vụ duy nhất trong mỗi Pomodoro.',
   '🧠 Sau 4 Pomodoro, hãy nghỉ dài 15-30 phút để não phục hồi tốt nhất.',
@@ -79,6 +93,13 @@ let completedSessions = 0;
 let ambientAudio = null;
 let currentSoundId = null;
 let ambientVolume = 0.4;
+
+// Web Audio & Playlist state
+let webAudioCtx = null;
+let masterGain = null;
+let webAudioNodes = [];
+let lofiAudio = null;
+let lofiTrackIndex = 0;
 
 // ══════════════════════════════════════════════════════
 // MAIN RENDER
@@ -196,6 +217,15 @@ export function renderFocus() {
               <div class="ambient-sound-status">● ĐANG PHÁT</div>
             </button>
           `).join('')}
+        </div>
+
+        <!-- Lofi Music Player (Only visible when Lofi is playing) -->
+        <div id="lofiPlayer" class="lofi-player" style="display: none; align-items: center; justify-content: space-between; margin-top: 15px; padding: 12px 16px; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.1); border-radius: 12px; font-size: 13px;">
+          <div style="display: flex; align-items: center; gap: 10px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 80%;">
+            <span style="font-size: 16px; display: inline-block; animation: pomoSpin 4s linear infinite;">🎵</span>
+            <span id="lofiTrackTitle" style="font-weight: 600; color: #a5b4fc; overflow: hidden; text-overflow: ellipsis;">Đang tải nhạc...</span>
+          </div>
+          <button onclick="focusLofiNext()" style="background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer; font-size: 18px; padding: 4px; display: flex; align-items: center; justify-content: center; transition: color 0.2s; outline: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.7)'" title="Bài tiếp theo">⏭️</button>
         </div>
 
         <!-- Volume -->
