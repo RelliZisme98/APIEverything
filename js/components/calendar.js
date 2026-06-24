@@ -749,7 +749,8 @@ async function initProxyEvents() {
       localStorage.setItem('rellia_custom_events', JSON.stringify(customEvents));
       renderCalendar();
     } else {
-      throw new Error(`Status ${res.status}`);
+      const text = await res.text();
+      throw new Error(`Status ${res.status} - ${text}`);
     }
   } catch (err) {
     console.warn('[Calendar] Server DB unavailable, using local cache:', err.message);
@@ -763,7 +764,7 @@ async function initProxyEvents() {
 async function uploadEventToProxy(event) {
   if (!hasDbConnection) return;
   try {
-    await fetch('/api/events', {
+    const res = await fetch('/api/events', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -777,8 +778,12 @@ async function uploadEventToProxy(event) {
         created_at: new Date().toISOString()
       })
     });
+    if (!res.ok) {
+      const text = await res.text();
+      console.error('[Upload Event Failed Server Error]', res.status, text);
+    }
   } catch (err) {
-    console.warn('[Upload Event Failed]', err);
+    console.warn('[Upload Event Failed Network Error]', err);
   }
 }
 
@@ -788,10 +793,14 @@ async function uploadEventToProxy(event) {
 async function deleteEventFromProxy(eventId) {
   if (!hasDbConnection) return;
   try {
-    await fetch(`/api/events?id=${encodeURIComponent(eventId)}`, {
+    const res = await fetch(`/api/events?id=${encodeURIComponent(eventId)}`, {
       method: 'DELETE'
     });
+    if (!res.ok) {
+      const text = await res.text();
+      console.error('[Delete Event Failed Server Error]', res.status, text);
+    }
   } catch (err) {
-    console.warn('[Delete Event Failed]', err);
+    console.warn('[Delete Event Failed Network Error]', err);
   }
 }
