@@ -21,56 +21,64 @@ const HOMEBREW_GAMES = [
     name: '🐦 Flappy Bird NES',
     desc: 'Bản clone Flappy Bird cực nhẹ cho hệ máy điện tử 4 nút.',
     url: 'https://raw.githubusercontent.com/retrobrews/nes-games/master/flappybird.nes',
-    thumbnail: getSvgThumbnail('🐦')
+    thumbnail: getSvgThumbnail('🐦'),
+    instructions: 'Bấm nút START (Enter) để bắt đầu. Nhấn nút A (phím Z) để bay lên né cống.'
   },
   {
     id: 'invaders',
     name: '🛸 Invaders Must Die',
     desc: 'Trận chiến bắn phi thuyền bảo vệ Trái Đất phong cách Space Invaders.',
     url: 'https://raw.githubusercontent.com/retrobrews/nes-games/master/invaders.nes',
-    thumbnail: getSvgThumbnail('🛸')
+    thumbnail: getSvgThumbnail('🛸'),
+    instructions: 'Bấm nút START (Enter) để bắt đầu. Dùng Trái/Phải để di chuyển, nút A (phím Z) để bắn quái vật.'
   },
   {
     id: 'lala',
     name: '🧚 Lala The Magical',
     desc: 'Game phiêu lưu cảnh nền đi tìm đá năng lượng của Mojon Twins.',
     url: 'https://raw.githubusercontent.com/retrobrews/nes-games/master/lala.nes',
-    thumbnail: getSvgThumbnail('🧚')
+    thumbnail: getSvgThumbnail('🧚'),
+    instructions: 'Bấm nút START (Enter) để vào game. Trái/Phải để chạy, nút A (Z) để nhảy, nút B (X) để lấy đá.'
   },
   {
     id: 'driar',
     name: '🏃 Driar Platformer',
     desc: 'Tựa game đi cảnh 38 màn chơi thu thập sao cực kỳ hấp dẫn và thử thách.',
     url: 'https://raw.githubusercontent.com/retrobrews/nes-games/master/driar.nes',
-    thumbnail: getSvgThumbnail('🏃')
+    thumbnail: getSvgThumbnail('🏃'),
+    instructions: 'Bấm nút START (Enter) để bắt đầu. Trái/Phải để di chuyển, nút A (Z) để nhảy qua chướng ngại vật.'
   },
   {
     id: 'supertilt',
     name: '🥊 Super Tilt Bro.',
     desc: 'Bản demake đấu võ đài kiểu Smash Bros có thể chơi hai người cạnh tranh.',
     url: 'https://raw.githubusercontent.com/retrobrews/nes-games/master/super-tilt-bro.nes',
-    thumbnail: getSvgThumbnail('🥊')
+    thumbnail: getSvgThumbnail('🥊'),
+    instructions: 'Bấm nút START (Enter) để vào game. Trái/Phải để di chuyển, nút A (Z) để tấn công, nút B (X) để nhảy.'
   },
   {
     id: 'snailmaze',
     name: '🐌 Snail Maze',
     desc: 'Dẫn dắt chú ốc sên đi qua 12 mê cung phức tạp để giành chiến thắng.',
     url: 'https://raw.githubusercontent.com/retrobrews/nes-games/master/snailmaze.nes',
-    thumbnail: getSvgThumbnail('🐌')
+    thumbnail: getSvgThumbnail('🐌'),
+    instructions: 'Dùng các nút di chuyển (phím Mũi Tên) để hướng dẫn ốc sên chạy thoát khỏi mê cung.'
   },
   {
     id: 'pong1k',
     name: '🏓 Pong 1K',
     desc: 'Trò chơi đánh bóng bàn cổ điển đơn giản nhưng lôi cuốn.',
     url: 'https://raw.githubusercontent.com/retrobrews/nes-games/master/pong1k.nes',
-    thumbnail: getSvgThumbnail('🏓')
+    thumbnail: getSvgThumbnail('🏓'),
+    instructions: 'Dùng phím Mũi Tên Lên/Xuống để điều khiển thanh vợt đánh bóng lại đối thủ.'
   },
   {
     id: 'gsm',
     name: '🚀 Space Magellan',
     desc: 'Điều khiển tàu ngầm tránh chướng ngại vật cực kỳ kịch tính.',
     url: 'https://raw.githubusercontent.com/retrobrews/nes-games/master/gsm.nes',
-    thumbnail: getSvgThumbnail('🚀')
+    thumbnail: getSvgThumbnail('🚀'),
+    instructions: 'Bấm nút START (Enter) để bắt đầu. Dùng các phím Mũi Tên để điều khiển phi thuyền tránh các bức tường.'
   }
 ];
 
@@ -116,6 +124,16 @@ function buildUI(container) {
                   <div class="emu-standby-inner">
                     <div class="emu-standby-logo">🕹️ RELLIA RETRO</div>
                     <div class="emu-standby-text">Chọn một game từ danh sách bên phải hoặc tải lên file .nes để bắt đầu chơi</div>
+                  </div>
+                </div>
+
+                <!-- CRT Start Prompt Overlay -->
+                <div class="emu-screen-start-prompt" id="emuScreenStartPrompt">
+                  <div class="emu-prompt-inner">
+                    <div class="emu-prompt-icon">🎮</div>
+                    <div class="emu-prompt-title" id="emuPromptTitle">Game Ready!</div>
+                    <div class="emu-prompt-desc" id="emuPromptDesc">Bấm vào đây để bắt đầu chơi.</div>
+                    <button class="emu-prompt-btn">BẮT ĐẦU CHƠI</button>
                   </div>
                 </div>
 
@@ -228,6 +246,11 @@ function setupEmulator() {
   const hudPower = document.getElementById('emuHudPower');
   const hudMute = document.getElementById('emuHudMute');
 
+  // Start Prompt elements
+  const promptEl = document.getElementById('emuScreenStartPrompt');
+  const promptTitle = document.getElementById('emuPromptTitle');
+  const promptDesc = document.getElementById('emuPromptDesc');
+
   let isMuted = false;
   let isPoweredOn = false;
 
@@ -248,6 +271,7 @@ function setupEmulator() {
         standbyEl.style.opacity = '1';
       }
       if (hudEl) hudEl.style.display = 'none';
+      if (promptEl) promptEl.style.display = 'none';
     }
 
     // Sync Mute status text on HUD
@@ -259,6 +283,33 @@ function setupEmulator() {
         hudMute.style.background = '';
       }
     }
+  }
+
+  function showStartPrompt(name, instructions) {
+    if (!promptEl) return;
+    if (promptTitle) promptTitle.textContent = `${name} Sẵn Sàng!`;
+    if (promptDesc) {
+      promptDesc.innerHTML = `
+        ${instructions || 'Sử dụng gamepad ảo hoặc các phím tương ứng trên bàn phím để chơi.'}
+        <br><br>
+        <span style="color:#60a5fa; font-weight:bold;">👉 Bấm vào đây hoặc nút BẮT ĐẦU CHƠI để vào game</span>
+      `;
+    }
+    promptEl.style.display = 'flex';
+  }
+
+  // Click on the prompt to auto-start the game
+  if (promptEl) {
+    promptEl.addEventListener('click', () => {
+      promptEl.style.display = 'none';
+      // Simulate START key press (index 3) to start game play
+      if (nesBrowser) {
+        nesBrowser.nes.buttonDown(1, 3);
+        setTimeout(() => {
+          nesBrowser.nes.buttonUp(1, 3);
+        }, 150);
+      }
+    });
   }
 
   // Initialize JSNES Browser wrapper
@@ -290,6 +341,7 @@ function setupEmulator() {
       nesBrowser = null;
     }
     containerScreen.innerHTML = '';
+    if (promptEl) promptEl.style.display = 'none';
   }
 
   async function loadRomFromUrl(url, name) {
@@ -319,6 +371,12 @@ function setupEmulator() {
       statusEl.textContent = `🟢 Running: ${name}`;
       btnReset.disabled = false;
       updateScreenUIState();
+
+      // Find instructions and show the prompt overlay
+      const cleanName = name.replace(/[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]/g, '').trim();
+      const gameObj = HOMEBREW_GAMES.find(g => g.name.includes(cleanName) || cleanName.includes(g.name));
+      const instructions = gameObj ? gameObj.instructions : 'Nhấn nút START (phím Enter) để bắt đầu.';
+      showStartPrompt(cleanName, instructions);
     } catch (e) {
       console.error(e);
       statusEl.textContent = '⚠️ Lỗi tải ROM';
@@ -347,6 +405,8 @@ function setupEmulator() {
       statusEl.textContent = `🟢 Running: ${file.name.replace('.nes', '')}`;
       btnReset.disabled = false;
       updateScreenUIState();
+
+      showStartPrompt(file.name.replace('.nes', ''), 'Bấm nút START (Enter) hoặc nhấp vào đây để bắt đầu chơi.');
     };
     reader.readAsBinaryString(file);
   });
