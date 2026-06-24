@@ -128,6 +128,18 @@ export function renderFocus() {
 
     <div class="focus-layout">
 
+      <!-- ══ DIGITAL CLOCK ══ -->
+      <div class="focus-clock-card" style="grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(99, 102, 241, 0.2); padding: 18px 28px; border-radius: 20px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.05); gap: 20px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <span style="font-size: 28px; line-height: 1;">🕰️</span>
+          <div>
+            <div style="font-size: 11px; color: rgba(165, 180, 252, 0.7); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Giờ Hiện Tại</div>
+            <div id="focus-current-date" style="font-size: 14px; color: var(--text-secondary); margin-top: 4px; font-weight: 500;">Đang tải ngày tháng...</div>
+          </div>
+        </div>
+        <div id="focus-current-time" style="font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700; color: #a5b4fc; text-shadow: 0 0 10px rgba(165, 180, 252, 0.4); letter-spacing: 1px; font-variant-numeric: tabular-nums;">00:00:00</div>
+      </div>
+
       <!-- ══ POMODORO CARD ══ -->
       <div class="pomodoro-card">
 
@@ -246,6 +258,34 @@ export function renderFocus() {
   `;
 
   updateRingDisplay();
+
+  // Live clock interval update
+  if (window.focusClockInterval) {
+    clearInterval(window.focusClockInterval);
+  }
+  function updateFocusClock() {
+    const timeEl = document.getElementById('focus-current-time');
+    const dateEl = document.getElementById('focus-current-date');
+    if (!timeEl || !dateEl) {
+      clearInterval(window.focusClockInterval);
+      window.focusClockInterval = null;
+      return;
+    }
+    const now = new Date();
+    const hh = now.getHours().toString().padStart(2, '0');
+    const mm = now.getMinutes().toString().padStart(2, '0');
+    const ss = now.getSeconds().toString().padStart(2, '0');
+    timeEl.textContent = `${hh}:${mm}:${ss}`;
+
+    const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+    const dayName = days[now.getDay()];
+    const dateStr = now.getDate().toString().padStart(2, '0');
+    const monthStr = (now.getMonth() + 1).toString().padStart(2, '0');
+    const yearStr = now.getFullYear();
+    dateEl.textContent = `${dayName}, ${dateStr}/${monthStr}/${yearStr}`;
+  }
+  setTimeout(updateFocusClock, 0);
+  window.focusClockInterval = setInterval(updateFocusClock, 1000);
 
   // Request notification permission silently
   if ('Notification' in window && Notification.permission === 'default') {
