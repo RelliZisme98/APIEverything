@@ -1234,6 +1234,102 @@ async function handleEvents(request, env) {
 }
 
 
+// ─── /api/news (RSS News Aggregator Proxy) ───────────────────────────
+async function handleNewsRSS(request) {
+  if (request.method === 'OPTIONS') return preflight();
+
+  const { searchParams } = new URL(request.url);
+  const source = searchParams.get('source') || 'vnexpress';
+
+  let feedUrl = 'https://vnexpress.net/rss/tin-moi-nhat.rss';
+  if (source === 'tuoitre') {
+    feedUrl = 'https://tuoitre.vn/rss/tin-moi-nhat.rss';
+  } else if (source === 'dantri') {
+    feedUrl = 'https://dantri.com.vn/rss/home.rss';
+  } else if (source === 'genk') {
+    feedUrl = 'https://genk.vn/rss/tin-cong-nghe.rss';
+  } else if (source === 'thanhnien') {
+    feedUrl = 'https://thanhnien.vn/rss/home.rss';
+  } else if (source === 'vietnamnet') {
+    feedUrl = 'https://vietnamnet.vn/rss/tin-moi-nhat.rss';
+  } else if (source === 'vtv') {
+    feedUrl = 'https://vtv.vn/tin-moi-nhat.rss';
+  } else if (source === 'tinhte') {
+    feedUrl = 'https://tinhte.vn/rss';
+  } else if (source === 'kenh14') {
+    feedUrl = 'https://kenh14.vn/home.rss';
+  }
+
+  try {
+    const res = await fetch(feedUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    });
+    if (!res.ok) throw new Error(`Fetch RSS feed failed: ${res.status}`);
+    const xmlText = await res.text();
+    const items = parseRSS(xmlText);
+
+    return new Response(JSON.stringify(items), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS }
+    });
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
+function parseRSS(xmlText) {
+  const items = [];
+  const matches = xmlText.matchAll(/<item>([\s\S]*?)<\/item>/g);
+  for (const match of matches) {
+    const itemXml = match[1];
+
+    const titleMatch = itemXml.match(/<title>(?:<!\[CDATA\[([\s\S]*?)\]\]>|([^<]*))/i);
+    const title = titleMatch ? (titleMatch[1] || titleMatch[2] || '').trim() : '';
+
+    const linkMatch = itemXml.match(/<link>(?:<!\[CDATA\[([\s\S]*?)\]\]>|([^<]*))/i);
+    const link = linkMatch ? (linkMatch[1] || linkMatch[2] || '').trim() : '';
+
+    const pubDateMatch = itemXml.match(/<pubDate>(?:<!\[CDATA\[([\s\S]*?)\]\]>|([^<]*))/i);
+    const pubDate = pubDateMatch ? (pubDateMatch[1] || pubDateMatch[2] || '').trim() : '';
+
+    const descMatch = itemXml.match(/<description>(?:<!\[CDATA\[([\s\S]*?)\]\]>|([^<]*))/i);
+    const rawDesc = descMatch ? (descMatch[1] || descMatch[2] || '').trim() : '';
+
+    // Extract image URL from description (e.g. <img src="url">)
+    let imageUrl = '';
+    const imgRegex = /<img[^>]+src=["']([^"']+)["']/i;
+    const imgMatch = rawDesc.match(imgRegex);
+    if (imgMatch) {
+      imageUrl = imgMatch[1];
+    }
+
+    // If not found in description, check <enclosure> or <media:content>
+    if (!imageUrl) {
+      const encMatch = itemXml.match(/<enclosure[^>]+url=["']([^"']+)["']/i);
+      if (encMatch) imageUrl = encMatch[1];
+    }
+
+    // Clean description HTML tags
+    let cleanDesc = rawDesc.replace(/<[^>]+>/g, '')
+                           .replace(/&nbsp;/g, ' ')
+                           .replace(/&amp;/g, '&')
+                           .replace(/&quot;/g, '"')
+                           .trim();
+
+    items.push({
+      title,
+      link,
+      pubDate,
+      description: cleanDesc,
+      image: imageUrl
+    });
+  }
+  return items.slice(0, 20); // Return top 20 news items
+}
+
+
 // ─── /api/spam-check ────────────────────────────────────────────────
 async function handleSpamCheck(request) {
   if (request.method === 'OPTIONS') return preflight();
@@ -2183,6 +2279,7 @@ export default {
     if (pathname === '/football') return handleFootball(request);
     if (pathname === '/api/todos') return handleTodos(request, env);
     if (pathname === '/api/events') return handleEvents(request, env);
+    if (pathname === '/api/news') return handleNewsRSS(request);
 
     if (pathname === '/api/spam-check') return handleSpamCheck(request);
     if (pathname === '/api/tax-lookup') return handleTaxLookup(request);
