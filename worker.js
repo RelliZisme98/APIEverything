@@ -107,7 +107,7 @@ async function extractArticle(html, targetUrl) {
         el.onEndTag(() => { skipCount--; });
       }
     })
-    .on('article.fck_detail, .detail-content, .singular-content, .klw-body-top, .detail-cmain, .article-content, #main-detail, .article-detail, .maincontent, .content-detail, .post-content, article, main', {
+    .on('article.fck_detail, .detail-content, .singular-content, .klw-body-top, .detail-cmain, .detail__cmain, .article-content, .article-body, .chi-tiet-bai-viet, #main-detail, .article-detail, .maincontent, .content-detail, .post-content, .knc-content, .vtv-detail-content, #entry-body, article, main', {
       element(el) {
         inContentCount++;
         el.onEndTag(() => { inContentCount--; });
@@ -1257,17 +1257,17 @@ async function handleApiNews(request) {
   } else if (source === 'dantri') {
     feedUrl = 'https://dantri.com.vn/rss/home.rss';
   } else if (source === 'genk') {
-    feedUrl = 'https://genk.vn/rss/tin-cong-nghe.rss';
+    feedUrl = 'https://genk.vn/rss/home.rss';
   } else if (source === 'thanhnien') {
     feedUrl = 'https://thanhnien.vn/rss/home.rss';
   } else if (source === 'vietnamnet') {
-    feedUrl = 'https://vietnamnet.vn/rss/tin-moi-nhat.rss';
+    feedUrl = 'https://vietnamnet.vn/rss/thoi-su.rss';
   } else if (source === 'vtv') {
-    feedUrl = 'https://vtv.vn/tin-moi-nhat.rss';
+    feedUrl = 'https://vtv.vn/rss/home.rss';
   } else if (source === 'tinhte') {
     feedUrl = 'https://tinhte.vn/rss';
   } else if (source === 'kenh14') {
-    feedUrl = 'https://kenh14.vn/home.rss';
+    feedUrl = 'https://kenh14.vn/rss/home.rss';
   }
 
   try {

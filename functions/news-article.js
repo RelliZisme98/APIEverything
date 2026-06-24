@@ -103,7 +103,7 @@ async function extractArticle(html, targetUrl) {
         el.onEndTag(() => { skipCount--; });
       }
     })
-    .on('article.fck_detail, .detail-content, .singular-content, .klw-body-top, .detail-cmain, .article-content, #main-detail, .article-detail, .maincontent, .content-detail, .post-content, article, main', {
+    .on('article.fck_detail, .detail-content, .singular-content, .klw-body-top, .detail-cmain, .detail__cmain, .article-content, .article-body, .chi-tiet-bai-viet, #main-detail, .article-detail, .maincontent, .content-detail, .post-content, .knc-content, .vtv-detail-content, #entry-body, article, main', {
       element(el) {
         inContentCount++;
         el.onEndTag(() => { inContentCount--; });
