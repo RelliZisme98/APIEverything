@@ -185,10 +185,17 @@ async function handleAuthSubmit(e) {
       body: JSON.stringify({ email, password })
     });
 
-    const data = await res.json();
+    let data = {};
+    try {
+      data = await res.json();
+    } catch (err) {
+      console.warn('[Auth] Response is not JSON:', err);
+    }
 
     if (!res.ok) {
-      throw new Error(data.error_description || data.error || 'Xác thực thất bại');
+      console.error('[Auth Error Response]', data);
+      const errMsg = data.msg || data.message || data.error_description || data.error || `Lỗi máy chủ (Mã: ${res.status})`;
+      throw new Error(errMsg);
     }
 
     if (authMode === 'signup') {
