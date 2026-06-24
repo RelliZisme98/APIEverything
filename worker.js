@@ -2834,6 +2834,17 @@ export default {
   async fetch(request, env) {
     const { pathname } = new URL(request.url);
 
+    // ── Diagnostic Endpoint ──
+    if (pathname === '/api/routing-diagnostic') {
+      return new Response(JSON.stringify({
+        status: "ok",
+        version: "1.0.1",
+        timestamp: new Date().toISOString()
+      }), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     // ── SPA Routing Rewrite for Frontend Paths ──
     const acceptHeader = request.headers.get('Accept') || '';
     if (acceptHeader.includes('text/html')) {
