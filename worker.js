@@ -2834,6 +2834,22 @@ export default {
   async fetch(request, env) {
     const { pathname } = new URL(request.url);
 
+    // ── Diagnostic Endpoint ──
+    if (pathname === '/api/routing-diagnostic') {
+      return new Response(JSON.stringify({
+        status: "ok",
+        version: "1.0.3",
+        timestamp: new Date().toISOString(),
+        requestUrl: request.url,
+        requestMethod: request.method,
+        acceptHeader: request.headers.get('Accept'),
+        userAgent: request.headers.get('User-Agent'),
+        cfRay: request.headers.get('CF-Ray')
+      }), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     if (pathname === '/phat-nguoi') return handlePhatNguoi(request);
     if (pathname === '/news-rss') return handleNewsRSS(request);
     if (pathname === '/news-article') return handleNewsArticle(request);

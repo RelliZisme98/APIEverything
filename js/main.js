@@ -455,10 +455,70 @@ async function loadLotteryBackground() {
   }
 }
 
+// ── Mappings for Dynamic Routing ──
+const sectionToPathMap = {
+  'finance': '/',
+  'weather': '/weather',
+  'news': '/news',
+  'calendar': '/calendar',
+  'travel': '/travel',
+  'todo': '/todo',
+  'lookup': '/lookup',
+  'qrcode': '/qrcode',
+  'emulator': '/games',
+  'tax-calc': '/tax-calc',
+  'typing-test': '/typing-test',
+  'converter': '/converter',
+  'bmi': '/bmi',
+  'iq': '/iq',
+  'eq': '/eq',
+  'lottery': '/lottery',
+  'world-clock': '/clock',
+  'football': '/football',
+  'downloader': '/downloader',
+  'media': '/media',
+  'focus': '/focus'
+};
+
+const pathToSectionMap = {
+  '/': 'finance',
+  '/finance': 'finance',
+  '/weather': 'weather',
+  '/news': 'news',
+  '/calendar': 'calendar',
+  '/travel': 'travel',
+  '/todo': 'todo',
+  '/lookup': 'lookup',
+  '/qrcode': 'qrcode',
+  '/games': 'emulator',
+  '/emulator': 'emulator',
+  '/tax-calc': 'tax-calc',
+  '/typing-test': 'typing-test',
+  '/converter': 'converter',
+  '/bmi': 'bmi',
+  '/iq': 'iq',
+  '/eq': 'eq',
+  '/lottery': 'lottery',
+  '/clock': 'world-clock',
+  '/world-clock': 'world-clock',
+  '/football': 'football',
+  '/downloader': 'downloader',
+  '/media': 'media',
+  '/focus': 'focus'
+};
+
+function getPathnameClean() {
+  let p = window.location.pathname;
+  if (p.endsWith('/') && p.length > 1) {
+    p = p.slice(0, -1);
+  }
+  return p;
+}
+
 // ── Lazy-load new features on first visit ──
 const _rendered = new Set();
 const _originalSwitch = window.switchSection;
-window.switchSection = (id) => {
+window.switchSection = (id, updateHistory = true) => {
   // Stop world clock if leaving that section
   if (!_rendered.has('world-clock') === false && id !== 'world-clock') {
     // don't destroy — let it keep ticking in background
@@ -499,7 +559,22 @@ window.switchSection = (id) => {
     if (id === 'iq')           renderIQ();
     if (id === 'eq')           renderEQ();
   }
+
+  // Push state to browser history if navigating via client click
+  if (updateHistory) {
+    const path = sectionToPathMap[id] || '/';
+    if (window.location.pathname !== path) {
+      window.history.pushState({ sectionId: id }, '', path);
+    }
+  }
 };
+
+// ── Handle back/forward navigation ──
+window.addEventListener('popstate', (e) => {
+  const cleanPath = getPathnameClean();
+  const id = (e.state && e.state.sectionId) || pathToSectionMap[cleanPath] || 'finance';
+  window.switchSection(id, false);
+});
 
 // ════════════════════════════════════════════════════════════
 // INIT
@@ -513,6 +588,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Pre-render static/no-API sections immediately
   renderTaxCalc();
   _rendered.add('tax-calc');
+
+  // Handle initial page load section routing
+  const cleanPath = getPathnameClean();
+  const initialSection = pathToSectionMap[cleanPath] || 'finance';
+  window.switchSection(initialSection, false);
+  window.history.replaceState({ sectionId: initialSection }, '', window.location.pathname);
+
   refreshAll();
 
   // Auto-refresh every 60 seconds

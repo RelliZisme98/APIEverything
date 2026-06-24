@@ -13,6 +13,7 @@ enabled = true
 [assets]
 directory = "."
 binding = "ASSETS"
+not_found_handling = "single-page-application"
 
 [vars]
 SUPABASE_URL = "https://kavodsarpdvzmaqrkunv.supabase.co"
