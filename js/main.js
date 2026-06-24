@@ -42,7 +42,7 @@ import { renderFocus } from './components/focus.js';
 import { renderQRCodeSuite } from './components/qrcode.js';
 import { renderEmulatorSuite } from './components/emulator.js?v=1.1.0';
 import { renderTypingTest } from './components/typing-test.js';
-import { renderConverter } from './components/converter.js';
+import { renderConverter, renderBMICalculator } from './components/converter.js';
 
 // ── Render Components ──
 import { initAIAssistant }     from './components/ai-assistant.js?v=1.0.4';
@@ -494,6 +494,7 @@ window.switchSection = (id) => {
     if (id === 'emulator')    renderEmulatorSuite();
     if (id === 'typing-test') renderTypingTest();
     if (id === 'converter')   renderConverter();
+    if (id === 'bmi')          renderBMICalculator();
   }
 };
 

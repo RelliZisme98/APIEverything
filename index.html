@@ -146,6 +146,11 @@
           <span class="nav-badge"
             style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">NEW</span>
         </button>
+        <button class="sidebar-nav-item" data-section="bmi" onclick="switchSection('bmi')">
+          <span class="nav-icon">⚖️</span>
+          <span class="nav-label">Chỉ Số BMI</span>
+          <span class="nav-badge" style="background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.3);">NEW</span>
+        </button>
         <button class="sidebar-nav-item" data-section="lottery" onclick="switchSection('lottery')">
           <span class="nav-icon">🎰</span>
           <span class="nav-label">Kết Quả Xổ Số</span>
@@ -318,9 +323,23 @@
         <div class="page-title"><span class="page-icon">📏</span> Bộ Chuyển Đổi Đơn Vị Toàn Năng</div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="icon">📏</span> Chuyển Đổi Dữ Liệu · Nhiệt Độ · Độ Dài · Múi Giờ</div>
+            <div class="card-title"><span class="icon">📏</span> Chuyển Đổi Dữ Liệu · Nhiệt Độ · Độ Dài · Tốc Độ</div>
           </div>
           <div id="converterContent">
+            <div class="skeleton skel-big"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: BMI CALCULATOR ════════ -->
+      <section class="content-section" id="section-bmi">
+        <div class="page-title"><span class="page-icon">⚖️</span> Máy Tính Chỉ Số BMI</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">🏥</span> Body Mass Index · Chuẩn WHO Châu Á</div>
+            <span class="card-badge" style="background:rgba(52,211,153,.12);color:#34d399;border-color:rgba(52,211,153,.25);">NEW</span>
+          </div>
+          <div id="bmiContent">
             <div class="skeleton skel-big"></div>
           </div>
         </div>

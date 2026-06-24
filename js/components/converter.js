@@ -1,10 +1,12 @@
 /**
  * components/converter.js
  * Universal Unit Converter component
- * Supports: Data, Temperature, Length, Mass, Volume, Area, Speed, Timezones, and BMI.
+ * Supports: Data, Temperature, Length, Mass, Volume, Area, Speed.
+ * Timezone Converter → world-clock.js
+ * BMI Calculator     → standalone bmi section
  */
 
-let activeCategory = 'data'; // 'data', 'temp', 'length', 'mass', 'volume', 'area', 'speed', 'timezone', 'bmi'
+let activeCategory = 'data'; // 'data', 'temp', 'length', 'mass', 'volume', 'area', 'speed'
 
 export function renderConverter(containerId = 'converterContent') {
   const container = document.getElementById(containerId);
@@ -21,8 +23,6 @@ export function renderConverter(containerId = 'converterContent') {
         <button class="conv-tab-btn" id="conv-tab-volume" data-cat="volume">🧪 Thể Tích</button>
         <button class="conv-tab-btn" id="conv-tab-area" data-cat="area">📐 Diện Tích</button>
         <button class="conv-tab-btn" id="conv-tab-speed" data-cat="speed">⚡ Tốc Độ</button>
-        <button class="conv-tab-btn" id="conv-tab-timezone" data-cat="timezone">🕐 Múi Giờ</button>
-        <button class="conv-tab-btn" id="conv-tab-bmi" data-cat="bmi">🏥 Chỉ Số BMI</button>
       </div>
 
       <!-- Main Converter Box -->
@@ -309,84 +309,7 @@ export function renderConverter(containerId = 'converterContent') {
           </div>
         </div>
 
-        <!-- 8. TIMEZONE CONVERTER -->
-        <div class="conv-panel" id="conv-panel-timezone">
-          <div class="tz-header">
-            <div class="tz-input-wrap">
-              <label class="conv-label">Chọn thời gian gốc (Máy của bạn):</label>
-              <input type="datetime-local" class="conv-input tz-base-input" id="conv-tz-base" />
-            </div>
-            <button class="btn-primary tz-now-btn" id="conv-tz-now">Đặt Hiện Tại</button>
-          </div>
-          
-          <div class="tz-results-list" id="conv-tz-list">
-            <!-- Timezones populated here -->
-          </div>
-        </div>
 
-        <!-- 9. BMI CALCULATOR -->
-        <div class="conv-panel" id="conv-panel-bmi">
-          <div class="bmi-container">
-            <!-- Left Side: Inputs -->
-            <div class="bmi-card">
-              <h3 style="margin: 0; font-size: 16px; color: var(--text-primary);">📊 Nhập Chỉ Số Cơ Thể</h3>
-              
-              <div class="conv-field">
-                <label class="conv-label">Giới tính</label>
-                <div class="bmi-gender-toggle">
-                  <button class="bmi-gender-btn active" data-gender="male" id="bmi-gen-male">🙋‍♂️ Nam</button>
-                  <button class="bmi-gender-btn" data-gender="female" id="bmi-gen-female">🙋‍♀️ Nữ</button>
-                </div>
-              </div>
-
-              <div class="conv-field">
-                <label class="conv-label">Chiều cao (cm)</label>
-                <input type="number" class="conv-input" id="bmi-height" placeholder="Ví dụ: 170" min="50" max="300" />
-              </div>
-
-              <div class="conv-field">
-                <label class="conv-label">Cân nặng (kg)</label>
-                <input type="number" class="conv-input" id="bmi-weight" placeholder="Ví dụ: 65" min="10" max="500" />
-              </div>
-            </div>
-
-            <!-- Right Side: Results -->
-            <div class="bmi-card" style="align-items: center; justify-content: center;">
-              <div class="bmi-results-wrap" id="bmi-results-placeholder">
-                <span style="font-size: 40px;">⚖️</span>
-                <p style="color: var(--text-muted); font-size: 14px; margin: 0; text-align: center;">Vui lòng nhập chiều cao và cân nặng để xem kết quả BMI.</p>
-              </div>
-
-              <div class="bmi-results-wrap" id="bmi-results-data" style="display: none; width: 100%;">
-                <div class="bmi-circle-container">
-                  <div class="bmi-circle" id="bmi-circle-glow">
-                    <span class="bmi-circle-val" id="bmi-val-text">22.5</span>
-                    <span class="bmi-circle-lbl">Chỉ số BMI</span>
-                  </div>
-                </div>
-                
-                <div class="bmi-status-text" id="bmi-status-lbl">Bình thường</div>
-                <div class="bmi-ideal-text" id="bmi-ideal-lbl">Cân nặng lý tưởng của bạn: 54 - 66 kg</div>
-
-                <!-- Visual scale -->
-                <div style="width: 100%; margin-top: 10px;">
-                  <div class="bmi-scale-bar">
-                    <div class="bmi-scale-indicator" id="bmi-indicator" style="left: 50%;"></div>
-                  </div>
-                  <div class="bmi-bracket-labels" style="margin-top: 8px;">
-                    <span>Gầy</span>
-                    <span>Thường</span>
-                    <span>Thừa cân</span>
-                    <span>Béo phì</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="conv-tip">
-            💡 Chỉ số BMI (Body Mass Index) áp dụng theo chuẩn chuẩn hóa dành cho người Châu Á (WHO Western Pacific Region).
-          </div>
-        </div>
       </div>
     </div>
   `;
@@ -662,99 +585,152 @@ function setupConverter() {
       });
     };
   });
+}
 
-  // ════════════════════════════════════════════════════════════
-  // 8. TIMEZONE CONVERTER LOGIC
-  // ════════════════════════════════════════════════════════════
-  const tzBaseInput = document.getElementById('conv-tz-base');
-  const tzNowBtn = document.getElementById('conv-tz-now');
-  const tzListWrap = document.getElementById('conv-tz-list');
+// ════════════════════════════════════════════════════════════
+// STANDALONE: TIMEZONE CONVERTER (used in world-clock section)
+// ════════════════════════════════════════════════════════════
+export function renderTimezoneConverter(containerId = 'tzConverterContent') {
+  const container = document.getElementById(containerId);
+  if (!container) return;
 
   const targetZones = [
-    { name: '🇻🇳 Việt Nam (ICT)', offset: 7, desc: 'Giờ Đông Dương (GMT+7)' },
-    { name: '🇬🇧 Vương Quốc Anh (GMT/BST)', offset: 0, desc: 'London / Giờ chuẩn Greenwich (GMT+0)' },
-    { name: '🇺🇸 Mỹ - New York (EST/EDT)', offset: -5, desc: 'Giờ miền Đông nước Mỹ (GMT-5)' },
-    { name: '🇺🇸 Mỹ - San Francisco (PST/PDT)', offset: -8, desc: 'Giờ Thái Bình Dương (GMT-8)' },
-    { name: '🇯🇵 Nhật Bản & Hàn Quốc (JST/KST)', offset: 9, desc: 'Giờ chuẩn Nhật Bản (GMT+9)' },
-    { name: '🇸🇬 Singapore & Trung Quốc (SGT/CST)', offset: 8, desc: 'Giờ Singapore / Bắc Kinh (GMT+8)' },
-    { name: '🇪🇺 Châu Âu - Paris/Berlin (CET/CEST)', offset: 1, desc: 'Giờ Trung Âu (GMT+1)' }
+    { name: '\ud83c\uddfb\ud83c\uddf3 Vi\u1ec7t Nam (ICT)', offset: 7, desc: 'Gi\u1edd \u0110\u00f4ng D\u01b0\u01a1ng (GMT+7)' },
+    { name: '\ud83c\uddec\ud83c\udde7 V\u01b0\u01a1ng Qu\u1ed1c Anh (GMT/BST)', offset: 0, desc: 'London / Gi\u1edd chu\u1ea9n Greenwich (GMT+0)' },
+    { name: '\ud83c\uddfa\ud83c\uddf8 M\u1ef9 - New York (EST/EDT)', offset: -5, desc: 'Gi\u1edd mi\u1ec1n \u0110\u00f4ng n\u01b0\u1edbc M\u1ef9 (GMT-5)' },
+    { name: '\ud83c\uddfa\ud83c\uddf8 M\u1ef9 - San Francisco (PST/PDT)', offset: -8, desc: 'Gi\u1edd Th\u00e1i B\u00ecnh D\u01b0\u01a1ng (GMT-8)' },
+    { name: '\ud83c\uddef\ud83c\uddf5 Nh\u1eadt B\u1ea3n & H\u00e0n Qu\u1ed1c (JST/KST)', offset: 9, desc: 'Gi\u1edd chu\u1ea9n Nh\u1eadt B\u1ea3n (GMT+9)' },
+    { name: '\ud83c\uddf8\ud83c\uddec Singapore & Trung Qu\u1ed1c (SGT/CST)', offset: 8, desc: 'Gi\u1edd Singapore / B\u1eafc Kinh (GMT+8)' },
+    { name: '\ud83c\uddea\ud83c\uddfa Ch\u00e2u \u00c2u - Paris/Berlin (CET/CEST)', offset: 1, desc: 'Gi\u1edd Trung \u00c2u (GMT+1)' },
+    { name: '\ud83c\udde6\ud83c\uddea UAE - Dubai (GST)', offset: 4, desc: 'Gi\u1edd Vùng V\u1ecbnh (GMT+4)' },
+    { name: '\ud83c\udde6\ud83c\uddfa \u00dac - Sydney (AEST)', offset: 10, desc: 'Gi\u1edd \u00dac ph\u00eda \u0110\u00f4ng (GMT+10)' },
   ];
 
-  if (tzBaseInput && tzNowBtn && tzListWrap) {
-    const now = new Date();
-    const pad = (num) => String(num).padStart(2, '0');
-    const localDatetimeStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
-    tzBaseInput.value = localDatetimeStr;
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const localStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
-    function updateTimezones() {
-      const baseVal = tzBaseInput.value;
-      if (!baseVal) {
-        tzListWrap.innerHTML = '<div class="tz-error">⚠️ Vui lòng chọn một mốc thời gian gốc.</div>';
-        return;
-      }
+  container.innerHTML = `
+    <div class="tz-section-wrap">
+      <div class="tz-header">
+        <div class="tz-input-wrap">
+          <label class="conv-label">\u23f0 Ch\u1ecdn th\u1eddi gian g\u1ed1c \u0111\u1ec3 quy \u0111\u1ed5i:</label>
+          <input type="datetime-local" class="conv-input tz-base-input" id="wc-tz-base" value="${localStr}" />
+        </div>
+        <button class="btn-primary tz-now-btn" id="wc-tz-now">\u23f1 Hi\u1ec7n T\u1ea1i</button>
+      </div>
+      <div class="tz-results-list" id="wc-tz-list"></div>
+      <div class="conv-tip">\ud83d\udca1 Ch\u1ec9 t\u00ednh to\u00e1n d\u1ef1a tr\u00ean offset UTC c\u1ed1 \u0111\u1ecbnh, ch\u01b0a t\u00ednh Daylight Saving Time (DST) theo m\u00f9a.</div>
+    </div>
+  `;
 
-      const baseDate = new Date(baseVal);
-      const systemOffsetHrs = -baseDate.getTimezoneOffset() / 60;
+  const tzBaseInput = document.getElementById('wc-tz-base');
+  const tzNowBtn = document.getElementById('wc-tz-now');
+  const tzListWrap = document.getElementById('wc-tz-list');
 
-      tzListWrap.innerHTML = '';
-      targetZones.forEach(zone => {
-        const diffHrs = zone.offset - systemOffsetHrs;
-        const destDate = new Date(baseDate.getTime() + diffHrs * 60 * 60 * 1000);
-
-        const timeStr = destDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-        const dateStr = destDate.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-        let dateClass = 'tz-date-same';
-        let dateLabel = 'Cùng ngày';
-        
-        const baseDay = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate());
-        const destDay = new Date(destDate.getFullYear(), destDate.getMonth(), destDate.getDate());
-        const dayDiff = (destDay - baseDay) / (24 * 60 * 60 * 1000);
-
-        if (dayDiff > 0) {
-          dateClass = 'tz-date-ahead';
-          dateLabel = `+${Math.round(dayDiff)} ngày`;
-        } else if (dayDiff < 0) {
-          dateClass = 'tz-date-behind';
-          dateLabel = `${Math.round(dayDiff)} ngày`;
-        }
-
-        const zoneCard = document.createElement('div');
-        zoneCard.className = 'tz-card';
-        zoneCard.innerHTML = `
-          <div class="tz-card-info">
-            <div class="tz-card-name">${zone.name}</div>
-            <div class="tz-card-desc">${zone.desc}</div>
-          </div>
-          <div class="tz-card-time-wrap">
-            <div class="tz-card-time">${timeStr}</div>
-            <div class="tz-card-date-lbl ${dateClass}">${dateLabel} (${dateStr})</div>
-          </div>
-        `;
-        tzListWrap.appendChild(zoneCard);
-      });
-    }
-
-    tzBaseInput.onchange = updateTimezones;
-    tzBaseInput.oninput = updateTimezones;
-
-    tzNowBtn.onclick = () => {
-      const cur = new Date();
-      tzBaseInput.value = `${cur.getFullYear()}-${pad(cur.getMonth() + 1)}-${cur.getDate()}T${pad(cur.getHours())}:${pad(cur.getMinutes())}`;
-      updateTimezones();
-    };
-
-    updateTimezones();
+  function updateTimezones() {
+    const baseVal = tzBaseInput.value;
+    if (!baseVal) { tzListWrap.innerHTML = '<div class="tz-error">\u26a0\ufe0f Vui l\u00f2ng ch\u1ecdn m\u1ed9c th\u1eddi gian g\u1ed1c.</div>'; return; }
+    const baseDate = new Date(baseVal);
+    const systemOffsetHrs = -baseDate.getTimezoneOffset() / 60;
+    tzListWrap.innerHTML = '';
+    targetZones.forEach(zone => {
+      const diffHrs = zone.offset - systemOffsetHrs;
+      const destDate = new Date(baseDate.getTime() + diffHrs * 3600000);
+      const timeStr = destDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+      const dateStr = destDate.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      const baseDay = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate());
+      const destDay = new Date(destDate.getFullYear(), destDate.getMonth(), destDate.getDate());
+      const dayDiff = Math.round((destDay - baseDay) / 86400000);
+      const dateClass = dayDiff > 0 ? 'tz-date-ahead' : dayDiff < 0 ? 'tz-date-behind' : 'tz-date-same';
+      const dateLabel = dayDiff > 0 ? `+${dayDiff} ng\u00e0y` : dayDiff < 0 ? `${dayDiff} ng\u00e0y` : 'C\u00f9ng ng\u00e0y';
+      const card = document.createElement('div');
+      card.className = 'tz-card';
+      card.innerHTML = `
+        <div class="tz-card-info">
+          <div class="tz-card-name">${zone.name}</div>
+          <div class="tz-card-desc">${zone.desc}</div>
+        </div>
+        <div class="tz-card-time-wrap">
+          <div class="tz-card-time">${timeStr}</div>
+          <div class="tz-card-date-lbl ${dateClass}">${dateLabel} (${dateStr})</div>
+        </div>
+      `;
+      tzListWrap.appendChild(card);
+    });
   }
 
-  // ════════════════════════════════════════════════════════════
-  // 9. BMI CALCULATOR LOGIC
-  // ════════════════════════════════════════════════════════════
+  tzBaseInput.oninput = updateTimezones;
+  tzBaseInput.onchange = updateTimezones;
+  tzNowBtn.onclick = () => {
+    const cur = new Date();
+    tzBaseInput.value = `${cur.getFullYear()}-${pad(cur.getMonth() + 1)}-${pad(cur.getDate())}T${pad(cur.getHours())}:${pad(cur.getMinutes())}`;
+    updateTimezones();
+  };
+  updateTimezones();
+}
+
+// ════════════════════════════════════════════════════════════
+// STANDALONE: BMI CALCULATOR (used in its own sidebar section)
+// ════════════════════════════════════════════════════════════
+export function renderBMICalculator(containerId = 'bmiContent') {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="bmi-container">
+      <div class="bmi-card">
+        <h3 style="margin:0;font-size:16px;color:var(--text-primary)">\ud83d\udcca Nh\u1eadp Ch\u1ec9 S\u1ed1 C\u01a1 Th\u1ec3</h3>
+        <div class="conv-field">
+          <label class="conv-label">Gi\u1edbi t\u00ednh</label>
+          <div class="bmi-gender-toggle">
+            <button class="bmi-gender-btn active" id="bmi-gen-male">\ud83d\ude4b\u200d\u2642\ufe0f Nam</button>
+            <button class="bmi-gender-btn" id="bmi-gen-female">\ud83d\ude4b\u200d\u2640\ufe0f N\u1eef</button>
+          </div>
+        </div>
+        <div class="conv-field">
+          <label class="conv-label">Chi\u1ec1u cao (cm)</label>
+          <input type="number" class="conv-input" id="bmi-height" placeholder="V\u00ed d\u1ee5: 170" min="50" max="300" />
+        </div>
+        <div class="conv-field">
+          <label class="conv-label">C\u00e2n n\u1eb7ng (kg)</label>
+          <input type="number" class="conv-input" id="bmi-weight" placeholder="V\u00ed d\u1ee5: 65" min="10" max="500" />
+        </div>
+      </div>
+      <div class="bmi-card" style="align-items:center;justify-content:center;">
+        <div class="bmi-results-wrap" id="bmi-results-placeholder">
+          <span style="font-size:40px">\u2696\ufe0f</span>
+          <p style="color:var(--text-muted);font-size:14px;margin:0;text-align:center">Vui l\u00f2ng nh\u1eadp chi\u1ec1u cao v\u00e0 c\u00e2n n\u1eb7ng \u0111\u1ec3 xem k\u1ebft qu\u1ea3 BMI.</p>
+        </div>
+        <div class="bmi-results-wrap" id="bmi-results-data" style="display:none;width:100%">
+          <div class="bmi-circle-container">
+            <div class="bmi-circle" id="bmi-circle-glow">
+              <span class="bmi-circle-val" id="bmi-val-text">--</span>
+              <span class="bmi-circle-lbl">Ch\u1ec9 s\u1ed1 BMI</span>
+            </div>
+          </div>
+          <div class="bmi-status-text" id="bmi-status-lbl"></div>
+          <div class="bmi-ideal-text" id="bmi-ideal-lbl"></div>
+          <div style="width:100%;margin-top:10px">
+            <div class="bmi-scale-bar">
+              <div class="bmi-scale-indicator" id="bmi-indicator" style="left:50%"></div>
+            </div>
+            <div class="bmi-bracket-labels" style="margin-top:8px">
+              <span>G\u1ea7y</span><span>Th\u01b0\u1eddng</span><span>Th\u1eeba c\u00e2n</span><span>B\u00e9o ph\u00ec</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="conv-tip" style="margin-top:16px">
+      \ud83d\udca1 Ch\u1ec9 s\u1ed1 BMI \u00e1p d\u1ee5ng theo chu\u1ea9n WHO Western Pacific Region d\u00e0nh cho ng\u01b0\u1eddi Ch\u00e2u \u00c1.
+    </div>
+  `;
+
   const bmiHeight = document.getElementById('bmi-height');
   const bmiWeight = document.getElementById('bmi-weight');
   const bmiMaleBtn = document.getElementById('bmi-gen-male');
   const bmiFemaleBtn = document.getElementById('bmi-gen-female');
-  
   const bmiPlaceholder = document.getElementById('bmi-results-placeholder');
   const bmiResultsData = document.getElementById('bmi-results-data');
   const bmiValText = document.getElementById('bmi-val-text');
@@ -762,107 +738,43 @@ function setupConverter() {
   const bmiIdealLbl = document.getElementById('bmi-ideal-lbl');
   const bmiIndicator = document.getElementById('bmi-indicator');
   const bmiCircleGlow = document.getElementById('bmi-circle-glow');
-
   let currentGender = 'male';
 
-  if (bmiHeight && bmiWeight && bmiMaleBtn && bmiFemaleBtn) {
-    bmiMaleBtn.onclick = () => {
-      currentGender = 'male';
-      bmiMaleBtn.classList.add('active');
-      bmiFemaleBtn.classList.remove('active');
-      calculateBMI();
-    };
+  bmiMaleBtn.onclick = () => { currentGender = 'male'; bmiMaleBtn.classList.add('active'); bmiFemaleBtn.classList.remove('active'); calc(); };
+  bmiFemaleBtn.onclick = () => { currentGender = 'female'; bmiFemaleBtn.classList.add('active'); bmiMaleBtn.classList.remove('active'); calc(); };
+  bmiHeight.oninput = calc;
+  bmiWeight.oninput = calc;
 
-    bmiFemaleBtn.onclick = () => {
-      currentGender = 'female';
-      bmiFemaleBtn.classList.add('active');
-      bmiMaleBtn.classList.remove('active');
-      calculateBMI();
-    };
-
-    bmiHeight.oninput = calculateBMI;
-    bmiWeight.oninput = calculateBMI;
-
-    function calculateBMI() {
-      const heightCm = parseFloat(bmiHeight.value);
-      const weightKg = parseFloat(bmiWeight.value);
-
-      if (isNaN(heightCm) || isNaN(weightKg) || heightCm <= 0 || weightKg <= 0) {
-        bmiPlaceholder.style.display = 'flex';
-        bmiResultsData.style.display = 'none';
-        return;
-      }
-
-      bmiPlaceholder.style.display = 'none';
-      bmiResultsData.style.display = 'flex';
-
-      const heightM = heightCm / 100;
-      const bmi = weightKg / (heightM * heightM);
-      bmiValText.textContent = bmi.toFixed(1);
-
-      // BMI Categories (WHO Asian standard):
-      // < 18.5: Gầy (Underweight)
-      // 18.5 - 22.9: Bình thường (Normal)
-      // 23.0 - 24.9: Tiền béo phì (Overweight / Pre-obese)
-      // 25.0 - 29.9: Béo phì độ 1 (Obese class I)
-      // >= 30.0: Béo phì độ 2 (Obese class II)
-
-      let status = '';
-      let color = '';
-      let pct = 0; // percentage position on scale bar
-
-      if (bmi < 18.5) {
-        status = 'Thiếu cân (Gầy) 🔵';
-        color = '#60a5fa'; // Blue
-        // Scale 0% to 25% for < 18.5. (e.g. 10 to 18.5 maps to 0% to 25%)
-        pct = Math.max(5, Math.min(24, ((bmi - 10) / 8.5) * 20 + 5));
-      } else if (bmi < 23.0) {
-        status = 'Bình thường (Cân đối) 🟢';
-        color = '#34d399'; // Green
-        // Scale 25% to 55% for 18.5 to 22.9.
-        pct = ((bmi - 18.5) / 4.4) * 30 + 25;
-      } else if (bmi < 25.0) {
-        status = 'Thừa cân (Tiền béo phì) 🟡';
-        color = '#fbbf24'; // Yellow
-        // Scale 55% to 70% for 23.0 to 24.9.
-        pct = ((bmi - 23.0) / 1.9) * 15 + 55;
-      } else if (bmi < 30.0) {
-        status = 'Béo phì độ I 🟠';
-        color = '#f97316'; // Orange
-        // Scale 70% to 85% for 25.0 to 29.9.
-        pct = ((bmi - 25.0) / 4.9) * 15 + 70;
-      } else {
-        status = 'Béo phì độ II 🔴';
-        color = '#ef4444'; // Red
-        // Scale 85% to 95% for >= 30.
-        pct = Math.min(95, ((bmi - 30.0) / 10) * 10 + 85);
-      }
-
-      // Update UI styles
-      bmiStatusLbl.textContent = status;
-      bmiStatusLbl.style.color = color;
-      bmiCircleGlow.style.borderColor = color;
-      bmiCircleGlow.style.boxShadow = `0 0 15px ${color}`;
-      bmiIndicator.style.left = `${pct}%`;
-
-      // Calculate ideal weight (WHO Normal BMI range: 18.5 to 22.9 for Asian)
-      const minIdeal = 18.5 * (heightM * heightM);
-      const maxIdeal = 22.9 * (heightM * heightM);
-      
-      let idealText = `Cân nặng lý tưởng của bạn: <strong>${minIdeal.toFixed(1)} - ${maxIdeal.toFixed(1)} kg</strong>.`;
-      
-      // Add health tip
-      if (bmi >= 23) {
-        const excess = weightKg - maxIdeal;
-        idealText += `<br><span style="font-size:11px;color:var(--text-muted);">Bạn nên giảm khoảng <strong>${excess.toFixed(1)} kg</strong> để đạt vóc dáng cân đối.</span>`;
-      } else if (bmi < 18.5) {
-        const deficit = minIdeal - weightKg;
-        idealText += `<br><span style="font-size:11px;color:var(--text-muted);">Bạn nên tăng khoảng <strong>${deficit.toFixed(1)} kg</strong> để đạt vóc dáng cân đối.</span>`;
-      } else {
-        idealText += `<br><span style="font-size:11px;color:var(--accent-green);">Tuyệt vời, hãy tiếp tục duy trì cân nặng này!</span>`;
-      }
-      
-      bmiIdealLbl.innerHTML = idealText;
+  function calc() {
+    const h = parseFloat(bmiHeight.value);
+    const w = parseFloat(bmiWeight.value);
+    if (isNaN(h) || isNaN(w) || h <= 0 || w <= 0) {
+      bmiPlaceholder.style.display = 'flex';
+      bmiResultsData.style.display = 'none';
+      return;
     }
+    bmiPlaceholder.style.display = 'none';
+    bmiResultsData.style.display = 'flex';
+    const hm = h / 100;
+    const bmi = w / (hm * hm);
+    bmiValText.textContent = bmi.toFixed(1);
+    let status, color, pct;
+    if (bmi < 18.5)       { status = 'Thi\u1ebfu c\u00e2n (G\u1ea7y) \ud83d\udd35'; color = '#60a5fa'; pct = Math.max(5, Math.min(24, ((bmi-10)/8.5)*20+5)); }
+    else if (bmi < 23.0)  { status = 'B\u00ecnh th\u01b0\u1eddng (C\u00e2n \u0111\u1ed1i) \ud83d\udfe2'; color = '#34d399'; pct = ((bmi-18.5)/4.4)*30+25; }
+    else if (bmi < 25.0)  { status = 'Th\u1eeba c\u00e2n (Ti\u1ec1n b\u00e9o ph\u00ec) \ud83d\udfe1'; color = '#fbbf24'; pct = ((bmi-23.0)/1.9)*15+55; }
+    else if (bmi < 30.0)  { status = 'B\u00e9o ph\u00ec \u0111\u1ed9 I \ud83d�'; color = '#f97316'; pct = ((bmi-25.0)/4.9)*15+70; }
+    else                  { status = 'B\u00e9o ph\u00ec \u0111\u1ed9 II \ud83d\udd34'; color = '#ef4444'; pct = Math.min(95, ((bmi-30.0)/10)*10+85); }
+    bmiStatusLbl.textContent = status;
+    bmiStatusLbl.style.color = color;
+    bmiCircleGlow.style.borderColor = color;
+    bmiCircleGlow.style.boxShadow = `0 0 15px ${color}`;
+    bmiIndicator.style.left = `${pct}%`;
+    const minI = (18.5 * hm * hm).toFixed(1);
+    const maxI = (22.9 * hm * hm).toFixed(1);
+    let tip = `C\u00e2n n\u1eb7ng l\u00fd t\u01b0\u1edfng: <strong>${minI} \u2013 ${maxI} kg</strong>.`;
+    if (bmi >= 23)       tip += `<br><span style="font-size:11px;color:var(--text-muted)">N\u00ean gi\u1ea3m kho\u1ea3ng <strong>${(w - parseFloat(maxI)).toFixed(1)} kg</strong>.</span>`;
+    else if (bmi < 18.5) tip += `<br><span style="font-size:11px;color:var(--text-muted)">N\u00ean t\u0103ng kho\u1ea3ng <strong>${(parseFloat(minI) - w).toFixed(1)} kg</strong>.</span>`;
+    else                 tip += `<br><span style="font-size:11px;color:var(--accent-green)">Tuy\u1ec7t v\u1eddi, duy tr\u00ec c\u00e2n n\u1eb7ng n\u00e0y!</span>`;
+    bmiIdealLbl.innerHTML = tip;
   }
 }

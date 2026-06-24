@@ -2,6 +2,7 @@
  * components/world-clock.js
  * World clock với 100+ múi giờ, dropdown tùy chọn, hiển thị UTC offset
  */
+import { renderTimezoneConverter } from './converter.js';
 
 // ── Full timezone database ──────────────────────────────────────────
 const ALL_TIMEZONES = [
@@ -198,7 +199,12 @@ export function renderWorldClock(containerId = 'worldClockContent') {
         </div>
         <div class="cd-done" id="cdDone" style="display:none;">🎉 Xong rồi!</div>
       </div>
-    </div>`;
+    </div>
+
+    <!-- Timezone Converter -->
+    <div class="wc-section-label" style="margin-top:24px;">🕐 Quy Đổi Múi Giờ</div>
+    <div id="tzConverterContent"></div>`;
+
 
   // Add dropdown event
   document.getElementById('wcAddDropdown')?.addEventListener('change', (e) => {
@@ -221,6 +227,7 @@ export function renderWorldClock(containerId = 'worldClockContent') {
   startWorldClock();
   setupStopwatch();
   setupCountdown();
+  renderTimezoneConverter('tzConverterContent');
 }
 
 function getZoneInfo(zone) {
