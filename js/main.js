@@ -40,7 +40,7 @@ import { renderFileTools, renderAudioTools } from './components/file-tools.js';
 import { renderFinance, switchFinanceTab } from './components/finance.js';
 import { renderFocus } from './components/focus.js';
 import { renderQRCodeSuite } from './components/qrcode.js';
-import { renderEmulatorSuite } from './components/emulator.js?v=1.0.9';
+import { renderEmulatorSuite } from './components/emulator.js?v=1.1.0';
 
 // ── Render Components ──
 import { initAIAssistant }     from './components/ai-assistant.js?v=1.0.4';

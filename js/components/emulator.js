@@ -17,20 +17,12 @@ function getSvgThumbnail(emoji) {
 
 const HOMEBREW_GAMES = [
   {
-    id: 'flappy_bird',
-    name: '🐦 Flappy Bird NES',
-    desc: 'Bản clone Flappy Bird cực nhẹ cho hệ máy điện tử 4 nút.',
-    url: 'https://raw.githubusercontent.com/retrobrews/nes-games/master/flappybird.nes',
-    thumbnail: getSvgThumbnail('🐦'),
-    instructions: 'Bấm nút START (Enter) để bắt đầu. Nhấn nút A (phím Z) để bay lên né cống.'
-  },
-  {
     id: 'invaders',
     name: '🛸 Invaders Must Die',
     desc: 'Trận chiến bắn phi thuyền bảo vệ Trái Đất phong cách Space Invaders.',
     url: 'https://raw.githubusercontent.com/retrobrews/nes-games/master/invaders.nes',
     thumbnail: getSvgThumbnail('🛸'),
-    instructions: 'Bấm nút START (Enter) để bắt đầu. Dùng Trái/Phải để di chuyển, nút A (phím Z) để bắn quái vật.'
+    instructions: 'Bấm nút START (Enter) để bắt đầu. Dùng Trái/Phải để di chuyển, nút A (phím X / Space) để bắn phi thuyền.'
   },
   {
     id: 'lala',
@@ -38,7 +30,7 @@ const HOMEBREW_GAMES = [
     desc: 'Game phiêu lưu cảnh nền đi tìm đá năng lượng của Mojon Twins.',
     url: 'https://raw.githubusercontent.com/retrobrews/nes-games/master/lala.nes',
     thumbnail: getSvgThumbnail('🧚'),
-    instructions: 'Bấm nút START (Enter) để vào game. Trái/Phải để chạy, nút A (Z) để nhảy, nút B (X) để lấy đá.'
+    instructions: 'Bấm nút START (Enter) để vào game. Trái/Phải để chạy, nút A (X / Space) để nhảy, nút B (Z) để lấy đá.'
   },
   {
     id: 'driar',
@@ -46,7 +38,7 @@ const HOMEBREW_GAMES = [
     desc: 'Tựa game đi cảnh 38 màn chơi thu thập sao cực kỳ hấp dẫn và thử thách.',
     url: 'https://raw.githubusercontent.com/retrobrews/nes-games/master/driar.nes',
     thumbnail: getSvgThumbnail('🏃'),
-    instructions: 'Bấm nút START (Enter) để bắt đầu. Trái/Phải để di chuyển, nút A (Z) để nhảy qua chướng ngại vật.'
+    instructions: 'Bấm nút START (Enter) để bắt đầu. Trái/Phải để di chuyển, nút A (X / Space) để nhảy qua chướng ngại vật.'
   },
   {
     id: 'supertilt',
@@ -54,7 +46,7 @@ const HOMEBREW_GAMES = [
     desc: 'Bản demake đấu võ đài kiểu Smash Bros có thể chơi hai người cạnh tranh.',
     url: 'https://raw.githubusercontent.com/retrobrews/nes-games/master/super-tilt-bro.nes',
     thumbnail: getSvgThumbnail('🥊'),
-    instructions: 'Bấm nút START (Enter) để vào game. Trái/Phải để di chuyển, nút A (Z) để tấn công, nút B (X) để nhảy.'
+    instructions: 'Bấm nút START (Enter) để vào game. Trái/Phải để di chuyển, nút A (X / Space) để tấn công, nút B (Z) để nhảy.'
   },
   {
     id: 'snailmaze',
