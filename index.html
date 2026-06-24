@@ -143,6 +143,11 @@
         </button>
       </div>
 
+      <!-- Account Section -->
+      <div class="sidebar-section-label" style="padding-left:20px;margin-top:6px;">👤 Tài Khoản</div>
+      <div class="sidebar-nav" id="sidebarAuthSection" style="flex: none; padding: 0 12px; margin-bottom: 10px;">
+      </div>
+
       <!-- Actions -->
       <div class="sidebar-actions">
         <button class="sidebar-refresh-btn" id="refreshBtn" onclick="refreshAll()">
@@ -380,6 +385,35 @@
       </div>
       <div class="cal-modal-body" id="calModalBody">
         <!-- Filled dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ AUTH MODAL ════════ -->
+  <div class="cal-modal-overlay" id="authModal">
+    <div class="cal-modal-content" style="max-width: 400px; background: rgba(15, 23, 42, 0.95);">
+      <div class="cal-modal-header">
+        <h3 id="authModalTitle">🔑 Đăng Nhập Tài Khoản</h3>
+        <button class="cal-modal-close" onclick="document.getElementById('authModal').classList.remove('open')">✕</button>
+      </div>
+      <div class="cal-modal-body">
+        <div class="auth-tabs" style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px;">
+          <button class="auth-tab-btn active" id="authTabLogin" onclick="window.switchAuthTab('login')" style="flex: 1; background: none; border: none; color: var(--text-primary); font-weight: 700; padding: 6px; cursor: pointer; border-radius: 6px;">Đăng nhập</button>
+          <button class="auth-tab-btn" id="authTabRegister" onclick="window.switchAuthTab('register')" style="flex: 1; background: none; border: none; color: var(--text-muted); font-weight: 500; padding: 6px; cursor: pointer; border-radius: 6px;">Đăng ký</button>
+        </div>
+
+        <form id="authForm" onsubmit="window.handleAuthSubmit(event)">
+          <div class="travel-select-wrap" style="margin-bottom: 15px;">
+            <label>Email <span class="tax-req">*</span></label>
+            <input type="email" id="authEmail" class="field-input" required placeholder="nhap@email.com" />
+          </div>
+          <div class="travel-select-wrap" style="margin-bottom: 20px;">
+            <label>Mật khẩu <span class="tax-req">*</span></label>
+            <input type="password" id="authPassword" class="field-input" required placeholder="Mật khẩu từ 6 ký tự..." minlength="6" />
+          </div>
+          <div id="authErrorMsg" style="color: #f87171; font-size: 12px; margin-bottom: 15px; display: none; background: rgba(248,113,113,0.1); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(248,113,113,0.2);"></div>
+          <button type="submit" class="btn-primary" id="authSubmitBtn" style="width: 100%; margin: 0;">Đăng Nhập</button>
+        </form>
       </div>
     </div>
   </div>

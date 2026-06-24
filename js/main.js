@@ -37,8 +37,9 @@ import { renderLookup }      from './components/lookup.js';
 import { renderDownloader }  from './components/downloader.js';
 import { renderMedia, loadMediaBackground }       from './components/media.js';
 import { renderFileTools, renderAudioTools } from './components/file-tools.js';
-import { renderFocus } from './components/focus.js';
 import { renderFinance, switchFinanceTab } from './components/finance.js';
+import { renderFocus } from './components/focus.js';
+import { initAuth } from './components/auth.js';
 
 // ── Render Components ──
 import { initAIAssistant }     from './components/ai-assistant.js?v=1.0.4';
@@ -493,6 +494,7 @@ window.switchSection = (id) => {
 // INIT
 // ════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
+  initAuth();
   renderFinance();
   _rendered.add('finance');
   renderCalendar();
