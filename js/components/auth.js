@@ -6,6 +6,26 @@
 
 let authMode = 'login'; // 'login' | 'register'
 
+// Inject blocking overlay & blur CSS
+const authStyle = document.createElement('style');
+authStyle.textContent = `
+  body.auth-required .app-shell {
+    filter: blur(15px);
+    pointer-events: none;
+    user-select: none;
+    opacity: 0.5;
+    transition: filter 0.4s ease, opacity 0.4s ease;
+  }
+  body.auth-required #tickerWrap {
+    display: none;
+  }
+  /* Prevent closing the auth modal when RLS/auth is required */
+  body.auth-required #authModal {
+    pointer-events: auto !important;
+  }
+`;
+document.head.appendChild(authStyle);
+
 export function isLoggedIn() {
   return !!localStorage.getItem('rellia_auth_token');
 }
@@ -43,6 +63,27 @@ export function initAuth() {
   window.switchAuthTab = switchAuthTab;
   window.handleAuthSubmit = handleAuthSubmit;
   window.handleLogout = handleLogout;
+
+  // Enforce authentication check immediately on page load
+  checkRequiredAuth();
+}
+
+function checkRequiredAuth() {
+  const closeBtn = document.getElementById('authModalCloseBtn');
+  const modal = document.getElementById('authModal');
+  
+  if (isLoggedIn()) {
+    document.body.classList.remove('auth-required');
+    if (closeBtn) closeBtn.style.display = 'block';
+  } else {
+    document.body.classList.add('auth-required');
+    if (closeBtn) closeBtn.style.display = 'none';
+    
+    // Automatically trigger login modal opening
+    if (modal && !modal.classList.contains('open')) {
+      openAuthModal();
+    }
+  }
 }
 
 function renderSidebarAuth() {
@@ -162,6 +203,9 @@ async function handleAuthSubmit(e) {
         document.getElementById('authModal').classList.remove('open');
         renderSidebarAuth();
 
+        // Remove blurs & check auth restriction
+        checkRequiredAuth();
+
         // Refresh Todo & Calendar components with new auth context
         triggerComponentsRefresh();
       } else {
@@ -186,6 +230,9 @@ function handleLogout() {
     // Clear local storage copies of events and todos if we want strict privacy
     localStorage.removeItem('rellia_todo_tasks');
     localStorage.removeItem('rellia_custom_events');
+
+    // Enable block blurs
+    checkRequiredAuth();
 
     triggerComponentsRefresh();
   }

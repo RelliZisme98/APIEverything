@@ -1253,6 +1253,7 @@ async function handleAuthSignup(request, env) {
       method: 'POST',
       headers: {
         'apikey': key,
+        'Authorization': `Bearer ${key}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(body)
@@ -1285,6 +1286,7 @@ async function handleAuthLogin(request, env) {
       method: 'POST',
       headers: {
         'apikey': key,
+        'Authorization': `Bearer ${key}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(body)
