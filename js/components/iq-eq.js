@@ -50,6 +50,54 @@ function showError(container, text, retryFn) {
   if (btn) btn.onclick = retryFn;
 }
 
+// Helper validation form trước khi bắt đầu test
+function validateIntroInputs(nameId, ageId, agreeId) {
+  const nameInput = document.getElementById(nameId);
+  const ageInput = document.getElementById(ageId);
+  const agreeCheck = document.getElementById(agreeId);
+
+  let isValid = true;
+
+  // Reset styles
+  if (nameInput) {
+    nameInput.style.borderColor = 'var(--border)';
+    nameInput.style.boxShadow = 'none';
+  }
+  if (ageInput) {
+    ageInput.style.borderColor = 'var(--border)';
+    ageInput.style.boxShadow = 'none';
+  }
+  if (agreeCheck) {
+    const labelRow = agreeCheck.closest('.iqeq-checkbox-row');
+    if (labelRow) labelRow.style.color = 'var(--text-secondary)';
+  }
+
+  // Validate Name
+  if (nameInput && !nameInput.value.trim()) {
+    nameInput.style.borderColor = '#ef4444';
+    nameInput.style.boxShadow = '0 0 8px rgba(239, 68, 68, 0.4)';
+    isValid = false;
+  }
+
+  // Validate Age
+  if (ageInput && !ageInput.value.trim()) {
+    ageInput.style.borderColor = '#ef4444';
+    ageInput.style.boxShadow = '0 0 8px rgba(239, 68, 68, 0.4)';
+    isValid = false;
+  }
+
+  // Validate Agreement
+  if (agreeCheck && !agreeCheck.checked) {
+    const labelRow = agreeCheck.closest('.iqeq-checkbox-row');
+    if (labelRow) {
+      labelRow.style.color = '#ef4444';
+    }
+    isValid = false;
+  }
+
+  return isValid;
+}
+
 // Thêm keyframes cho spinner nếu chưa có
 if (!document.getElementById('iqeq-keyframes')) {
   const style = document.createElement('style');
@@ -115,7 +163,7 @@ export function renderIQ(containerId = 'iqContent') {
           <div class="iqeq-checkbox-label">Tôi đã hiểu rõ và đồng ý với điều khoản miễn trừ trách nhiệm ở trên.</div>
         </label>
 
-        <button class="btn-primary" id="iq-btn-start" disabled style="width: 100%;">Bắt đầu kiểm tra IQ</button>
+        <button class="btn-primary" id="iq-btn-start" style="width: 100%;">Bắt đầu kiểm tra IQ</button>
       </div>
 
       <!-- Màn hình làm bài (Bố cục chuyên nghiệp) -->
@@ -205,11 +253,12 @@ export function renderIQ(containerId = 'iqContent') {
   const submit = document.getElementById('iq-btn-submit');
   const restart = document.getElementById('iq-btn-restart');
 
-  if (agree && start) {
-    agree.onchange = (e) => {
-      start.disabled = !e.target.checked;
+  if (start) {
+    start.onclick = () => {
+      if (validateIntroInputs('iq-user-name', 'iq-user-age', 'iq-agree')) {
+        fetchAndStartIQ(containerId);
+      }
     };
-    start.onclick = () => fetchAndStartIQ(containerId);
   }
 
   if (prev) prev.onclick = () => navigateIQ(-1);
@@ -496,7 +545,7 @@ export function renderEQ(containerId = 'eqContent') {
           <div class="iqeq-checkbox-label">Tôi đã hiểu rõ và đồng ý với điều khoản miễn trừ trách nhiệm ở trên.</div>
         </label>
 
-        <button class="btn-primary" id="eq-btn-start" disabled style="width: 100%;">Bắt đầu kiểm tra EQ</button>
+        <button class="btn-primary" id="eq-btn-start" style="width: 100%;">Bắt đầu kiểm tra EQ</button>
       </div>
 
       <!-- Màn hình làm bài -->
@@ -593,11 +642,12 @@ export function renderEQ(containerId = 'eqContent') {
   const restart = document.getElementById('eq-btn-restart');
   const likertBtns = document.querySelectorAll('.iqeq-likert-btn');
 
-  if (agree && start) {
-    agree.onchange = (e) => {
-      start.disabled = !e.target.checked;
+  if (start) {
+    start.onclick = () => {
+      if (validateIntroInputs('eq-user-name', 'eq-user-age', 'eq-agree')) {
+        fetchAndStartEQ(containerId);
+      }
     };
-    start.onclick = () => fetchAndStartEQ(containerId);
   }
 
   if (restart) restart.onclick = () => renderEQ(containerId);
