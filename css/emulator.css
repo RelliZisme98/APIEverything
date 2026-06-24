@@ -611,3 +611,32 @@
   box-shadow: 0 6px 14px rgba(5, 150, 105, 0.4);
 }
 
+/* ── Mobile Layout & Optimization Media Queries ── */
+@media (max-width: 768px) {
+  .emu-screen-hud {
+    opacity: 0.85; /* Highly visible by default on mobile touchscreens */
+  }
+}
+
+@media (max-width: 480px) {
+  .emu-gamepad {
+    padding: 16px 12px;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: space-around;
+  }
+  .emu-gamepad-center {
+    order: 3; /* Move Select/Start to the bottom row for gameboy controller ergonomics */
+    width: 100%;
+    justify-content: center;
+    margin-top: 10px;
+  }
+  .emu-keyboard-help {
+    display: none; /* Hide keyboard shortcut help box on mobile devices */
+  }
+  .emu-prompt-inner {
+    max-width: 90%;
+  }
+}
+
+
