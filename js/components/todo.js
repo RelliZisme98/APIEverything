@@ -226,7 +226,10 @@ async function initProxyTodos() {
       saveTasksLocally();
       populateCategoryDropdown(document.getElementById('todoCategorySelect')?.value || 'work');
       renderTaskView();
-    } else throw new Error(`Status ${res.status}`);
+    } else {
+      const text = await res.text();
+      throw new Error(`Status ${res.status} - ${text}`);
+    }
   } catch (err) {
     console.warn('[Todo] Server unavailable, using local cache:', err.message);
     hasDbConnection = false;
@@ -547,7 +550,7 @@ function addNewTodo() {
 async function uploadTaskToProxy(task) {
   if (!hasDbConnection) return;
   try {
-    await fetch('/api/todos', {
+    const res = await fetch('/api/todos', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -557,14 +560,26 @@ async function uploadTaskToProxy(task) {
         created_at: task.createdAt
       })
     });
-  } catch (err) { console.warn('[Upload Task Failed]', err); }
+    if (!res.ok) {
+      const text = await res.text();
+      console.error('[Upload Todo Failed Server Error]', res.status, text);
+    }
+  } catch (err) {
+    console.warn('[Upload Todo Failed Network Error]', err);
+  }
 }
 
 async function deleteTaskFromProxy(taskId) {
   if (!hasDbConnection) return;
   try {
-    await fetch(`/api/todos?id=${encodeURIComponent(taskId)}`, { method: 'DELETE' });
-  } catch (err) { console.warn('[Delete Task Failed]', err); }
+    const res = await fetch(`/api/todos?id=${encodeURIComponent(taskId)}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const text = await res.text();
+      console.error('[Delete Todo Failed Server Error]', res.status, text);
+    }
+  } catch (err) {
+    console.warn('[Delete Todo Failed Network Error]', err);
+  }
 }
 
 // ── Global handlers ──

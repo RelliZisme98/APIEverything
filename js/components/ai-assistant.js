@@ -9,12 +9,42 @@ import { solarToLunar, canChiYear } from '../utils/lunar-calendar.js';
 
 let isChatOpen = false;
 let chatHistory = []; // Keep track of conversation history
+let isMuted = localStorage.getItem('ai_muted') === 'true';
+
+let voices = [];
+let currentAudio = null;
+let audioQueue = [];
+let currentQueueIndex = 0;
+
+function stopAudio() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
+  audioQueue = [];
+  currentQueueIndex = 0;
+  if (window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+  }
+}
+
+function loadVoices() {
+  if (typeof window !== 'undefined' && window.speechSynthesis) {
+    voices = window.speechSynthesis.getVoices();
+  }
+}
+if (typeof window !== 'undefined' && window.speechSynthesis) {
+  loadVoices();
+  if (window.speechSynthesis.onvoiceschanged !== undefined) {
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }
+}
 
 export function initAIAssistant() {
   // 1. Inject stylesheet dynamically
   const link = document.createElement('link');
   link.rel = 'stylesheet';
-  link.href = 'css/ai-assistant.css?v=1.0.1';
+  link.href = 'css/ai-assistant.css?v=1.0.4';
   document.head.appendChild(link);
 
   // 2. Create Chat elements
@@ -45,7 +75,10 @@ export function initAIAssistant() {
           <div class="ai-status-dot"></div>
           <strong>🤖 Robot Trợ Lý AI</strong>
         </div>
-        <button type="button" id="aiChatClose" class="ai-chat-close">✕</button>
+        <div class="ai-chatbox-actions">
+          <button type="button" id="aiMuteBtn" class="ai-mute-btn" title="Bật/Tắt giọng nói Robot">${isMuted ? '🔇' : '🔊'}</button>
+          <button type="button" id="aiChatClose" class="ai-chat-close">✕</button>
+        </div>
       </div>
       
       <div id="aiChatBody" class="ai-chatbox-body">
@@ -70,12 +103,22 @@ export function initAIAssistant() {
   // 3. Register Event Listeners
   const bubble = document.getElementById('aiBubble');
   const closeBtn = document.getElementById('aiChatClose');
+  const muteBtn = document.getElementById('aiMuteBtn');
   const sendBtn = document.getElementById('aiSendBtn');
   const micBtn = document.getElementById('aiMicBtn');
   const input = document.getElementById('aiInput');
 
   bubble.addEventListener('click', (e) => { e.preventDefault(); toggleChat(); });
   closeBtn.addEventListener('click', (e) => { e.preventDefault(); toggleChat(false); });
+  muteBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    isMuted = !isMuted;
+    localStorage.setItem('ai_muted', isMuted);
+    muteBtn.innerHTML = isMuted ? '🔇' : '🔊';
+    if (isMuted) {
+      stopAudio();
+    }
+  });
   
   // Register click & pointerdown to bypass mouse/touch event interception on PCs
   const onSendTrigger = (e) => {
@@ -105,6 +148,7 @@ export function initAIAssistant() {
     recognition.maxAlternatives = 1;
 
     recognition.onstart = () => {
+      stopAudio();
       micBtn.classList.add('recording');
       input.placeholder = 'Đang lắng nghe...';
     };
@@ -161,11 +205,13 @@ function toggleChat(forceState) {
   } else {
     chatBox.classList.remove('open');
     bubble.classList.remove('active');
+    stopAudio();
   }
 }
 
 let isSending = false;
 async function handleSend(e) {
+  stopAudio();
   if (e) {
     if (typeof e.preventDefault === 'function') e.preventDefault();
     if (typeof e.stopPropagation === 'function') e.stopPropagation();
@@ -259,6 +305,7 @@ async function handleSend(e) {
 
     const data = await res.json();
     appendMessage(data.response, 'assistant');
+    speakText(data.response);
 
     // Update history
     chatHistory.push({ role: 'user', content: text });
@@ -276,6 +323,128 @@ async function handleSend(e) {
   }
 }
 window.handleSend = handleSend;
+
+function speakText(text) {
+  if (isMuted) return;
+
+  stopAudio();
+
+  // Clean markdown syntax and emojis to ensure smooth speech synthesis
+  let cleanText = text
+    .replace(/\*\*([\s\S]*?)\*\*/g, '$1') // remove bold asterisks
+    .replace(/[-*#`_]/g, ' ')               // remove bullet dashes, headers, inline code, underscores
+    .replace(/[🤖🌤️🌦️⛈️☀️❄️💨🌫️🎈📉📈⚽🎟️🇻🇳🏆⭐⚠️🔴😊😂🤣😍👍👋]/gu, '') // remove common emojis
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (!cleanText) return;
+
+  // Split into manageable chunks for Google Translate API limits (~200 chars)
+  const chunks = splitTextIntoChunks(cleanText, 180);
+  playAudioChunks(chunks, cleanText);
+}
+
+function splitTextIntoChunks(text, maxLength) {
+  const chunks = [];
+  let currentChunk = '';
+  
+  // Split by words to avoid cutting words in half
+  const words = text.split(' ');
+  for (const word of words) {
+    if ((currentChunk + ' ' + word).length > maxLength) {
+      if (currentChunk) chunks.push(currentChunk.trim());
+      currentChunk = word;
+    } else {
+      currentChunk = currentChunk ? currentChunk + ' ' + word : word;
+    }
+  }
+  if (currentChunk) {
+    chunks.push(currentChunk.trim());
+  }
+  return chunks;
+}
+
+function playAudioChunks(chunks, fullText) {
+  audioQueue = chunks;
+  currentQueueIndex = 0;
+  
+  // If no chunks, fallback
+  if (chunks.length === 0) {
+     speakTextNative(fullText);
+     return;
+  }
+  playNextChunk(fullText);
+}
+
+function playNextChunk(fullText) {
+  if (isMuted) return;
+  if (currentQueueIndex >= audioQueue.length) {
+    currentAudio = null;
+    return;
+  }
+
+  const textToPlay = audioQueue[currentQueueIndex];
+
+  // ╔═ CORE FIX: Route through /api/tts Cloudflare Worker proxy ═╗
+  // The Worker fetches Google Translate TTS server-side (no CORS),
+  // then streams back a real Vietnamese MP3 to the browser.
+  // This guarantees a natural Vietnamese voice on every device/OS.
+  const url = `/api/tts?text=${encodeURIComponent(textToPlay)}`;
+
+  currentAudio = new Audio(url);
+  currentAudio.onended = () => {
+    currentQueueIndex++;
+    playNextChunk(fullText);
+  };
+  currentAudio.onerror = (e) => {
+    console.warn('[AI TTS] Proxy error, falling back to native TTS.', e);
+    stopAudio();
+    speakTextNative(fullText);
+  };
+  currentAudio.play().catch(err => {
+    console.warn('[AI TTS] play() blocked (autoplay policy), falling back to native TTS.', err);
+    stopAudio();
+    speakTextNative(fullText);
+  });
+}
+
+function speakTextNative(cleanText) {
+  if (isMuted) return;
+  if (!window.speechSynthesis) return;
+
+  const utterance = new SpeechSynthesisUtterance(cleanText);
+  utterance.lang = 'vi-VN';
+
+  // Load voices if not cached yet
+  if (!voices || voices.length === 0) {
+    loadVoices();
+  }
+
+  // Find a Vietnamese voice: starts with 'vi' (e.g. vi-VN, vi)
+  let viVoice = voices.find(voice => {
+    const l = voice.lang.toLowerCase();
+    return l.startsWith('vi-') || l === 'vi';
+  });
+
+  // Fallback search: name contains "vietnamese" or "việt"
+  if (!viVoice) {
+    viVoice = voices.find(voice => {
+      const n = voice.name.toLowerCase();
+      return n.includes('vietnamese') || n.includes('việt');
+    });
+  }
+
+  if (viVoice) {
+    utterance.voice = viVoice;
+    utterance.lang = viVoice.lang;
+  }
+
+  // Optimize speech speed/pitch for natural communication
+  utterance.rate = 1.05; 
+  utterance.pitch = 1.0;
+
+  window.speechSynthesis.speak(utterance);
+}
 
 function formatMarkdown(text) {
   if (!text) return '';

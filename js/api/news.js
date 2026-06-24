@@ -1,10 +1,7 @@
 /**
  * api/news.js — RSS feed reader via Cloudflare Function proxy
- * Proxy at: everything.rellia.org/news-rss  (deployed with the site)
  */
 import APP_CONFIG from '../../config.js';
-
-const PROXY = (APP_CONFIG.TRAFFIC_PROXY_URL || 'https://everything.rellia.org');
 
 export const FEEDS = {
   vnexpress: {
@@ -25,11 +22,43 @@ export const FEEDS = {
     color: '#f59e0b',
     logo: '🟡',
   },
+  genk: {
+    label: 'GenK',
+    url: 'https://genk.vn/rss/home.rss',
+    color: '#10b981',
+    logo: '💻',
+  },
+  thanhnien: {
+    label: 'Thanh Niên',
+    url: 'https://thanhnien.vn/rss/home.rss',
+    color: '#2563eb',
+    logo: '📰',
+  },
+  vietnamnet: {
+    label: 'VietnamNet',
+    url: 'https://vietnamnet.vn/rss/thoi-su.rss',
+    color: '#059669',
+    logo: '🌐',
+  },
+  vtv: {
+    label: 'VTV News',
+    url: 'https://vtv.vn/rss/home.rss',
+    color: '#dc2626',
+    logo: '📺',
+  },
+  tinhte: {
+    label: 'Tinh Tế',
+    url: 'https://tinhte.vn/rss',
+    color: '#06b6d4',
+    logo: '💡',
+  },
+  kenh14: {
+    label: 'Kênh 14',
+    url: 'https://kenh14.vn/rss/home.rss',
+    color: '#db2777',
+    logo: '🌸',
+  },
 };
-
-function stripHTML(str) {
-  return str.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 200);
-}
 
 export function relativeTime(dateStr) {
   if (!dateStr) return '';
@@ -40,41 +69,29 @@ export function relativeTime(dateStr) {
   return `${Math.floor(diff / 86400)} ngày trước`;
 }
 
-/** Fetch RSS via Cloudflare proxy (deployed alongside the site) */
+/** Fetch RSS via Cloudflare proxy */
 export async function fetchNews(sourceKey = 'vnexpress', limit = 12) {
   const feed = FEEDS[sourceKey];
   if (!feed) return [];
 
   try {
     const res = await fetch(
-      `${PROXY}/news-rss?url=${encodeURIComponent(feed.url)}`,
+      `/api/news?source=${encodeURIComponent(sourceKey)}`,
       { signal: AbortSignal.timeout(10000) }
     );
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const xml = await res.text();
-    if (!xml.includes('<item')) throw new Error('Invalid RSS');
+    const items = await res.json();
 
-    const parser = new DOMParser();
-    const doc    = parser.parseFromString(xml, 'text/xml');
-    const items  = Array.from(doc.querySelectorAll('item')).slice(0, limit);
-
-    return items.map(item => {
-      // Try to extract image from enclosure or media:content
-      const enclosure = item.querySelector('enclosure');
-      const media     = item.getElementsByTagNameNS('http://search.yahoo.com/mrss/', 'content')[0];
-      const img       = enclosure?.getAttribute('url') || media?.getAttribute('url') || '';
-
-      return {
-        title:   item.querySelector('title')?.textContent?.trim()       ?? '',
-        link:    item.querySelector('link')?.textContent?.trim()         ?? '#',
-        pubDate: item.querySelector('pubDate')?.textContent?.trim()      ?? '',
-        desc:    stripHTML(item.querySelector('description')?.textContent ?? ''),
-        img,
-        source:  feed.label,
-        color:   feed.color,
-        logo:    feed.logo,
-      };
-    });
+    return items.slice(0, limit).map(item => ({
+      title:   item.title || '',
+      link:    item.link || '#',
+      pubDate: item.pubDate || '',
+      desc:    item.description || '',
+      img:     item.image || '',
+      source:  feed.label,
+      color:   feed.color,
+      logo:    feed.logo,
+    }));
   } catch (err) {
     console.warn('[News]', sourceKey, err.message);
     return [];
@@ -85,7 +102,7 @@ export async function fetchNews(sourceKey = 'vnexpress', limit = 12) {
 export async function fetchArticle(articleUrl) {
   try {
     const res = await fetch(
-      `${PROXY}/news-article?url=${encodeURIComponent(articleUrl)}`,
+      `/news-article?url=${encodeURIComponent(articleUrl)}`,
       { signal: AbortSignal.timeout(12000) }
     );
     if (!res.ok) throw new Error(`HTTP ${res.status}`);

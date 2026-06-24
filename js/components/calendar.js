@@ -21,11 +21,19 @@ import { renderHolidays } from './holidays.js';
 let displayYear  = new Date().getFullYear();
 let displayMonth = new Date().getMonth() + 1;
 
+let hasDbConnection = false;
+let dbInitialized = false;
+
 /**
  * Render the entire calendar card.
  * @param {string} containerId
  */
 export function renderCalendar(containerId = 'calendarContent') {
+  if (!dbInitialized) {
+    dbInitialized = true;
+    initProxyEvents();
+  }
+
   const el = document.getElementById(containerId);
   if (!el) return;
 
@@ -127,6 +135,10 @@ export function renderCalendar(containerId = 'calendarContent') {
   window._calClickDay = openDayDetailModal;
   window._calSaveEvent = saveCustomEvent;
   window._calDeleteEvent = deleteCustomEvent;
+  window._calOpenAddEventModal = openAddEventModal;
+  window._calSaveNewEvent = saveNewEvent;
+  window._calEditCustomEvent = editCustomEvent;
+  window._calUpdateCustomEvent = updateCustomEvent;
 }
 
 /**
@@ -470,6 +482,7 @@ function saveCustomEvent(day, month, year, eventId) {
   }
 
   localStorage.setItem('rellia_custom_events', JSON.stringify(customEvents));
+  uploadEventToProxy(newEvent);
 
   // Close modal
   document.getElementById('calModal').classList.remove('open');
@@ -487,10 +500,307 @@ function deleteCustomEvent(eventId) {
   const customEvents = getCustomEvents();
   const filtered = customEvents.filter(e => e.id !== eventId);
   localStorage.setItem('rellia_custom_events', JSON.stringify(filtered));
+  deleteEventFromProxy(eventId);
 
   // Close modal
   document.getElementById('calModal').classList.remove('open');
 
   // Re-render
   renderCalendar();
+}
+
+/**
+ * Open Add Event Modal (allows setting date manually)
+ */
+function openAddEventModal() {
+  const modal = document.getElementById('calModal');
+  const body  = document.getElementById('calModalBody');
+  if (!modal || !body) return;
+
+  const titleStr = 'Thêm Sự Kiện Cá Nhân Mới';
+  document.getElementById('calModalTitle').textContent = titleStr;
+
+  const today = new Date();
+  const curDay = today.getDate();
+  const curMonth = today.getMonth() + 1;
+  const curYear = today.getFullYear();
+
+  body.innerHTML = `
+    <!-- Event Marking Form -->
+    <div class="cal-event-form" style="border-top: none; padding-top: 0;">
+      <div class="cal-form-title">🔔 Đánh dấu ngày quan trọng</div>
+      <div class="cal-form-row">
+        <label class="conv-label">Tên sự kiện</label>
+        <input type="text" id="calEventName" class="field-input" placeholder="Ví dụ: Sinh nhật mẹ, giỗ chạp..." value="" />
+      </div>
+      <div class="cal-form-row" style="display: flex; gap: 8px;">
+        <div style="flex: 1;">
+          <label class="conv-label" style="font-size: 11px;">Ngày</label>
+          <select id="calEventDay" class="field-input">
+            ${Array.from({length: 31}, (_, i) => `<option value="${i+1}" ${i+1 === curDay ? 'selected' : ''}>${i+1}</option>`).join('')}
+          </select>
+        </div>
+        <div style="flex: 1;">
+          <label class="conv-label" style="font-size: 11px;">Tháng</label>
+          <select id="calEventMonth" class="field-input">
+            ${Array.from({length: 12}, (_, i) => `<option value="${i+1}" ${i+1 === curMonth ? 'selected' : ''}>Tháng ${i+1}</option>`).join('')}
+          </select>
+        </div>
+        <div style="flex: 1;">
+          <label class="conv-label" style="font-size: 11px;">Năm</label>
+          <select id="calEventYear" class="field-input">
+            ${Array.from({length: 5}, (_, i) => {
+              const y = curYear - 2 + i;
+              return `<option value="${y}" ${y === curYear ? 'selected' : ''}>${y}</option>`;
+            }).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="cal-form-row">
+        <label class="conv-label">Loại lịch</label>
+        <select id="calEventDateType" class="field-input">
+          <option value="solar">Dương lịch</option>
+          <option value="lunar">Âm lịch</option>
+        </select>
+      </div>
+      <label class="cal-checkbox-row">
+        <input type="checkbox" id="calEventRepeat" checked />
+        Lặp lại hàng năm
+      </label>
+
+      <div class="cal-form-actions">
+        <button class="cal-btn cal-btn-save" onclick="window._calSaveNewEvent()">
+          Lưu sự kiện
+        </button>
+      </div>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+/**
+ * Save new custom event from Add Event Modal
+ */
+function saveNewEvent() {
+  const name = document.getElementById('calEventName')?.value?.trim();
+  const dateType = document.getElementById('calEventDateType')?.value;
+  const repeat = document.getElementById('calEventRepeat')?.checked;
+  const day = parseInt(document.getElementById('calEventDay')?.value, 10);
+  const month = parseInt(document.getElementById('calEventMonth')?.value, 10);
+  const year = parseInt(document.getElementById('calEventYear')?.value, 10);
+
+  if (!name) {
+    alert('Vui lòng nhập tên sự kiện!');
+    return;
+  }
+
+  const customEvents = getCustomEvents();
+
+  const newEvent = {
+    id: 'evt_' + Math.random().toString(36).substr(2, 9),
+    name,
+    dateType,
+    repeat,
+    day,
+    month,
+    year,
+  };
+
+  customEvents.push(newEvent);
+  localStorage.setItem('rellia_custom_events', JSON.stringify(customEvents));
+  uploadEventToProxy(newEvent);
+
+  // Close modal
+  document.getElementById('calModal').classList.remove('open');
+
+  // Re-render
+  renderCalendar();
+}
+
+/**
+ * Open edit modal for custom event from list click
+ */
+function editCustomEvent(eventId) {
+  const customEvents = getCustomEvents();
+  const existingEvent = customEvents.find(e => e.id === eventId);
+  if (!existingEvent) return;
+
+  const modal = document.getElementById('calModal');
+  const body  = document.getElementById('calModalBody');
+  if (!modal || !body) return;
+
+  const titleStr = 'Chỉnh Sửa Sự Kiện';
+  document.getElementById('calModalTitle').textContent = titleStr;
+
+  body.innerHTML = `
+    <!-- Event Marking Form -->
+    <div class="cal-event-form" style="border-top: none; padding-top: 0;">
+      <div class="cal-form-title">✏️ Chỉnh sửa sự kiện cá nhân</div>
+      <div class="cal-form-row">
+        <label class="conv-label">Tên sự kiện</label>
+        <input type="text" id="calEventName" class="field-input" placeholder="Ví dụ: Sinh nhật mẹ, giỗ chạp..." value="${existingEvent.name}" />
+      </div>
+      <div class="cal-form-row" style="display: flex; gap: 8px;">
+        <div style="flex: 1;">
+          <label class="conv-label" style="font-size: 11px;">Ngày</label>
+          <select id="calEventDay" class="field-input">
+            ${Array.from({length: 31}, (_, i) => `<option value="${i+1}" ${i+1 === existingEvent.day ? 'selected' : ''}>${i+1}</option>`).join('')}
+          </select>
+        </div>
+        <div style="flex: 1;">
+          <label class="conv-label" style="font-size: 11px;">Tháng</label>
+          <select id="calEventMonth" class="field-input">
+            ${Array.from({length: 12}, (_, i) => `<option value="${i+1}" ${i+1 === existingEvent.month ? 'selected' : ''}>Tháng ${i+1}</option>`).join('')}
+          </select>
+        </div>
+        <div style="flex: 1;">
+          <label class="conv-label" style="font-size: 11px;">Năm</label>
+          <select id="calEventYear" class="field-input">
+            ${Array.from({length: 5}, (_, i) => {
+              const y = new Date().getFullYear() - 2 + i;
+              return `<option value="${y}" ${y === existingEvent.year ? 'selected' : ''}>${y}</option>`;
+            }).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="cal-form-row">
+        <label class="conv-label">Loại lịch</label>
+        <select id="calEventDateType" class="field-input">
+          <option value="solar" ${existingEvent.dateType === 'solar' ? 'selected' : ''}>Dương lịch</option>
+          <option value="lunar" ${existingEvent.dateType === 'lunar' ? 'selected' : ''}>Âm lịch</option>
+        </select>
+      </div>
+      <label class="cal-checkbox-row">
+        <input type="checkbox" id="calEventRepeat" ${existingEvent.repeat ? 'checked' : ''} />
+        Lặp lại hàng năm
+      </label>
+
+      <div class="cal-form-actions">
+        <button class="cal-btn cal-btn-delete" onclick="window._calDeleteEvent('${existingEvent.id}')">Xóa sự kiện</button>
+        <button class="cal-btn cal-btn-save" onclick="window._calUpdateCustomEvent('${existingEvent.id}')">
+          Cập nhật
+        </button>
+      </div>
+    </div>
+  `;
+
+  modal.classList.add('open');
+}
+
+/**
+ * Update custom event
+ */
+function updateCustomEvent(eventId) {
+  const name = document.getElementById('calEventName')?.value?.trim();
+  const dateType = document.getElementById('calEventDateType')?.value;
+  const repeat = document.getElementById('calEventRepeat')?.checked;
+  const day = parseInt(document.getElementById('calEventDay')?.value, 10);
+  const month = parseInt(document.getElementById('calEventMonth')?.value, 10);
+  const year = parseInt(document.getElementById('calEventYear')?.value, 10);
+
+  if (!name) {
+    alert('Vui lòng nhập tên sự kiện!');
+    return;
+  }
+
+  const customEvents = getCustomEvents();
+  const idx = customEvents.findIndex(e => e.id === eventId);
+  if (idx !== -1) {
+    const updatedEvent = {
+      id: eventId,
+      name,
+      dateType,
+      repeat,
+      day,
+      month,
+      year,
+    };
+    customEvents[idx] = updatedEvent;
+    localStorage.setItem('rellia_custom_events', JSON.stringify(customEvents));
+    uploadEventToProxy(updatedEvent);
+  }
+
+  // Close modal
+  document.getElementById('calModal').classList.remove('open');
+
+  // Re-render
+  renderCalendar();
+}
+
+/**
+ * Sync custom events from Supabase secure proxy
+ */
+async function initProxyEvents() {
+  try {
+    const res = await fetch('/api/events');
+    if (res.ok) {
+      const data = await res.json();
+      hasDbConnection = true;
+      const customEvents = data.map(item => ({
+        id: item.id,
+        name: item.name,
+        dateType: item.date_type,
+        repeat: item.repeat,
+        day: item.day,
+        month: item.month,
+        year: item.year,
+      }));
+      localStorage.setItem('rellia_custom_events', JSON.stringify(customEvents));
+      renderCalendar();
+    } else {
+      const text = await res.text();
+      throw new Error(`Status ${res.status} - ${text}`);
+    }
+  } catch (err) {
+    console.warn('[Calendar] Server DB unavailable, using local cache:', err.message);
+    hasDbConnection = false;
+  }
+}
+
+/**
+ * Securely upload custom event details to Supabase
+ */
+async function uploadEventToProxy(event) {
+  if (!hasDbConnection) return;
+  try {
+    const res = await fetch('/api/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: event.id,
+        name: event.name,
+        date_type: event.dateType,
+        repeat: event.repeat,
+        day: event.day,
+        month: event.month,
+        year: event.year,
+        created_at: new Date().toISOString()
+      })
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      console.error('[Upload Event Failed Server Error]', res.status, text);
+    }
+  } catch (err) {
+    console.warn('[Upload Event Failed Network Error]', err);
+  }
+}
+
+/**
+ * Securely delete custom event from Supabase
+ */
+async function deleteEventFromProxy(eventId) {
+  if (!hasDbConnection) return;
+  try {
+    const res = await fetch(`/api/events?id=${encodeURIComponent(eventId)}`, {
+      method: 'DELETE'
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      console.error('[Delete Event Failed Server Error]', res.status, text);
+    }
+  } catch (err) {
+    console.warn('[Delete Event Failed Network Error]', err);
+  }
 }

@@ -33,6 +33,10 @@ const ALLOWED_RSS = [
   'https://dantri.com.vn/rss/',
   'https://thanhnien.vn/rss/',
   'https://nhandan.vn/rss/',
+  'https://genk.vn/rss/',
+  'https://vietnamnet.vn/rss/',
+  'https://vtv.vn/rss/',
+  'https://kenh14.vn/rss/',
 ];
 
 async function handleNewsRSS(request) {
@@ -55,7 +59,7 @@ async function handleNewsRSS(request) {
 }
 
 // ─── /news-article ──────────────────────────────────────────────────
-const ALLOWED_ARTICLE_DOMAINS = ['vnexpress.net', 'tuoitre.vn', 'dantri.com.vn', 'thanhnien.vn', 'nhandan.vn'];
+const ALLOWED_ARTICLE_DOMAINS = ['vnexpress.net', 'tuoitre.vn', 'dantri.com.vn', 'thanhnien.vn', 'nhandan.vn', 'genk.vn', 'vietnamnet.vn', 'vtv.vn', 'kenh14.vn'];
 
 async function handleNewsArticle(request) {
   if (request.method === 'OPTIONS') return preflight();
@@ -71,7 +75,7 @@ async function handleNewsArticle(request) {
       redirect: 'follow',
     });
     const html = await res.text();
-    const article = extractArticle(html, targetUrl);
+    const article = await extractArticle(html, targetUrl);
     return new Response(JSON.stringify(article), {
       headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=600' },
     });
@@ -80,42 +84,55 @@ async function handleNewsArticle(request) {
   }
 }
 
-function extractArticle(html, url) {
-  const get = (re) => { const m = html.match(re); return m ? decode(m[1].trim()) : ''; };
+async function extractArticle(html, targetUrl) {
+  let title = '';
+  let description = '';
+  let content = '';
+  let publishedAt = '';
+  let thumbnail = '';
 
-  const title = get(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)/i)
-    || get(/<title[^>]*>([^<]+)<\/title>/i);
-  const description = get(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)/i)
-    || get(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']description["']/i);
-  const thumbnail = get(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)/i)
-    || get(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
-  const publishedAt = get(/published_time["']\s*content=["']([^"']+)/i)
-    || get(/datePublished["']\s*:\s*["']([^"']+)/i);
+  let inContentCount = 0;
+  let skipCount = 0;
 
-  // Extract main text from common containers
-  const containers = [
-    /<article[^>]*class="[^"]*fck_detail[^"]*"[^>]*>([\s\S]*?)<\/article>/i,
-    /<div[^>]*class="[^"]*detail-content[^"]*"[^>]*>([\s\S]*?)<\/div>\s*(?:<div[^>]*class="[^"]*relate|<section)/i,
-    /<div[^>]*class="[^"]*singular-content[^"]*"[^>]*>([\s\S]*?)<\/div>\s*(?:<div[^>]*class="[^"]*relate|<section)/i,
-    /<article[^>]*>([\s\S]*?)<\/article>/i,
-    /<main[^>]*>([\s\S]*?)<\/main>/i,
-  ];
+  const rewriter = new HTMLRewriter()
+    .on('meta[property="og:title"]', { element(el) { if (!title) title = el.getAttribute('content'); } })
+    .on('title', { text(chunk) { if (!title) title += chunk.text; } })
+    .on('meta[property="og:description"]', { element(el) { if (!description) description = el.getAttribute('content'); } })
+    .on('meta[name="description"]', { element(el) { if (!description) description = el.getAttribute('content'); } })
+    .on('meta[property="og:image"]', { element(el) { if (!thumbnail) thumbnail = el.getAttribute('content'); } })
+    .on('meta[property="article:published_time"]', { element(el) { if (!publishedAt) publishedAt = el.getAttribute('content'); } })
+    .on('script, style, figure.video, .relate, .box-related, .banner, .tin-lien-quan, .related-news, .box-comment, .author-info, .box-share, .post-tags, .article-bottom, .box-author, .comment-wrapper, .fb-comments, #comments, .tags, .social-share, .author-wrap, .author, .source, .box-category, .box-tintuclienquan, .relate-container, .box-tin-lien-quan, [data-role="comment"]', {
+      element(el) {
+        skipCount++;
+        el.onEndTag(() => { skipCount--; });
+      }
+    })
+    .on('p, br, div, h1, h2, h3, h4, h5, h6, li', {
+      element(el) {
+        if (inContentCount > 0 && skipCount === 0) {
+          content += '\n';
+        }
+      }
+    })
+    .on('article.fck_detail, .detail-content, .singular-content, .klw-body-top, .detail-cmain, .detail__cmain, .article-content, .article-body, .chi-tiet-bai-viet, #main-detail, .article-detail, .maincontent, .content-detail, .post-content, .knc-content, .vtv-detail-content, #entry-body, article, main', {
+      element(el) {
+        inContentCount++;
+        el.onEndTag(() => { inContentCount--; });
+      },
+      text(chunk) {
+        if (inContentCount > 0 && skipCount === 0) {
+          content += chunk.text;
+        }
+      }
+    });
 
-  let raw = '';
-  for (const re of containers) {
-    const m = html.match(re);
-    if (m?.[1]?.length > 300) { raw = m[1]; break; }
-  }
+  await rewriter.transform(new Response(html)).text();
 
-  const content = raw
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[\s\S]*?<\/style>/gi, '')
-    .replace(/<figure[\s\S]*?<\/figure>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-    .replace(/\s{2,}/g, ' ').trim();
+  content = content.replace(/[ \t]+/g, ' ').replace(/\n\s*\n+/g, '\n\n').trim();
+  title = title ? decode(title).trim() : '';
+  description = description ? decode(description).trim() : '';
 
-  return { title, description, content: content || description, publishedAt, thumbnail, url };
+  return { title, description, content: content || description, publishedAt, thumbnail, url: targetUrl };
 }
 
 function decode(s) {
@@ -1165,6 +1182,171 @@ async function handleTodos(request, env) {
   }
 }
 
+// ─── /api/events (proxy bảo mật lưu sự kiện và ghi chú lịch vào Supabase) ────────
+async function handleEvents(request, env) {
+  if (request.method === 'OPTIONS') return preflight();
+
+  const url = env.SUPABASE_URL ? env.SUPABASE_URL.trim().replace(/^['\"]|['\"]$/g, '') : '';
+  const key = env.SUPABASE_KEY ? env.SUPABASE_KEY.trim().replace(/^['\"]|['\"]$/g, '') : '';
+
+  if (!url || !key) {
+    return cors(JSON.stringify({ error: `Supabase URL or Key is missing. URL length: ${url ? url.length : 0}, Key length: ${key ? key.length : 0}` }), 503);
+  }
+
+  const supabaseHeaders = {
+    'apikey': key,
+    'Authorization': `Bearer ${key}`,
+    'Content-Type': 'application/json'
+  };
+
+  try {
+    if (request.method === 'GET') {
+      const res = await fetch(`${url}/rest/v1/custom_events?select=*&order=created_at.desc`, {
+        headers: supabaseHeaders
+      });
+      const data = await res.text();
+      return new Response(data, {
+        status: res.status,
+        headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS }
+      });
+    }
+
+    if (request.method === 'POST') {
+      const body = await request.json();
+      const res = await fetch(`${url}/rest/v1/custom_events`, {
+        method: 'POST',
+        headers: {
+          ...supabaseHeaders,
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify(body)
+      });
+      const data = await res.text();
+      return new Response(data, {
+        status: res.status,
+        headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS }
+      });
+    }
+
+    if (request.method === 'DELETE') {
+      const { searchParams } = new URL(request.url);
+      const id = searchParams.get('id');
+      if (!id) return cors(JSON.stringify({ error: 'id required' }), 400);
+
+      const res = await fetch(`${url}/rest/v1/custom_events?id=eq.${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: supabaseHeaders
+      });
+      const data = await res.text();
+      return new Response(data, {
+        status: res.status,
+        headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS }
+      });
+    }
+
+    return cors(JSON.stringify({ error: 'method not allowed' }), 405);
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
+
+// ─── /api/news (RSS News Aggregator Proxy) ───────────────────────────
+async function handleApiNews(request) {
+  if (request.method === 'OPTIONS') return preflight();
+
+  const { searchParams } = new URL(request.url);
+  const source = searchParams.get('source') || 'vnexpress';
+
+  let feedUrl = 'https://vnexpress.net/rss/tin-moi-nhat.rss';
+  if (source === 'tuoitre') {
+    feedUrl = 'https://tuoitre.vn/rss/tin-moi-nhat.rss';
+  } else if (source === 'dantri') {
+    feedUrl = 'https://dantri.com.vn/rss/home.rss';
+  } else if (source === 'genk') {
+    feedUrl = 'https://genk.vn/rss/home.rss';
+  } else if (source === 'thanhnien') {
+    feedUrl = 'https://thanhnien.vn/rss/home.rss';
+  } else if (source === 'vietnamnet') {
+    feedUrl = 'https://vietnamnet.vn/rss/thoi-su.rss';
+  } else if (source === 'vtv') {
+    feedUrl = 'https://vtv.vn/rss/home.rss';
+  } else if (source === 'tinhte') {
+    feedUrl = 'https://tinhte.vn/rss';
+  } else if (source === 'kenh14') {
+    feedUrl = 'https://kenh14.vn/rss/home.rss';
+  }
+
+  try {
+    const res = await fetch(feedUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    });
+    if (!res.ok) throw new Error(`Fetch RSS feed failed: ${res.status}`);
+    const xmlText = await res.text();
+    const items = parseRSS(xmlText);
+
+    return new Response(JSON.stringify(items), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS }
+    });
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
+function parseRSS(xmlText) {
+  const items = [];
+  const matches = xmlText.matchAll(/<item>([\s\S]*?)<\/item>/g);
+  for (const match of matches) {
+    const itemXml = match[1];
+
+    const titleMatch = itemXml.match(/<title>(?:<!\[CDATA\[([\s\S]*?)\]\]>|([^<]*))/i);
+    const title = titleMatch ? (titleMatch[1] || titleMatch[2] || '').trim() : '';
+
+    const linkMatch = itemXml.match(/<link>(?:<!\[CDATA\[([\s\S]*?)\]\]>|([^<]*))/i);
+    const link = linkMatch ? (linkMatch[1] || linkMatch[2] || '').trim() : '';
+
+    const pubDateMatch = itemXml.match(/<pubDate>(?:<!\[CDATA\[([\s\S]*?)\]\]>|([^<]*))/i);
+    const pubDate = pubDateMatch ? (pubDateMatch[1] || pubDateMatch[2] || '').trim() : '';
+
+    const descMatch = itemXml.match(/<description>(?:<!\[CDATA\[([\s\S]*?)\]\]>|([^<]*))/i);
+    const rawDesc = descMatch ? (descMatch[1] || descMatch[2] || '').trim() : '';
+
+    // Extract image URL from description (e.g. <img src="url">)
+    let imageUrl = '';
+    const imgRegex = /<img[^>]+src=["']([^"']+)["']/i;
+    const imgMatch = rawDesc.match(imgRegex);
+    if (imgMatch) {
+      imageUrl = imgMatch[1];
+    }
+
+    // If not found in description, check <enclosure> or <media:content>
+    if (!imageUrl) {
+      const encMatch = itemXml.match(/<enclosure[^>]+url=["']([^"']+)["']/i);
+      if (encMatch) imageUrl = encMatch[1];
+    }
+
+    // Clean description HTML tags
+    let cleanDesc = rawDesc.replace(/<[^>]+>/g, '')
+                           .replace(/&nbsp;/g, ' ')
+                           .replace(/&amp;/g, '&')
+                           .replace(/&quot;/g, '"')
+                           .trim();
+
+    items.push({
+      title,
+      link,
+      pubDate,
+      description: cleanDesc,
+      image: imageUrl
+    });
+  }
+  return items.slice(0, 20); // Return top 20 news items
+}
+
+
 // ─── /api/spam-check ────────────────────────────────────────────────
 async function handleSpamCheck(request) {
   if (request.method === 'OPTIONS') return preflight();
@@ -2019,7 +2201,14 @@ async function handleAI(request, env) {
     }
 
     const systemPrompt = `Bạn là Trợ lý ảo AI, được tích hợp trên Dashboard đa năng (Rellia Đại Dashboard).
-Hãy trả lời thắc mắc của người dùng bằng tiếng Việt một cách tự nhiên, thân thiện. Đối với các câu hỏi thông thường, hãy trả lời ngắn gọn (1-3 câu, tối đa 4 câu). Tuy nhiên, nếu người dùng yêu cầu liệt kê danh sách (như lịch nghỉ lễ, lịch bay, tin tức, việc cần làm...), hãy liệt kê đầy đủ, chính xác và chi tiết toàn bộ thông tin có trong bối cảnh bên dưới mà không tự ý cắt xén hay bỏ sót bất kỳ mục nào.
+Hãy trả lời thắc mắc của người dùng bằng tiếng Việt một cách tự nhiên, thân thiện.
+
+LƯU Ý QUAN TRỌNG VỀ ĐỊNH DẠNG:
+- TUYỆT ĐỐI KHÔNG ĐƯỢC xuất ra định dạng JSON thô (ví dụ: {"airports":...} hoặc {"flights":...}). Tất cả thông tin từ bối cảnh phải được phân tích và diễn giải lại dưới dạng văn bản/danh sách Tiếng Việt đẹp đẽ, rõ ràng và dễ đọc.
+- Đối với các câu hỏi thông thường, hãy trả lời ngắn gọn (1-3 câu, tối đa 4 câu).
+- Nếu người dùng yêu cầu liệt kê danh sách (như lịch nghỉ lễ, lịch bay, tin tức, việc cần làm...), hãy liệt kê đầy đủ, chính xác và chi tiết toàn bộ thông tin có trong bối cảnh bên dưới mà không tự ý cắt xén hay bỏ sót bất kỳ mục nào.
+- Trình bày thông tin một cách có tổ chức, sử dụng các tiêu đề và ký tự gạch đầu dòng để người dùng dễ đọc.
+
 Sử dụng các thông tin thực tế từ Dashboard ở dưới để trả lời trực tiếp. Nếu không có thông tin hoặc thông tin không liên quan, hãy trả lời lịch sự rằng bạn chưa có dữ liệu đó.
 Đồng thời, bạn có thể giới thiệu cho người dùng các tính năng có sẵn trên Dashboard nếu họ hỏi về:
 - Tra cứu phạt nguội: Dashboard có tab "Tra Cứu Phạt Nguội" hiển thị cổng thông tin phạt nguội từ PhatNguoi.vn và Cổng CSGT.
@@ -2049,7 +2238,14 @@ ${contextStr}`;
       max_tokens: 1024
     });
 
-    return new Response(JSON.stringify({ response: result.response }), {
+    // Strip out leaked Llama 3.1 role headers
+    let finalResponse = result.response || '';
+    finalResponse = finalResponse.replace(/^(assistant\s*)+/ig, '').trim();
+    if (!finalResponse) {
+      finalResponse = 'Xin lỗi, tôi chưa thể trả lời câu hỏi của bạn lúc này.';
+    }
+
+    return new Response(JSON.stringify({ response: finalResponse }), {
       headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS },
     });
   } catch (err) {
@@ -2057,6 +2253,112 @@ ${contextStr}`;
   }
 }
 
+
+// ─── /api/tts — Google Translate TTS Proxy ──────────────────────────────────
+// Bypasses CORS by fetching the audio server-side and streaming it back.
+async function handleTTS(request) {
+  if (request.method === 'OPTIONS') return preflight();
+  const url = new URL(request.url);
+  const text = url.searchParams.get('text');
+  if (!text || text.length > 500) {
+    return cors(JSON.stringify({ error: 'Missing or too-long text param (max 500 chars)' }), 400);
+  }
+
+  const ttsUrl = `https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=vi&q=${encodeURIComponent(text)}`;
+  try {
+    const res = await fetch(ttsUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+        'Referer': 'https://translate.google.com',
+      },
+    });
+    if (!res.ok) {
+      return cors(JSON.stringify({ error: `TTS upstream error ${res.status}` }), 502);
+    }
+    const audio = await res.arrayBuffer();
+    return new Response(audio, {
+      status: 200,
+      headers: {
+        'Content-Type': 'audio/mpeg',
+        'Cache-Control': 'public, max-age=3600',
+        ...CORS,
+      },
+    });
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
+
+// ─── /api/shorten — URL Shortener Proxy ──────────────────────────────
+async function handleShorten(request) {
+  if (request.method === 'OPTIONS') return preflight();
+  if (request.method !== 'POST') {
+    return cors(JSON.stringify({ error: 'Method not allowed' }), 405);
+  }
+
+  try {
+    const { url } = await request.json();
+    if (!url) {
+      return cors(JSON.stringify({ error: 'Thiếu đường dẫn (url) cần rút gọn.' }), 400);
+    }
+
+    // 1. cleanuri.com
+    try {
+      const response = await fetch('https://cleanuri.com/api/v1/shorten', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `url=${encodeURIComponent(url)}`,
+        signal: AbortSignal.timeout(5000)
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.result_url) {
+          return cors(JSON.stringify({ shorturl: data.result_url }));
+        }
+      }
+    } catch (e) {
+      console.warn('[Shorten] cleanuri failed:', e.message);
+    }
+
+    // 2. gotiny.cc
+    try {
+      const response = await fetch('https://gotiny.cc/api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input: url }),
+        signal: AbortSignal.timeout(5000)
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data[0] && data[0].code) {
+          return cors(JSON.stringify({ shorturl: `https://gotiny.cc/${data[0].code}` }));
+        }
+      }
+    } catch (e) {
+      console.warn('[Shorten] gotiny failed:', e.message);
+    }
+
+    // 3. tinyurl.com
+    try {
+      const response = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`, {
+        signal: AbortSignal.timeout(5000)
+      });
+      if (response.ok) {
+        const shortUrl = await response.text();
+        if (shortUrl && shortUrl.startsWith('http')) {
+          return cors(JSON.stringify({ shorturl: shortUrl.trim() }));
+        }
+      }
+    } catch (e) {
+      console.warn('[Shorten] tinyurl failed:', e.message);
+    }
+
+    return cors(JSON.stringify({ error: 'Không thể rút gọn link bằng các dịch vụ công cộng hiện tại. Vui lòng thử lại sau.' }), 502);
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
 
 export default {
   async fetch(request, env) {
@@ -2071,6 +2373,9 @@ export default {
     if (pathname === '/lottery') return handleLottery(request);
     if (pathname === '/football') return handleFootball(request);
     if (pathname === '/api/todos') return handleTodos(request, env);
+    if (pathname === '/api/events') return handleEvents(request, env);
+    if (pathname === '/api/news') return handleApiNews(request);
+
     if (pathname === '/api/spam-check') return handleSpamCheck(request);
     if (pathname === '/api/tax-lookup') return handleTaxLookup(request);
     if (pathname === '/api/downloader') return handleDownloader(request);
@@ -2079,7 +2384,10 @@ export default {
     if (pathname === '/api/exchange') return handleExchange(request);
     if (pathname === '/api/crypto') return handleCrypto(request, env);
     if (pathname === '/vietlott') return handleVietlott(request);
-    if (pathname === '/api/ai') return handleAI(request, env);
+    if (pathname === '/api/ai')  return handleAI(request, env);
+    if (pathname === '/api/tts')  return handleTTS(request);
+    if (pathname === '/api/shorten') return handleShorten(request);
+
 
 
     // ── Routes bảo mật (key ẩn trong Cloudflare Secrets) ──

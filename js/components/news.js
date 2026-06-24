@@ -38,7 +38,7 @@ export async function renderNews(containerId = 'newsContent', isSilent = false) 
     if (!articles.length) {
       el.innerHTML = `
         <div class="news-tabs">${tabs()}</div>
-        <div class="error-msg">⚠️ Không tải được tin tức. Cần deploy Cloudflare Functions lên <code>everything.rellia.org</code>. Xem file <code>functions/news-rss.js</code>.</div>`;
+        <div class="error-msg">⚠️ Không tải được tin tức. Vui lòng kiểm tra lại kết nối mạng hoặc thử lại sau.</div>`;
       return;
     }
 
@@ -133,11 +133,11 @@ window.openNewsArticle = async (idx) => {
   // Fetch full article
   const data = await fetchArticle(article.link);
 
-  if (data?.content && data.content.length > 100) {
+  if (data?.content && data.content.length > 100 && data.content !== data.description) {
     // Split into paragraphs
     const paragraphs = data.content
-      .split(/(?<=[.!?।।])\s{2,}|(?<=\n)/)
-      .filter(p => p.trim().length > 30)
+      .split(/\n+/)
+      .filter(p => p.trim().length > 10)
       .map(p => `<p>${p.trim()}</p>`)
       .join('');
     document.getElementById('nrContent').innerHTML =
@@ -145,10 +145,9 @@ window.openNewsArticle = async (idx) => {
   } else {
     // Fallback: show desc + link
     document.getElementById('nrContent').innerHTML = `
-      <p class="nr-excerpt">${article.desc || 'Không thể tải nội dung đầy đủ.'}</p>
+      <p class="nr-excerpt">${article.desc || 'Không có mô tả cho bài viết này.'}</p>
       <div class="nr-fallback-note">
-        Nội dung đầy đủ yêu cầu deploy Cloudflare Function.
-        <a href="${article.link}" target="_blank" rel="noopener">Đọc trên trang gốc →</a>
+        <a href="${article.link}" target="_blank" rel="noopener">Đọc đầy đủ bài viết trên trang gốc →</a>
       </div>`;
   }
 };

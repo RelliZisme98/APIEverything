@@ -27,6 +27,10 @@ export async function onRequest(context) {
     'thanhnien.vn',
     'baomoi.com',
     'nhandan.vn',
+    'genk.vn',
+    'vietnamnet.vn',
+    'vtv.vn',
+    'kenh14.vn',
   ];
 
   let targetHost;
@@ -59,7 +63,7 @@ export async function onRequest(context) {
     const html = await res.text();
 
     // Extract article content using simple heuristics
-    const article = extractArticle(html, targetUrl);
+    const article = await extractArticle(html, targetUrl);
 
     return new Response(JSON.stringify(article), {
       headers: {
@@ -76,70 +80,55 @@ export async function onRequest(context) {
   }
 }
 
-function extractArticle(html, url) {
-  // Extract title
-  const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
-    || html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
-  const title = titleMatch ? decode(titleMatch[1].trim()) : '';
-
-  // Extract description/lead
-  const descMatch = html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)/i)
-    || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']description["']/i);
-  const description = descMatch ? decode(descMatch[1].trim()) : '';
-
-  // Extract published time
-  const dateMatch = html.match(/published_time["']\s*content=["']([^"']+)/i)
-    || html.match(/datePublished["']\s*:\s*["']([^"']+)/i)
-    || html.match(/<time[^>]+datetime=["']([^"']+)/i);
-  const publishedAt = dateMatch ? dateMatch[1].trim() : '';
-
-  // Extract main article text
-  // Try common article containers
+async function extractArticle(html, targetUrl) {
+  let title = '';
+  let description = '';
   let content = '';
-  const selectors = [
-    // VnExpress
-    /<article[^>]*class="[^"]*fck_detail[^"]*"[^>]*>([\s\S]*?)<\/article>/i,
-    // Tuổi Trẻ
-    /<div[^>]*class="[^"]*detail-content[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<div[^>]*class="[^"]*relate/i,
-    // Dân Trí
-    /<div[^>]*class="[^"]*singular-content[^"]*"[^>]*>([\s\S]*?)<\/div>\s*(?:<div[^>]*class="[^"]*relate|<section)/i,
-    // Generic article tag
-    /<article[^>]*>([\s\S]*?)<\/article>/i,
-    // Generic main
-    /<main[^>]*>([\s\S]*?)<\/main>/i,
-  ];
+  let publishedAt = '';
+  let thumbnail = '';
 
-  for (const re of selectors) {
-    const m = html.match(re);
-    if (m && m[1] && m[1].length > 200) {
-      content = m[1];
-      break;
-    }
-  }
+  let inContentCount = 0;
+  let skipCount = 0;
 
-  // Strip all HTML tags, scripts, styles
-  content = content
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[\s\S]*?<\/style>/gi, '')
-    .replace(/<figure[\s\S]*?<\/figure>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
+  const rewriter = new HTMLRewriter()
+    .on('meta[property="og:title"]', { element(el) { if (!title) title = el.getAttribute('content'); } })
+    .on('title', { text(chunk) { if (!title) title += chunk.text; } })
+    .on('meta[property="og:description"]', { element(el) { if (!description) description = el.getAttribute('content'); } })
+    .on('meta[name="description"]', { element(el) { if (!description) description = el.getAttribute('content'); } })
+    .on('meta[property="og:image"]', { element(el) { if (!thumbnail) thumbnail = el.getAttribute('content'); } })
+    .on('meta[property="article:published_time"]', { element(el) { if (!publishedAt) publishedAt = el.getAttribute('content'); } })
+    .on('script, style, figure.video, .relate, .box-related, .banner, .tin-lien-quan, .related-news, .box-comment, .author-info, .box-share, .post-tags, .article-bottom, .box-author, .comment-wrapper, .fb-comments, #comments, .tags, .social-share, .author-wrap, .author, .source, .box-category, .box-tintuclienquan, .relate-container, .box-tin-lien-quan, [data-role="comment"]', {
+      element(el) {
+        skipCount++;
+        el.onEndTag(() => { skipCount--; });
+      }
+    })
+    .on('p, br, div, h1, h2, h3, h4, h5, h6, li', {
+      element(el) {
+        if (inContentCount > 0 && skipCount === 0) {
+          content += '\n';
+        }
+      }
+    })
+    .on('article.fck_detail, .detail-content, .singular-content, .klw-body-top, .detail-cmain, .detail__cmain, .article-content, .article-body, .chi-tiet-bai-viet, #main-detail, .article-detail, .maincontent, .content-detail, .post-content, .knc-content, .vtv-detail-content, #entry-body, article, main', {
+      element(el) {
+        inContentCount++;
+        el.onEndTag(() => { inContentCount--; });
+      },
+      text(chunk) {
+        if (inContentCount > 0 && skipCount === 0) {
+          content += chunk.text;
+        }
+      }
+    });
 
-  // Fallback to description
-  if (!content || content.length < 100) content = description;
+  await rewriter.transform(new Response(html)).text();
 
-  // Extract thumbnail image
-  const imgMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)/i)
-    || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
-  const thumbnail = imgMatch ? imgMatch[1].trim() : '';
+  content = content.replace(/[ \t]+/g, ' ').replace(/\n\s*\n+/g, '\n\n').trim();
+  title = title ? decode(title).trim() : '';
+  description = description ? decode(description).trim() : '';
 
-  return { title, description, content, publishedAt, thumbnail, url };
+  return { title, description, content: content || description, publishedAt, thumbnail, url: targetUrl };
 }
 
 function decode(str) {

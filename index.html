@@ -16,6 +16,7 @@
 
   <!-- ── CSS – load order matters ── -->
   <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/finance.css" />
   <link rel="stylesheet" href="css/animations.css" />
   <link rel="stylesheet" href="css/skeleton.css" />
   <link rel="stylesheet" href="css/sidebar.css" />
@@ -42,6 +43,10 @@
   <link rel="stylesheet" href="css/lookup.css" />
   <link rel="stylesheet" href="css/media.css" />
   <link rel="stylesheet" href="css/file-tools.css" />
+  <link rel="stylesheet" href="css/qrcode.css" />
+  <link rel="stylesheet" href="css/emulator.css" />
+  <link rel="stylesheet" href="css/typing-test.css" />
+  <link rel="stylesheet" href="css/converter.css" />
   <link rel="stylesheet" href="css/mobile.css" />
 </head>
 
@@ -66,52 +71,26 @@
         </div>
       </div>
 
-      <!-- Clock -->
-      <div class="sidebar-clock">
-        <div class="sidebar-clock-time" id="clockDisplay">--:--:--</div>
-        <div class="sidebar-clock-date" id="clockDate">--/--/----</div>
-      </div>
-
-      <!-- Nav: Tài chính -->
+       <!-- Nav: Tài chính -->
       <div class="sidebar-section-label">💰 Tài Chính</div>
       <div class="sidebar-nav" id="sidebarNav">
-        <button class="sidebar-nav-item active" data-section="crypto" onclick="switchSection('crypto')">
-          <span class="nav-icon">💎</span>
-          <span class="nav-label">Tiền Điện Tử</span>
+        <button class="sidebar-nav-item active" data-section="finance" onclick="switchSection('finance')">
+          <span class="nav-icon">💰</span>
+          <span class="nav-label">Thị Trường Tài Chính</span>
           <span class="nav-badge">LIVE</span>
-        </button>
-        <button class="sidebar-nav-item" data-section="gold" onclick="switchSection('gold')">
-          <span class="nav-icon">🏅</span>
-          <span class="nav-label">Giá Vàng</span>
-          <span class="nav-badge">LIVE</span>
-        </button>
-        <button class="sidebar-nav-item active" data-section="exchange" onclick="switchSection('exchange')">
-          <span class="nav-icon">💱</span>
-          <span class="nav-label">Tỷ Giá & Quy Đổi</span>
-          <span class="nav-badge">LIVE</span>
-        </button>
-        <button class="sidebar-nav-item" data-section="gas" onclick="switchSection('gas')">
-          <span class="nav-icon">⛽</span>
-          <span class="nav-label">Giá Xăng Dầu</span>
-          <span class="nav-badge yellow">CẬP NHẬT</span>
         </button>
 
         <!-- Nav: Thông tin -->
         <div class="sidebar-section-label" style="padding-left:0;margin-top:6px;">🌐 Thông Tin</div>
         <button class="sidebar-nav-item" data-section="weather" onclick="switchSection('weather')">
           <span class="nav-icon">☀️</span>
-          <span class="nav-label">Thời Tiết</span>
+          <span class="nav-label">Thời Tiết & AQI</span>
           <span class="nav-badge" id="weatherNavBadge">LIVE</span>
         </button>
-        <button class="sidebar-nav-item" data-section="aqi" onclick="switchSection('aqi')">
-          <span class="nav-icon">🌫️</span>
-          <span class="nav-label">Chất Lượng KK</span>
-          <span class="nav-badge">LIVE</span>
-        </button>
-        <button class="sidebar-nav-item" data-section="vnindex" onclick="switchSection('vnindex')">
-          <span class="nav-icon">📈</span>
-          <span class="nav-label">Chứng Khoán</span>
-          <span class="nav-badge">LIVE</span>
+        <button class="sidebar-nav-item" data-section="news" onclick="switchSection('news')">
+          <span class="nav-icon">📰</span>
+          <span class="nav-label">Tin Tức 24h</span>
+          <span class="nav-badge" style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">HOT</span>
         </button>
 
         <!-- Nav: Tiện ích -->
@@ -120,14 +99,6 @@
           <span class="nav-icon">📅</span>
           <span class="nav-label">Lịch &amp; Nghỉ Lễ</span>
           <span class="nav-badge">TỰ TÍNH</span>
-        </button>
-        <button class="sidebar-nav-item" data-section="traffic" onclick="switchSection('traffic')">
-          <span class="nav-icon">🚔</span>
-          <span class="nav-label">Tra Cứu Phạt Nguội</span>
-        </button>
-        <button class="sidebar-nav-item" data-section="power" onclick="switchSection('power')">
-          <span class="nav-icon">⚡</span>
-          <span class="nav-label">Lịch Cúp Điện</span>
         </button>
         <button class="sidebar-nav-item" data-section="travel" onclick="switchSection('travel')">
           <span class="nav-icon">✈️</span>
@@ -139,17 +110,36 @@
         </button>
         <button class="sidebar-nav-item" data-section="lookup" onclick="switchSection('lookup')">
           <span class="nav-icon">🔎</span>
-          <span class="nav-label">Tra Cứu Dịch Vụ Công</span>
+          <span class="nav-label">Dịch Vụ Công</span>
+          <span class="nav-badge">NEW</span>
         </button>
 
         <!-- Nav: Công cụ -->
         <div class="sidebar-section-label" style="padding-left:0;margin-top:6px;">🔧 Công cụ</div>
-
-
+        <button class="sidebar-nav-item" data-section="qrcode" onclick="switchSection('qrcode')">
+          <span class="nav-icon">🔗</span>
+          <span class="nav-label">QR &amp; Rút Gọn Link</span>
+          <span class="nav-badge" style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">NEW</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="emulator" onclick="switchSection('emulator')">
+          <span class="nav-icon">🎮</span>
+          <span class="nav-label">Game Giả Lập</span>
+          <span class="nav-badge" style="background:rgba(239,68,68,.15);color:#f87171;border-color:rgba(239,68,68,.3);">HOT</span>
+        </button>
         <button class="sidebar-nav-item" data-section="tax-calc" onclick="switchSection('tax-calc')">
           <span class="nav-icon">🧮</span>
           <span class="nav-label">Tính Thuế TNCN</span>
           <span class="nav-badge">2026</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="typing-test" onclick="switchSection('typing-test')">
+          <span class="nav-icon">⌨️</span>
+          <span class="nav-label">Luyện Gõ Phím</span>
+          <span class="nav-badge" style="background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.3);">NEW</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="converter" onclick="switchSection('converter')">
+          <span class="nav-icon">📏</span>
+          <span class="nav-label">Bộ Chuyển Đổi</span>
+          <span class="nav-badge" style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">NEW</span>
         </button>
         <button class="sidebar-nav-item" data-section="lottery" onclick="switchSection('lottery')">
           <span class="nav-icon">🎰</span>
@@ -173,8 +163,12 @@
           <span class="nav-icon">🎬</span>
           <span class="nav-label">Phim & Trò Chơi</span>
         </button>
+        <button class="sidebar-nav-item" data-section="focus" onclick="switchSection('focus')">
+          <span class="nav-icon">🍅</span>
+          <span class="nav-label">Tập Trung &amp; Âm Nhạc</span>
+          <span class="nav-badge" style="background:rgba(99,102,241,.15);color:#a5b4fc;border-color:rgba(99,102,241,.3);">POMO</span>
+        </button>
       </div>
-
       <!-- Actions -->
       <div class="sidebar-actions">
         <button class="sidebar-refresh-btn" id="refreshBtn" onclick="refreshAll()">
@@ -206,216 +200,10 @@
         </div>
       </div>
 
-      <!-- ════════ SECTION: CRYPTO ════════ -->
-      <section class="content-section active" id="section-crypto">
-        <div class="page-title"><span class="page-icon">💎</span> Tiền Điện Tử</div>
-
-        <div class="card" style="margin-bottom:20px;">
-          <div class="card-header">
-            <div class="card-title"><span class="icon">🪙</span> Top Crypto Theo Vốn Hóa</div>
-            <span class="card-badge badge-live"><span class="status-dot dot-green"></span>LIVE</span>
-          </div>
-          <div id="cryptoGrid" class="crypto-grid">
-            <div class="skeleton skel-card"></div>
-            <div class="skeleton skel-card"></div>
-            <div class="skeleton skel-card"></div>
-            <div class="skeleton skel-card"></div>
-            <div class="skeleton skel-card"></div>
-            <div class="skeleton skel-card"></div>
-          </div>
-        </div>
-
-        <!-- Bản đồ xu hướng & Quy đổi chi tiết -->
-        <div class="card" id="cryptoDetailCard" style="margin-bottom:20px; display:none;">
-          <div class="card-header">
-            <div class="card-title"><span class="icon">📊</span> Bản Đồ Xu Hướng &amp; Quy Đổi Chi Tiết</div>
-            <span class="card-badge badge-live" id="cryptoDetailBadge"><span class="status-dot dot-green"></span>LIVE</span>
-          </div>
-          <div class="crypto-detail-container" id="cryptoDetailContainer">
-            <!-- Nơi render biểu đồ và bộ quy đổi -->
-          </div>
-        </div>
-
-        <!-- Market Stats + Exchange at a glance -->
-        <div class="row-2" style="margin-bottom:20px;">
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title"><span class="icon">📈</span> Thống Kê Thị Trường</div>
-              <span class="card-badge badge-live"><span class="status-dot dot-green"></span>LIVE</span>
-            </div>
-            <div id="marketStats">
-              <div class="skeleton skel-line"></div>
-              <div class="skeleton skel-line"></div>
-              <div class="skeleton skel-line"></div>
-              <div class="skeleton skel-line"></div>
-            </div>
-          </div>
-          <!-- Placeholder for summary or tips -->
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title"><span class="icon">📋</span> Bảng Chi Tiết Crypto (Top 15)</div>
-              <span class="card-badge badge-live"><span class="status-dot dot-green"></span>LIVE</span>
-            </div>
-            <div style="overflow-x:auto;">
-              <table id="cryptoTable">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Tên</th>
-                    <th style="text-align:right;">Giá (USD)</th>
-                    <th style="text-align:right;">24h</th>
-                    <th style="text-align:right;">7 ngày</th>
-                    <th style="text-align:right;">Vốn Hóa</th>
-                    <th style="text-align:right;">KL 24h</th>
-                  </tr>
-                </thead>
-                <tbody id="cryptoTableBody">
-                  <tr>
-                    <td colspan="7">
-                      <div class="skeleton skel-line" style="margin:10px 0;"></div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td colspan="7">
-                      <div class="skeleton skel-line" style="margin:10px 0;"></div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td colspan="7">
-                      <div class="skeleton skel-line" style="margin:10px 0;"></div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ════════ SECTION: GOLD ════════ -->
-      <section class="content-section" id="section-gold">
-        <div class="page-title"><span class="page-icon">🏅</span> Giá Vàng</div>
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title"><span class="icon">🏅</span> Giá Vàng Thế Giới & Trong Nước</div>
-            <span class="card-badge badge-live"><span class="status-dot dot-green"></span>LIVE</span>
-          </div>
-          <div id="goldContent">
-            <div class="skeleton skel-big"></div>
-            <div class="skeleton skel-line" style="margin-top:10px;width:50%;"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ════════ SECTION: EXCHANGE ════════ -->
-      <section class="content-section" id="section-exchange">
-        <div class="page-title"><span class="page-icon">💱</span> Tỷ Giá &amp; Quy Đổi</div>
-        <div class="row-2" style="margin-bottom:20px;">
-          
-          <!-- Card 1: Bảng Tỷ Giá (Vietcombank & Quốc Tế) -->
-          <div class="card">
-            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
-              <div class="card-title" style="display: flex; align-items: center; gap: 8px;">
-                <span class="icon">💱</span>
-                <div class="fx-tabs">
-                  <button class="fx-tab-btn active" onclick="switchFxTab('vcb')" id="fxTab-vcb">Vietcombank</button>
-                  <button class="fx-tab-btn" onclick="switchFxTab('intl')" id="fxTab-intl">Quốc Tế</button>
-                </div>
-              </div>
-              <span class="card-badge badge-live"><span class="status-dot dot-green"></span>LIVE</span>
-            </div>
-
-            <!-- Tab content VCB -->
-            <div class="fx-tab-content active" id="fxContent-vcb" style="margin-top: 10px;">
-              <div id="bankRatesContent">
-                <div class="skeleton skel-line"></div>
-                <div class="skeleton skel-line"></div>
-                <div class="skeleton skel-line"></div>
-              </div>
-            </div>
-
-            <!-- Tab content Quốc Tế -->
-            <div class="fx-tab-content" id="fxContent-intl" style="margin-top: 10px;">
-              <table class="fx-table">
-                <tbody id="fxBody">
-                  <tr>
-                    <td colspan="3">
-                      <div class="skeleton skel-line"></div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td colspan="3">
-                      <div class="skeleton skel-line"></div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td colspan="3">
-                      <div class="skeleton skel-line"></div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <div class="api-note" style="margin-top:10px;">
-                <small id="fxSourceNote">Nguồn: Frankfurter (ECB) / ExchangeRate API · Tỷ giá tham chiếu</small>
-              </div>
-            </div>
-          </div>
-
-          <!-- Card 2: Quy Đổi -->
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title"><span class="icon">🧮</span> Công Cụ Quy Đổi Tỷ Giá</div>
-              <span class="card-badge badge-live"><span class="status-dot dot-green"></span>TỰ ĐỘNG</span>
-            </div>
-            <div class="converter-wrap">
-              <div class="conv-row">
-                <div class="conv-field">
-                  <label class="conv-label">Số tiền</label>
-                  <input type="number" id="convAmount" class="field-input" value="1" min="0" placeholder="Nhập số tiền..." />
-                </div>
-              </div>
-              <div class="conv-row conv-select-row">
-                <div class="conv-field">
-                  <label class="conv-label">Từ</label>
-                  <select id="convFrom" class="field-input select-currency">
-                    <!-- Dynamic currencies -->
-                  </select>
-                </div>
-                <button class="conv-swap-btn" id="convSwap" title="Đổi chiều">⇆</button>
-                <div class="conv-field">
-                  <label class="conv-label">Sang</label>
-                  <select id="convTo" class="field-input select-currency">
-                    <!-- Dynamic currencies -->
-                  </select>
-                </div>
-              </div>
-              <div class="conv-result-card">
-                <div class="conv-result-val" id="convResult">0 ₫</div>
-                <div class="conv-rate-detail" id="convRateDetail">1 USD = ...</div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      <!-- ════════ SECTION: GAS ════════ -->
-      <section class="content-section" id="section-gas">
-        <div class="page-title"><span class="page-icon">⛽</span> Giá Xăng Dầu</div>
-        <div class="card">
-          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
-            <div class="card-title"><span class="icon">⛽</span> Giá Xăng Dầu Việt Nam</div>
-            <div class="gas-controls" style="display: flex; align-items: center; gap: 8px;">
-              <select id="gasRegionSelect" style="background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 2px 6px; font-size: 11px; outline: none; cursor: pointer;">
-                <option value="1" style="background: var(--bg-card); color: var(--text-main);">Khu vực 1</option>
-                <option value="2" style="background: var(--bg-card); color: var(--text-main);">Khu vực 2</option>
-              </select>
-              <span class="card-badge badge-manual" id="gasLiveBadge"><span class="status-dot dot-yellow"></span>ƯỚC TÍNH</span>
-            </div>
-          </div>
-          <div class="gas-grid" id="gasGrid"></div>
-          <div class="gas-updated" id="gasUpdated"></div>
-        </div>
+      <!-- ════════ SECTION: FINANCE ════════ -->
+      <section class="content-section active" id="section-finance">
+        <div class="page-title"><span class="page-icon">💰</span> Thị Trường Tài Chính</div>
+        <div id="financeContent"></div>
       </section>
 
       <!-- ════════ SECTION: WEATHER ════════ -->
@@ -458,54 +246,7 @@
         </div>
       </section>
 
-      <!-- ════════ SECTION: TRAFFIC ════════ -->
-      <section class="content-section" id="section-traffic">
-        <div class="page-title"><span class="page-icon">🚔</span> Tra Cứu Phạt Nguội</div>
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title"><span class="icon">🚔</span> Tra Cứu Phạt Nguội</div>
-            <span class="card-badge badge-live"><span class="status-dot dot-green"></span>NHÚNG TRỰC TIẾP</span>
-          </div>
-          <!-- Dynamic results -->
-          <div id="trafficResult"></div>
-        </div>
-      </section>
 
-      <!-- ════════ SECTION: POWER ════════ -->
-      <section class="content-section" id="section-power">
-        <div class="page-title"><span class="page-icon">⚡</span> Lịch Cúp Điện</div>
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title"><span class="icon">⚡</span> Lịch Cúp Điện Theo Khu Vực</div>
-            <span class="card-badge badge-live"><span class="status-dot dot-green"></span>EVNSPC LIVE</span>
-          </div>
-          <div id="powerContent"></div>
-        </div>
-      </section>
-
-      <!-- ════════ SECTION: AQI ════════ -->
-      <section class="content-section" id="section-aqi">
-        <div class="page-title"><span class="page-icon">🌫️</span> Chất Lượng Không Khí</div>
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title"><span class="icon">🌫️</span> Air Quality Index (AQI)</div>
-            <span class="card-badge badge-live"><span class="status-dot dot-green"></span>LIVE</span>
-          </div>
-          <div id="aqiContent"></div>
-        </div>
-      </section>
-
-      <!-- ════════ SECTION: VNINDEX ════════ -->
-      <section class="content-section" id="section-vnindex">
-        <div class="page-title"><span class="page-icon">📈</span> Chứng Khoán Việt Nam</div>
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title"><span class="icon">📈</span> VN-Index · HNX · UPCOM</div>
-            <span class="card-badge badge-live"><span class="status-dot dot-green"></span>LIVE</span>
-          </div>
-          <div id="vnindexContent"></div>
-        </div>
-      </section>
 
       <!-- ════════ SECTION: NEWS ════════ -->
       <section class="content-section" id="section-news">
@@ -523,6 +264,58 @@
 
 
 
+
+      <!-- ════════ SECTION: QR CODE & SHORTENER ════════ -->
+      <section class="content-section" id="section-qrcode">
+        <div class="page-title"><span class="page-icon">🔗</span> QR &amp; Rút Gọn Link</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">🔗</span> Tạo QR Code Nghệ Thuật &amp; Rút Gọn Link</div>
+          </div>
+          <div id="qrcodeContent">
+            <div class="skeleton skel-big"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: RETRO EMULATOR ════════ -->
+      <section class="content-section" id="section-emulator">
+        <div class="page-title"><span class="page-icon">🎮</span> Game Giả Lập Cổ Điển</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">🎮</span> Trình Giả Lập NES (Điện tử 4 nút)</div>
+          </div>
+          <div id="emulatorContent">
+            <div class="skeleton skel-big"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: TYPING SPEED TEST ════════ -->
+      <section class="content-section" id="section-typing-test">
+        <div class="page-title"><span class="page-icon">⌨️</span> Luyện Gõ Phím Nhanh</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">⌨️</span> Monkeytype Mini · Đo WPM &amp; Độ Chính Xác</div>
+          </div>
+          <div id="typingTestContent">
+            <div class="skeleton skel-big"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: UNIVERSAL CONVERTER ════════ -->
+      <section class="content-section" id="section-converter">
+        <div class="page-title"><span class="page-icon">📏</span> Bộ Chuyển Đổi Đơn Vị Toàn Năng</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">📏</span> Chuyển Đổi Dữ Liệu · Nhiệt Độ · Độ Dài · Múi Giờ</div>
+          </div>
+          <div id="converterContent">
+            <div class="skeleton skel-big"></div>
+          </div>
+        </div>
+      </section>
 
       <!-- ════════ SECTION: TAX CALC ════════ -->
       <section class="content-section" id="section-tax-calc">
@@ -629,6 +422,12 @@
           </div>
           <div id="mediaContent"></div>
         </div>
+      </section>
+
+      <!-- ════════ SECTION: FOCUS MODE ════════ -->
+      <section class="content-section" id="section-focus">
+        <div class="page-title"><span class="page-icon">🍅</span> Chế Độ Tập Trung</div>
+        <div id="focusContent"></div>
       </section>
 
       <!-- Footer -->

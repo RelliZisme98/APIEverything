@@ -556,3 +556,37 @@
   color: var(--text-muted);
   border: 1px solid rgba(255,255,255,0.06);
 }
+
+/* Add event button styles */
+.hl-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.cal-btn-add {
+  background: var(--gradient-brand);
+  border: none;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--glow-blue);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cal-btn-add:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+  box-shadow: 0 4px 12px rgba(96, 165, 250, 0.25);
+}
+
+.cal-btn-add:active {
+  transform: translateY(0);
+}

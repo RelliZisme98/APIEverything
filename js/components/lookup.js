@@ -74,10 +74,12 @@ export function renderLookup() {
     <div class="lk-wrap">
       <!-- Tabs -->
       <div class="lk-tabs">
-        <button class="lk-tab-btn active" data-pane="spam">🛡️ Kiểm tra SĐT &amp; Email</button>
-        <button class="lk-tab-btn" data-pane="tax">🏢 Tra cứu Mã số thuế</button>
-        <button class="lk-tab-btn" data-pane="postal">📮 Mã bưu điện (ZIP)</button>
-        <button class="lk-tab-btn" data-pane="gov">🏛️ Dịch vụ công Việt Nam</button>
+        <button class="lk-tab-btn active" data-pane="spam">🛡️ Kiểm tra Spam</button>
+        <button class="lk-tab-btn" data-pane="tax">🏢 Mã số thuế</button>
+        <button class="lk-tab-btn" data-pane="postal">📮 Mã bưu chính</button>
+        <button class="lk-tab-btn" data-pane="gov">🏛️ Dịch vụ công</button>
+        <button class="lk-tab-btn" data-pane="power">⚡ Lịch Cúp Điện</button>
+        <button class="lk-tab-btn" data-pane="traffic">🚔 Phạt Nguội</button>
       </div>
 
       <!-- PANE 1: SPAM CHECK -->
@@ -233,6 +235,33 @@ export function renderLookup() {
           </div>
         </div>
       </div>
+
+      <!-- PANE 5: POWER OUTAGES -->
+      <div class="lk-pane" id="pane-power">
+        <div class="travel-title-sub">⚡ Tra Cứu Lịch Cúp Điện Toàn Quốc</div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">
+          Bản đồ lịch ngừng giảm cung cấp điện chi tiết các khu vực của EVN trên toàn quốc.
+        </div>
+        <div style="position: relative; width: 100%; height: 750px; overflow: hidden; border-radius: 8px; background: #121214; border: 1px solid var(--border);">
+          <div id="po-iframe-loader" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #121214; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; color: #a0a0ab; font-size: 14px;">
+            <div style="width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.08); border-top-color: #60a5fa; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 12px;"></div>
+            <span>Đang kết nối tới máy chủ bản đồ toàn quốc...</span>
+          </div>
+          <iframe id="po-iframe" src="https://lichcupdien.app" style="width: 100%; height: 100%; border: none; opacity: 0; transition: opacity 0.3s;" sandbox="allow-scripts allow-forms allow-same-origin allow-popups" allowfullscreen></iframe>
+        </div>
+      </div>
+
+      <!-- PANE 6: TRAFFIC FINES -->
+      <div class="lk-pane" id="pane-traffic">
+        <div class="travel-title-sub">🚔 Tra Cứu Phạt Nguội Giao Thông</div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">
+          Tra cứu trực tiếp vi phạm phạt nguội giao thông của xe ô tô, xe máy qua nguồn dữ liệu PhatNguoi.vn.
+        </div>
+        <div style="position: relative; width: 100%; height: 750px; overflow: hidden; border-radius: 8px; background: #121214; border: 1px solid var(--border);">
+          <iframe src="https://phatnguoi.vn" style="width: 100%; height: 100%; border: none;" sandbox="allow-scripts allow-forms allow-same-origin allow-popups" allowfullscreen></iframe>
+        </div>
+      </div>
+
     </div>
   `;
 
@@ -320,6 +349,16 @@ export function renderLookup() {
   document.getElementById('gplxInput')?.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') document.getElementById('btnCheckGPLX').click();
   });
+
+  // Bind loader for power outages iframe
+  const iframe = document.getElementById('po-iframe');
+  const loader = document.getElementById('po-iframe-loader');
+  if (iframe && loader) {
+    iframe.addEventListener('load', () => {
+      loader.style.display = 'none';
+      iframe.style.opacity = '1';
+    });
+  }
 }
 
 function handleSpamCheck() {
@@ -332,7 +371,6 @@ function handleSpamCheck() {
     return;
   }
 
-  // Client-side validations
   if (input.includes('@')) {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     if (!emailRegex.test(input)) {
@@ -468,7 +506,6 @@ async function handleTaxCheck() {
     return;
   }
 
-  // Client-side validations
   const isNumericMST = /^[0-9]+[0-9-]*$/.test(input);
   if (isNumericMST) {
     const cleanMST = input.replace(/[^0-9]/g, '');
@@ -501,7 +538,6 @@ async function handleTaxCheck() {
 
     let html = `<div style="display:flex; flex-direction:column; gap:12px; max-height:450px; overflow-y:auto; padding-right:4px;">`;
     data.results.forEach(company => {
-      // Display mstImg if present, else plaintext mst
       const mstHTML = company.mstImg 
         ? `<img src="${company.mstImg}" style="max-height: 18px; vertical-align: middle;" alt="MST" />`
         : company.mst;

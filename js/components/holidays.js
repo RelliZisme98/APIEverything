@@ -135,6 +135,7 @@ export function renderHolidays(containerId = 'holidaysContent') {
         icon: '👤',
         note: e.dateType === 'lunar' ? `${e.day}/${e.month} âm` : `${e.day}/${e.month} dương`,
         dateObj: nextDate,
+        customEventId: e.id,
       });
     }
   });
@@ -174,7 +175,8 @@ export function renderHolidays(containerId = 'holidaysContent') {
     const noteText = h.note ? ` · ${h.note}` : '';
 
     return `
-      <div class="hl-item ${isHoliday ? 'hl-item--holiday' : ''} ${isCustom ? 'hl-item--custom' : ''}">
+      <div class="hl-item ${isHoliday ? 'hl-item--holiday' : ''} ${isCustom ? 'hl-item--custom' : ''}"
+           ${isCustom ? `style="cursor: pointer;" onclick="window._calEditCustomEvent('${h.customEventId}')"` : ''}>
         <div class="hl-icon" style="background: ${clr}12; color: ${clr};">${icon}</div>
         <div class="hl-body">
           <div class="hl-name" style="${isCustom ? 'color: var(--accent-cyan); font-weight: 500;' : ''}">${h.name}</div>
@@ -203,7 +205,12 @@ export function renderHolidays(containerId = 'holidaysContent') {
 
   el.innerHTML = `
     ${heroHtml}
-    <div class="hl-section-label">📅 Lịch ngày lễ & sự kiện sắp tới</div>
+    <div class="hl-section-header">
+      <div class="hl-section-label" style="margin-bottom: 0;">📅 Lịch ngày lễ & sự kiện sắp tới</div>
+      <button class="cal-btn-add" onclick="window._calOpenAddEventModal()">
+        + Thêm sự kiện
+      </button>
+    </div>
     <div class="hl-list">${items}</div>
-    <div class="hl-note">* Các ngày lễ âm lịch được tính toán động dựa trên thuật toán lịch Việt Nam. Các sự kiện cá nhân được thêm tự động từ tab Lịch Âm Dương.</div>`;
+    <div class="hl-note">* Các ngày lễ âm lịch được tính toán động dựa trên thuật toán lịch Việt Nam. Các sự kiện cá nhân có thể được thêm từ nút "Thêm sự kiện" hoặc bằng cách chọn ngày trên mini calendar.</div>`;
 }
