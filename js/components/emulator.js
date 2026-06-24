@@ -139,9 +139,10 @@ function buildUI(container) {
 
                 <!-- Floating HUD overlay buttons -->
                 <div class="emu-screen-hud" id="emuScreenHud">
-                  <button class="emu-hud-btn" id="emuHudReset" title="Chơi lại từ đầu (Reset)">🔄 Chơi lại</button>
-                  <button class="emu-hud-btn btn-danger-hud" id="emuHudPower" title="Tắt game (Power Off)">🔌 Tắt game</button>
-                  <button class="emu-hud-btn" id="emuHudMute" title="Tắt/Bật tiếng">🔊 Mute</button>
+                  <button class="emu-hud-btn" id="emuHudReset" title="Chơi lại nhanh (Reset)">🔄 Reset</button>
+                  <button class="emu-hud-btn" id="emuHudSave" title="Lưu nhanh trạng thái">💾 Lưu</button>
+                  <button class="emu-hud-btn" id="emuHudLoad" title="Tải nhanh trạng thái">📂 Tải</button>
+                  <button class="emu-hud-btn btn-danger-hud" id="emuHudPower" title="Tắt game (Power Off)">🔌 Tắt</button>
                 </div>
               </div>
             </div>
@@ -244,7 +245,8 @@ function setupEmulator() {
   const hudEl = document.getElementById('emuScreenHud');
   const hudReset = document.getElementById('emuHudReset');
   const hudPower = document.getElementById('emuHudPower');
-  const hudMute = document.getElementById('emuHudMute');
+  const hudSave = document.getElementById('emuHudSave');
+  const hudLoad = document.getElementById('emuHudLoad');
 
   // Start Prompt elements
   const promptEl = document.getElementById('emuScreenStartPrompt');
@@ -253,6 +255,11 @@ function setupEmulator() {
 
   let isMuted = false;
   let isPoweredOn = false;
+  let activeGameId = '';
+  
+  // State serialization buffers
+  let autoCheckpointState = null;
+  let manualSaveState = null;
 
   function updateScreenUIState() {
     if (isPoweredOn) {
@@ -272,16 +279,6 @@ function setupEmulator() {
       }
       if (hudEl) hudEl.style.display = 'none';
       if (promptEl) promptEl.style.display = 'none';
-    }
-
-    // Sync Mute status text on HUD
-    if (hudMute) {
-      hudMute.innerHTML = isMuted ? '🔇 Bật tiếng' : '🔊 Tắt tiếng';
-      if (isMuted) {
-        hudMute.style.background = '#f59e0b';
-      } else {
-        hudMute.style.background = '';
-      }
     }
   }
 
@@ -307,6 +304,19 @@ function setupEmulator() {
         nesBrowser.nes.buttonDown(1, 3);
         setTimeout(() => {
           nesBrowser.nes.buttonUp(1, 3);
+
+          // Capture auto-checkpoint after 1.5 seconds (bypasses intro screens/menus)
+          setTimeout(() => {
+            if (nesBrowser && isPoweredOn && activeGameId) {
+              try {
+                autoCheckpointState = nesBrowser.nes.toJSON();
+                console.log('[Emulator] Auto-checkpoint captured for ' + activeGameId);
+              } catch (e) {
+                console.error('[Emulator] Failed to save auto-checkpoint:', e);
+              }
+            }
+          }, 1500);
+
         }, 150);
       }
     });
@@ -342,6 +352,8 @@ function setupEmulator() {
     }
     containerScreen.innerHTML = '';
     if (promptEl) promptEl.style.display = 'none';
+    autoCheckpointState = null;
+    manualSaveState = null;
   }
 
   async function loadRomFromUrl(url, name) {
@@ -374,6 +386,7 @@ function setupEmulator() {
 
       // Find instructions and show the prompt overlay
       const cleanName = name.replace(/[\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF]/g, '').trim();
+      activeGameId = cleanName;
       const gameObj = HOMEBREW_GAMES.find(g => g.name.includes(cleanName) || cleanName.includes(g.name));
       const instructions = gameObj ? gameObj.instructions : 'Nhấn nút START (phím Enter) để bắt đầu.';
       showStartPrompt(cleanName, instructions);
@@ -402,11 +415,13 @@ function setupEmulator() {
 
       isPoweredOn = true;
       led.classList.add('active');
-      statusEl.textContent = `🟢 Running: ${file.name.replace('.nes', '')}`;
+      const localGameId = file.name.replace('.nes', '');
+      activeGameId = localGameId;
+      statusEl.textContent = `🟢 Running: ${localGameId}`;
       btnReset.disabled = false;
       updateScreenUIState();
 
-      showStartPrompt(file.name.replace('.nes', ''), 'Bấm nút START (Enter) hoặc nhấp vào đây để bắt đầu chơi.');
+      showStartPrompt(localGameId, 'Bấm nút START (Enter) hoặc nhấp vào đây để bắt đầu chơi.');
     };
     reader.readAsBinaryString(file);
   });
@@ -450,6 +465,21 @@ function setupEmulator() {
 
   btnReset.addEventListener('click', () => {
     if (nesBrowser && isPoweredOn) {
+      // If we have an auto-checkpoint state, load it for an instant retry!
+      if (autoCheckpointState) {
+        try {
+          nesBrowser.nes.fromJSON(autoCheckpointState);
+          statusEl.textContent = '⚡ Reset nhanh màn chơi!';
+          setTimeout(() => {
+            if (isPoweredOn && activeGameId) statusEl.textContent = `🟢 Running: ${activeGameId}`;
+          }, 1000);
+          return;
+        } catch (e) {
+          console.error('[Emulator] Checkpoint restore failed, falling back to full reset', e);
+        }
+      }
+
+      // Full hardware reset fallback
       nesBrowser.nes.reloadROM();
       statusEl.textContent = '🟢 Resetted';
     }
@@ -464,7 +494,6 @@ function setupEmulator() {
       btnMute.textContent = '🔊 MUTE';
       btnMute.style.background = '';
       isMuted = false;
-      updateScreenUIState();
     } else {
       // Mute (Override samples writing with empty function)
       if (!nesBrowser.nes.audio.originalWriteSample) {
@@ -474,14 +503,67 @@ function setupEmulator() {
       btnMute.textContent = '🔇 UNMUTE';
       btnMute.style.background = '#f59e0b';
       isMuted = true;
-      updateScreenUIState();
     }
   });
+
+  // Attach Save and Load state handlers
+  if (hudSave) {
+    hudSave.addEventListener('click', () => {
+      if (nesBrowser && isPoweredOn) {
+        try {
+          manualSaveState = nesBrowser.nes.toJSON();
+          if (activeGameId) {
+            localStorage.setItem(`nes_save_${activeGameId}`, JSON.stringify(manualSaveState));
+          }
+          statusEl.textContent = '💾 Đã lưu trạng thái!';
+          setTimeout(() => {
+            if (isPoweredOn && activeGameId) statusEl.textContent = `🟢 Running: ${activeGameId}`;
+          }, 1500);
+        } catch (e) {
+          console.error(e);
+          statusEl.textContent = '⚠️ Lỗi lưu nhanh';
+        }
+      }
+    });
+  }
+
+  if (hudLoad) {
+    hudLoad.addEventListener('click', () => {
+      if (nesBrowser && isPoweredOn) {
+        let stateToLoad = manualSaveState;
+        if (!stateToLoad && activeGameId) {
+          const stored = localStorage.getItem(`nes_save_${activeGameId}`);
+          if (stored) {
+            try {
+              stateToLoad = JSON.parse(stored);
+            } catch (e) {}
+          }
+        }
+
+        if (stateToLoad) {
+          try {
+            nesBrowser.nes.fromJSON(stateToLoad);
+            statusEl.textContent = '📂 Đã tải trạng thái!';
+            setTimeout(() => {
+              if (isPoweredOn && activeGameId) statusEl.textContent = `🟢 Running: ${activeGameId}`;
+            }, 1500);
+          } catch (e) {
+            console.error(e);
+            statusEl.textContent = '⚠️ Lỗi tải nhanh';
+          }
+        } else {
+          statusEl.textContent = '⚠️ Chưa có file lưu!';
+          setTimeout(() => {
+            if (isPoweredOn && activeGameId) statusEl.textContent = `🟢 Running: ${activeGameId}`;
+          }, 1500);
+        }
+      }
+    });
+  }
 
   // Connect screen HUD overlay buttons to console buttons
   if (hudReset) hudReset.addEventListener('click', () => btnReset.click());
   if (hudPower) hudPower.addEventListener('click', () => btnPower.click());
-  if (hudMute) hudMute.addEventListener('click', () => btnMute.click());
 
   // Initial State Setup
   updateScreenUIState();
@@ -536,28 +618,34 @@ function setupGamepadInput() {
     // Mouse events
     btn.addEventListener('mousedown', (e) => {
       e.preventDefault();
+      btn.classList.add('active');
       handlePress(btnName);
     });
     btn.addEventListener('mouseup', (e) => {
       e.preventDefault();
+      btn.classList.remove('active');
       handleRelease(btnName);
     });
     btn.addEventListener('mouseleave', (e) => {
       e.preventDefault();
+      btn.classList.remove('active');
       handleRelease(btnName);
     });
 
     // Touch events
     btn.addEventListener('touchstart', (e) => {
       e.preventDefault();
+      btn.classList.add('active');
       handlePress(btnName);
     });
     btn.addEventListener('touchend', (e) => {
       e.preventDefault();
+      btn.classList.remove('active');
       handleRelease(btnName);
     });
     btn.addEventListener('touchcancel', (e) => {
       e.preventDefault();
+      btn.classList.remove('active');
       handleRelease(btnName);
     });
   });
