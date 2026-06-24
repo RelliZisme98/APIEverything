@@ -43,6 +43,7 @@
   <link rel="stylesheet" href="css/lookup.css" />
   <link rel="stylesheet" href="css/media.css" />
   <link rel="stylesheet" href="css/file-tools.css" />
+  <link rel="stylesheet" href="css/qrcode.css" />
   <link rel="stylesheet" href="css/mobile.css" />
 </head>
 
@@ -112,8 +113,11 @@
 
         <!-- Nav: Công cụ -->
         <div class="sidebar-section-label" style="padding-left:0;margin-top:6px;">🔧 Công cụ</div>
-
-
+        <button class="sidebar-nav-item" data-section="qrcode" onclick="switchSection('qrcode')">
+          <span class="nav-icon">🔗</span>
+          <span class="nav-label">QR &amp; Rút Gọn Link</span>
+          <span class="nav-badge" style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">NEW</span>
+        </button>
         <button class="sidebar-nav-item" data-section="tax-calc" onclick="switchSection('tax-calc')">
           <span class="nav-icon">🧮</span>
           <span class="nav-label">Tính Thuế TNCN</span>
@@ -242,6 +246,19 @@
 
 
 
+
+      <!-- ════════ SECTION: QR CODE & SHORTENER ════════ -->
+      <section class="content-section" id="section-qrcode">
+        <div class="page-title"><span class="page-icon">🔗</span> QR &amp; Rút Gọn Link</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">🔗</span> Tạo QR Code Nghệ Thuật &amp; Rút Gọn Link</div>
+          </div>
+          <div id="qrcodeContent">
+            <div class="skeleton skel-big"></div>
+          </div>
+        </div>
+      </section>
 
       <!-- ════════ SECTION: TAX CALC ════════ -->
       <section class="content-section" id="section-tax-calc">

@@ -2289,6 +2289,77 @@ async function handleTTS(request) {
   }
 }
 
+
+// ─── /api/shorten — URL Shortener Proxy ──────────────────────────────
+async function handleShorten(request) {
+  if (request.method === 'OPTIONS') return preflight();
+  if (request.method !== 'POST') {
+    return cors(JSON.stringify({ error: 'Method not allowed' }), 405);
+  }
+
+  try {
+    const { url } = await request.json();
+    if (!url) {
+      return cors(JSON.stringify({ error: 'Thiếu đường dẫn (url) cần rút gọn.' }), 400);
+    }
+
+    // 1. cleanuri.com
+    try {
+      const response = await fetch('https://cleanuri.com/api/v1/shorten', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `url=${encodeURIComponent(url)}`,
+        signal: AbortSignal.timeout(5000)
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.result_url) {
+          return cors(JSON.stringify({ shorturl: data.result_url }));
+        }
+      }
+    } catch (e) {
+      console.warn('[Shorten] cleanuri failed:', e.message);
+    }
+
+    // 2. gotiny.cc
+    try {
+      const response = await fetch('https://gotiny.cc/api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input: url }),
+        signal: AbortSignal.timeout(5000)
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data[0] && data[0].code) {
+          return cors(JSON.stringify({ shorturl: `https://gotiny.cc/${data[0].code}` }));
+        }
+      }
+    } catch (e) {
+      console.warn('[Shorten] gotiny failed:', e.message);
+    }
+
+    // 3. tinyurl.com
+    try {
+      const response = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`, {
+        signal: AbortSignal.timeout(5000)
+      });
+      if (response.ok) {
+        const shortUrl = await response.text();
+        if (shortUrl && shortUrl.startsWith('http')) {
+          return cors(JSON.stringify({ shorturl: shortUrl.trim() }));
+        }
+      }
+    } catch (e) {
+      console.warn('[Shorten] tinyurl failed:', e.message);
+    }
+
+    return cors(JSON.stringify({ error: 'Không thể rút gọn link bằng các dịch vụ công cộng hiện tại. Vui lòng thử lại sau.' }), 502);
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
 export default {
   async fetch(request, env) {
     const { pathname } = new URL(request.url);
@@ -2315,6 +2386,8 @@ export default {
     if (pathname === '/vietlott') return handleVietlott(request);
     if (pathname === '/api/ai')  return handleAI(request, env);
     if (pathname === '/api/tts')  return handleTTS(request);
+    if (pathname === '/api/shorten') return handleShorten(request);
+
 
 
     // ── Routes bảo mật (key ẩn trong Cloudflare Secrets) ──
