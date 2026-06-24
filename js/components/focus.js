@@ -5,11 +5,12 @@
  * Features:
  * - Animated SVG ring countdown timer
  * - Work / Short Break / Long Break modes
- * - Customizable durations
+ * - Customizable durations (Hours and Minutes)
  * - 4-session Pomodoro cycle tracking
  * - Ambient sounds: Lofi, Rain, Forest, Cafe, Ocean, White Noise
  * - Volume control, play/stop toggle
  * - Browser Notifications when session ends
+ * - Live dynamic digital clock
  */
 
 // ── Durations (in seconds) ──────────────────────────────
@@ -21,7 +22,6 @@ const SOUNDS = [
     id: 'lofi',
     name: 'Lofi Hip-Hop',
     emoji: '🎵',
-    // lofi radio stream via YouTube embed audio proxy (fallback: generated tone)
     url: 'https://stream.zeno.fm/f3wvbbqmdg8uv',
   },
   {
@@ -128,6 +128,18 @@ export function renderFocus() {
 
     <div class="focus-layout">
 
+      <!-- ══ DIGITAL CLOCK ══ -->
+      <div class="focus-clock-card" style="grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(99, 102, 241, 0.2); padding: 18px 28px; border-radius: 20px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.05); gap: 20px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <span style="font-size: 28px; line-height: 1;">🕰️</span>
+          <div>
+            <div style="font-size: 11px; color: rgba(165, 180, 252, 0.7); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Giờ Hiện Tại</div>
+            <div id="focus-current-date" style="font-size: 14px; color: var(--text-secondary); margin-top: 4px; font-weight: 500;">Đang tải ngày tháng...</div>
+          </div>
+        </div>
+        <div id="focus-current-time" style="font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700; color: #a5b4fc; text-shadow: 0 0 10px rgba(165, 180, 252, 0.4); letter-spacing: 1px; font-variant-numeric: tabular-nums;">00:00:00</div>
+      </div>
+
       <!-- ══ POMODORO CARD ══ -->
       <div class="pomodoro-card">
 
@@ -185,22 +197,37 @@ export function renderFocus() {
           ${[0,1,2,3].map(i => `<div class="pomodoro-dot ${i < completedSessions ? 'filled' : ''}" data-dot="${i}"></div>`).join('')}
         </div>
 
-        <!-- Custom durations -->
-        <div class="pomodoro-custom">
-          <div class="pomodoro-custom-group">
-            <label>Làm việc (phút)</label>
-            <input type="number" id="customWork" min="1" max="120" value="25"
-              onchange="focusUpdateDuration('work', this.value)">
+        <!-- Custom durations with Hours and Minutes -->
+        <div class="pomodoro-custom" style="display: flex; flex-direction: column; gap: 10px; width: 100%; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+          <!-- Work Duration Row -->
+          <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <span style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); min-width: 90px; text-align: left;">🎯 Làm việc:</span>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <input type="number" id="customWorkHour" min="0" max="23" value="0" style="width: 55px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e2e8f0; padding: 6px; text-align: center; font-size: 13px; font-weight: 600;" onchange="focusUpdateDuration('work')" />
+              <span style="font-size: 11px; color: var(--text-muted);">giờ</span>
+              <input type="number" id="customWorkMin" min="0" max="59" value="25" style="width: 55px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e2e8f0; padding: 6px; text-align: center; font-size: 13px; font-weight: 600;" onchange="focusUpdateDuration('work')" />
+              <span style="font-size: 11px; color: var(--text-muted);">phút</span>
+            </div>
           </div>
-          <div class="pomodoro-custom-group">
-            <label>Nghỉ ngắn (phút)</label>
-            <input type="number" id="customShort" min="1" max="30" value="5"
-              onchange="focusUpdateDuration('short', this.value)">
+          <!-- Short Break Row -->
+          <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <span style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); min-width: 90px; text-align: left;">☕ Nghỉ ngắn:</span>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <input type="number" id="customShortHour" min="0" max="23" value="0" style="width: 55px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e2e8f0; padding: 6px; text-align: center; font-size: 13px; font-weight: 600;" onchange="focusUpdateDuration('short')" />
+              <span style="font-size: 11px; color: var(--text-muted);">giờ</span>
+              <input type="number" id="customShortMin" min="0" max="59" value="5" style="width: 55px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e2e8f0; padding: 6px; text-align: center; font-size: 13px; font-weight: 600;" onchange="focusUpdateDuration('short')" />
+              <span style="font-size: 11px; color: var(--text-muted);">phút</span>
+            </div>
           </div>
-          <div class="pomodoro-custom-group">
-            <label>Nghỉ dài (phút)</label>
-            <input type="number" id="customLong" min="1" max="60" value="15"
-              onchange="focusUpdateDuration('long', this.value)">
+          <!-- Long Break Row -->
+          <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <span style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); min-width: 90px; text-align: left;">🌙 Nghỉ dài:</span>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <input type="number" id="customLongHour" min="0" max="23" value="0" style="width: 55px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e2e8f0; padding: 6px; text-align: center; font-size: 13px; font-weight: 600;" onchange="focusUpdateDuration('long')" />
+              <span style="font-size: 11px; color: var(--text-muted);">giờ</span>
+              <input type="number" id="customLongMin" min="0" max="59" value="15" style="width: 55px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e2e8f0; padding: 6px; text-align: center; font-size: 13px; font-weight: 600;" onchange="focusUpdateDuration('long')" />
+              <span style="font-size: 11px; color: var(--text-muted);">phút</span>
+            </div>
           </div>
         </div>
       </div>
@@ -247,6 +274,34 @@ export function renderFocus() {
 
   updateRingDisplay();
 
+  // Live clock interval update
+  if (window.focusClockInterval) {
+    clearInterval(window.focusClockInterval);
+  }
+  function updateFocusClock() {
+    const timeEl = document.getElementById('focus-current-time');
+    const dateEl = document.getElementById('focus-current-date');
+    if (!timeEl || !dateEl) {
+      clearInterval(window.focusClockInterval);
+      window.focusClockInterval = null;
+      return;
+    }
+    const now = new Date();
+    const hh = now.getHours().toString().padStart(2, '0');
+    const mm = now.getMinutes().toString().padStart(2, '0');
+    const ss = now.getSeconds().toString().padStart(2, '0');
+    timeEl.textContent = `${hh}:${mm}:${ss}`;
+
+    const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+    const dayName = days[now.getDay()];
+    const dateStr = now.getDate().toString().padStart(2, '0');
+    const monthStr = (now.getMonth() + 1).toString().padStart(2, '0');
+    const yearStr = now.getFullYear();
+    dateEl.textContent = `${dayName}, ${dateStr}/${monthStr}/${yearStr}`;
+  }
+  setTimeout(updateFocusClock, 0);
+  window.focusClockInterval = setInterval(updateFocusClock, 1000);
+
   // Request notification permission silently
   if ('Notification' in window && Notification.permission === 'default') {
     Notification.requestPermission();
@@ -257,9 +312,26 @@ export function renderFocus() {
 // POMODORO LOGIC
 // ══════════════════════════════════════════════════════
 function formatTime(sec) {
-  const m = Math.floor(sec / 60).toString().padStart(2, '0');
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60).toString().padStart(2, '0');
   const s = (sec % 60).toString().padStart(2, '0');
+  if (h > 0) {
+    return `${h.toString().padStart(2, '0')}:${m}:${s}`;
+  }
   return `${m}:${s}`;
+}
+
+function getCustomDuration(mode) {
+  const prefix = mode === 'work' ? 'Work' : mode === 'short' ? 'Short' : 'Long';
+  const h = parseInt(document.getElementById(`custom${prefix}Hour`)?.value || 0);
+  const m = parseInt(document.getElementById(`custom${prefix}Min`)?.value || 0);
+  const totalSec = (h * 3600) + (m * 60);
+  if (totalSec <= 0) {
+    if (mode === 'work') return 25 * 60;
+    if (mode === 'short') return 5 * 60;
+    return 15 * 60;
+  }
+  return totalSec;
 }
 
 function updateRingDisplay() {
@@ -298,9 +370,9 @@ window.focusSwitchMode = function(mode) {
   currentMode = mode;
 
   const durations = {
-    work:  parseInt(document.getElementById('customWork')?.value  || 25) * 60,
-    short: parseInt(document.getElementById('customShort')?.value || 5)  * 60,
-    long:  parseInt(document.getElementById('customLong')?.value  || 15) * 60,
+    work:  getCustomDuration('work'),
+    short: getCustomDuration('short'),
+    long:  getCustomDuration('long'),
   };
   timeLeft = durations[mode];
   totalTime = timeLeft;
@@ -349,9 +421,9 @@ window.focusReset = function() {
   isRunning = false;
 
   const durations = {
-    work:  parseInt(document.getElementById('customWork')?.value  || 25) * 60,
-    short: parseInt(document.getElementById('customShort')?.value || 5)  * 60,
-    long:  parseInt(document.getElementById('customLong')?.value  || 15) * 60,
+    work:  getCustomDuration('work'),
+    short: getCustomDuration('short'),
+    long:  getCustomDuration('long'),
   };
   timeLeft = durations[currentMode];
   totalTime = timeLeft;
@@ -368,9 +440,9 @@ window.focusSkip = function() {
   onSessionEnd();
 };
 
-window.focusUpdateDuration = function(mode, val) {
+window.focusUpdateDuration = function(mode) {
   if (mode === currentMode && !isRunning) {
-    timeLeft = parseInt(val) * 60;
+    timeLeft = getCustomDuration(mode);
     totalTime = timeLeft;
     updateRingDisplay();
   }
@@ -442,8 +514,6 @@ function playBeep() {
   } catch(e) { /* AudioContext not available */ }
 }
 
-// ══════════════════════════════════════════════════════
-// AMBIENT SOUND ENGINE
 // ══════════════════════════════════════════════════════
 // AMBIENT SOUND ENGINE
 // ══════════════════════════════════════════════════════
@@ -627,4 +697,3 @@ window.focusSetVolume = function(val) {
   if (lofiAudio) lofiAudio.volume = ambientVolume;
   if (masterGain) masterGain.gain.value = ambientVolume;
 };
-
