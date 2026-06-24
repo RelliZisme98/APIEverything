@@ -24,7 +24,7 @@ export const FEEDS = {
   },
   genk: {
     label: 'GenK',
-    url: 'https://genk.vn/rss/tin-cong-nghe.rss',
+    url: 'https://genk.vn/rss/home.rss',
     color: '#10b981',
     logo: '💻',
   },
@@ -36,13 +36,13 @@ export const FEEDS = {
   },
   vietnamnet: {
     label: 'VietnamNet',
-    url: 'https://vietnamnet.vn/rss/tin-moi-nhat.rss',
+    url: 'https://vietnamnet.vn/rss/thoi-su.rss',
     color: '#059669',
     logo: '🌐',
   },
   vtv: {
     label: 'VTV News',
-    url: 'https://vtv.vn/tin-moi-nhat.rss',
+    url: 'https://vtv.vn/rss/home.rss',
     color: '#dc2626',
     logo: '📺',
   },
@@ -54,7 +54,7 @@ export const FEEDS = {
   },
   kenh14: {
     label: 'Kênh 14',
-    url: 'https://kenh14.vn/home.rss',
+    url: 'https://kenh14.vn/rss/home.rss',
     color: '#db2777',
     logo: '🌸',
   },

@@ -33,6 +33,10 @@ const ALLOWED_RSS = [
   'https://dantri.com.vn/rss/',
   'https://thanhnien.vn/rss/',
   'https://nhandan.vn/rss/',
+  'https://genk.vn/rss/',
+  'https://vietnamnet.vn/rss/',
+  'https://vtv.vn/rss/',
+  'https://kenh14.vn/rss/',
 ];
 
 async function handleNewsRSS(request) {
@@ -55,7 +59,7 @@ async function handleNewsRSS(request) {
 }
 
 // ─── /news-article ──────────────────────────────────────────────────
-const ALLOWED_ARTICLE_DOMAINS = ['vnexpress.net', 'tuoitre.vn', 'dantri.com.vn', 'thanhnien.vn', 'nhandan.vn'];
+const ALLOWED_ARTICLE_DOMAINS = ['vnexpress.net', 'tuoitre.vn', 'dantri.com.vn', 'thanhnien.vn', 'nhandan.vn', 'genk.vn', 'vietnamnet.vn', 'vtv.vn', 'kenh14.vn'];
 
 async function handleNewsArticle(request) {
   if (request.method === 'OPTIONS') return preflight();
@@ -71,7 +75,7 @@ async function handleNewsArticle(request) {
       redirect: 'follow',
     });
     const html = await res.text();
-    const article = extractArticle(html, targetUrl);
+    const article = await extractArticle(html, targetUrl);
     return new Response(JSON.stringify(article), {
       headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=600' },
     });
@@ -80,42 +84,48 @@ async function handleNewsArticle(request) {
   }
 }
 
-function extractArticle(html, url) {
-  const get = (re) => { const m = html.match(re); return m ? decode(m[1].trim()) : ''; };
+async function extractArticle(html, targetUrl) {
+  let title = '';
+  let description = '';
+  let content = '';
+  let publishedAt = '';
+  let thumbnail = '';
 
-  const title = get(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)/i)
-    || get(/<title[^>]*>([^<]+)<\/title>/i);
-  const description = get(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)/i)
-    || get(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']description["']/i);
-  const thumbnail = get(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)/i)
-    || get(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
-  const publishedAt = get(/published_time["']\s*content=["']([^"']+)/i)
-    || get(/datePublished["']\s*:\s*["']([^"']+)/i);
+  let inContentCount = 0;
+  let skipCount = 0;
 
-  // Extract main text from common containers
-  const containers = [
-    /<article[^>]*class="[^"]*fck_detail[^"]*"[^>]*>([\s\S]*?)<\/article>/i,
-    /<div[^>]*class="[^"]*detail-content[^"]*"[^>]*>([\s\S]*?)<\/div>\s*(?:<div[^>]*class="[^"]*relate|<section)/i,
-    /<div[^>]*class="[^"]*singular-content[^"]*"[^>]*>([\s\S]*?)<\/div>\s*(?:<div[^>]*class="[^"]*relate|<section)/i,
-    /<article[^>]*>([\s\S]*?)<\/article>/i,
-    /<main[^>]*>([\s\S]*?)<\/main>/i,
-  ];
+  const rewriter = new HTMLRewriter()
+    .on('meta[property="og:title"]', { element(el) { if (!title) title = el.getAttribute('content'); } })
+    .on('title', { text(chunk) { if (!title) title += chunk.text; } })
+    .on('meta[property="og:description"]', { element(el) { if (!description) description = el.getAttribute('content'); } })
+    .on('meta[name="description"]', { element(el) { if (!description) description = el.getAttribute('content'); } })
+    .on('meta[property="og:image"]', { element(el) { if (!thumbnail) thumbnail = el.getAttribute('content'); } })
+    .on('meta[property="article:published_time"]', { element(el) { if (!publishedAt) publishedAt = el.getAttribute('content'); } })
+    .on('script, style, figure.video, .relate, .box-related, .banner, .tin-lien-quan, .related-news', {
+      element(el) {
+        skipCount++;
+        el.onEndTag(() => { skipCount--; });
+      }
+    })
+    .on('article.fck_detail, .detail-content, .singular-content, .klw-body-top, .detail-cmain, .article-content, #main-detail, .article-detail, .maincontent, .content-detail, .post-content, article, main', {
+      element(el) {
+        inContentCount++;
+        el.onEndTag(() => { inContentCount--; });
+      },
+      text(chunk) {
+        if (inContentCount > 0 && skipCount === 0) {
+          content += chunk.text;
+        }
+      }
+    });
 
-  let raw = '';
-  for (const re of containers) {
-    const m = html.match(re);
-    if (m?.[1]?.length > 300) { raw = m[1]; break; }
-  }
+  await rewriter.transform(new Response(html)).text();
 
-  const content = raw
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[\s\S]*?<\/style>/gi, '')
-    .replace(/<figure[\s\S]*?<\/figure>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-    .replace(/\s{2,}/g, ' ').trim();
+  content = content.replace(/\s+/g, ' ').trim();
+  title = title ? decode(title).trim() : '';
+  description = description ? decode(description).trim() : '';
 
-  return { title, description, content: content || description, publishedAt, thumbnail, url };
+  return { title, description, content: content || description, publishedAt, thumbnail, url: targetUrl };
 }
 
 function decode(s) {
