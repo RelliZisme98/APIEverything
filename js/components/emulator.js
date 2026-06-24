@@ -181,11 +181,11 @@ function buildUI(container) {
             <div class="emu-action-buttons">
               <div class="emu-action-btn-wrap">
                 <div class="emu-action-btn emu-btn-b" data-button="B">B</div>
-                <label>B (Phím X)</label>
+                <label>B (Phím Z)</label>
               </div>
               <div class="emu-action-btn-wrap">
                 <div class="emu-action-btn emu-btn-a" data-button="A">A</div>
-                <label>A (Phím Z)</label>
+                <label>A (Phím X / Space)</label>
               </div>
             </div>
           </div>
@@ -193,7 +193,7 @@ function buildUI(container) {
           <!-- Keyboard Help -->
           <div class="emu-keyboard-help">
             <span class="emu-help-tag">⌨️ Phím điều khiển:</span>
-            <span>Di chuyển: <b>Arrow Keys</b> | A: <b>Z</b> | B: <b>X</b> | Select: <b>Shift</b> | Start: <b>Enter</b></span>
+            <span>Di chuyển: <b>Arrow Keys</b> | A: <b>X / Space</b> | B: <b>Z</b> | Select: <b>Shift</b> | Start: <b>Enter</b></span>
           </div>
         </div>
 
@@ -504,6 +504,13 @@ function setupGamepadInput() {
 
   function handlePress(btnName) {
     if (!nesBrowser) return;
+
+    // Dismiss overlay prompt on any gamepad interaction
+    const promptEl = document.getElementById('emuScreenStartPrompt');
+    if (promptEl && promptEl.style.display !== 'none') {
+      promptEl.style.display = 'none';
+    }
+
     const btnConst = buttons[btnName];
     if (btnConst !== undefined) {
       nesBrowser.nes.buttonDown(1, btnConst);
@@ -561,10 +568,11 @@ function setupGamepadInput() {
     'ArrowDown': 5,
     'ArrowLeft': 6,
     'ArrowRight': 7,
-    'z': 0,
-    'Z': 0,
-    'x': 1,
-    'X': 1,
+    'z': 1, // B
+    'Z': 1, // B
+    'x': 0, // A
+    'X': 0, // A
+    ' ': 0, // Space -> A
     'Enter': 3,
     'Shift': 2
   };
@@ -575,6 +583,13 @@ function setupGamepadInput() {
     if (button !== undefined) {
       e.preventDefault();
       e.stopPropagation();
+
+      // Dismiss overlay prompt on any keyboard interaction
+      const promptEl = document.getElementById('emuScreenStartPrompt');
+      if (promptEl && promptEl.style.display !== 'none') {
+        promptEl.style.display = 'none';
+      }
+
       nesBrowser.nes.buttonDown(1, button);
     }
   };
