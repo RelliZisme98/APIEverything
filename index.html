@@ -44,6 +44,7 @@
   <link rel="stylesheet" href="css/media.css" />
   <link rel="stylesheet" href="css/file-tools.css" />
   <link rel="stylesheet" href="css/qrcode.css" />
+  <link rel="stylesheet" href="css/emulator.css" />
   <link rel="stylesheet" href="css/mobile.css" />
 </head>
 
@@ -117,6 +118,11 @@
           <span class="nav-icon">🔗</span>
           <span class="nav-label">QR &amp; Rút Gọn Link</span>
           <span class="nav-badge" style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">NEW</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="emulator" onclick="switchSection('emulator')">
+          <span class="nav-icon">🎮</span>
+          <span class="nav-label">Game Giả Lập</span>
+          <span class="nav-badge" style="background:rgba(239,68,68,.15);color:#f87171;border-color:rgba(239,68,68,.3);">HOT</span>
         </button>
         <button class="sidebar-nav-item" data-section="tax-calc" onclick="switchSection('tax-calc')">
           <span class="nav-icon">🧮</span>
@@ -255,6 +261,19 @@
             <div class="card-title"><span class="icon">🔗</span> Tạo QR Code Nghệ Thuật &amp; Rút Gọn Link</div>
           </div>
           <div id="qrcodeContent">
+            <div class="skeleton skel-big"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: RETRO EMULATOR ════════ -->
+      <section class="content-section" id="section-emulator">
+        <div class="page-title"><span class="page-icon">🎮</span> Game Giả Lập Cổ Điển</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">🎮</span> Trình Giả Lập NES (Điện tử 4 nút)</div>
+          </div>
+          <div id="emulatorContent">
             <div class="skeleton skel-big"></div>
           </div>
         </div>

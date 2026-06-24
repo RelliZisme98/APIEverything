@@ -1,0 +1,523 @@
+/* ══════════════════════════════════════════
+   Retro Game Emulator Stylesheet
+   ══════════════════════════════════════════ */
+
+.emu-suite-wrap {
+  width: 100%;
+}
+
+.emu-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .emu-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* TV Cabinet Frame */
+.emu-tv-cabinet {
+  background: linear-gradient(135deg, #2a2e35, #121417);
+  border: 10px solid #1a1c1e;
+  border-radius: 20px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), 
+              0 0 0 1px rgba(255, 255, 255, 0.05),
+              inset 0 4px 10px rgba(255, 255, 255, 0.1);
+  padding: 16px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.emu-screen-bezel {
+  background: #0d0f12;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.emu-tv-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 0 4px;
+}
+
+/* Power LED Indicator */
+.emu-power-led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 6px #ef4444;
+  transition: all 0.3s;
+}
+
+.emu-power-led.active {
+  background: #22c55e;
+  box-shadow: 0 0 10px #22c55e, 0 0 20px #22c55e;
+}
+
+.emu-tv-brand {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 11px;
+  font-weight: 900;
+  color: #64748b;
+  letter-spacing: 0.1em;
+}
+
+.emu-tv-status {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: #3b82f6;
+  text-shadow: 0 0 4px rgba(59, 130, 246, 0.4);
+}
+
+/* Screen Container */
+#nes-screen-container {
+  width: 100%;
+  aspect-ratio: 256/240;
+  background: #000;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.9);
+  position: relative;
+}
+
+/* CRT Screen Scanlines / Curved glass effect */
+#nes-screen-container::after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+              linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  background-size: 100% 3px, 6px 100%;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0.15;
+}
+
+#nes-screen-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  display: block;
+}
+
+/* Console Control Buttons */
+.emu-tv-controls {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 14px;
+  padding: 0 6px;
+}
+
+.emu-btn-console {
+  background: #334155;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  color: #e2e8f0;
+  padding: 6px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  transition: all 0.2s;
+}
+
+.emu-btn-console:hover:not(:disabled) {
+  background: #475569;
+  border-color: #64748b;
+  color: #fff;
+}
+
+.emu-btn-console:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.emu-btn-console:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+#emuBtnPower {
+  border-color: #f87171;
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.05);
+}
+
+#emuBtnPower:hover {
+  background: #ef4444;
+  color: #fff;
+  border-color: #ef4444;
+}
+
+/* Virtual Gamepad */
+.emu-gamepad {
+  background: #d1d5db;
+  border: 4px solid #9ca3af;
+  border-radius: 16px;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+/* D-Pad Style */
+.emu-dpad {
+  width: 90px;
+  height: 90px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.emu-dpad-btn {
+  position: absolute;
+  background: #1f2937;
+  color: #9ca3af;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  transition: background 0.1s;
+}
+
+.emu-dpad-btn:active {
+  background: #000;
+  color: #fff;
+}
+
+.emu-dpad-up {
+  width: 30px; height: 32px;
+  top: 0; left: 30px;
+  border-radius: 4px 4px 0 0;
+}
+
+.emu-dpad-down {
+  width: 30px; height: 32px;
+  bottom: 0; left: 30px;
+  border-radius: 0 0 4px 4px;
+}
+
+.emu-dpad-left {
+  width: 32px; height: 30px;
+  top: 30px; left: 0;
+  border-radius: 4px 0 0 4px;
+}
+
+.emu-dpad-right {
+  width: 32px; height: 30px;
+  top: 30px; right: 0;
+  border-radius: 0 4px 4px 0;
+}
+
+.emu-dpad-center {
+  width: 30px; height: 30px;
+  top: 30px; left: 30px;
+  background: #1f2937;
+  box-shadow: none;
+  cursor: default;
+}
+
+/* Center System Buttons */
+.emu-gamepad-center {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.emu-center-btn-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.emu-center-btn-wrap label {
+  font-size: 8px;
+  font-weight: 800;
+  color: #4b5563;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.emu-sys-btn {
+  width: 38px;
+  height: 12px;
+  background: #7b7f87;
+  border-radius: 6px;
+  border: 1px solid #4b5563;
+  cursor: pointer;
+  box-shadow: inset 0 2px 2px rgba(0,0,0,0.5);
+}
+
+.emu-sys-btn:active {
+  background: #1f2937;
+}
+
+/* Action Buttons A / B */
+.emu-action-buttons {
+  display: flex;
+  gap: 12px;
+  transform: rotate(-10deg);
+}
+
+.emu-action-btn-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.emu-action-btn-wrap label {
+  font-size: 8px;
+  font-weight: 800;
+  color: #4b5563;
+  font-family: 'JetBrains Mono', monospace;
+  transform: rotate(10deg);
+  margin-top: 4px;
+}
+
+.emu-action-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #b91c1c;
+  border: 3px solid #1f2937;
+  color: #fff;
+  font-weight: 900;
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 3px 0 #7f1d1d, 0 4px 6px rgba(0,0,0,0.4);
+}
+
+.emu-action-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #7f1d1d, 0 1px 2px rgba(0,0,0,0.4);
+}
+
+/* Help Box */
+.emu-keyboard-help {
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.emu-help-tag {
+  color: var(--accent-blue);
+  font-weight: 700;
+  margin-right: 6px;
+}
+
+/* Library Column */
+.emu-library-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.emu-game-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.emu-game-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+
+.emu-game-card:hover {
+  border-color: rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+}
+
+.emu-game-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.emu-game-info {
+  flex: 1;
+}
+
+.emu-game-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+}
+
+.emu-game-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.emu-play-btn {
+  font-size: 10px;
+  padding: 6px 12px;
+  background: #2563eb;
+}
+
+/* Upload Box */
+.emu-upload-box {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.emu-upload-box:hover {
+  border-color: var(--accent-blue);
+}
+
+.emu-upload-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+.emu-upload-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+}
+
+/* ── Screen Wrapper and Overlay HUD ── */
+.emu-screen-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 256/240;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #000;
+}
+
+/* Standby Screen */
+.emu-screen-standby {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(circle at center, #1b2028 0%, #0d0f12 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  z-index: 5;
+  color: #64748b;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8);
+  transition: opacity 0.3s ease;
+}
+
+.emu-standby-inner {
+  max-width: 280px;
+}
+
+.emu-standby-logo {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 800;
+  color: #3b82f6;
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  margin-bottom: 12px;
+}
+
+.emu-standby-text {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+/* Floating HUD on Screen */
+.emu-screen-hud {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: none; /* Shown dynamically when game is running */
+  gap: 8px;
+  z-index: 20; /* Draw on top of canvas & scanlines */
+  pointer-events: auto;
+  opacity: 0.3;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.emu-screen-wrapper:hover .emu-screen-hud {
+  opacity: 1.0;
+}
+
+.emu-hud-btn {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 6px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s;
+}
+
+.emu-hud-btn:hover {
+  background: #2563eb;
+  border-color: #60a5fa;
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.6);
+}
+
+.emu-hud-btn.btn-danger-hud:hover {
+  background: #dc2626;
+  border-color: #f87171;
+  box-shadow: 0 0 10px rgba(220, 38, 38, 0.6);
+}
+
+.emu-hud-btn:active {
+  transform: translateY(1px);
+}
