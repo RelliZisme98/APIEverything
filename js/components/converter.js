@@ -1,10 +1,10 @@
 /**
  * components/converter.js
  * Universal Unit Converter component
- * Supports: Data, Temperature, Length, Mass, Volume, Area, Speed, and Timezones.
+ * Supports: Data, Temperature, Length, Mass, Volume, Area, Speed, Timezones, and BMI.
  */
 
-let activeCategory = 'data'; // 'data', 'temp', 'length', 'mass', 'volume', 'area', 'speed', 'timezone'
+let activeCategory = 'data'; // 'data', 'temp', 'length', 'mass', 'volume', 'area', 'speed', 'timezone', 'bmi'
 
 export function renderConverter(containerId = 'converterContent') {
   const container = document.getElementById(containerId);
@@ -22,6 +22,7 @@ export function renderConverter(containerId = 'converterContent') {
         <button class="conv-tab-btn" id="conv-tab-area" data-cat="area">📐 Diện Tích</button>
         <button class="conv-tab-btn" id="conv-tab-speed" data-cat="speed">⚡ Tốc Độ</button>
         <button class="conv-tab-btn" id="conv-tab-timezone" data-cat="timezone">🕐 Múi Giờ</button>
+        <button class="conv-tab-btn" id="conv-tab-bmi" data-cat="bmi">🏥 Chỉ Số BMI</button>
       </div>
 
       <!-- Main Converter Box -->
@@ -320,6 +321,70 @@ export function renderConverter(containerId = 'converterContent') {
           
           <div class="tz-results-list" id="conv-tz-list">
             <!-- Timezones populated here -->
+          </div>
+        </div>
+
+        <!-- 9. BMI CALCULATOR -->
+        <div class="conv-panel" id="conv-panel-bmi">
+          <div class="bmi-container">
+            <!-- Left Side: Inputs -->
+            <div class="bmi-card">
+              <h3 style="margin: 0; font-size: 16px; color: var(--text-primary);">📊 Nhập Chỉ Số Cơ Thể</h3>
+              
+              <div class="conv-field">
+                <label class="conv-label">Giới tính</label>
+                <div class="bmi-gender-toggle">
+                  <button class="bmi-gender-btn active" data-gender="male" id="bmi-gen-male">🙋‍♂️ Nam</button>
+                  <button class="bmi-gender-btn" data-gender="female" id="bmi-gen-female">🙋‍♀️ Nữ</button>
+                </div>
+              </div>
+
+              <div class="conv-field">
+                <label class="conv-label">Chiều cao (cm)</label>
+                <input type="number" class="conv-input" id="bmi-height" placeholder="Ví dụ: 170" min="50" max="300" />
+              </div>
+
+              <div class="conv-field">
+                <label class="conv-label">Cân nặng (kg)</label>
+                <input type="number" class="conv-input" id="bmi-weight" placeholder="Ví dụ: 65" min="10" max="500" />
+              </div>
+            </div>
+
+            <!-- Right Side: Results -->
+            <div class="bmi-card" style="align-items: center; justify-content: center;">
+              <div class="bmi-results-wrap" id="bmi-results-placeholder">
+                <span style="font-size: 40px;">⚖️</span>
+                <p style="color: var(--text-muted); font-size: 14px; margin: 0; text-align: center;">Vui lòng nhập chiều cao và cân nặng để xem kết quả BMI.</p>
+              </div>
+
+              <div class="bmi-results-wrap" id="bmi-results-data" style="display: none; width: 100%;">
+                <div class="bmi-circle-container">
+                  <div class="bmi-circle" id="bmi-circle-glow">
+                    <span class="bmi-circle-val" id="bmi-val-text">22.5</span>
+                    <span class="bmi-circle-lbl">Chỉ số BMI</span>
+                  </div>
+                </div>
+                
+                <div class="bmi-status-text" id="bmi-status-lbl">Bình thường</div>
+                <div class="bmi-ideal-text" id="bmi-ideal-lbl">Cân nặng lý tưởng của bạn: 54 - 66 kg</div>
+
+                <!-- Visual scale -->
+                <div style="width: 100%; margin-top: 10px;">
+                  <div class="bmi-scale-bar">
+                    <div class="bmi-scale-indicator" id="bmi-indicator" style="left: 50%;"></div>
+                  </div>
+                  <div class="bmi-bracket-labels" style="margin-top: 8px;">
+                    <span>Gầy</span>
+                    <span>Thường</span>
+                    <span>Thừa cân</span>
+                    <span>Béo phì</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="conv-tip">
+            💡 Chỉ số BMI (Body Mass Index) áp dụng theo chuẩn chuẩn hóa dành cho người Châu Á (WHO Western Pacific Region).
           </div>
         </div>
       </div>
@@ -680,5 +745,124 @@ function setupConverter() {
     };
 
     updateTimezones();
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // 9. BMI CALCULATOR LOGIC
+  // ════════════════════════════════════════════════════════════
+  const bmiHeight = document.getElementById('bmi-height');
+  const bmiWeight = document.getElementById('bmi-weight');
+  const bmiMaleBtn = document.getElementById('bmi-gen-male');
+  const bmiFemaleBtn = document.getElementById('bmi-gen-female');
+  
+  const bmiPlaceholder = document.getElementById('bmi-results-placeholder');
+  const bmiResultsData = document.getElementById('bmi-results-data');
+  const bmiValText = document.getElementById('bmi-val-text');
+  const bmiStatusLbl = document.getElementById('bmi-status-lbl');
+  const bmiIdealLbl = document.getElementById('bmi-ideal-lbl');
+  const bmiIndicator = document.getElementById('bmi-indicator');
+  const bmiCircleGlow = document.getElementById('bmi-circle-glow');
+
+  let currentGender = 'male';
+
+  if (bmiHeight && bmiWeight && bmiMaleBtn && bmiFemaleBtn) {
+    bmiMaleBtn.onclick = () => {
+      currentGender = 'male';
+      bmiMaleBtn.classList.add('active');
+      bmiFemaleBtn.classList.remove('active');
+      calculateBMI();
+    };
+
+    bmiFemaleBtn.onclick = () => {
+      currentGender = 'female';
+      bmiFemaleBtn.classList.add('active');
+      bmiMaleBtn.classList.remove('active');
+      calculateBMI();
+    };
+
+    bmiHeight.oninput = calculateBMI;
+    bmiWeight.oninput = calculateBMI;
+
+    function calculateBMI() {
+      const heightCm = parseFloat(bmiHeight.value);
+      const weightKg = parseFloat(bmiWeight.value);
+
+      if (isNaN(heightCm) || isNaN(weightKg) || heightCm <= 0 || weightKg <= 0) {
+        bmiPlaceholder.style.display = 'flex';
+        bmiResultsData.style.display = 'none';
+        return;
+      }
+
+      bmiPlaceholder.style.display = 'none';
+      bmiResultsData.style.display = 'flex';
+
+      const heightM = heightCm / 100;
+      const bmi = weightKg / (heightM * heightM);
+      bmiValText.textContent = bmi.toFixed(1);
+
+      // BMI Categories (WHO Asian standard):
+      // < 18.5: Gầy (Underweight)
+      // 18.5 - 22.9: Bình thường (Normal)
+      // 23.0 - 24.9: Tiền béo phì (Overweight / Pre-obese)
+      // 25.0 - 29.9: Béo phì độ 1 (Obese class I)
+      // >= 30.0: Béo phì độ 2 (Obese class II)
+
+      let status = '';
+      let color = '';
+      let pct = 0; // percentage position on scale bar
+
+      if (bmi < 18.5) {
+        status = 'Thiếu cân (Gầy) 🔵';
+        color = '#60a5fa'; // Blue
+        // Scale 0% to 25% for < 18.5. (e.g. 10 to 18.5 maps to 0% to 25%)
+        pct = Math.max(5, Math.min(24, ((bmi - 10) / 8.5) * 20 + 5));
+      } else if (bmi < 23.0) {
+        status = 'Bình thường (Cân đối) 🟢';
+        color = '#34d399'; // Green
+        // Scale 25% to 55% for 18.5 to 22.9.
+        pct = ((bmi - 18.5) / 4.4) * 30 + 25;
+      } else if (bmi < 25.0) {
+        status = 'Thừa cân (Tiền béo phì) 🟡';
+        color = '#fbbf24'; // Yellow
+        // Scale 55% to 70% for 23.0 to 24.9.
+        pct = ((bmi - 23.0) / 1.9) * 15 + 55;
+      } else if (bmi < 30.0) {
+        status = 'Béo phì độ I 🟠';
+        color = '#f97316'; // Orange
+        // Scale 70% to 85% for 25.0 to 29.9.
+        pct = ((bmi - 25.0) / 4.9) * 15 + 70;
+      } else {
+        status = 'Béo phì độ II 🔴';
+        color = '#ef4444'; // Red
+        // Scale 85% to 95% for >= 30.
+        pct = Math.min(95, ((bmi - 30.0) / 10) * 10 + 85);
+      }
+
+      // Update UI styles
+      bmiStatusLbl.textContent = status;
+      bmiStatusLbl.style.color = color;
+      bmiCircleGlow.style.borderColor = color;
+      bmiCircleGlow.style.boxShadow = `0 0 15px ${color}`;
+      bmiIndicator.style.left = `${pct}%`;
+
+      // Calculate ideal weight (WHO Normal BMI range: 18.5 to 22.9 for Asian)
+      const minIdeal = 18.5 * (heightM * heightM);
+      const maxIdeal = 22.9 * (heightM * heightM);
+      
+      let idealText = `Cân nặng lý tưởng của bạn: <strong>${minIdeal.toFixed(1)} - ${maxIdeal.toFixed(1)} kg</strong>.`;
+      
+      // Add health tip
+      if (bmi >= 23) {
+        const excess = weightKg - maxIdeal;
+        idealText += `<br><span style="font-size:11px;color:var(--text-muted);">Bạn nên giảm khoảng <strong>${excess.toFixed(1)} kg</strong> để đạt vóc dáng cân đối.</span>`;
+      } else if (bmi < 18.5) {
+        const deficit = minIdeal - weightKg;
+        idealText += `<br><span style="font-size:11px;color:var(--text-muted);">Bạn nên tăng khoảng <strong>${deficit.toFixed(1)} kg</strong> để đạt vóc dáng cân đối.</span>`;
+      } else {
+        idealText += `<br><span style="font-size:11px;color:var(--accent-green);">Tuyệt vời, hãy tiếp tục duy trì cân nặng này!</span>`;
+      }
+      
+      bmiIdealLbl.innerHTML = idealText;
+    }
   }
 }

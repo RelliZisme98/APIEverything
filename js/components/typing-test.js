@@ -290,40 +290,44 @@ function setupTypingTest() {
       startTimer();
     }
 
-    // Determine key input details
     const currentTypedLength = val.length;
-    
-    // Backspace handling
-    if (currentTypedLength < typedText.length) {
-      // User pressed backspace
-      for (let i = currentTypedLength; i < typedText.length; i++) {
+
+    // 1. Stats Tracking: Track typed characters and errors when length increases
+    if (currentTypedLength > typedText.length) {
+      for (let i = typedText.length; i < currentTypedLength; i++) {
+        totalTypedChars++;
         const charEl = chars[i];
         if (charEl) {
-          charEl.className = 'tt-char' + (charEl.classList.contains('tt-space') ? ' tt-space' : '');
+          const typedChar = val[i];
+          const targetChar = charEl.classList.contains('tt-space') ? ' ' : charEl.textContent;
+          if (typedChar !== targetChar) {
+            errorsCount++;
+          }
         }
       }
-      charIndex = currentTypedLength;
-    } else {
-      // Character typed
-      for (let i = typedText.length; i < currentTypedLength; i++) {
-        const charEl = chars[i];
-        if (!charEl) continue;
+    }
 
+    // 2. Visual rendering: Re-evaluate correct/incorrect states of all chars based on full current input string
+    // This resolves Vietnamese IME (Telex/VNI) composition rewriting of characters (e.g. o + o -> ô)
+    for (let i = 0; i < chars.length; i++) {
+      const charEl = chars[i];
+      if (i < currentTypedLength) {
         const typedChar = val[i];
         const targetChar = charEl.classList.contains('tt-space') ? ' ' : charEl.textContent;
-
-        totalTypedChars++;
         if (typedChar === targetChar) {
           charEl.classList.remove('incorrect');
           charEl.classList.add('correct');
         } else {
           charEl.classList.remove('correct');
           charEl.classList.add('incorrect');
-          errorsCount++;
         }
+      } else {
+        // Reset classes for characters beyond the current input length
+        charEl.classList.remove('correct', 'incorrect');
       }
-      charIndex = currentTypedLength;
     }
+
+    charIndex = currentTypedLength;
 
     // Update active cursor placement
     chars.forEach(c => c.classList.remove('active-cursor'));

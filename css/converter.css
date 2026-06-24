@@ -284,3 +284,153 @@
   background: rgba(255, 255, 255, 0.02);
 }
 
+/* BMI Calculator Specifics */
+.bmi-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.bmi-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.bmi-gender-toggle {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.bmi-gender-btn {
+  flex: 1;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.bmi-gender-btn:hover {
+  background: rgba(255,255,255,0.05);
+  color: var(--text-primary);
+}
+
+.bmi-gender-btn.active[data-gender="male"] {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+
+.bmi-gender-btn.active[data-gender="female"] {
+  background: rgba(236, 72, 153, 0.15);
+  border-color: #ec4899;
+  color: #ec4899;
+}
+
+.bmi-results-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  gap: 16px;
+  padding: 10px 0;
+}
+
+.bmi-circle-container {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bmi-circle {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  border: 8px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}
+
+.bmi-circle-val {
+  font-size: 32px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.bmi-circle-lbl {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.bmi-status-text {
+  font-size: 18px;
+  font-weight: 700;
+  transition: color 0.3s ease;
+}
+
+.bmi-ideal-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* BMI Brackets Bar */
+.bmi-scale-bar {
+  width: 100%;
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(to right, 
+    #60a5fa 0% 25%,   /* Gầy: < 18.5 */
+    #34d399 25% 55%,  /* Bình thường: 18.5 - 22.9 */
+    #fbbf24 55% 70%,  /* Tiền béo phì: 23.0 - 24.9 */
+    #f97316 70% 85%,  /* Béo phì độ 1: 25.0 - 29.9 */
+    #ef4444 85% 100%  /* Béo phì độ 2: >= 30 */
+  );
+  position: relative;
+  margin-top: 10px;
+}
+
+.bmi-scale-indicator {
+  position: absolute;
+  top: -6px;
+  width: 6px;
+  height: 22px;
+  background: #fff;
+  border: 1px solid #000;
+  border-radius: 3px;
+  box-shadow: 0 0 4px rgba(0,0,0,0.5);
+  transform: translateX(-50%);
+  transition: left 0.3s ease;
+}
+
+.bmi-bracket-labels {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 0 2px;
+}
+
+
