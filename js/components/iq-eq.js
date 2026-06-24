@@ -181,7 +181,11 @@ export function renderIQ(containerId = 'iqContent') {
             </div>
           </div>
           <div class="iqeq-score-label" id="iq-res-class">Đang tính...</div>
-          <div class="iqeq-score-sublabel" id="iq-res-desc">Đang tải dữ liệu...</div>
+        </div>
+
+        <div class="iqeq-analysis-box" style="margin-top: 20px;">
+          <div class="iqeq-analysis-title">📋 NHẬN XÉT CHI TIẾT</div>
+          <div class="iqeq-analysis-text" id="iq-res-desc">Đang phân tích dữ liệu...</div>
         </div>
 
         <div class="iqeq-result-disclaimer">
@@ -450,7 +454,7 @@ async function finishIQTest() {
 // ── RENDER CHỨC NĂNG KIỂM TRA EQ (10 CÂU LIKERT) ──────────────────────
 export function renderEQ(containerId = 'eqContent') {
   activeState.type = 'EQ';
-  activeState.limitQuestions = 10;
+  activeState.limitQuestions = 25;
   const container = document.getElementById(containerId);
   if (!container) return;
 
@@ -463,7 +467,7 @@ export function renderEQ(containerId = 'eqContent') {
           <div>
             <div class="iqeq-intro-title">Bài Kiểm Tra Trí Tuệ Cảm Xúc (EQ Test)</div>
             <div class="iqeq-intro-desc">
-              Bài trắc nghiệm gồm <strong>10 câu hỏi tình huống cảm xúc</strong> được chọn ngẫu nhiên từ ngân hàng 100 câu bảo mật.<br>
+              Bài trắc nghiệm gồm <strong>25 câu hỏi tình huống cảm xúc</strong> được chọn ngẫu nhiên từ ngân hàng 100 câu bảo mật.<br>
               Bạn sẽ trả lời bằng cách tự đánh giá theo mức độ đồng tình của bản thân (Likert Scale). Đáp án chấm trực tiếp trên server để bảo mật.
             </div>
           </div>
@@ -502,7 +506,7 @@ export function renderEQ(containerId = 'eqContent') {
         </div>
         <div class="iqeq-progress-wrap" style="margin-bottom: 20px;">
           <div class="iqeq-progress-bar"><div class="iqeq-progress-fill" id="eq-bar-fill" style="width:0%;"></div></div>
-          <div class="iqeq-progress-text" id="eq-progress-lbl">0/10</div>
+          <div class="iqeq-progress-text" id="eq-progress-lbl">Câu hỏi 1/25</div>
         </div>
         
         <div class="iqeq-question-card">
@@ -567,6 +571,11 @@ export function renderEQ(containerId = 'eqContent') {
             <div class="iqeq-dim-bar-wrap"><div class="iqeq-dim-bar-fill" id="eq-bar-selfAwa" style="width:0%; background:#fbbf24;"></div></div>
             <div class="iqeq-dim-score" id="eq-lbl-selfAwa">0%</div>
           </div>
+        </div>
+
+        <div class="iqeq-analysis-box" style="margin-top: 20px;">
+          <div class="iqeq-analysis-title">📋 NHẬN XÉT CHI TIẾT</div>
+          <div class="iqeq-analysis-text" id="eq-res-desc">Đang phân tích dữ liệu...</div>
         </div>
 
         <div class="iqeq-result-disclaimer" style="margin-top:20px;">
@@ -703,6 +712,7 @@ async function finishEQTest() {
 
     document.getElementById('eq-res-value').textContent = result.score;
     document.getElementById('eq-res-class').textContent = result.classification;
+    document.getElementById('eq-res-desc').textContent = result.desc;
 
     // Chạy vòng tròn điểm số SVG
     const ring = document.getElementById('eq-svg-ring');

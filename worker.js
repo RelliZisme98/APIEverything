@@ -1557,9 +1557,24 @@ async function handleIQEQ(request, env) {
         });
         return cors(JSON.stringify(safeQuestions), 200);
       } else {
-        const indices = Array.from({ length: SERVER_EQ_POOL.length }, (_, i) => i)
-          .sort(() => 0.5 - Math.random())
-          .slice(0, 10);
+        // Phân nhóm câu hỏi EQ theo khía cạnh (mỗi khía cạnh có 25 câu):
+        // 1. Empathy (Thấu cảm): index 0 đến 24
+        const empathyPool = Array.from({ length: 25 }, (_, i) => i);
+        // 2. SelfReg (Tự điều chỉnh): index 25 đến 49
+        const selfRegPool = Array.from({ length: 25 }, (_, i) => i + 25);
+        // 3. Social (Kỹ năng xã hội): index 50 đến 74
+        const socialPool = Array.from({ length: 25 }, (_, i) => i + 50);
+        // 4. SelfAwa (Tự nhận thức): index 75 đến 99
+        const selfAwaPool = Array.from({ length: 25 }, (_, i) => i + 75);
+
+        // Lấy ngẫu nhiên để tổng cộng được 25 câu (6 Empathy, 6 SelfReg, 6 Social, 7 SelfAwa)
+        const selectedEmpathy = empathyPool.sort(() => 0.5 - Math.random()).slice(0, 6);
+        const selectedSelfReg = selfRegPool.sort(() => 0.5 - Math.random()).slice(0, 6);
+        const selectedSocial = socialPool.sort(() => 0.5 - Math.random()).slice(0, 6);
+        const selectedSelfAwa = selfAwaPool.sort(() => 0.5 - Math.random()).slice(0, 7);
+
+        // Gộp lại và sắp xếp theo index tăng dần
+        const indices = [...selectedEmpathy, ...selectedSelfReg, ...selectedSocial, ...selectedSelfAwa].sort((a, b) => a - b);
         
         const safeQuestions = indices.map(idx => {
           const original = SERVER_EQ_POOL[idx];
@@ -1645,13 +1660,22 @@ async function handleIQEQ(request, env) {
         finalScore = Math.round(60 + (finalPct * 80));
 
         let classification = 'Trung Bình';
-        if (finalScore >= 120) classification = 'Cực Kỳ Nhạy Bén / Cao';
-        else if (finalScore >= 100) classification = 'Tốt / Cân Bằng';
-        else if (finalScore < 80) classification = 'Cần Cải Thiện';
+        let desc = 'Khả năng nhận biết cảm xúc ở mức cơ bản, tuy nhiên đôi khi vẫn gặp khó khăn trong việc kiểm soát hành vi khi nóng giận hoặc chưa thực sự thấu cảm người khác.';
+        if (finalScore >= 120) {
+          classification = 'Cực Kỳ Nhạy Bén / Cao';
+          desc = 'Bạn có khả năng thấu cảm sâu sắc, kiểm soát cảm xúc bản thân xuất sắc và có năng lực giao tiếp xã hội cực kỳ khéo léo. Bạn dễ dàng tạo dựng được niềm tin và kết nối bền vững với mọi người.';
+        } else if (finalScore >= 100) {
+          classification = 'Tốt / Cân Bằng';
+          desc = 'Chỉ số cảm xúc của bạn đạt trạng thái cân bằng tốt. Bạn có khả năng làm chủ bản thân trong hầu hết các tình huống và duy trì được mối quan hệ xã hội hài hòa.';
+        } else if (finalScore < 80) {
+          classification = 'Cần Cải Thiện';
+          desc = 'Bạn có xu hướng dễ bị cảm xúc chi phối hoặc gặp khó khăn khi hòa nhập xã hội. Việc học cách lắng nghe bản thân và rèn luyện sự bình tĩnh sẽ giúp bạn cải thiện chỉ số này.';
+        }
 
         responsePayload = {
           score: finalScore,
           classification,
+          desc,
           breakdown
         };
       }
