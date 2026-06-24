@@ -2238,7 +2238,14 @@ ${contextStr}`;
       max_tokens: 1024
     });
 
-    return new Response(JSON.stringify({ response: result.response }), {
+    // Strip out leaked Llama 3.1 role headers
+    let finalResponse = result.response || '';
+    finalResponse = finalResponse.replace(/^(assistant\s*)+/ig, '').trim();
+    if (!finalResponse) {
+      finalResponse = 'Xin lỗi, tôi chưa thể trả lời câu hỏi của bạn lúc này.';
+    }
+
+    return new Response(JSON.stringify({ response: finalResponse }), {
       headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS },
     });
   } catch (err) {
