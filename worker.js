@@ -1235,7 +1235,7 @@ async function handleEvents(request, env) {
 
 
 // ─── /api/news (RSS News Aggregator Proxy) ───────────────────────────
-async function handleNewsRSS(request) {
+async function handleApiNews(request) {
   if (request.method === 'OPTIONS') return preflight();
 
   const { searchParams } = new URL(request.url);
@@ -2279,7 +2279,7 @@ export default {
     if (pathname === '/football') return handleFootball(request);
     if (pathname === '/api/todos') return handleTodos(request, env);
     if (pathname === '/api/events') return handleEvents(request, env);
-    if (pathname === '/api/news') return handleNewsRSS(request);
+    if (pathname === '/api/news') return handleApiNews(request);
 
     if (pathname === '/api/spam-check') return handleSpamCheck(request);
     if (pathname === '/api/tax-lookup') return handleTaxLookup(request);
