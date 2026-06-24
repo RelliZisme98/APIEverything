@@ -1,115 +1,79 @@
 /**
  * components/iq-eq.js
- * Chức năng Kiểm tra IQ và EQ (Tách riêng)
- * - Câu hỏi ngẫu nhiên không lặp
- * - Bảng nhập Tên & Tuổi trước khi làm bài
- * - Ghi kết quả lặng lẽ vào DB (Supabase) qua /api/iqeq
+ * Chức năng Kiểm tra IQ và EQ (Tách riêng - Bảo mật Backend)
+ * - Toàn bộ ngân hàng đề 100 câu và logic chấm điểm được lưu ở server (Cloudflare Worker).
+ * - Client chỉ nhận câu hỏi ngẫu nhiên không kèm đáp án (Tránh F12 cheat).
+ * - Nộp bài và chấm điểm hoàn toàn thông qua API POST /api/iqeq?action=submit.
  */
 
-// ── NGÂN HÀNG ĐỀ THI IQ (30 CÂU HỎI) ──────────────────────────────
-const IQ_POOL = [
-  { q: "Số tiếp theo trong dãy: 2, 4, 8, 16, ...", options: ["24", "32", "30", "64"], ans: 1 },
-  { q: "Chữ cái tiếp theo: A, C, E, G, ...", options: ["H", "I", "J", "K"], ans: 1 },
-  { q: "Nếu tất cả A là B, tất cả B là C, thì tất cả A có phải là C không?", options: ["Chắc chắn đúng", "Chắc chắn sai", "Không xác định được", "Đôi khi đúng"], ans: 0 },
-  { q: "Một chiếc áo giá 20$. Giảm giá 20%, giá mới là bao nhiêu?", options: ["15$", "16$", "18$", "10$"], ans: 1 },
-  { q: "Số nào không thuộc nhóm số nguyên tố: 3, 5, 7, 9, 11, 13?", options: ["5", "7", "9", "11"], ans: 2 },
-  { q: "Mary 16 tuổi, gấp 4 lần tuổi em trai. Hỏi khi Mary gấp 2 lần tuổi em trai thì Mary bao nhiêu tuổi?", options: ["20", "24", "26", "28"], ans: 1 },
-  { q: "Từ nào khác loại nhất với các từ còn lại?", options: ["Táo", "Cam", "Cà rốt", "Lê"], ans: 2 },
-  { q: "Số tiếp theo trong dãy Fibonacci: 1, 1, 2, 3, 5, 8, 13, ...", options: ["15", "21", "25", "34"], ans: 1 },
-  { q: "Cái gì luôn đến vào ngày mai nhưng không bao giờ đến hôm nay?", options: ["Ngày mai", "Ngày hôm qua", "Tương lai", "Quá khứ"], ans: 0 },
-  { q: "Có bao nhiêu chữ số 9 trong dãy số từ 1 đến 100?", options: ["10", "11", "19", "20"], ans: 3 },
-  { q: "Một cây gậy và một quả bóng giá 1.10$. Cây gậy đắt hơn quả bóng 1.00$. Quả bóng giá bao nhiêu?", options: ["0.05$", "0.10$", "1.00$", "0.50$"], ans: 0 },
-  { q: "5 máy tạo ra 5 sản phẩm trong 5 phút. Hỏi cần bao lâu để 100 máy tạo ra 100 sản phẩm?", options: ["5 phút", "20 phút", "100 phút", "50 phút"], ans: 0 },
-  { q: "Mảng súng phủ kín hồ sau 48 ngày. Mỗi ngày mảng súng tăng gấp đôi diện tích. Cần mấy ngày để phủ nửa hồ?", options: ["24 ngày", "47 ngày", "36 ngày", "12 ngày"], ans: 1 },
-  { q: "Từ nào trái nghĩa với từ 'Khởi đầu'?", options: ["Kết thúc", "Bắt đầu", "Tiếp tục", "Tạm dừng"], ans: 0 },
-  { q: "Hình tam giác có 3 cạnh. Hình lục giác có mấy cạnh?", options: ["4", "5", "6", "8"], ans: 2 },
-  { q: "Số tiếp theo trong dãy: 3, 5, 9, 17, ...", options: ["25", "33", "35", "41"], ans: 1 },
-  { q: "Nếu quay ngược kim đồng hồ 135 độ từ vị trí 12 giờ, kim chỉ mấy giờ?", options: ["7h30", "4h30", "9h00", "10h30"], ans: 0 },
-  { q: "Mặt trời mọc ở hướng Đông, lặn ở hướng Tây. Nếu bạn đi về hướng Đông rồi rẽ trái, bạn sẽ hướng về đâu?", options: ["Bắc", "Nam", "Tây", "Đông Bắc"], ans: 0 },
-  { q: "Sách đối với Đọc giống như Nhạc đối với...", options: ["Hát", "Nghe", "Đàn", "Viết"], ans: 1 },
-  { q: "Số nào thích hợp thay thế dấu chấm hỏi: 8 -> 64, 9 -> 81, 10 -> ?", options: ["90", "100", "110", "120"], ans: 1 },
-  { q: "Con cua có 8 chân và 2 càng. Con nhện có mấy chân?", options: ["6", "8", "10", "12"], ans: 1 },
-  { q: "Một năm có 365 ngày. Năm nhuận có bao nhiêu ngày?", options: ["364", "365", "366", "367"], ans: 2 },
-  { q: "Nếu ngày hôm kia là thứ Hai, thì ngày mai là thứ mấy?", options: ["Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"], ans: 1 },
-  { q: "Tìm số lớn nhất có 2 chữ số khác nhau?", options: ["99", "98", "97", "96"], ans: 1 },
-  { q: "Từ nào viết đúng chính tả?", options: ["Sản xuất", "Sản suất", "Sản sất", "Xản xuất"], ans: 0 },
-  { q: "Bố của Mary có 5 người con gái: Nana, Nene, Nini, Nono. Hỏi người con thứ 5 tên gì?", options: ["Nunu", "Nyny", "Mary", "Nene"], ans: 2 },
-  { q: "Một nhóm người có 5 người bắt tay nhau đôi một. Hỏi có tổng cộng bao nhiêu cái bắt tay?", options: ["5", "10", "15", "20"], ans: 1 },
-  { q: "Số tiếp theo trong dãy: 100, 90, 81, 73, ...", options: ["65", "66", "67", "68"], ans: 1 },
-  { q: "Một cái bể nước mất 6 giờ để đầy nếu dùng vòi A, mất 12 giờ nếu dùng vòi B. Hỏi mở cả hai vòi mất bao lâu?", options: ["3 giờ", "4 giờ", "5 giờ", "6 giờ"], ans: 1 },
-  { q: "Nếu đảo ngược các chữ cái trong từ 'ROMA', bạn sẽ được từ nào có nghĩa là tình yêu trong tiếng Latin/Ý?", options: ["AMOR", "MOAR", "RAMO", "ARMO"], ans: 0 }
-];
-
-// ── NGÂN HÀNG ĐỀ THI EQ (25 CÂU HỎI) ──────────────────────────────
-// type: '+' (càng đồng ý càng cao), '-' (càng đồng ý càng thấp)
-// dim: empathy (thấu cảm), selfReg (tự kiểm soát), social (kỹ năng xã hội), selfAwa (tự nhận thức)
-const EQ_POOL = [
-  { q: "Tôi nhận ra ngay khi bạn bè buồn hay lo lắng dù họ cố giấu.", type: "+", dim: "empathy" },
-  { q: "Khi nổi giận, tôi nói ra những lời tổn thương mà sau đó thấy hối hận.", type: "-", dim: "selfReg" },
-  { q: "Tôi cảm thấy thoải mái khi bắt chuyện với người lạ tại các sự kiện.", type: "+", dim: "social" },
-  { q: "Tôi hiểu rất rõ điểm mạnh và giới hạn năng lực của chính mình.", type: "+", dim: "selfAwa" },
-  { q: "Tôi thấy khó chia sẻ hay cảm thông với những bất hạnh mà tôi chưa từng gặp.", type: "-", dim: "empathy" },
-  { q: "Tôi giữ được bình tĩnh và suy nghĩ thấu đáo dưới áp lực lớn.", type: "+", dim: "selfReg" },
-  { q: "Tôi thường hay hiểu lầm hoặc cãi vã với đồng nghiệp và bạn bè.", type: "-", dim: "social" },
-  { q: "Tôi biết rõ nguyên nhân sâu xa của sự thay đổi cảm xúc của mình.", type: "+", dim: "selfAwa" },
-  { q: "Tôi cố gắng đặt mình vào vị trí đối phương khi có tranh chấp bất đồng.", type: "+", dim: "empathy" },
-  { q: "Khi thất bại, tôi thường đổ lỗi cho hoàn cảnh thay vì nhìn nhận lỗi sai bản thân.", type: "-", dim: "selfReg" },
-  { q: "Mọi người thường tìm đến tôi làm cầu nối giải quyết xung đột.", type: "+", dim: "social" },
-  { q: "Tôi có những phản ứng bộc phát mà chính tôi cũng không giải thích nổi nguyên nhân.", type: "-", dim: "selfAwa" },
-  { q: "Tôi dễ thuyết phục và tạo được sự đồng thuận trong tập thể.", type: "+", dim: "social" },
-  { q: "Tôi mất rất nhiều thời gian để nguôi giận sau một tranh cãi gay gắt.", type: "-", dim: "selfReg" },
-  { q: "Tôi có khả năng phán đoán trạng thái tâm lý qua ánh mắt và cử chỉ người khác.", type: "+", dim: "empathy" },
-  { q: "Tôi cảm thấy khó chấp nhận khi nhận được ý kiến đóng góp trái chiều.", type: "-", dim: "selfReg" },
-  { q: "Tôi thích lắng nghe câu chuyện của người khác hơn là chỉ nói về bản thân.", type: "+", dim: "empathy" },
-  { q: "Tôi nhận biết được cơ thể mình đang căng thẳng trước khi tâm trí tôi kịp nhận ra.", type: "+", dim: "selfAwa" },
-  { q: "Tôi thường cảm thấy lạc lõng và khó hòa nhập khi tham gia nhóm mới.", type: "-", dim: "social" },
-  { q: "Tôi có thể dễ dàng chuyển hướng cuộc trò chuyện khi thấy đối phương không thoải mái.", type: "+", dim: "social" },
-  { q: "Tôi thường ra quyết định dựa trên cảm xúc nhất thời hơn là phân tích.", type: "-", dim: "selfReg" },
-  { q: "Tôi biết khi nào cần nói lời từ chối mà không làm người khác tổn thương.", type: "+", dim: "social" },
-  { q: "Tôi hay nghi ngờ giá trị và khả năng của bản thân khi gặp thử thách nhỏ.", type: "-", dim: "selfAwa" },
-  { q: "Tôi dễ xúc động khi xem những bộ phim hay đọc những câu chuyện buồn.", type: "+", dim: "empathy" },
-  { q: "Tôi luôn tự nhắc nhở bản thân về mục tiêu dài hạn khi đối mặt khó khăn trước mắt.", type: "+", dim: "selfReg" }
-];
-
-// ── TRẠNG THÁI KIỂM TRA ──────────────────────────────────────────
+// ── TRẠNG THÁI KIỂM TRA TOÀN CỤC ────────────────────────────────────
 let activeState = {
-  type: 'IQ', // IQ or EQ
-  questions: [],
+  type: 'IQ', // IQ hoặc EQ
+  questions: [], // Nhận từ server
   currIdx: 0,
-  iqScoreRaw: 0,
-  eqScores: { empathy: 0, selfReg: 0, social: 0, selfAwa: 0 },
+  selectedAnswers: [], // Chỉ lưu index của đáp án đã chọn (0,1,2,3) hoặc Likert score (0,1,2,3,4)
   timer: null,
   timeLeft: 0,
-  limitQuestions: 10,
-  timeLimitSec: 30, // 30s mỗi câu IQ
+  limitQuestions: 25, // IQ: 25, EQ: 10
   userName: '',
   userAge: ''
 };
 
-// ── UTILS ────────────────────────────────────────────────────────
-function getShuffledQuestions(pool, count) {
-  const shuffled = [...pool].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
+// ── UTILS RENDER LOADING/ERROR ──────────────────────────────────────
+function showLoading(container, text) {
+  container.innerHTML = `
+    <div class="iqeq-wrapper">
+      <div class="iqeq-screen active">
+        <div class="iqeq-loading-card" style="text-align: center; padding: 40px 20px;">
+          <div class="iqeq-spinner" style="width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1); border-top-color: var(--accent); border-radius: 50%; animation: iqeq-spin 1s linear infinite; margin: 0 auto 20px;"></div>
+          <div style="font-size: 16px; color: var(--text-primary); font-weight: 500;">${text}</div>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
-// Gửi dữ liệu âm thầm lên database
-async function saveToDatabaseQuietly(payload) {
-  try {
-    await fetch('/api/iqeq', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
-  } catch (err) {
-    console.warn('Silent database save omitted/failed: ', err.message);
-  }
+function showError(container, text, retryFn) {
+  container.innerHTML = `
+    <div class="iqeq-wrapper">
+      <div class="iqeq-screen active">
+        <div class="iqeq-intro-card" style="text-align: center; border-color: rgba(239, 68, 68, 0.3);">
+          <div style="font-size: 40px; margin-bottom: 15px;">❌</div>
+          <div class="iqeq-intro-title" style="color: #ef4444;">Đã xảy ra lỗi</div>
+          <div class="iqeq-intro-desc" style="margin-bottom: 20px;">${text}</div>
+          <button class="btn-primary" id="iqeq-btn-retry" style="background:#ef4444; border-color:#ef4444;">Thử lại</button>
+        </div>
+      </div>
+    </div>
+  `;
+  const btn = document.getElementById('iqeq-btn-retry');
+  if (btn) btn.onclick = retryFn;
 }
 
-// ── RENDER CHỨC NĂNG KIỂM TRA IQ ───────────────────────────────────
+// Thêm keyframes cho spinner nếu chưa có
+if (!document.getElementById('iqeq-keyframes')) {
+  const style = document.createElement('style');
+  style.id = 'iqeq-keyframes';
+  style.textContent = `
+    @keyframes iqeq-spin {
+      to { transform: rotate(360deg); }
+    }
+    .iqeq-spinner {
+      border: 4px solid rgba(255,255,255,0.1);
+      border-top-color: #60a5fa !important;
+      border-radius: 50%;
+    }
+    .eq .iqeq-spinner {
+      border-top-color: #34d399 !important;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+// ── RENDER CHỨC NĂNG KIỂM TRA IQ (25 CÂU - 30 PHÚT) ───────────────────
 export function renderIQ(containerId = 'iqContent') {
   activeState.type = 'IQ';
+  activeState.limitQuestions = 25;
   const container = document.getElementById(containerId);
   if (!container) return;
 
@@ -122,13 +86,13 @@ export function renderIQ(containerId = 'iqContent') {
           <div>
             <div class="iqeq-intro-title">Bài Kiểm Tra Trí Tuệ (IQ Test)</div>
             <div class="iqeq-intro-desc">
-              Bài trắc nghiệm gồm <strong>10 câu hỏi logic</strong> được chọn ngẫu nhiên từ ngân hàng đề.<br>
-              Mỗi câu hỏi có giới hạn thời gian trả lời là <strong>30 giây</strong>.
+              Bài trắc nghiệm gồm <strong>25 câu hỏi tư duy & hình học</strong> đa dạng được chọn ngẫu nhiên từ ngân hàng 100 câu bảo mật trên máy chủ.<br>
+              Tổng thời gian làm bài là <strong>30 phút</strong>. Đáp án được chấm độc quyền tại backend để đảm bảo bảo mật và chống cheat (F12).
             </div>
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 16px;">
           <div>
             <label style="display:block; font-size:12px; margin-bottom:4px; color:var(--text-secondary);">Họ và tên của bạn</label>
             <input type="text" id="iq-user-name" placeholder="Ví dụ: Nguyễn Văn A" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:6px; color:#fff;" />
@@ -154,28 +118,47 @@ export function renderIQ(containerId = 'iqContent') {
         <button class="btn-primary" id="iq-btn-start" disabled style="width: 100%;">Bắt đầu kiểm tra IQ</button>
       </div>
 
-      <!-- Màn hình làm bài -->
+      <!-- Màn hình làm bài (Bố cục chuyên nghiệp) -->
       <div class="iqeq-screen" id="iq-scr-test">
         <div class="iqeq-test-header">
           <div class="iqeq-test-phase-badge iq">Kiểm tra IQ</div>
-          <div class="iqeq-timer" id="iq-timer-lbl">00:30</div>
+          <div class="iqeq-timer" id="iq-timer-lbl">30:00</div>
         </div>
-        <div class="iqeq-progress-wrap">
-          <div class="iqeq-progress-bar"><div class="iqeq-progress-fill" id="iq-bar-fill" style="width:0%;"></div></div>
-          <div class="iqeq-progress-text" id="iq-progress-lbl">0/10</div>
-        </div>
-        
-        <div class="iqeq-question-card">
-          <div class="iqeq-q-category" id="iq-q-cat">TƯ DUY MẪU HÌNH & CHUỖI SỐ</div>
-          <div class="iqeq-q-text" id="iq-q-txt">...</div>
-          <div class="iqeq-options-grid" id="iq-options-wrap">
-            <!-- options -->
+
+        <div class="iqeq-test-layout">
+          <!-- Cột bên trái: Câu hỏi và Lựa chọn -->
+          <div>
+            <div class="iqeq-progress-wrap" style="margin-bottom: 16px;">
+              <div class="iqeq-progress-bar"><div class="iqeq-progress-fill" id="iq-bar-fill" style="width:0%;"></div></div>
+              <div class="iqeq-progress-text" id="iq-progress-lbl">Câu hỏi 1/25</div>
+            </div>
+            
+            <div class="iqeq-question-card">
+              <div class="iqeq-q-category">LOGIC & HÌNH HỌC</div>
+              <div class="iqeq-q-text" id="iq-q-txt">Đang tải câu hỏi...</div>
+              
+              <!-- Container cho sơ đồ hình học SVG -->
+              <div id="iq-svg-container" style="margin: 15px 0; text-align: center;"></div>
+              
+              <div class="iqeq-options-grid" id="iq-options-wrap">
+                <!-- options -->
+              </div>
+            </div>
+            
+            <div class="iqeq-nav-row" style="margin-top: 20px;">
+              <button class="btn-secondary" id="iq-btn-prev">◀ Câu trước</button>
+              <button class="btn-primary" id="iq-btn-next">Câu tiếp theo ▶</button>
+            </div>
           </div>
-          <div class="iqeq-feedback-row" id="iq-feedback-lbl"></div>
-        </div>
-        
-        <div class="iqeq-nav-row" style="justify-content: flex-end;">
-          <button class="btn-primary" id="iq-btn-next" style="display:none;">Câu tiếp theo ➔</button>
+
+          <!-- Cột bên phải: Lưới 25 câu chuyển nhanh -->
+          <div class="iqeq-q-grid-panel">
+            <div class="iqeq-q-grid-title">Bản đồ câu hỏi</div>
+            <div class="iqeq-q-grid" id="iq-q-grid-container">
+              <!-- grid items -->
+            </div>
+            <button class="btn-primary" id="iq-btn-submit" style="width:100%; margin-top:20px; background:var(--accent-green); border-color:var(--accent-green);">Nộp bài thi</button>
+          </div>
         </div>
       </div>
 
@@ -198,7 +181,7 @@ export function renderIQ(containerId = 'iqContent') {
             </div>
           </div>
           <div class="iqeq-score-label" id="iq-res-class">Đang tính...</div>
-          <div class="iqeq-score-sublabel" id="iq-res-desc">Đang tải biểu đồ dữ liệu...</div>
+          <div class="iqeq-score-sublabel" id="iq-res-desc">Đang tải dữ liệu...</div>
         </div>
 
         <div class="iqeq-result-disclaimer">
@@ -213,177 +196,266 @@ export function renderIQ(containerId = 'iqContent') {
   // Attach events
   const agree = document.getElementById('iq-agree');
   const start = document.getElementById('iq-btn-start');
+  const prev = document.getElementById('iq-btn-prev');
   const next = document.getElementById('iq-btn-next');
+  const submit = document.getElementById('iq-btn-submit');
   const restart = document.getElementById('iq-btn-restart');
 
   if (agree && start) {
     agree.onchange = (e) => {
       start.disabled = !e.target.checked;
     };
-    start.onclick = startIQTest;
+    start.onclick = () => fetchAndStartIQ(containerId);
   }
 
-  if (next) next.onclick = nextIQQuestion;
+  if (prev) prev.onclick = () => navigateIQ(-1);
+  if (next) next.onclick = () => navigateIQ(1);
+  if (submit) submit.onclick = finishIQTest;
   if (restart) restart.onclick = () => renderIQ(containerId);
 }
 
-function startIQTest() {
+async function fetchAndStartIQ(containerId) {
+  const container = document.getElementById(containerId);
   const nameInput = document.getElementById('iq-user-name');
   const ageInput = document.getElementById('iq-user-age');
 
   activeState.userName = nameInput ? nameInput.value.trim() || 'Ẩn danh' : 'Ẩn danh';
   activeState.userAge = ageInput ? ageInput.value.trim() || 'Chưa rõ' : 'Chưa rõ';
 
-  // Shuffle & pick 10
-  activeState.questions = getShuffledQuestions(IQ_POOL, activeState.limitQuestions);
-  activeState.currIdx = 0;
-  activeState.iqScoreRaw = 0;
+  showLoading(container, "Đang thiết lập bộ đề kiểm tra IQ ngẫu nhiên bảo mật từ server...");
 
-  // UI transition
-  document.getElementById('iq-scr-intro').classList.remove('active');
-  document.getElementById('iq-scr-test').classList.add('active');
+  try {
+    const res = await fetch('/api/iqeq?action=questions&type=IQ');
+    if (!res.ok) throw new Error("Không thể tải danh sách câu hỏi IQ.");
+    const questions = await res.json();
 
-  loadIQQuestion();
+    // Khởi tạo lại trạng thái
+    activeState.questions = questions;
+    activeState.currIdx = 0;
+    activeState.selectedAnswers = Array(activeState.limitQuestions).fill(null);
+
+    // Quay lại màn hình chính của IQ nhưng hiển thị chế độ làm bài
+    renderIQ(containerId);
+    
+    // UI transition
+    document.getElementById('iq-scr-intro').classList.remove('active');
+    document.getElementById('iq-scr-test').classList.add('active');
+
+    // Khởi tạo lưới bản đồ câu hỏi
+    buildQuestionGrid();
+
+    // Khởi động đồng hồ đếm ngược toàn cục (30 phút = 1800 giây)
+    activeState.timeLeft = 1800;
+    updateGlobalTimerUI();
+    clearInterval(activeState.timer);
+    activeState.timer = setInterval(() => {
+      activeState.timeLeft--;
+      updateGlobalTimerUI();
+      if (activeState.timeLeft <= 0) {
+        clearInterval(activeState.timer);
+        alert("⏱ Đã hết 30 phút làm bài! Hệ thống tự động nộp bài.");
+        finishIQTest();
+      }
+    }, 1000);
+
+    loadIQQuestion();
+  } catch (err) {
+    showError(container, err.message, () => renderIQ(containerId));
+  }
+}
+
+function buildQuestionGrid() {
+  const container = document.getElementById('iq-q-grid-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  for (let i = 0; i < activeState.limitQuestions; i++) {
+    const item = document.createElement('button');
+    item.className = 'iqeq-q-grid-item';
+    item.id = `q-grid-item-${i}`;
+    item.textContent = i + 1;
+    item.onclick = () => {
+      activeState.currIdx = i;
+      loadIQQuestion();
+    };
+    container.appendChild(item);
+  }
+}
+
+function updateQuestionGridStatus() {
+  for (let i = 0; i < activeState.limitQuestions; i++) {
+    const el = document.getElementById(`q-grid-item-${i}`);
+    if (!el) continue;
+
+    el.classList.remove('active', 'answered');
+    if (i === activeState.currIdx) {
+      el.classList.add('active');
+    } else if (activeState.selectedAnswers[i] !== null) {
+      el.classList.add('answered');
+    }
+  }
 }
 
 function loadIQQuestion() {
+  if (activeState.questions.length === 0) return;
   const q = activeState.questions[activeState.currIdx];
   
-  // Update progress
-  document.getElementById('iq-progress-lbl').textContent = `${activeState.currIdx + 1}/${activeState.limitQuestions}`;
-  document.getElementById('iq-bar-fill').style.width = `${(activeState.currIdx / activeState.limitQuestions) * 100}%`;
+  // Cập nhật nhãn tiến trình & bản đồ câu hỏi
+  document.getElementById('iq-progress-lbl').textContent = `Câu hỏi ${activeState.currIdx + 1}/${activeState.limitQuestions}`;
+  document.getElementById('iq-bar-fill').style.width = `${((activeState.currIdx) / activeState.limitQuestions) * 100}%`;
+  updateQuestionGridStatus();
 
+  // Nội dung câu hỏi
   document.getElementById('iq-q-txt').textContent = q.q;
 
-  // Options
+  // Render SVG hình học nếu có
+  const svgBox = document.getElementById('iq-svg-container');
+  if (svgBox) {
+    if (q.svg) {
+      svgBox.innerHTML = q.svg;
+      svgBox.style.display = 'block';
+    } else {
+      svgBox.innerHTML = '';
+      svgBox.style.display = 'none';
+    }
+  }
+
+  // Khởi tạo các lựa chọn đáp án
   const wrap = document.getElementById('iq-options-wrap');
   wrap.innerHTML = '';
-  document.getElementById('iq-feedback-lbl').classList.remove('show');
-  document.getElementById('iq-btn-next').style.display = 'none';
+
+  // Ẩn/Hiện nút chuyển đổi phù hợp
+  document.getElementById('iq-btn-prev').style.visibility = activeState.currIdx === 0 ? 'hidden' : 'visible';
+  const nextBtn = document.getElementById('iq-btn-next');
+  if (activeState.currIdx === activeState.limitQuestions - 1) {
+    nextBtn.textContent = 'Nộp bài thi ➔';
+  } else {
+    nextBtn.textContent = 'Câu tiếp theo ▶';
+  }
 
   q.options.forEach((optText, idx) => {
     const btn = document.createElement('button');
     btn.className = 'iqeq-option-btn';
+    if (activeState.selectedAnswers[activeState.currIdx] === idx) {
+      btn.classList.add('selected');
+    }
     btn.innerHTML = `<span class="iqeq-option-key">${String.fromCharCode(65 + idx)}</span> <span>${optText}</span>`;
-    btn.onclick = () => submitIQAnswer(idx, btn);
+    btn.onclick = () => {
+      // Lưu lại câu trả lời
+      activeState.selectedAnswers[activeState.currIdx] = idx;
+      
+      // Cập nhật giao diện lựa chọn
+      document.querySelectorAll('#iq-options-wrap .iqeq-option-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+
+      // Cập nhật trạng thái lưới bản đồ câu hỏi
+      updateQuestionGridStatus();
+    };
     wrap.appendChild(btn);
   });
-
-  // Start timer
-  activeState.timeLeft = activeState.timeLimitSec;
-  updateIQTimerUI();
-  clearInterval(activeState.timer);
-  activeState.timer = setInterval(() => {
-    activeState.timeLeft--;
-    updateIQTimerUI();
-    if (activeState.timeLeft <= 0) {
-      clearInterval(activeState.timer);
-      submitIQAnswer(-1, null); // Timeout
-    }
-  }, 1000);
 }
 
-function updateIQTimerUI() {
+function navigateIQ(dir) {
+  const newIdx = activeState.currIdx + dir;
+  if (newIdx >= 0 && newIdx < activeState.limitQuestions) {
+    activeState.currIdx = newIdx;
+    loadIQQuestion();
+  } else if (newIdx === activeState.limitQuestions) {
+    finishIQTest();
+  }
+}
+
+function updateGlobalTimerUI() {
   const lbl = document.getElementById('iq-timer-lbl');
   if (!lbl) return;
-  const s = activeState.timeLeft.toString().padStart(2, '0');
-  lbl.textContent = `00:${s}`;
-  if (activeState.timeLeft <= 5) lbl.classList.add('warning');
-  else lbl.classList.remove('warning');
+
+  const m = Math.floor(activeState.timeLeft / 60).toString().padStart(2, '0');
+  const s = (activeState.timeLeft % 60).toString().padStart(2, '0');
+  lbl.textContent = `${m}:${s}`;
+
+  if (activeState.timeLeft <= 60) {
+    lbl.classList.add('warning');
+  } else {
+    lbl.classList.remove('warning');
+  }
 }
 
-function submitIQAnswer(selectedIdx, btnEl) {
+async function finishIQTest() {
   clearInterval(activeState.timer);
-  const q = activeState.questions[activeState.currIdx];
-  const isCorrect = (selectedIdx === q.ans);
 
-  if (isCorrect) activeState.iqScoreRaw++;
-
-  // Visual options state
-  const btns = document.querySelectorAll('#iq-options-wrap .iqeq-option-btn');
-  btns.forEach((b, i) => {
-    b.disabled = true;
-    if (i === q.ans) b.classList.add('correct');
-    else if (i === selectedIdx && !isCorrect) b.classList.add('incorrect');
-  });
-
-  const fb = document.getElementById('iq-feedback-lbl');
-  if (selectedIdx === -1) {
-    fb.textContent = '⏱ Hết thời gian câu hỏi này!';
-    fb.className = 'iqeq-feedback-row incorrect show';
-  } else if (isCorrect) {
-    fb.textContent = '✔️ Câu trả lời hoàn toàn chính xác!';
-    fb.className = 'iqeq-feedback-row correct show';
-  } else {
-    fb.textContent = '❌ Không đúng rồi!';
-    fb.className = 'iqeq-feedback-row incorrect show';
+  // Kiểm tra câu chưa làm
+  const unselectedCount = activeState.selectedAnswers.filter(a => a === null).length;
+  if (unselectedCount > 0 && activeState.timeLeft > 0) {
+    const confirmSubmit = confirm(`Bạn còn ${unselectedCount} câu hỏi chưa làm. Bạn có chắc chắn muốn nộp bài?`);
+    if (!confirmSubmit) {
+      // Tiếp tục đếm ngược
+      activeState.timer = setInterval(() => {
+        activeState.timeLeft--;
+        updateGlobalTimerUI();
+        if (activeState.timeLeft <= 0) {
+          clearInterval(activeState.timer);
+          finishIQTest();
+        }
+      }, 1000);
+      return;
+    }
   }
 
-  document.getElementById('iq-btn-next').style.display = 'block';
-}
+  const container = document.getElementById('iqContent');
+  showLoading(container, "Đang gửi câu trả lời và chấm điểm bảo mật trên server...");
 
-function nextIQQuestion() {
-  activeState.currIdx++;
-  if (activeState.currIdx >= activeState.limitQuestions) {
-    showIQResults();
-  } else {
-    loadIQQuestion();
+  try {
+    const answersPayload = activeState.selectedAnswers.map((sel, idx) => ({
+      qIdx: activeState.questions[idx].qIdx,
+      selected: sel
+    }));
+
+    const res = await fetch('/api/iqeq?action=submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: activeState.userName,
+        age: activeState.userAge,
+        test_type: 'IQ',
+        answers: answersPayload
+      })
+    });
+
+    if (!res.ok) throw new Error("Chấm điểm thất bại. Vui lòng kiểm tra kết nối mạng.");
+    const result = await res.json();
+
+    // Hiển thị màn hình kết quả
+    renderIQ('iqContent');
+    document.getElementById('iq-scr-intro').classList.remove('active');
+    document.getElementById('iq-scr-test').classList.remove('active');
+    document.getElementById('iq-scr-result').classList.add('active');
+
+    document.getElementById('iq-res-value').textContent = result.score;
+    document.getElementById('iq-res-class').textContent = result.classification;
+    document.getElementById('iq-res-desc').textContent = result.desc;
+
+    // Chạy vòng tròn điểm số SVG
+    const ring = document.getElementById('iq-svg-ring');
+    if (ring) {
+      const circum = 314;
+      const pct = (result.raw_correct || 0) / activeState.limitQuestions;
+      ring.style.strokeDashoffset = circum - (pct * circum);
+    }
+  } catch (err) {
+    showError(container, err.message, () => renderIQ('iqContent'));
   }
-}
-
-function showIQResults() {
-  document.getElementById('iq-scr-test').classList.remove('active');
-  document.getElementById('iq-scr-result').classList.add('active');
-
-  const scorePct = activeState.iqScoreRaw / activeState.limitQuestions;
-  const iqVal = Math.round(75 + (scorePct * 65)); // 75 - 140
-
-  let classification = 'Bình Thường';
-  let desc = 'Tư duy logic ổn định, phản xạ thông tin nhanh chóng.';
-  if (iqVal >= 130) {
-    classification = 'Thiên Tài / Xuất Chúng';
-    desc = 'Sở hữu trí thông minh siêu phàm, phân tích xuất sắc mọi dữ kiện phức tạp.';
-  } else if (iqVal >= 115) {
-    classification = 'Trí Tuệ Cao';
-    desc = 'Tư duy nhạy bén và khả năng xâu chuỗi thông tin rất tốt.';
-  } else if (iqVal < 90) {
-    classification = 'Cận Trung Bình';
-    desc = 'Khả năng tư duy logic cần được mài giũa thêm qua luyện tập.';
-  }
-
-  document.getElementById('iq-res-value').textContent = iqVal;
-  document.getElementById('iq-res-class').textContent = classification;
-  document.getElementById('iq-res-desc').textContent = desc;
-
-  // Set ring animation
-  const ring = document.getElementById('iq-svg-ring');
-  if (ring) {
-    const circum = 314;
-    ring.style.strokeDashoffset = circum - (scorePct * circum);
-  }
-
-  // Quiet DB post
-  saveToDatabaseQuietly({
-    name: activeState.userName,
-    age: activeState.userAge,
-    test_type: 'IQ',
-    score: iqVal,
-    raw_correct: activeState.iqScoreRaw,
-    max_score: 140,
-    answers_json: JSON.stringify(activeState.questions.map(q => q.q)),
-    created_at: new Date().toISOString()
-  });
 }
 
 
-// ── RENDER CHỨC NĂNG KIỂM TRA EQ ───────────────────────────────────
+// ── RENDER CHỨC NĂNG KIỂM TRA EQ (10 CÂU LIKERT) ──────────────────────
 export function renderEQ(containerId = 'eqContent') {
   activeState.type = 'EQ';
+  activeState.limitQuestions = 10;
   const container = document.getElementById(containerId);
   if (!container) return;
 
   container.innerHTML = `
-    <div class="iqeq-wrapper">
+    <div class="iqeq-wrapper eq">
       <!-- Màn hình nhập thông tin & miễn trừ trách nhiệm -->
       <div class="iqeq-screen active" id="eq-scr-intro">
         <div class="iqeq-intro-card">
@@ -391,13 +463,13 @@ export function renderEQ(containerId = 'eqContent') {
           <div>
             <div class="iqeq-intro-title">Bài Kiểm Tra Trí Tuệ Cảm Xúc (EQ Test)</div>
             <div class="iqeq-intro-desc">
-              Bài trắc nghiệm gồm <strong>10 câu hỏi tình huống cảm xúc</strong>.<br>
-              Bạn sẽ trả lời bằng cách tự đánh giá theo mức độ đồng tình của bản thân (Likert Scale).
+              Bài trắc nghiệm gồm <strong>10 câu hỏi tình huống cảm xúc</strong> được chọn ngẫu nhiên từ ngân hàng 100 câu bảo mật.<br>
+              Bạn sẽ trả lời bằng cách tự đánh giá theo mức độ đồng tình của bản thân (Likert Scale). Đáp án chấm trực tiếp trên server để bảo mật.
             </div>
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 16px;">
           <div>
             <label style="display:block; font-size:12px; margin-bottom:4px; color:var(--text-secondary);">Họ và tên của bạn</label>
             <input type="text" id="eq-user-name" placeholder="Ví dụ: Nguyễn Văn A" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:6px; color:#fff;" />
@@ -428,7 +500,7 @@ export function renderEQ(containerId = 'eqContent') {
         <div class="iqeq-test-header">
           <div class="iqeq-test-phase-badge eq">Kiểm tra EQ</div>
         </div>
-        <div class="iqeq-progress-wrap">
+        <div class="iqeq-progress-wrap" style="margin-bottom: 20px;">
           <div class="iqeq-progress-bar"><div class="iqeq-progress-fill" id="eq-bar-fill" style="width:0%;"></div></div>
           <div class="iqeq-progress-text" id="eq-progress-lbl">0/10</div>
         </div>
@@ -516,7 +588,7 @@ export function renderEQ(containerId = 'eqContent') {
     agree.onchange = (e) => {
       start.disabled = !e.target.checked;
     };
-    start.onclick = startEQTest;
+    start.onclick = () => fetchAndStartEQ(containerId);
   }
 
   if (restart) restart.onclick = () => renderEQ(containerId);
@@ -530,35 +602,50 @@ export function renderEQ(containerId = 'eqContent') {
   });
 }
 
-function startEQTest() {
+async function fetchAndStartEQ(containerId) {
+  const container = document.getElementById(containerId);
   const nameInput = document.getElementById('eq-user-name');
   const ageInput = document.getElementById('eq-user-age');
 
   activeState.userName = nameInput ? nameInput.value.trim() || 'Ẩn danh' : 'Ẩn danh';
   activeState.userAge = ageInput ? ageInput.value.trim() || 'Chưa rõ' : 'Chưa rõ';
 
-  // Shuffle & pick 10
-  activeState.questions = getShuffledQuestions(EQ_POOL, activeState.limitQuestions);
-  activeState.currIdx = 0;
-  activeState.eqScores = { empathy: { total: 0, count: 0 }, selfReg: { total: 0, count: 0 }, social: { total: 0, count: 0 }, selfAwa: { total: 0, count: 0 } };
+  showLoading(container, "Đang thiết lập bộ đề kiểm tra EQ ngẫu nhiên bảo mật từ server...");
 
-  // UI transition
-  document.getElementById('eq-scr-intro').classList.remove('active');
-  document.getElementById('eq-scr-test').classList.add('active');
+  try {
+    const res = await fetch('/api/iqeq?action=questions&type=EQ');
+    if (!res.ok) throw new Error("Không thể tải danh sách câu hỏi EQ.");
+    const questions = await res.json();
 
-  loadEQQuestion();
+    // Khởi tạo lại trạng thái
+    activeState.questions = questions;
+    activeState.currIdx = 0;
+    activeState.selectedAnswers = Array(activeState.limitQuestions).fill(null);
+
+    // Quay lại màn hình chính của EQ nhưng hiển thị chế độ làm bài
+    renderEQ(containerId);
+
+    // UI transition
+    document.getElementById('eq-scr-intro').classList.remove('active');
+    document.getElementById('eq-scr-test').classList.add('active');
+
+    loadEQQuestion();
+  } catch (err) {
+    showError(container, err.message, () => renderEQ(containerId));
+  }
 }
 
 function loadEQQuestion() {
+  if (activeState.questions.length === 0) return;
   const q = activeState.questions[activeState.currIdx];
 
-  // Update progress
-  document.getElementById('eq-progress-lbl').textContent = `${activeState.currIdx + 1}/${activeState.limitQuestions}`;
+  // Cập nhật tiến trình
+  document.getElementById('eq-progress-lbl').textContent = `Câu hỏi ${activeState.currIdx + 1}/${activeState.limitQuestions}`;
   document.getElementById('eq-bar-fill').style.width = `${(activeState.currIdx / activeState.limitQuestions) * 100}%`;
 
   document.getElementById('eq-q-txt').textContent = q.q;
 
-  // Reset likert buttons
+  // Khởi tạo lại nút Likert
   const btns = document.querySelectorAll('.iqeq-likert-btn');
   btns.forEach(b => {
     b.classList.remove('selected');
@@ -571,75 +658,71 @@ function submitEQAnswer(val, clickedBtn) {
   btns.forEach(b => b.disabled = true);
   if (clickedBtn) clickedBtn.classList.add('selected');
 
-  const q = activeState.questions[activeState.currIdx];
-  let score = val;
-  if (q.type === '-') {
-    score = 4 - val; // Đảo ngược điểm
-  }
-
-  // Update score
-  activeState.eqScores[q.dim].total += score;
-  activeState.eqScores[q.dim].count += 1;
+  // Lưu câu trả lời (Likert score 0 - 4)
+  activeState.selectedAnswers[activeState.currIdx] = val;
 
   setTimeout(() => {
     activeState.currIdx++;
     if (activeState.currIdx >= activeState.limitQuestions) {
-      showEQResults();
+      finishEQTest();
     } else {
       loadEQQuestion();
     }
   }, 350);
 }
 
-function showEQResults() {
-  document.getElementById('eq-scr-test').classList.remove('active');
-  document.getElementById('eq-scr-result').classList.add('active');
+async function finishEQTest() {
+  const container = document.getElementById('eqContent');
+  showLoading(container, "Đang gửi câu trả lời và phân tích chỉ số cảm xúc EQ trên server...");
 
-  // Calculate final score
-  let totalEqSum = 0;
-  let totalEqCount = 0;
-  const dims = ['empathy', 'selfReg', 'social', 'selfAwa'];
+  try {
+    const answersPayload = activeState.selectedAnswers.map((sel, idx) => ({
+      qIdx: activeState.questions[idx].qIdx,
+      selected: sel
+    }));
 
-  dims.forEach(d => {
-    const s = activeState.eqScores[d];
-    if (s && s.count > 0) {
-      const p = s.total / (s.count * 4); // 0.0 to 1.0
-      totalEqSum += p;
-      totalEqCount += 1;
+    const res = await fetch('/api/iqeq?action=submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: activeState.userName,
+        age: activeState.userAge,
+        test_type: 'EQ',
+        answers: answersPayload
+      })
+    });
 
-      const pctStr = Math.round(p * 100) + '%';
-      document.getElementById(`eq-bar-${d}`).style.width = pctStr;
-      document.getElementById(`eq-lbl-${d}`).textContent = pctStr;
+    if (!res.ok) throw new Error("Phân tích kết quả EQ thất bại.");
+    const result = await res.json();
+
+    // Quay lại màn hình chính của EQ nhưng ở màn hình kết quả
+    renderEQ('eqContent');
+    document.getElementById('eq-scr-intro').classList.remove('active');
+    document.getElementById('eq-scr-test').classList.remove('active');
+    document.getElementById('eq-scr-result').classList.add('active');
+
+    document.getElementById('eq-res-value').textContent = result.score;
+    document.getElementById('eq-res-class').textContent = result.classification;
+
+    // Chạy vòng tròn điểm số SVG
+    const ring = document.getElementById('eq-svg-ring');
+    if (ring) {
+      const circum = 314;
+      // Quy đổi điểm số về phần trăm để hiển thị (thang điểm 60 - 140)
+      const pct = (result.score - 60) / 80;
+      ring.style.strokeDashoffset = circum - (pct * circum);
     }
-  });
 
-  const finalPct = totalEqSum / (totalEqCount || 1);
-  const eqValue = Math.round(60 + (finalPct * 80)); // 60 - 140
-
-  let classification = 'Trung Bình';
-  if (eqValue >= 120) classification = 'Cực Kỳ Nhạy Bén / Cao';
-  else if (eqValue >= 100) classification = 'Tốt / Cân Bằng';
-  else if (eqValue < 80) classification = 'Cần Cải Thiện';
-
-  document.getElementById('eq-res-value').textContent = eqValue;
-  document.getElementById('eq-res-class').textContent = classification;
-
-  // Set ring animation
-  const ring = document.getElementById('eq-svg-ring');
-  if (ring) {
-    const circum = 314;
-    ring.style.strokeDashoffset = circum - (finalPct * circum);
+    // Biểu đồ khía cạnh
+    const dims = ['empathy', 'selfReg', 'social', 'selfAwa'];
+    dims.forEach(d => {
+      const val = result.breakdown[d] || 0;
+      const bar = document.getElementById(`eq-bar-${d}`);
+      const lbl = document.getElementById(`eq-lbl-${d}`);
+      if (bar) bar.style.width = `${val}%`;
+      if (lbl) lbl.textContent = `${val}%`;
+    });
+  } catch (err) {
+    showError(container, err.message, () => renderEQ('eqContent'));
   }
-
-  // Quiet DB post
-  saveToDatabaseQuietly({
-    name: activeState.userName,
-    age: activeState.userAge,
-    test_type: 'EQ',
-    score: eqValue,
-    raw_correct: 0,
-    max_score: 140,
-    answers_json: JSON.stringify(activeState.questions.map(q => q.q)),
-    created_at: new Date().toISOString()
-  });
 }
