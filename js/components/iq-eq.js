@@ -68,8 +68,12 @@ function validateIntroInputs(nameId, ageId, agreeId) {
     ageInput.style.boxShadow = 'none';
   }
   if (agreeCheck) {
+    agreeCheck.style.outline = 'none';
     const labelRow = agreeCheck.closest('.iqeq-checkbox-row');
-    if (labelRow) labelRow.style.color = 'var(--text-secondary)';
+    if (labelRow) {
+      const label = labelRow.querySelector('.iqeq-checkbox-label');
+      if (label) label.style.color = 'var(--text-secondary)';
+    }
   }
 
   // Validate Name
@@ -88,9 +92,14 @@ function validateIntroInputs(nameId, ageId, agreeId) {
 
   // Validate Agreement
   if (agreeCheck && !agreeCheck.checked) {
+    agreeCheck.style.outline = '2px solid #ef4444';
+    agreeCheck.style.outlineOffset = '2px';
     const labelRow = agreeCheck.closest('.iqeq-checkbox-row');
     if (labelRow) {
-      labelRow.style.color = '#ef4444';
+      const label = labelRow.querySelector('.iqeq-checkbox-label');
+      if (label) {
+        label.style.color = '#ef4444';
+      }
     }
     isValid = false;
   }
@@ -185,7 +194,6 @@ export function renderIQ(containerId = 'iqContent') {
               <div class="iqeq-q-category">LOGIC & HÌNH HỌC</div>
               <div class="iqeq-q-text" id="iq-q-txt">Đang tải câu hỏi...</div>
               
-              <!-- Container cho sơ đồ hình học SVG -->
               <div id="iq-svg-container" style="margin: 15px 0; text-align: center;"></div>
               
               <div class="iqeq-options-grid" id="iq-options-wrap">
@@ -310,7 +318,7 @@ async function fetchAndStartIQ(containerId) {
 
     // Quay lại màn hình chính của IQ nhưng hiển thị chế độ làm bài
     renderIQ(containerId);
-    
+
     // UI transition
     document.getElementById('iq-scr-intro').classList.remove('active');
     document.getElementById('iq-scr-test').classList.add('active');
@@ -373,7 +381,7 @@ function updateQuestionGridStatus() {
 function loadIQQuestion() {
   if (activeState.questions.length === 0) return;
   const q = activeState.questions[activeState.currIdx];
-  
+
   // Cập nhật nhãn tiến trình & bản đồ câu hỏi
   document.getElementById('iq-progress-lbl').textContent = `Câu hỏi ${activeState.currIdx + 1}/${activeState.limitQuestions}`;
   document.getElementById('iq-bar-fill').style.width = `${((activeState.currIdx) / activeState.limitQuestions) * 100}%`;
@@ -417,7 +425,7 @@ function loadIQQuestion() {
     btn.onclick = () => {
       // Lưu lại câu trả lời
       activeState.selectedAnswers[activeState.currIdx] = idx;
-      
+
       // Cập nhật giao diện lựa chọn
       document.querySelectorAll('#iq-options-wrap .iqeq-option-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
