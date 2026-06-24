@@ -45,8 +45,8 @@
   <link rel="stylesheet" href="css/file-tools.css" />
   <link rel="stylesheet" href="css/qrcode.css" />
   <link rel="stylesheet" href="css/emulator.css" />
-  <link rel="stylesheet" href="css/typing-test.css" />
   <link rel="stylesheet" href="css/converter.css" />
+  <link rel="stylesheet" href="css/iq-eq-test.css" />
   <link rel="stylesheet" href="css/mobile.css" />
 </head>
 
@@ -150,6 +150,11 @@
           <span class="nav-icon">⚖️</span>
           <span class="nav-label">Chỉ Số BMI</span>
           <span class="nav-badge" style="background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.3);">NEW</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="iqeq" onclick="switchSection('iqeq')">
+          <span class="nav-icon">🧠</span>
+          <span class="nav-label">Kiểm Tra IQ & EQ</span>
+          <span class="nav-badge" style="background:rgba(251,191,36,.15);color:#fbbf24;border-color:rgba(251,191,36,.3);">HOT</span>
         </button>
         <button class="sidebar-nav-item" data-section="lottery" onclick="switchSection('lottery')">
           <span class="nav-icon">🎰</span>
@@ -342,6 +347,14 @@
           <div id="bmiContent">
             <div class="skeleton skel-big"></div>
           </div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: IQ & EQ TEST ════════ -->
+      <section class="content-section" id="section-iqeq">
+        <div class="page-title"><span class="page-icon">🧠</span> Kiểm Tra IQ & EQ</div>
+        <div id="iqeqContent">
+          <div class="skeleton skel-big"></div>
         </div>
       </section>
 
