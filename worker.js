@@ -1250,6 +1250,58 @@ async function handleEvents(request, env) {
   }
 }
 
+// ─── /api/iqeq (proxy bảo mật lưu kết quả test IQ/EQ vào Supabase) ────────
+async function handleIQEQ(request, env) {
+  if (request.method === 'OPTIONS') return preflight();
+
+  const url = env.SUPABASE_URL ? env.SUPABASE_URL.trim().replace(/^['\"]|['\"]$/g, '') : '';
+  const key = env.SUPABASE_KEY ? env.SUPABASE_KEY.trim().replace(/^['\"]|['\"]$/g, '') : '';
+
+  if (!url || !key) {
+    return cors(JSON.stringify({ error: 'Supabase URL or Key is missing' }), 503);
+  }
+
+  const supabaseHeaders = {
+    'apikey': key,
+    'Authorization': `Bearer ${key}`,
+    'Content-Type': 'application/json'
+  };
+
+  try {
+    if (request.method === 'GET') {
+      const res = await fetch(`${url}/rest/v1/iqeq_results?select=*&order=created_at.desc`, {
+        headers: supabaseHeaders
+      });
+      const data = await res.text();
+      return new Response(data, {
+        status: res.status,
+        headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS }
+      });
+    }
+
+    if (request.method === 'POST') {
+      const body = await request.json();
+      const res = await fetch(`${url}/rest/v1/iqeq_results`, {
+        method: 'POST',
+        headers: {
+          ...supabaseHeaders,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(body)
+      });
+      const data = await res.text();
+      return new Response(data, {
+        status: res.status,
+        headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS }
+      });
+    }
+    return cors(JSON.stringify({ error: 'method not allowed' }), 405);
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
+
 
 // ─── /api/news (RSS News Aggregator Proxy) ───────────────────────────
 async function handleApiNews(request) {
@@ -2374,6 +2426,7 @@ export default {
     if (pathname === '/football') return handleFootball(request);
     if (pathname === '/api/todos') return handleTodos(request, env);
     if (pathname === '/api/events') return handleEvents(request, env);
+    if (pathname === '/api/iqeq') return handleIQEQ(request, env);
     if (pathname === '/api/news') return handleApiNews(request);
 
     if (pathname === '/api/spam-check') return handleSpamCheck(request);

@@ -151,10 +151,15 @@
           <span class="nav-label">Chỉ Số BMI</span>
           <span class="nav-badge" style="background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.3);">NEW</span>
         </button>
-        <button class="sidebar-nav-item" data-section="iqeq" onclick="switchSection('iqeq')">
+        <button class="sidebar-nav-item" data-section="iq" onclick="switchSection('iq')">
           <span class="nav-icon">🧠</span>
-          <span class="nav-label">Kiểm Tra IQ & EQ</span>
-          <span class="nav-badge" style="background:rgba(251,191,36,.15);color:#fbbf24;border-color:rgba(251,191,36,.3);">HOT</span>
+          <span class="nav-label">Kiểm Tra IQ</span>
+          <span class="nav-badge" style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">IQ</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="eq" onclick="switchSection('eq')">
+          <span class="nav-icon">❤️</span>
+          <span class="nav-label">Kiểm Tra EQ</span>
+          <span class="nav-badge" style="background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.3);">EQ</span>
         </button>
         <button class="sidebar-nav-item" data-section="lottery" onclick="switchSection('lottery')">
           <span class="nav-icon">🎰</span>
@@ -350,10 +355,18 @@
         </div>
       </section>
 
-      <!-- ════════ SECTION: IQ & EQ TEST ════════ -->
-      <section class="content-section" id="section-iqeq">
-        <div class="page-title"><span class="page-icon">🧠</span> Kiểm Tra IQ & EQ</div>
-        <div id="iqeqContent">
+      <!-- ════════ SECTION: IQ TEST ════════ -->
+      <section class="content-section" id="section-iq">
+        <div class="page-title"><span class="page-icon">🧠</span> Bài Kiểm Tra Chỉ Số IQ</div>
+        <div id="iqContent">
+          <div class="skeleton skel-big"></div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: EQ TEST ════════ -->
+      <section class="content-section" id="section-eq">
+        <div class="page-title"><span class="page-icon">❤️</span> Bài Kiểm Tra Chỉ Số EQ</div>
+        <div id="eqContent">
           <div class="skeleton skel-big"></div>
         </div>
       </section>
