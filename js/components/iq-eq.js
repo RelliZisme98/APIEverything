@@ -236,6 +236,27 @@ export function renderIQ(containerId = 'iqContent') {
           <div class="iqeq-analysis-text" id="iq-res-desc">Đang phân tích dữ liệu...</div>
         </div>
 
+        <div class="iqeq-analysis-box" style="margin-top: 20px;">
+          <div class="iqeq-analysis-title" style="color: #60a5fa;">📊 THANG ĐIỂM IQ & PHÂN PHỐI DÂN SỐ</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 13px;">
+            <div style="background: rgba(255,255,255,0.015); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); line-height: 1.5;">
+              <strong style="color: #60a5fa;">🎯 Thang điểm IQ chuẩn:</strong>
+              <div style="margin-top: 6px; color: var(--text-secondary);">
+                • <strong>Trên 130</strong>: Xuất chúng (Top 2% dân số)<br>
+                • <strong>115 - 129</strong>: Trí tuệ cao (Top 13.5% dân số)<br>
+                • <strong>90 - 114</strong>: Trung bình (68% dân số)<br>
+                • <strong>Dưới 90</strong>: Thấp / Cần rèn luyện thêm
+              </div>
+            </div>
+            <div style="background: rgba(255,255,255,0.015); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); line-height: 1.5;">
+              <strong style="color: #60a5fa;">💡 Ý nghĩa kết quả IQ:</strong>
+              <div style="margin-top: 6px; color: var(--text-secondary);">
+                Điểm số được tính toán dựa trên khả năng giải quyết 25 câu hỏi thuộc 3 mức độ khó tăng dần (Dễ, Trung bình, Khó) tương ứng với các kỹ năng logic, toán học và hình học không gian.
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="iqeq-result-disclaimer">
           Kết quả lưu thành công trên hệ thống. Trí tuệ của bạn là độc nhất vô nhị và không thể quy chụp hoàn toàn bằng một con số đơn lẻ. Hãy luôn tự tin!
         </div>
@@ -627,6 +648,36 @@ export function renderEQ(containerId = 'eqContent') {
           <div class="iqeq-analysis-text" id="eq-res-desc">Đang phân tích dữ liệu...</div>
         </div>
 
+        <div class="iqeq-analysis-box" style="margin-top: 20px;">
+          <div class="iqeq-analysis-title" style="color: #34d399;">📊 GIẢI THÍCH CHI TIẾT KHÍA CẠNH EQ</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 13px;">
+            <div style="background: rgba(255,255,255,0.015); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+              <strong style="color: #818cf8;">🧠 Thấu cảm (Empathy):</strong>
+              <p style="margin: 4px 0 0; color: var(--text-secondary); line-height: 1.5;">Khả năng cảm nhận và thấu hiểu cảm xúc, nhu cầu và quan điểm của người khác. Điểm cao thể hiện sự tinh tế và lắng nghe tốt.</p>
+            </div>
+            <div style="background: rgba(255,255,255,0.015); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+              <strong style="color: #34d399;">⚡ Tự điều chỉnh (Self-Regulation):</strong>
+              <p style="margin: 4px 0 0; color: var(--text-secondary); line-height: 1.5;">Khả năng kiểm soát các cơn bốc đồng, làm chủ cảm xúc khi căng thẳng và thích ứng nhanh với môi trường thay đổi.</p>
+            </div>
+            <div style="background: rgba(255,255,255,0.015); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+              <strong style="color: #f472b6;">🤝 Kỹ năng xã hội (Social Skills):</strong>
+              <p style="margin: 4px 0 0; color: var(--text-secondary); line-height: 1.5;">Khả năng xây dựng mối quan hệ xã hội tốt đẹp, làm việc nhóm, đàm phán thuyết phục và khéo léo xử lý xung đột.</p>
+            </div>
+            <div style="background: rgba(255,255,255,0.015); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+              <strong style="color: #fbbf24;">🔍 Tự nhận thức (Self-Awareness):</strong>
+              <p style="margin: 4px 0 0; color: var(--text-secondary); line-height: 1.5;">Khả năng tự hiểu rõ ưu khuyết điểm, nhu cầu cảm xúc và động lực cá nhân để đưa ra các quyết định hành vi sáng suốt.</p>
+            </div>
+          </div>
+          
+          <div style="margin-top: 16px; padding: 12px; background: rgba(52, 211, 153, 0.05); border: 1px dashed rgba(52, 211, 153, 0.2); border-radius: 6px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.5;">
+            <strong>Mức độ đánh giá theo điểm số EQ tổng quát:</strong><br>
+            • <span style="color: #34d399; font-weight:bold;">120 trở lên</span>: Cao (Cực kỳ nhạy bén cảm xúc)<br>
+            • <span style="color: #60a5fa; font-weight:bold;">100 - 119</span>: Khá / Cân bằng tốt<br>
+            • <span style="color: #fbbf24; font-weight:bold;">80 - 99</span>: Trung bình<br>
+            • <span style="color: #ef4444; font-weight:bold;">Dưới 80</span>: Cần rèn luyện thêm
+          </div>
+        </div>
+
         <div class="iqeq-result-disclaimer" style="margin-top:20px;">
           Kết quả lưu thành công trên hệ thống. EQ là năng lực phát triển bền vững theo thời gian thông qua trải nghiệm đời sống.
         </div>
@@ -780,7 +831,18 @@ async function finishEQTest() {
       const bar = document.getElementById(`eq-bar-${d}`);
       const lbl = document.getElementById(`eq-lbl-${d}`);
       if (bar) bar.style.width = `${val}%`;
-      if (lbl) lbl.textContent = `${val}%`;
+      if (lbl) {
+        let level = 'Cần cải thiện';
+        let levelColor = '#ef4444';
+        if (val >= 75) {
+          level = 'Cao';
+          levelColor = '#10b981';
+        } else if (val >= 50) {
+          level = 'Khá';
+          levelColor = '#60a5fa';
+        }
+        lbl.innerHTML = `${val}% <span style="font-size:11px; font-weight:normal; color:${levelColor}; margin-left:6px;">(${level})</span>`;
+      }
     });
   } catch (err) {
     showError(container, err.message, () => renderEQ('eqContent'));
