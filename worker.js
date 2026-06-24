@@ -101,10 +101,17 @@ async function extractArticle(html, targetUrl) {
     .on('meta[name="description"]', { element(el) { if (!description) description = el.getAttribute('content'); } })
     .on('meta[property="og:image"]', { element(el) { if (!thumbnail) thumbnail = el.getAttribute('content'); } })
     .on('meta[property="article:published_time"]', { element(el) { if (!publishedAt) publishedAt = el.getAttribute('content'); } })
-    .on('script, style, figure.video, .relate, .box-related, .banner, .tin-lien-quan, .related-news', {
+    .on('script, style, figure.video, .relate, .box-related, .banner, .tin-lien-quan, .related-news, .box-comment, .author-info, .box-share, .post-tags, .article-bottom, .box-author, .comment-wrapper, .fb-comments, #comments, .tags, .social-share, .author-wrap, .author, .source, .box-category, .box-tintuclienquan, .relate-container, .box-tin-lien-quan, [data-role="comment"]', {
       element(el) {
         skipCount++;
         el.onEndTag(() => { skipCount--; });
+      }
+    })
+    .on('p, br, div, h1, h2, h3, h4, h5, h6, li', {
+      element(el) {
+        if (inContentCount > 0 && skipCount === 0) {
+          content += '\n';
+        }
       }
     })
     .on('article.fck_detail, .detail-content, .singular-content, .klw-body-top, .detail-cmain, .detail__cmain, .article-content, .article-body, .chi-tiet-bai-viet, #main-detail, .article-detail, .maincontent, .content-detail, .post-content, .knc-content, .vtv-detail-content, #entry-body, article, main', {
@@ -121,7 +128,7 @@ async function extractArticle(html, targetUrl) {
 
   await rewriter.transform(new Response(html)).text();
 
-  content = content.replace(/\s+/g, ' ').trim();
+  content = content.replace(/[ \t]+/g, ' ').replace(/\n\s*\n+/g, '\n\n').trim();
   title = title ? decode(title).trim() : '';
   description = description ? decode(description).trim() : '';
 

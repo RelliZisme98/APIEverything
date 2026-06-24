@@ -136,8 +136,8 @@ window.openNewsArticle = async (idx) => {
   if (data?.content && data.content.length > 100 && data.content !== data.description) {
     // Split into paragraphs
     const paragraphs = data.content
-      .split(/(?<=[.!?।।])\s{2,}|(?<=\n)/)
-      .filter(p => p.trim().length > 30)
+      .split(/\n+/)
+      .filter(p => p.trim().length > 10)
       .map(p => `<p>${p.trim()}</p>`)
       .join('');
     document.getElementById('nrContent').innerHTML =
