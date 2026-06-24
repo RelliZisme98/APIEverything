@@ -34,12 +34,14 @@ let timeLeft = 30;
 let timerInterval = null;
 let isPlaying = false;
 let isFinished = false;
+let playSound = false; // Sound toggle
 
 let testWords = [];
 let typedText = '';
 let charIndex = 0;
 let errorsCount = 0;
 let totalTypedChars = 0;
+let caretBlinkTimeout = null;
 
 export function renderTypingTest(containerId = 'typingTestContent') {
   const container = document.getElementById(containerId);
@@ -59,6 +61,10 @@ export function renderTypingTest(containerId = 'typingTestContent') {
           <button class="tt-btn ${currentDuration === 15 ? 'active' : ''}" id="tt-time-15">15s</button>
           <button class="tt-btn ${currentDuration === 30 ? 'active' : ''}" id="tt-time-30">30s</button>
           <button class="tt-btn ${currentDuration === 60 ? 'active' : ''}" id="tt-time-60">60s</button>
+        </div>
+        <div class="tt-group">
+          <span class="tt-label">Âm thanh:</span>
+          <button class="tt-btn ${playSound ? 'active' : ''}" id="tt-btn-sound">🔊 Click: ${playSound ? 'Bật' : 'Tắt'}</button>
         </div>
       </div>
 
@@ -85,7 +91,9 @@ export function renderTypingTest(containerId = 'typingTestContent') {
         </div>
         <input type="text" id="tt-hidden-input" autocomplete="off" autofocus class="tt-hidden-input" />
         <div class="tt-focus-prompt" id="tt-focus-prompt">
-          <span class="pulse-icon">⌨️</span> Nhấp chuột vào đây để kích hoạt gõ phím
+          <span class="pulse-icon">⌨️</span>
+          <span>Nhấp chuột vào đây để kích hoạt gõ phím</span>
+          <span class="tt-focus-prompt-shortcut">Bấm ESC để chơi lại</span>
         </div>
       </div>
 
@@ -134,6 +142,33 @@ export function renderTypingTest(containerId = 'typingTestContent') {
   setupTypingTest();
 }
 
+function playClickSound() {
+  if (!playSound) return;
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AudioContextClass();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    // Generate a realistic mechanical click sound using dynamic oscillator frequency sweeps
+    osc.type = 'triangle';
+    const pitch = 850 + Math.random() * 300;
+    osc.frequency.setValueAtTime(pitch, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.04);
+    
+    gain.gain.setValueAtTime(0.04, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+    
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.045);
+  } catch (e) {
+    console.error('AudioContext error:', e);
+  }
+}
+
 function setupTypingTest() {
   const wordsWrap = document.getElementById('tt-words-wrap');
   const hiddenInput = document.getElementById('tt-hidden-input');
@@ -149,6 +184,7 @@ function setupTypingTest() {
   const time15 = document.getElementById('tt-time-15');
   const time30 = document.getElementById('tt-time-30');
   const time60 = document.getElementById('tt-time-60');
+  const soundToggle = document.getElementById('tt-btn-sound');
 
   const resultScreen = document.getElementById('tt-result-screen');
   const resultCloseBtn = document.getElementById('tt-r-close-btn');
@@ -166,6 +202,14 @@ function setupTypingTest() {
   charIndex = 0;
   errorsCount = 0;
   totalTypedChars = 0;
+
+  // Sound toggle handler
+  soundToggle.onclick = () => {
+    playSound = !playSound;
+    soundToggle.classList.toggle('active', playSound);
+    soundToggle.textContent = `🔊 Click: ${playSound ? 'Bật' : 'Tắt'}`;
+    hiddenInput.focus();
+  };
 
   // Language selectors
   langVi.onclick = () => { currentLang = 'vi'; updateActiveButtons(); initWords(); };
@@ -216,6 +260,57 @@ function setupTypingTest() {
     typingBox.classList.remove('focused');
   };
 
+  // Gliding caret position updates
+  function updateCaret() {
+    const caretEl = document.getElementById('tt-caret');
+    if (!caretEl) return;
+    const chars = wordsWrap.querySelectorAll('.tt-char');
+    const activeChar = chars[charIndex];
+    
+    if (activeChar) {
+      const charRect = activeChar.getBoundingClientRect();
+      const parentRect = wordsWrap.getBoundingClientRect();
+      
+      const leftVal = charRect.left - parentRect.left + wordsWrap.scrollLeft;
+      const topVal = charRect.top - parentRect.top + wordsWrap.scrollTop;
+      
+      caretEl.style.left = `${leftVal}px`;
+      caretEl.style.top = `${topVal}px`;
+      caretEl.style.height = `${charRect.height}px`;
+      caretEl.style.display = 'block';
+    } else {
+      // Caret at the end of the last character
+      const lastChar = chars[chars.length - 1];
+      if (lastChar) {
+        const charRect = lastChar.getBoundingClientRect();
+        const parentRect = wordsWrap.getBoundingClientRect();
+        
+        const leftVal = charRect.left - parentRect.left + wordsWrap.scrollLeft + charRect.width;
+        const topVal = charRect.top - parentRect.top + wordsWrap.scrollTop;
+        
+        caretEl.style.left = `${leftVal}px`;
+        caretEl.style.top = `${topVal}px`;
+        caretEl.style.height = `${charRect.height}px`;
+        caretEl.style.display = 'block';
+      } else {
+        caretEl.style.display = 'none';
+      }
+    }
+  }
+
+  // Blinking caret handling
+  function resetCaretBlink() {
+    const caretEl = document.getElementById('tt-caret');
+    if (!caretEl) return;
+    
+    caretEl.classList.remove('blink');
+    clearTimeout(caretBlinkTimeout);
+    
+    caretBlinkTimeout = setTimeout(() => {
+      caretEl.classList.add('blink');
+    }, 500);
+  }
+
   // Populate words
   function initWords() {
     const list = WORD_BANKS[currentLang];
@@ -225,6 +320,13 @@ function setupTypingTest() {
     
     // Render words as span letters
     wordsWrap.innerHTML = '';
+    
+    // Add custom caret element
+    const caret = document.createElement('div');
+    caret.className = 'tt-caret blink';
+    caret.id = 'tt-caret';
+    wordsWrap.appendChild(caret);
+
     testWords.forEach((word, wordIdx) => {
       const wordSpan = document.createElement('span');
       wordSpan.className = 'tt-word';
@@ -248,15 +350,18 @@ function setupTypingTest() {
       wordsWrap.appendChild(wordSpan);
     });
 
-    // Mark first character with cursor active
-    const chars = wordsWrap.querySelectorAll('.tt-char');
-    if (chars.length > 0) {
-      chars[0].classList.add('active-cursor');
-    }
+    // Positions caret at the start of first character
+    setTimeout(updateCaret, 20);
   }
 
   // Run initial population
   initWords();
+
+  // Handle caret updates on resize
+  const onResize = () => updateCaret();
+  window.removeEventListener('resize', window._ttOnResize);
+  window._ttOnResize = onResize;
+  window.addEventListener('resize', onResize);
 
   // Reset test state
   function resetTest() {
@@ -283,7 +388,10 @@ function setupTypingTest() {
     if (isFinished) return;
 
     const val = hiddenInput.value;
-    const chars = wordsWrap.querySelectorAll('.tt-char');
+    const chars = wordsWrap.querySelectorAll('.tt-char:not(.tt-caret)'); // exclude caret element
+
+    // Play click sound effect
+    playClickSound();
 
     // Start timer on first keystroke
     if (!isPlaying && val.length > 0) {
@@ -308,7 +416,6 @@ function setupTypingTest() {
     }
 
     // 2. Visual rendering: Re-evaluate correct/incorrect states of all chars based on full current input string
-    // This resolves Vietnamese IME (Telex/VNI) composition rewriting of characters (e.g. o + o -> ô)
     for (let i = 0; i < chars.length; i++) {
       const charEl = chars[i];
       if (i < currentTypedLength) {
@@ -329,20 +436,20 @@ function setupTypingTest() {
 
     charIndex = currentTypedLength;
 
-    // Update active cursor placement
-    chars.forEach(c => c.classList.remove('active-cursor'));
-    if (charIndex < chars.length) {
-      chars[charIndex].classList.add('active-cursor');
+    // 3. Gliding Caret and Blinking state resets
+    updateCaret();
+    resetCaretBlink();
+
+    // 4. Smooth scroll centering
+    const activeChar = chars[charIndex];
+    if (activeChar) {
+      const wrapperHeight = wordsWrap.clientHeight;
+      const charRect = activeChar.getBoundingClientRect();
+      const parentRect = wordsWrap.getBoundingClientRect();
+      const relativeCharTop = charRect.top - parentRect.top + wordsWrap.scrollTop;
       
-      // Auto scroll container if cursor moves down
-      const cursorEl = chars[charIndex];
-      const wrapRect = wordsWrap.getBoundingClientRect();
-      const cursorRect = cursorEl.getBoundingClientRect();
-      if (cursorRect.bottom > wrapRect.bottom - 10) {
-        wordsWrap.scrollTop += 32;
-      } else if (cursorRect.top < wrapRect.top + 10) {
-        wordsWrap.scrollTop -= 32;
-      }
+      const targetScroll = relativeCharTop - wrapperHeight / 2 + charRect.height / 2;
+      wordsWrap.scrollTo({ top: targetScroll, behavior: 'smooth' });
     }
 
     typedText = val;

@@ -45,8 +45,8 @@
   <link rel="stylesheet" href="css/file-tools.css" />
   <link rel="stylesheet" href="css/qrcode.css" />
   <link rel="stylesheet" href="css/emulator.css" />
-  <link rel="stylesheet" href="css/typing-test.css" />
   <link rel="stylesheet" href="css/converter.css" />
+  <link rel="stylesheet" href="css/iq-eq-test.css" />
   <link rel="stylesheet" href="css/mobile.css" />
 </head>
 
@@ -71,7 +71,7 @@
         </div>
       </div>
 
-       <!-- Nav: Tài chính -->
+      <!-- Nav: Tài chính -->
       <div class="sidebar-section-label">💰 Tài Chính</div>
       <div class="sidebar-nav" id="sidebarNav">
         <button class="sidebar-nav-item active" data-section="finance" onclick="switchSection('finance')">
@@ -90,7 +90,8 @@
         <button class="sidebar-nav-item" data-section="news" onclick="switchSection('news')">
           <span class="nav-icon">📰</span>
           <span class="nav-label">Tin Tức 24h</span>
-          <span class="nav-badge" style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">HOT</span>
+          <span class="nav-badge"
+            style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">HOT</span>
         </button>
 
         <!-- Nav: Tiện ích -->
@@ -119,12 +120,14 @@
         <button class="sidebar-nav-item" data-section="qrcode" onclick="switchSection('qrcode')">
           <span class="nav-icon">🔗</span>
           <span class="nav-label">QR &amp; Rút Gọn Link</span>
-          <span class="nav-badge" style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">NEW</span>
+          <span class="nav-badge"
+            style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">NEW</span>
         </button>
         <button class="sidebar-nav-item" data-section="emulator" onclick="switchSection('emulator')">
           <span class="nav-icon">🎮</span>
           <span class="nav-label">Game Giả Lập</span>
-          <span class="nav-badge" style="background:rgba(239,68,68,.15);color:#f87171;border-color:rgba(239,68,68,.3);">HOT</span>
+          <span class="nav-badge"
+            style="background:rgba(239,68,68,.15);color:#f87171;border-color:rgba(239,68,68,.3);">HOT</span>
         </button>
         <button class="sidebar-nav-item" data-section="tax-calc" onclick="switchSection('tax-calc')">
           <span class="nav-icon">🧮</span>
@@ -134,12 +137,29 @@
         <button class="sidebar-nav-item" data-section="typing-test" onclick="switchSection('typing-test')">
           <span class="nav-icon">⌨️</span>
           <span class="nav-label">Luyện Gõ Phím</span>
-          <span class="nav-badge" style="background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.3);">NEW</span>
+          <span class="nav-badge"
+            style="background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.3);">NEW</span>
         </button>
         <button class="sidebar-nav-item" data-section="converter" onclick="switchSection('converter')">
           <span class="nav-icon">📏</span>
           <span class="nav-label">Bộ Chuyển Đổi</span>
-          <span class="nav-badge" style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">NEW</span>
+          <span class="nav-badge"
+            style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">NEW</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="bmi" onclick="switchSection('bmi')">
+          <span class="nav-icon">⚖️</span>
+          <span class="nav-label">Chỉ Số BMI</span>
+          <span class="nav-badge" style="background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.3);">NEW</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="iq" onclick="switchSection('iq')">
+          <span class="nav-icon">🧠</span>
+          <span class="nav-label">Kiểm Tra IQ</span>
+          <span class="nav-badge" style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">IQ</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="eq" onclick="switchSection('eq')">
+          <span class="nav-icon">❤️</span>
+          <span class="nav-label">Kiểm Tra EQ</span>
+          <span class="nav-badge" style="background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.3);">EQ</span>
         </button>
         <button class="sidebar-nav-item" data-section="lottery" onclick="switchSection('lottery')">
           <span class="nav-icon">🎰</span>
@@ -153,7 +173,8 @@
         <button class="sidebar-nav-item" data-section="football" onclick="switchSection('football')">
           <span class="nav-icon">⚽</span>
           <span class="nav-label">Bóng Đá</span>
-          <span class="nav-badge" style="background:rgba(251,191,36,.15);color:#fbbf24;border-color:rgba(251,191,36,.3);">EPL</span>
+          <span class="nav-badge"
+            style="background:rgba(251,191,36,.15);color:#fbbf24;border-color:rgba(251,191,36,.3);">EPL</span>
         </button>
         <button class="sidebar-nav-item" data-section="downloader" onclick="switchSection('downloader')">
           <span class="nav-icon">📥</span>
@@ -166,7 +187,8 @@
         <button class="sidebar-nav-item" data-section="focus" onclick="switchSection('focus')">
           <span class="nav-icon">🍅</span>
           <span class="nav-label">Tập Trung &amp; Âm Nhạc</span>
-          <span class="nav-badge" style="background:rgba(99,102,241,.15);color:#a5b4fc;border-color:rgba(99,102,241,.3);">POMO</span>
+          <span class="nav-badge"
+            style="background:rgba(99,102,241,.15);color:#a5b4fc;border-color:rgba(99,102,241,.3);">POMO</span>
         </button>
       </div>
       <!-- Actions -->
@@ -224,7 +246,8 @@
           <!-- City search -->
           <div class="weather-search">
             <input class="field-input" id="cityInput" type="text" placeholder="Nhập tên thành phố..."
-              value="Ho Chi Minh City" onkeydown="if(event.key === 'Enter') { event.preventDefault(); loadWeather(); }" />
+              value="Ho Chi Minh City"
+              onkeydown="if(event.key === 'Enter') { event.preventDefault(); loadWeather(); }" />
             <button type="button" class="btn-primary" onclick="loadWeather()">Tìm</button>
           </div>
           <!-- Dynamic content -->
@@ -254,7 +277,8 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title"><span class="icon">📰</span> Tin Tức Mới Nhất</div>
-            <span class="card-badge" style="background:rgba(251,191,36,0.12);color:var(--accent-yellow);border-color:rgba(251,191,36,0.25);">RSS</span>
+            <span class="card-badge"
+              style="background:rgba(251,191,36,0.12);color:var(--accent-yellow);border-color:rgba(251,191,36,0.25);">RSS</span>
           </div>
           <div id="newsContent"></div>
         </div>
@@ -296,7 +320,7 @@
         <div class="page-title"><span class="page-icon">⌨️</span> Luyện Gõ Phím Nhanh</div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="icon">⌨️</span> Monkeytype Mini · Đo WPM &amp; Độ Chính Xác</div>
+            <div class="card-title"><span class="icon">⌨️</span> Đo WPM &amp; Độ Chính Xác</div>
           </div>
           <div id="typingTestContent">
             <div class="skeleton skel-big"></div>
@@ -309,11 +333,41 @@
         <div class="page-title"><span class="page-icon">📏</span> Bộ Chuyển Đổi Đơn Vị Toàn Năng</div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="icon">📏</span> Chuyển Đổi Dữ Liệu · Nhiệt Độ · Độ Dài · Múi Giờ</div>
+            <div class="card-title"><span class="icon">📏</span> Chuyển Đổi Dữ Liệu · Nhiệt Độ · Độ Dài · Tốc Độ</div>
           </div>
           <div id="converterContent">
             <div class="skeleton skel-big"></div>
           </div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: BMI CALCULATOR ════════ -->
+      <section class="content-section" id="section-bmi">
+        <div class="page-title"><span class="page-icon">⚖️</span> Máy Tính Chỉ Số BMI</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">🏥</span> Body Mass Index · Chuẩn WHO Châu Á</div>
+            <span class="card-badge" style="background:rgba(52,211,153,.12);color:#34d399;border-color:rgba(52,211,153,.25);">NEW</span>
+          </div>
+          <div id="bmiContent">
+            <div class="skeleton skel-big"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: IQ TEST ════════ -->
+      <section class="content-section" id="section-iq">
+        <div class="page-title"><span class="page-icon">🧠</span> Bài Kiểm Tra Chỉ Số IQ</div>
+        <div id="iqContent">
+          <div class="skeleton skel-big"></div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: EQ TEST ════════ -->
+      <section class="content-section" id="section-eq">
+        <div class="page-title"><span class="page-icon">❤️</span> Bài Kiểm Tra Chỉ Số EQ</div>
+        <div id="eqContent">
+          <div class="skeleton skel-big"></div>
         </div>
       </section>
 
@@ -334,7 +388,9 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title"><span class="icon">🎰</span> Kết quả xổ số hôm nay</div>
-            <span class="card-badge" style="background:rgba(251,191,36,.12);color:var(--accent-yellow);border-color:rgba(251,191,36,.25);">HÔM NAY</span>
+            <span class="card-badge"
+              style="background:rgba(251,191,36,.12);color:var(--accent-yellow);border-color:rgba(251,191,36,.25);">HÔM
+              NAY</span>
           </div>
           <div id="lotteryContent"></div>
         </div>
@@ -357,7 +413,8 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title"><span class="icon">🏆</span> Lịch thi đấu · Kết quả · Bảng Xếp Hạng</div>
-            <span class="card-badge" style="background:rgba(251,191,36,.12);color:#fbbf24;border-color:rgba(251,191,36,.25);">LIVE</span>
+            <span class="card-badge"
+              style="background:rgba(251,191,36,.12);color:#fbbf24;border-color:rgba(251,191,36,.25);">LIVE</span>
           </div>
           <div id="footballContent"></div>
         </div>
@@ -401,7 +458,9 @@
       <section class="content-section" id="section-downloader">
         <div class="page-title"><span class="page-icon">📥</span> Tải &amp; Công Cụ File</div>
         <div class="vl-tab-bar" style="margin-bottom: 16px;">
-          <button class="vl-tab active" id="dlTab-media" onclick="switchDownloaderTab('media')" style="background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.4);color:#60a5fa;">📥 Tải Video &amp; Nhạc</button>
+          <button class="vl-tab active" id="dlTab-media" onclick="switchDownloaderTab('media')"
+            style="background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.4);color:#60a5fa;">📥 Tải Video &amp;
+            Nhạc</button>
           <button class="vl-tab" id="dlTab-files" onclick="switchDownloaderTab('files')">📁 Công Cụ File</button>
         </div>
         <div class="card">
@@ -454,7 +513,8 @@
     <div class="cal-modal-content">
       <div class="cal-modal-header">
         <h3 id="calModalTitle">Chi Tiết Ngày</h3>
-        <button class="cal-modal-close" onclick="document.getElementById('calModal').classList.remove('open')">✕</button>
+        <button class="cal-modal-close"
+          onclick="document.getElementById('calModal').classList.remove('open')">✕</button>
       </div>
       <div class="cal-modal-body" id="calModalBody">
         <!-- Filled dynamically -->
