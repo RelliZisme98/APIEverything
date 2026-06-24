@@ -45,6 +45,8 @@
   <link rel="stylesheet" href="css/file-tools.css" />
   <link rel="stylesheet" href="css/qrcode.css" />
   <link rel="stylesheet" href="css/emulator.css" />
+  <link rel="stylesheet" href="css/typing-test.css" />
+  <link rel="stylesheet" href="css/converter.css" />
   <link rel="stylesheet" href="css/mobile.css" />
 </head>
 
@@ -128,6 +130,16 @@
           <span class="nav-icon">🧮</span>
           <span class="nav-label">Tính Thuế TNCN</span>
           <span class="nav-badge">2026</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="typing-test" onclick="switchSection('typing-test')">
+          <span class="nav-icon">⌨️</span>
+          <span class="nav-label">Luyện Gõ Phím</span>
+          <span class="nav-badge" style="background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.3);">NEW</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="converter" onclick="switchSection('converter')">
+          <span class="nav-icon">📏</span>
+          <span class="nav-label">Bộ Chuyển Đổi</span>
+          <span class="nav-badge" style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">NEW</span>
         </button>
         <button class="sidebar-nav-item" data-section="lottery" onclick="switchSection('lottery')">
           <span class="nav-icon">🎰</span>
@@ -274,6 +286,32 @@
             <div class="card-title"><span class="icon">🎮</span> Trình Giả Lập NES (Điện tử 4 nút)</div>
           </div>
           <div id="emulatorContent">
+            <div class="skeleton skel-big"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: TYPING SPEED TEST ════════ -->
+      <section class="content-section" id="section-typing-test">
+        <div class="page-title"><span class="page-icon">⌨️</span> Luyện Gõ Phím Nhanh</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">⌨️</span> Monkeytype Mini · Đo WPM &amp; Độ Chính Xác</div>
+          </div>
+          <div id="typingTestContent">
+            <div class="skeleton skel-big"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: UNIVERSAL CONVERTER ════════ -->
+      <section class="content-section" id="section-converter">
+        <div class="page-title"><span class="page-icon">📏</span> Bộ Chuyển Đổi Đơn Vị Toàn Năng</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">📏</span> Chuyển Đổi Dữ Liệu · Nhiệt Độ · Độ Dài · Múi Giờ</div>
+          </div>
+          <div id="converterContent">
             <div class="skeleton skel-big"></div>
           </div>
         </div>

@@ -1,0 +1,313 @@
+/* ═══════════════════════════════════════════
+   TYPING SPEED TEST COMPONENT STYLING
+   ═══════════════════════════════════════════ */
+
+.tt-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Toolbar */
+.tt-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: var(--bg-secondary);
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  align-items: center;
+}
+
+.tt-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tt-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.tt-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.tt-btn:hover {
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.tt-btn.active {
+  color: var(--accent-blue);
+  background: rgba(96, 165, 250, 0.1);
+  border-color: rgba(96, 165, 250, 0.2);
+  box-shadow: 0 0 10px rgba(96, 165, 250, 0.05);
+}
+
+/* Stats Bar */
+.tt-stats-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  text-align: center;
+}
+
+.tt-stat-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.tt-stat-item:hover {
+  border-color: var(--border-glow);
+}
+
+.tt-stat-val {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.tt-stat-val.timer {
+  color: var(--accent-yellow);
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.2);
+}
+
+.tt-stat-lbl {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* Typing Box */
+.tt-typing-container {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.01);
+  outline: none;
+  cursor: text;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.tt-typing-container.focused {
+  border-color: var(--accent-blue);
+  box-shadow: var(--glow-blue);
+}
+
+.tt-words-wrapper {
+  height: 120px;
+  overflow-y: hidden;
+  padding: 24px;
+  font-size: 20px;
+  line-height: 1.8;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  word-break: break-all;
+  user-select: none;
+  scroll-behavior: smooth;
+}
+
+.tt-word {
+  display: inline-block;
+  margin-right: 2px;
+}
+
+.tt-char {
+  position: relative;
+  transition: color 0.1s ease, background 0.1s ease;
+}
+
+.tt-char.correct {
+  color: var(--text-primary);
+}
+
+.tt-char.incorrect {
+  color: var(--accent-red);
+  background: rgba(248, 113, 113, 0.15);
+  border-radius: 2px;
+}
+
+.tt-char.active-cursor {
+  border-left: 2px solid var(--accent-yellow);
+  margin-left: -1px;
+  animation: ttBlink 1s infinite;
+}
+
+@keyframes ttBlink {
+  0%, 100% { border-color: transparent; }
+  50% { border-color: var(--accent-yellow); }
+}
+
+.tt-hidden-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+}
+
+/* Focus Prompt Overlay */
+.tt-focus-prompt {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(7, 11, 20, 0.7);
+  backdrop-filter: blur(4px);
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.25s ease;
+}
+
+.tt-focus-prompt .pulse-icon {
+  font-size: 18px;
+  margin-right: 8px;
+  animation: ttPulse 1.5s infinite;
+}
+
+@keyframes ttPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* Actions */
+.tt-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.tt-restart-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Result Screen Overlay */
+.tt-result-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(7, 11, 20, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: var(--radius);
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.tt-result-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 30px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.tt-result-header {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent-green);
+  margin-bottom: 24px;
+}
+
+.tt-result-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.tt-r-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 16px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.tt-r-item.highlight {
+  border-color: rgba(52, 211, 153, 0.3);
+  box-shadow: 0 0 15px rgba(52, 211, 153, 0.05);
+}
+
+.tt-r-item.highlight .tt-r-val {
+  color: var(--accent-green);
+}
+
+.tt-r-val {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.tt-r-lbl {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+  text-transform: uppercase;
+}
+
+.tt-result-details {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+/* Responsiveness */
+@media (max-width: 576px) {
+  .tt-stats-bar {
+    gap: 8px;
+  }
+  .tt-stat-val {
+    font-size: 20px;
+  }
+  .tt-words-wrapper {
+    font-size: 16px;
+    height: 100px;
+  }
+  .tt-result-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .tt-r-val {
+    font-size: 26px;
+  }
+}
