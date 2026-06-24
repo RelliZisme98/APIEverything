@@ -2838,7 +2838,7 @@ export default {
     if (pathname === '/api/routing-diagnostic') {
       return new Response(JSON.stringify({
         status: "ok",
-        version: "1.0.2",
+        version: "1.0.3",
         timestamp: new Date().toISOString(),
         requestUrl: request.url,
         requestMethod: request.method,
@@ -2848,26 +2848,6 @@ export default {
       }), {
         headers: { 'Content-Type': 'application/json' }
       });
-    }
-
-    // ── SPA Routing Rewrite for Frontend Paths ──
-    const acceptHeader = request.headers.get('Accept') || '';
-    if (acceptHeader.includes('text/html')) {
-      const frontendPaths = [
-        '/', '/finance', '/weather', '/news', '/calendar', '/travel', '/todo',
-        '/lookup', '/qrcode', '/games', '/emulator', '/tax-calc', '/typing-test',
-        '/converter', '/bmi', '/iq', '/eq', '/lottery', '/clock', '/world-clock',
-        '/football', '/downloader', '/media', '/focus'
-      ];
-      let cleanPath = pathname;
-      if (cleanPath.endsWith('/') && cleanPath.length > 1) {
-        cleanPath = cleanPath.slice(0, -1);
-      }
-      if (frontendPaths.includes(cleanPath)) {
-        const url = new URL(request.url);
-        url.pathname = '/index.html';
-        return env.ASSETS.fetch(new Request(url.toString(), request));
-      }
     }
 
     if (pathname === '/phat-nguoi') return handlePhatNguoi(request);
