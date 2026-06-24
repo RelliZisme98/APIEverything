@@ -133,7 +133,7 @@ window.openNewsArticle = async (idx) => {
   // Fetch full article
   const data = await fetchArticle(article.link);
 
-  if (data?.content && data.content.length > 100) {
+  if (data?.content && data.content.length > 100 && data.content !== data.description) {
     // Split into paragraphs
     const paragraphs = data.content
       .split(/(?<=[.!?।।])\s{2,}|(?<=\n)/)
@@ -142,6 +142,7 @@ window.openNewsArticle = async (idx) => {
       .join('');
     document.getElementById('nrContent').innerHTML =
       paragraphs || `<p>${data.content}</p>`;
+  } else {
     // Fallback: show desc + link
     document.getElementById('nrContent').innerHTML = `
       <p class="nr-excerpt">${article.desc || 'Không có mô tả cho bài viết này.'}</p>
