@@ -97,6 +97,14 @@ export function renderTypingTest(containerId = 'typingTestContent') {
         </div>
       </div>
 
+      <!-- Live Typing Preview Panel -->
+      <div class="tt-input-panel" style="margin-top: 15px; display: flex; align-items: center; gap: 12px; background: rgba(13, 20, 36, 0.4); padding: 12px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);">
+        <span style="font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; flex-shrink: 0;">Nội dung gõ:</span>
+        <div id="tt-input-preview" style="font-family: var(--font-mono); font-size: 15px; color: var(--accent-blue); min-height: 22px; flex-grow: 1; display: flex; align-items: center; overflow: hidden; white-space: nowrap; text-shadow: 0 0 8px rgba(96, 165, 250, 0.3);">
+          <span style="color: rgba(255,255,255,0.25); font-style: italic;">Nhấp vào ô từ phía trên và bắt đầu gõ...</span>
+        </div>
+      </div>
+
       <!-- Footer action -->
       <div class="tt-actions">
         <button class="btn-primary tt-restart-btn" id="tt-btn-restart">
@@ -378,6 +386,10 @@ function setupTypingTest() {
     errorsCount = 0;
     totalTypedChars = 0;
     hiddenInput.value = '';
+    const previewEl = document.getElementById('tt-input-preview');
+    if (previewEl) {
+      previewEl.innerHTML = `<span style="color: rgba(255,255,255,0.25); font-style: italic;">Nhấp vào ô từ phía trên và bắt đầu gõ...</span>`;
+    }
     resultScreen.style.display = 'none';
     initWords();
     hiddenInput.focus();
@@ -396,6 +408,17 @@ function setupTypingTest() {
     // Start timer on first keystroke
     if (!isPlaying && val.length > 0) {
       startTimer();
+    }
+
+    // Update live text preview
+    const previewEl = document.getElementById('tt-input-preview');
+    if (previewEl) {
+      if (val.length === 0) {
+        previewEl.innerHTML = `<span style="color: rgba(255,255,255,0.25); font-style: italic;">Nhấp vào ô từ phía trên và bắt đầu gõ...</span>`;
+      } else {
+        const showVal = val.length > 50 ? '...' + val.slice(-50) : val;
+        previewEl.textContent = showVal;
+      }
     }
 
     const currentTypedLength = val.length;
