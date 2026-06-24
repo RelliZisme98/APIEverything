@@ -199,7 +199,6 @@ export function renderTodo() {
 
   populateCategoryDropdown();
   initProxyTodos();
-  window._todoInit = initProxyTodos;
 }
 
 async function initProxyTodos() {
@@ -207,7 +206,7 @@ async function initProxyTodos() {
   const syncText  = document.getElementById('syncText');
 
   try {
-    const res = await window.authFetch('/api/todos');
+    const res = await fetch('/api/todos');
     if (res.ok) {
       const data = await res.json();
       hasDbConnection = true;
@@ -548,7 +547,7 @@ function addNewTodo() {
 async function uploadTaskToProxy(task) {
   if (!hasDbConnection) return;
   try {
-    await window.authFetch('/api/todos', {
+    await fetch('/api/todos', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -564,7 +563,7 @@ async function uploadTaskToProxy(task) {
 async function deleteTaskFromProxy(taskId) {
   if (!hasDbConnection) return;
   try {
-    await window.authFetch(`/api/todos?id=${encodeURIComponent(taskId)}`, { method: 'DELETE' });
+    await fetch(`/api/todos?id=${encodeURIComponent(taskId)}`, { method: 'DELETE' });
   } catch (err) { console.warn('[Delete Task Failed]', err); }
 }
 

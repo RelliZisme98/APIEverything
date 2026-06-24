@@ -1108,10 +1108,9 @@ async function handleTodos(request, env) {
     }), 400);
   }
 
-  const authHeader = request.headers.get('Authorization');
   const supabaseHeaders = {
     'apikey': key,
-    'Authorization': authHeader || `Bearer ${key}`,
+    'Authorization': `Bearer ${key}`,
     'Content-Type': 'application/json'
   };
 
@@ -1177,10 +1176,9 @@ async function handleEvents(request, env) {
     return cors(JSON.stringify({ error: `Supabase URL or Key is missing. URL length: ${url ? url.length : 0}, Key length: ${key ? key.length : 0}` }), 503);
   }
 
-  const authHeader = request.headers.get('Authorization');
   const supabaseHeaders = {
     'apikey': key,
-    'Authorization': authHeader || `Bearer ${key}`,
+    'Authorization': `Bearer ${key}`,
     'Content-Type': 'application/json'
   };
 
@@ -1235,71 +1233,6 @@ async function handleEvents(request, env) {
   }
 }
 
-// ─── /api/auth/signup ────────────────────────────────────────────────
-async function handleAuthSignup(request, env) {
-  if (request.method === 'OPTIONS') return preflight();
-  if (request.method !== 'POST') return cors(JSON.stringify({ error: 'method not allowed' }), 405);
-
-  const url = env.SUPABASE_URL ? env.SUPABASE_URL.trim().replace(/^['\"]|['\"]$/g, '') : '';
-  const key = env.SUPABASE_KEY ? env.SUPABASE_KEY.trim().replace(/^['\"]|['\"]$/g, '') : '';
-
-  if (!url || !key) {
-    return cors(JSON.stringify({ error: 'Supabase configuration missing' }), 503);
-  }
-
-  try {
-    const body = await request.json();
-    const res = await fetch(`${url}/auth/v1/signup`, {
-      method: 'POST',
-      headers: {
-        'apikey': key,
-        'Authorization': `Bearer ${key}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    });
-    const data = await res.text();
-    return new Response(data, {
-      status: res.status,
-      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS }
-    });
-  } catch (err) {
-    return cors(JSON.stringify({ error: err.message }), 500);
-  }
-}
-
-// ─── /api/auth/login ─────────────────────────────────────────────────
-async function handleAuthLogin(request, env) {
-  if (request.method === 'OPTIONS') return preflight();
-  if (request.method !== 'POST') return cors(JSON.stringify({ error: 'method not allowed' }), 405);
-
-  const url = env.SUPABASE_URL ? env.SUPABASE_URL.trim().replace(/^['\"]|['\"]$/g, '') : '';
-  const key = env.SUPABASE_KEY ? env.SUPABASE_KEY.trim().replace(/^['\"]|['\"]$/g, '') : '';
-
-  if (!url || !key) {
-    return cors(JSON.stringify({ error: 'Supabase configuration missing' }), 503);
-  }
-
-  try {
-    const body = await request.json();
-    const res = await fetch(`${url}/auth/v1/token?grant_type=password`, {
-      method: 'POST',
-      headers: {
-        'apikey': key,
-        'Authorization': `Bearer ${key}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    });
-    const data = await res.text();
-    return new Response(data, {
-      status: res.status,
-      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS }
-    });
-  } catch (err) {
-    return cors(JSON.stringify({ error: err.message }), 500);
-  }
-}
 
 // ─── /api/spam-check ────────────────────────────────────────────────
 async function handleSpamCheck(request) {
@@ -2250,8 +2183,7 @@ export default {
     if (pathname === '/football') return handleFootball(request);
     if (pathname === '/api/todos') return handleTodos(request, env);
     if (pathname === '/api/events') return handleEvents(request, env);
-    if (pathname === '/api/auth/signup') return handleAuthSignup(request, env);
-    if (pathname === '/api/auth/login') return handleAuthLogin(request, env);
+
     if (pathname === '/api/spam-check') return handleSpamCheck(request);
     if (pathname === '/api/tax-lookup') return handleTaxLookup(request);
     if (pathname === '/api/downloader') return handleDownloader(request);

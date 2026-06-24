@@ -733,7 +733,7 @@ function updateCustomEvent(eventId) {
  */
 async function initProxyEvents() {
   try {
-    const res = await window.authFetch('/api/events');
+    const res = await fetch('/api/events');
     if (res.ok) {
       const data = await res.json();
       hasDbConnection = true;
@@ -757,16 +757,13 @@ async function initProxyEvents() {
   }
 }
 
-// Expose calInit globally
-window._calInit = initProxyEvents;
-
 /**
  * Securely upload custom event details to Supabase
  */
 async function uploadEventToProxy(event) {
   if (!hasDbConnection) return;
   try {
-    await window.authFetch('/api/events', {
+    await fetch('/api/events', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -791,7 +788,7 @@ async function uploadEventToProxy(event) {
 async function deleteEventFromProxy(eventId) {
   if (!hasDbConnection) return;
   try {
-    await window.authFetch(`/api/events?id=${encodeURIComponent(eventId)}`, {
+    await fetch(`/api/events?id=${encodeURIComponent(eventId)}`, {
       method: 'DELETE'
     });
   } catch (err) {
