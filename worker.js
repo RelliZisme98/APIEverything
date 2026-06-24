@@ -2838,8 +2838,13 @@ export default {
     if (pathname === '/api/routing-diagnostic') {
       return new Response(JSON.stringify({
         status: "ok",
-        version: "1.0.1",
-        timestamp: new Date().toISOString()
+        version: "1.0.2",
+        timestamp: new Date().toISOString(),
+        requestUrl: request.url,
+        requestMethod: request.method,
+        acceptHeader: request.headers.get('Accept'),
+        userAgent: request.headers.get('User-Agent'),
+        cfRay: request.headers.get('CF-Ray')
       }), {
         headers: { 'Content-Type': 'application/json' }
       });
