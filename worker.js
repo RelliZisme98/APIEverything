@@ -896,6 +896,72 @@ function parsePlxPricesFromHtml(html) {
   return prices;
 }
 
+function parseFuelPrices(html) {
+  const prices = [];
+  const clean = html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '');
+
+  const trRe = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+  let trM;
+  while ((trM = trRe.exec(clean)) !== null) {
+    const cells = [];
+    const tdRe = /<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi;
+    let tdM;
+    while ((tdM = tdRe.exec(trM[1])) !== null) {
+      const text = tdM[1]
+        .replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+      if (text) cells.push(text);
+    }
+    if (cells.length < 3) continue;
+    const name = cells[0];
+    if (!/xăng|dầu|diesel|mazut|hỏa|ron|\bdo\b/i.test(name)) continue;
+
+    const parseVnNum = s => {
+      const n = parseInt(s.replace(/[.\s]/g, '').replace(',', ''));
+      return n > 5000 && n < 100000 ? n : null;
+    };
+
+    const r1 = parseVnNum(cells[cells.length - 2] || '');
+    const r2 = parseVnNum(cells[cells.length - 1] || '') ?? r1;
+    if (r1) prices.push({ name: name.trim(), r1, r2 });
+  }
+  return prices;
+}
+
+function mergePrices(parsed, defaultPrices) {
+  for (const item of parsed) {
+    const nameLower = item.name.toLowerCase();
+    const target = defaultPrices.find(p => {
+      const pLower = p.name.toLowerCase();
+      if (pLower.includes('ron95') || pLower.includes('ron 95')) {
+        return nameLower.includes('ron 95') || nameLower.includes('ron95');
+      }
+      if (pLower.includes('ron92') || pLower.includes('ron 92')) {
+        return nameLower.includes('ron 92') || nameLower.includes('ron92');
+      }
+      if (pLower.includes('0,05s') || pLower.includes('0.05s')) {
+        return nameLower.includes('0,05s') || nameLower.includes('0.05s');
+      }
+      if (pLower.includes('0,001s') || pLower.includes('0.001s')) {
+        return nameLower.includes('0,001s') || nameLower.includes('0.001s');
+      }
+      if (pLower.includes('hỏa') || pLower.includes('2-k')) {
+        return nameLower.includes('hỏa') || nameLower.includes('2-k') || nameLower.includes('kerosene');
+      }
+      if (pLower.includes('mazut') || pLower.includes('180cst')) {
+        return nameLower.includes('mazut') || nameLower.includes('fo') || nameLower.includes('fo-r');
+      }
+      return false;
+    });
+    if (target) {
+      target.r1 = item.r1;
+      target.r2 = item.r2;
+    }
+  }
+}
+
 async function handleGas(request, env) {
   if (request.method === 'OPTIONS') return preflight();
 
@@ -1010,36 +1076,7 @@ async function handleGas(request, env) {
         }
 
         if (parsed && parsed.length > 0) {
-          // Merge parsed values into defaultPrices
-          for (const item of parsed) {
-            const nameLower = item.name.toLowerCase();
-            const target = defaultPrices.find(p => {
-              const pLower = p.name.toLowerCase();
-              if (pLower === 'ron 95-iii') {
-                return nameLower.includes('ron 95') && nameLower.includes('iii');
-              }
-              if (pLower === 'xăng e5 ron92') {
-                return nameLower.includes('ron 92');
-              }
-              if (pLower === 'dầu diesel 0,05s') {
-                return nameLower.includes('0,05s') || nameLower.includes('0.05s');
-              }
-              if (pLower === 'dầu diesel 0,001s') {
-                return nameLower.includes('0,001s') || nameLower.includes('0.001s');
-              }
-              if (pLower === 'dầu hỏa 2-k') {
-                return nameLower.includes('hỏa') || nameLower.includes('2-k') || nameLower.includes('kerosene');
-              }
-              if (pLower === 'dầu mazut 180cst 3,5s') {
-                return nameLower.includes('mazut') || nameLower.includes('fo');
-              }
-              return false;
-            });
-            if (target) {
-              target.r1 = item.r1;
-              target.r2 = item.r2;
-            }
-          }
+          mergePrices(parsed, defaultPrices);
 
           return new Response(JSON.stringify({
             success: true,
@@ -1056,7 +1093,75 @@ async function handleGas(request, env) {
     console.warn('[Gas] Tier-2 (scrape) failed:', err.message);
   }
 
-  // ── Tier 3: Static fallback (updated manually to latest known pricing) ─
+  // ── Tier 3: Independent Web Scrapers (Giaxanghomnay.com & Webgia.com) ──
+  // This is a robust fallback when Petrolimex official site/API is offline or blocking.
+  if (source === 'static') {
+    try {
+      console.log('[Gas] Trying Tier-3 fallback: Giaxanghomnay.com...');
+      const gxRes = await fetch('https://giaxanghomnay.com/', {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'Accept-Language': 'vi-VN,vi;q=0.9,en;q=0.8',
+        },
+        signal: AbortSignal.timeout(6000)
+      });
+      if (gxRes.ok) {
+        const gxHtml = await gxRes.text();
+        const parsed = parseFuelPrices(gxHtml);
+        if (parsed && parsed.length > 0) {
+          source = 'Giaxanghomnay Scraped';
+          const dateMatch = gxHtml.match(/ngày\s*(\d{1,2})\/(\d{1,2})\/(\d{4})/i) || gxHtml.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+          if (dateMatch) {
+            priceDate = `${dateMatch[3]}-${String(dateMatch[2]).padStart(2, '0')}-${String(dateMatch[1]).padStart(2, '0')}`;
+          }
+          mergePrices(parsed, defaultPrices);
+        }
+      }
+    } catch (err) {
+      console.warn('[Gas] Giaxanghomnay scrape failed:', err.message);
+    }
+  }
+
+  if (source === 'static') {
+    try {
+      console.log('[Gas] Trying Tier-3 fallback: Webgia.com...');
+      const wgRes = await fetch('https://webgia.com/gia-xang-dau/', {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Referer': 'https://webgia.com/',
+        },
+        signal: AbortSignal.timeout(6000)
+      });
+      if (wgRes.ok) {
+        const wgHtml = await wgRes.text();
+        const parsed = parseFuelPrices(wgHtml);
+        if (parsed && parsed.length > 0) {
+          source = 'Webgia Scraped';
+          const dateMatch = wgHtml.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+          if (dateMatch) {
+            priceDate = `${dateMatch[3]}-${String(dateMatch[2]).padStart(2, '0')}-${String(dateMatch[1]).padStart(2, '0')}`;
+          }
+          mergePrices(parsed, defaultPrices);
+        }
+      }
+    } catch (err) {
+      console.warn('[Gas] Webgia scrape failed:', err.message);
+    }
+  }
+
+  if (source !== 'static') {
+    return new Response(JSON.stringify({
+      success: true,
+      priceDate,
+      prices: defaultPrices,
+      source
+    }), {
+      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public, max-age=3600' }
+    });
+  }
+
+  // ── Tier 4: Static fallback (updated manually to latest known pricing) ─
   return new Response(JSON.stringify({
     success: true,
     priceDate,
