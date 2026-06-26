@@ -141,13 +141,13 @@ async function loadLeagueData(silent = false) {
     if (type === 'statistics' || type === 'table') {
       params.season = _league === 'wc' ? '2026' : '2025';
     }
-    if (type === 'scoreboard' && _dateOffset !== 0) {
+    if (type === 'scoreboard') {
       const base = new Date();
       base.setDate(base.getDate() + _dateOffset);
       // ESPN scoreboard supports dates param for range
-      const fmt = (d) => d.toLocaleDateString('sv-SE').replace(/-/g,'');
+      const fmt = (d) => `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
       const rangeStart = new Date(base); rangeStart.setDate(rangeStart.getDate() - 3);
-      const rangeEnd   = new Date(base); rangeEnd.setDate(rangeEnd.getDate() + 4);
+      const rangeEnd   = new Date(base); rangeEnd.setDate(rangeEnd.getDate() + 3);
       params.dates = `${fmt(rangeStart)}-${fmt(rangeEnd)}`;
     }
     const res  = await fetch(API(params));

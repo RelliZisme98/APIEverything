@@ -274,11 +274,16 @@ async function loadVNIndex(isSilent = false) {
   if (container) {
     await renderVNIndex('vnindexContent', isSilent);
   } else {
-    // Background fetch only to populate global state for AI assistant
+    // Background fetch to populate global state for overview and AI assistant
     try {
-      const res = await fetch('/vnindex');
+      const res = await fetch('/vnindex?type=index');
       if (res.ok) {
         state.vnindexData = await res.json();
+        const isOverviewActive = !document.querySelector('.finance-tab-btn') || 
+                                 document.querySelector('.finance-tab-btn[data-tab="overview"]')?.classList.contains('active');
+        if (isOverviewActive) {
+          renderFinance();
+        }
         renderTicker();
       }
     } catch (e) {
