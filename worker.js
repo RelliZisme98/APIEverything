@@ -2866,7 +2866,7 @@ async function handleTTS(request) {
 
 
 // ─── /api/shorten — URL Shortener Proxy ──────────────────────────────
-async function handleShorten(request) {
+async function handleShorten(request, env) {
   if (request.method === 'OPTIONS') return preflight();
   if (request.method !== 'POST') {
     return cors(JSON.stringify({ error: 'Method not allowed' }), 405);
@@ -2878,43 +2878,30 @@ async function handleShorten(request) {
       return cors(JSON.stringify({ error: 'Thiếu đường dẫn (url) cần rút gọn.' }), 400);
     }
 
-    // 1. cleanuri.com
-    try {
-      const response = await fetch('https://cleanuri.com/api/v1/shorten', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `url=${encodeURIComponent(url)}`,
-        signal: AbortSignal.timeout(5000)
-      });
-      if (response.ok) {
-        const data = await response.json();
-        if (data && data.result_url) {
-          return cors(JSON.stringify({ shorturl: data.result_url }));
+    // 1. Bitly (nếu có BITLY_TOKEN trong Cloudflare Secrets)
+    if (env && env.BITLY_TOKEN) {
+      try {
+        const response = await fetch('https://api-ssl.bitly.com/v4/shorten', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${env.BITLY_TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ long_url: url }),
+          signal: AbortSignal.timeout(5000),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.link) {
+            return cors(JSON.stringify({ shorturl: data.link }));
+          }
         }
+      } catch (e) {
+        console.warn('[Shorten] bitly failed:', e.message);
       }
-    } catch (e) {
-      console.warn('[Shorten] cleanuri failed:', e.message);
     }
 
-    // 2. gotiny.cc
-    try {
-      const response = await fetch('https://gotiny.cc/api', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ input: url }),
-        signal: AbortSignal.timeout(5000)
-      });
-      if (response.ok) {
-        const data = await response.json();
-        if (data && data[0] && data[0].code) {
-          return cors(JSON.stringify({ shorturl: `https://gotiny.cc/${data[0].code}` }));
-        }
-      }
-    } catch (e) {
-      console.warn('[Shorten] gotiny failed:', e.message);
-    }
-
-    // 3. tinyurl.com
+    // 2. tinyurl.com (fallback — ổn định, không cần API key)
     try {
       const response = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`, {
         signal: AbortSignal.timeout(5000)
@@ -2927,6 +2914,36 @@ async function handleShorten(request) {
       }
     } catch (e) {
       console.warn('[Shorten] tinyurl failed:', e.message);
+    }
+
+    // 2. is.gd
+    try {
+      const response = await fetch(`https://is.gd/create.php?format=json&url=${encodeURIComponent(url)}`, {
+        signal: AbortSignal.timeout(5000)
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.shorturl) {
+          return cors(JSON.stringify({ shorturl: data.shorturl }));
+        }
+      }
+    } catch (e) {
+      console.warn('[Shorten] is.gd failed:', e.message);
+    }
+
+    // 3. v.gd (backup của is.gd)
+    try {
+      const response = await fetch(`https://v.gd/create.php?format=json&url=${encodeURIComponent(url)}`, {
+        signal: AbortSignal.timeout(5000)
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.shorturl) {
+          return cors(JSON.stringify({ shorturl: data.shorturl }));
+        }
+      }
+    } catch (e) {
+      console.warn('[Shorten] v.gd failed:', e.message);
     }
 
     return cors(JSON.stringify({ error: 'Không thể rút gọn link bằng các dịch vụ công cộng hiện tại. Vui lòng thử lại sau.' }), 502);
@@ -2978,7 +2995,7 @@ export default {
     if (pathname === '/vietlott') return handleVietlott(request);
     if (pathname === '/api/ai')  return handleAI(request, env);
     if (pathname === '/api/tts')  return handleTTS(request);
-    if (pathname === '/api/shorten') return handleShorten(request);
+    if (pathname === '/api/shorten') return handleShorten(request, env);
 
 
 
