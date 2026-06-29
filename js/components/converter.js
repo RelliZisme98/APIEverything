@@ -758,23 +758,43 @@ export function renderBMICalculator(containerId = 'bmiContent') {
     const hm = h / 100;
     const bmi = w / (hm * hm);
     bmiValText.textContent = bmi.toFixed(1);
+
+    // ── Ngưỡng BMI Châu Á (WHO Western Pacific) ──
+    // Thiếu cân: < 18.5 | Bình thường: 18.5–22.9 | Thừa cân: 23–24.9
+    // Béo phì I: 25–29.9 | Béo phì II: ≥ 30
     let status, color, pct;
-    if (bmi < 18.5)       { status = 'Thi\u1ebfu c\u00e2n (G\u1ea7y) \ud83d\udd35'; color = '#60a5fa'; pct = Math.max(5, Math.min(24, ((bmi-10)/8.5)*20+5)); }
-    else if (bmi < 23.0)  { status = 'B\u00ecnh th\u01b0\u1eddng (C\u00e2n \u0111\u1ed1i) \ud83d\udfe2'; color = '#34d399'; pct = ((bmi-18.5)/4.4)*30+25; }
-    else if (bmi < 25.0)  { status = 'Th\u1eeba c\u00e2n (Ti\u1ec1n b\u00e9o ph\u00ec) \ud83d\udfe1'; color = '#fbbf24'; pct = ((bmi-23.0)/1.9)*15+55; }
-    else if (bmi < 30.0)  { status = 'B\u00e9o ph\u00ec \u0111\u1ed9 I \ud83d�'; color = '#f97316'; pct = ((bmi-25.0)/4.9)*15+70; }
-    else                  { status = 'B\u00e9o ph\u00ec \u0111\u1ed9 II \ud83d\udd34'; color = '#ef4444'; pct = Math.min(95, ((bmi-30.0)/10)*10+85); }
+    if (bmi < 18.5)       { status = 'Thiếu cân (Gầy) 🔵'; color = '#60a5fa'; pct = Math.max(5, Math.min(24, ((bmi-10)/8.5)*20+5)); }
+    else if (bmi < 23.0)  { status = 'Bình thường (Cân đối) 🟢'; color = '#34d399'; pct = ((bmi-18.5)/4.4)*30+25; }
+    else if (bmi < 25.0)  { status = 'Thừa cân (Tiền béo phì) 🟡'; color = '#fbbf24'; pct = ((bmi-23.0)/2.0)*15+55; }
+    else if (bmi < 30.0)  { status = 'Béo phì độ I 🟠'; color = '#f97316'; pct = ((bmi-25.0)/5.0)*15+70; }
+    else                  { status = 'Béo phì độ II 🔴'; color = '#ef4444'; pct = Math.min(95, ((bmi-30.0)/10)*10+85); }
+
     bmiStatusLbl.textContent = status;
     bmiStatusLbl.style.color = color;
     bmiCircleGlow.style.borderColor = color;
     bmiCircleGlow.style.boxShadow = `0 0 15px ${color}`;
     bmiIndicator.style.left = `${pct}%`;
+
+    // ── Cân nặng lý tưởng & % mỡ cơ thể chuẩn theo giới tính ──
     const minI = (18.5 * hm * hm).toFixed(1);
     const maxI = (22.9 * hm * hm).toFixed(1);
-    let tip = `C\u00e2n n\u1eb7ng l\u00fd t\u01b0\u1edfng: <strong>${minI} \u2013 ${maxI} kg</strong>.`;
-    if (bmi >= 23)       tip += `<br><span style="font-size:11px;color:var(--text-muted)">N\u00ean gi\u1ea3m kho\u1ea3ng <strong>${(w - parseFloat(maxI)).toFixed(1)} kg</strong>.</span>`;
-    else if (bmi < 18.5) tip += `<br><span style="font-size:11px;color:var(--text-muted)">N\u00ean t\u0103ng kho\u1ea3ng <strong>${(parseFloat(minI) - w).toFixed(1)} kg</strong>.</span>`;
-    else                 tip += `<br><span style="font-size:11px;color:var(--accent-green)">Tuy\u1ec7t v\u1eddi, duy tr\u00ec c\u00e2n n\u1eb7ng n\u00e0y!</span>`;
+
+    // % mỡ cơ thể lý tưởng theo giới tính (tham chiếu ACSM)
+    const fatRef = currentGender === 'male'
+      ? '% mỡ cơ thể lý tưởng <strong>(Nam): 10–20%</strong>'
+      : '% mỡ cơ thể lý tưởng <strong>(Nữ): 20–30%</strong>';
+
+    let tip = `Cân nặng lý tưởng (BMI 18.5–22.9): <strong>${minI} – ${maxI} kg</strong>.<br>
+      <span style="font-size:11px;color:var(--text-muted)">${fatRef}</span>`;
+
+    if (bmi >= 23) {
+      tip += `<br><span style="font-size:11px;color:var(--text-muted)">Nên giảm khoảng <strong>${(w - parseFloat(maxI)).toFixed(1)} kg</strong> để đạt cân nặng lý tưởng.</span>`;
+    } else if (bmi < 18.5) {
+      tip += `<br><span style="font-size:11px;color:var(--text-muted)">Nên tăng khoảng <strong>${(parseFloat(minI) - w).toFixed(1)} kg</strong> để đạt cân nặng lý tưởng.</span>`;
+    } else {
+      tip += `<br><span style="font-size:11px;color:var(--accent-green)">✅ Tuyệt vời! Duy trì cân nặng này nhé!</span>`;
+    }
+
     bmiIdealLbl.innerHTML = tip;
   }
 }
