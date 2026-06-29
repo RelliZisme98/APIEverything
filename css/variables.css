@@ -1,57 +1,99 @@
-/* ═══════════════════════════════════════════
-   DESIGN TOKENS – CSS Custom Properties
-   ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN TOKENS — Rellia Dashboard Design System
+   Inspired by: Linear + Raycast + Vercel design systems
+   ═══════════════════════════════════════════════════════════════ */
 
 :root {
-  /* Fonts */
-  --font-sans:     'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-heading:  'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
-  --font-mono:     'JetBrains Mono', monospace;
+  /* ── Font Families ─────────────────────────────────────────── */
+  --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace;
 
-  /* Backgrounds */
-  --bg-primary:    #030712; /* Deepest dark */
-  --bg-secondary:  #0b0f19; /* Sidebar and sections background */
-  --bg-card:       rgba(15, 23, 42, 0.45); /* Glassmorphism card */
-  --bg-card-hover: rgba(30, 41, 59, 0.6);
-  --bg-popover:    #0f172a;
+  /* ── Canvas & Surface Ladder (Linear-style) ────────────────── */
+  --canvas:          #07080a;   /* Page background — near-pure black (Raycast) */
+  --surface-1:       #0f1011;   /* Cards, panels, raised tiles (Linear surface-1) */
+  --surface-2:       #141516;   /* Hover state, elevated cards */
+  --surface-3:       #18191a;   /* Deepest lift, sub-nav, dropdowns */
+  --surface-4:       #1e1f21;   /* Modals, popovers */
 
-  /* Borders & Dividers */
-  --border:        rgba(255, 255, 255, 0.05);
-  --border-hover:  rgba(255, 255, 255, 0.1);
-  --border-glow:   rgba(96, 165, 250, 0.25);
+  /* Glassmorphism variant */
+  --bg-card:         rgba(15, 16, 17, 0.72);
+  --bg-card-hover:   rgba(20, 21, 22, 0.88);
+  --bg-popover:      rgba(15, 16, 17, 0.96);
 
-  /* Typography Colors */
-  --text-primary:   #f9fafb; /* Crisp white */
-  --text-secondary: #9ca3af; /* Cool grey */
-  --text-muted:     #6b7280; /* Dimmed grey */
-  --text-link:      #60a5fa;
+  /* Legacy compat */
+  --bg-primary:      var(--canvas);
+  --bg-secondary:    var(--surface-1);
 
-  /* Premium Vibrant Accents */
-  --accent-blue:    #3b82f6;
-  --accent-purple:  #8b5cf6;
-  --accent-cyan:    #06b6d4;
-  --accent-green:   #10b981;
-  --accent-red:     #ef4444;
-  --accent-yellow:  #f59e0b;
-  --accent-orange:  #f97316;
+  /* ── Borders (hairline system — Linear) ────────────────────── */
+  --hairline:        #23252a;              /* Default 1px card border */
+  --hairline-strong: #34343a;             /* Stronger divider, focus ring base */
+  --hairline-soft:   rgba(255,255,255,0.05); /* Very subtle on glass surfaces */
+  --border:          var(--hairline-soft);
+  --border-hover:    rgba(255,255,255,0.10);
+  --border-glow:     rgba(94, 106, 210, 0.35);
 
-  /* Shadows / Glows */
-  --shadow-sm:   0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg:   0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-glow: 0 0 24px rgba(59, 130, 246, 0.12);
-  
-  /* Easing curves */
-  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1); /* Custom premium easing */
+  /* ── Typography Colors ─────────────────────────────────────── */
+  --ink:             #f7f8f8;   /* Primary headlines & emphasized text */
+  --ink-muted:       #d0d6e0;   /* Secondary text */
+  --ink-subtle:      #8a8f98;   /* Tertiary, deselected, meta */
+  --ink-tertiary:    #62666d;   /* Disabled, footnotes */
+
+  /* Legacy compat */
+  --text-primary:    var(--ink);
+  --text-secondary:  var(--ink-muted);
+  --text-muted:      var(--ink-subtle);
+  --text-link:       #7c86f0;
+
+  /* ── Brand Accent — Linear Lavender-Blue ───────────────────── */
+  --accent-primary:  #5e6ad2;   /* Primary CTA, active states, focus rings */
+  --accent-hover:    #828fff;   /* Hover state of primary accent */
+  --accent-focus:    #5e69d1;   /* Focus ring tint */
+
+  /* ── Semantic Accents ──────────────────────────────────────── */
+  --accent-blue:     #5e6ad2;   /* Maps to primary for compat */
+  --accent-purple:   #8b5cf6;
+  --accent-cyan:     #22d3ee;   /* Live data, ticker values */
+  --accent-green:    #27a644;   /* Positive values, success */
+  --accent-red:      #ef4444;   /* Negative values, danger */
+  --accent-yellow:   #ffc533;   /* Warnings, badges */
+  --accent-orange:   #fb923c;
+
+  /* ── Shadows — Stacked subtle (Vercel-style) ───────────────── */
+  --shadow-sm:   0px 1px 1px rgba(0,0,0,0.2), 0 0 0 1px var(--hairline);
+  --shadow-md:   0px 2px 2px rgba(0,0,0,0.15), 0px 4px 8px rgba(0,0,0,0.12), 0 0 0 1px var(--hairline);
+  --shadow-lg:   0px 2px 2px rgba(0,0,0,0.15), 0px 8px 16px rgba(0,0,0,0.12), 0px 16px 32px rgba(0,0,0,0.08), 0 0 0 1px var(--hairline);
+  --shadow-glow: 0 0 0 2px rgba(94,106,210,0.25), 0 0 24px rgba(94,106,210,0.12);
+  --shadow-glow-sm: 0 0 12px rgba(94,106,210,0.15);
+
+  /* ── Easing Curves ─────────────────────────────────────────── */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  /* Radii */
-  --radius:      16px;
+  /* ── Border Radius Scale ───────────────────────────────────── */
+  --radius-xs:   4px;
+  --radius-sm:   6px;
+  --radius:      10px;
   --radius-md:   12px;
-  --radius-sm:   8px;
+  --radius-lg:   16px;
+  --radius-xl:   20px;
+  --radius-pill: 9999px;
 
-  /* Gradients */
-  --gradient-brand: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  --gradient-glow:  linear-gradient(135deg, rgba(5b, 130, 246, 0.15), rgba(139, 92, 246, 0.15));
+  /* ── Gradients ─────────────────────────────────────────────── */
+  --gradient-brand:   linear-gradient(135deg, var(--accent-primary) 0%, #7c86f0 50%, var(--accent-purple) 100%);
+  --gradient-brand-subtle: linear-gradient(135deg, rgba(94,106,210,0.12) 0%, rgba(139,92,246,0.08) 100%);
+  --gradient-surface: linear-gradient(180deg, var(--surface-2) 0%, var(--surface-1) 100%);
+  --gradient-glow:    radial-gradient(ellipse at center, rgba(94,106,210,0.15) 0%, transparent 70%);
+
+  /* ── Spacing ───────────────────────────────────────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-section: 96px;
 }
-

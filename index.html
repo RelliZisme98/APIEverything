@@ -8,10 +8,11 @@
   <meta name="description"
     content="Theo dõi giá vàng, tỷ giá ngoại tệ, giá xăng, tiền điện tử và thời tiết Việt Nam theo thời gian thực." />
 
-  <!-- Google Fonts -->
+  <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
     rel="stylesheet" />
 
   <!-- ── CSS – load order matters ── -->
@@ -48,13 +49,14 @@
   <link rel="stylesheet" href="css/converter.css" />
   <link rel="stylesheet" href="css/iq-eq-test.css" />
   <link rel="stylesheet" href="css/typing-test.css" />
+  <link rel="stylesheet" href="css/ai-assistant.css" />
   <link rel="stylesheet" href="css/mobile.css" />
 </head>
 
 <body>
 
   <!-- ═══════════════ MOBILE HAMBURGER ═══════════════ -->
- <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Mở menu"></button>
+  <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Mở menu"></button>
   <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
   <!-- ═══════════════ APP SHELL ═══════════════ -->
@@ -65,7 +67,7 @@
 
       <!-- Logo -->
       <div class="sidebar-logo">
- <div class="sidebar-logo-icon"></div>
+        <div class="sidebar-logo-icon"></div>
         <div>
           <div class="sidebar-logo-text">Rellia<span> Đại</span></div>
           <div class="sidebar-logo-sub">Thông tin cần thiết hàng ngày</div>
@@ -74,20 +76,21 @@
 
       <!-- Sidebar Search -->
       <div class="sidebar-search-wrap">
- <span class="search-icon"></span>
+        <span class="search-icon"></span>
         <input type="text" id="sidebarSearch" placeholder="Tìm kiếm nhanh công cụ..." oninput="filterSidebar()" />
       </div>
 
-      <!-- Nav: Tài chính -->
+      <!-- Sidebar Nav groups -->
       <div class="sidebar-section-label">Tài Chính</div>
       <div class="sidebar-nav" id="sidebarNav">
+
         <button class="sidebar-nav-item active" data-section="finance" onclick="switchSection('finance')">
           <span class="nav-label">Thị Trường Tài Chính</span>
           <span class="nav-badge">LIVE</span>
         </button>
 
-        <!-- Nav: Thông tin -->
-        <div class="sidebar-section-label" style="padding-left:0;margin-top:6px;">Thông Tin</div>
+        <div class="sidebar-section-label" style="padding-left:0;margin-top:4px;">Thông Tin</div>
+
         <button class="sidebar-nav-item" data-section="weather" onclick="switchSection('weather')">
           <span class="nav-label">Thời Tiết & AQI</span>
           <span class="nav-badge" id="weatherNavBadge">LIVE</span>
@@ -95,87 +98,91 @@
         <button class="sidebar-nav-item" data-section="news" onclick="switchSection('news')">
           <span class="nav-label">Tin Tức 24h</span>
           <span class="nav-badge"
-            style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">HOT</span>
+            style="background:rgba(59,130,246,.12);color:#7c86f0;border-color:rgba(59,130,246,.25);">HOT</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="football" onclick="switchSection('football')">
+          <span class="nav-label">Bóng Đá</span>
+          <span class="nav-badge"
+            style="background:rgba(251,191,36,.12);color:#fbbf24;border-color:rgba(251,191,36,.25);">EPL</span>
         </button>
 
-        <!-- Nav: Tiện ích -->
-        <div class="sidebar-section-label" style="padding-left:0;margin-top:6px;">Tiện ích</div>
+        <div class="sidebar-section-label" style="padding-left:0;margin-top:4px;">Tra Cứu & Tiện Ích</div>
+
         <button class="sidebar-nav-item" data-section="calendar" onclick="switchSection('calendar')">
-          <span class="nav-label">Lịch &amp; Nghỉ Lễ</span>
-          <span class="nav-badge">TỰ TÍNH</span>
+          <span class="nav-label">Lịch & Nghỉ Lễ</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="world-clock" onclick="switchSection('world-clock')">
+          <span class="nav-label">Đồng Hồ & Hẹn Giờ</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="lottery" onclick="switchSection('lottery')">
+          <span class="nav-label">Kết Quả Xổ Số</span>
+          <span class="nav-badge">HÔM NAY</span>
         </button>
         <button class="sidebar-nav-item" data-section="travel" onclick="switchSection('travel')">
           <span class="nav-label">Di Chuyển & Vé Xe</span>
         </button>
+        <button class="sidebar-nav-item" data-section="lookup" onclick="switchSection('lookup')">
+          <span class="nav-label">Dịch Vụ Công</span>
+        </button>
         <button class="sidebar-nav-item" data-section="todo" onclick="switchSection('todo')">
           <span class="nav-label">Ghi Chú & Todo</span>
         </button>
-        <button class="sidebar-nav-item" data-section="lookup" onclick="switchSection('lookup')">
-          <span class="nav-label">Dịch Vụ Công</span>
-          <span class="nav-badge">NEW</span>
-        </button>
 
-        <!-- Nav: Công cụ -->
-        <div class="sidebar-section-label" style="padding-left:0;margin-top:6px;">Công cụ</div>
-        <button class="sidebar-nav-item" data-section="qrcode" onclick="switchSection('qrcode')">
-          <span class="nav-label">QR &amp; Rút Gọn Link</span>
-          <span class="nav-badge"
-            style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">NEW</span>
+        <div class="sidebar-section-label" style="padding-left:0;margin-top:4px;">Sức Khỏe & Kiểm Tra</div>
+
+        <button class="sidebar-nav-item" data-section="bmi" onclick="switchSection('bmi')">
+          <span class="nav-label">Chỉ Số BMI</span>
         </button>
-        <button class="sidebar-nav-item" data-section="emulator" onclick="switchSection('emulator')">
-          <span class="nav-label">Game Giả Lập</span>
+        <button class="sidebar-nav-item" data-section="iq" onclick="switchSection('iq')">
+          <span class="nav-label">Kiểm Tra IQ</span>
           <span class="nav-badge"
-            style="background:rgba(239,68,68,.15);color:#f87171;border-color:rgba(239,68,68,.3);">HOT</span>
+            style="background:rgba(94,106,210,.12);color:#7c86f0;border-color:rgba(94,106,210,.25);">IQ</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="eq" onclick="switchSection('eq')">
+          <span class="nav-label">Kiểm Tra EQ</span>
+          <span class="nav-badge"
+            style="background:rgba(52,211,153,.12);color:#34d399;border-color:rgba(52,211,153,.25);">EQ</span>
         </button>
         <button class="sidebar-nav-item" data-section="tax-calc" onclick="switchSection('tax-calc')">
           <span class="nav-label">Tính Thuế TNCN</span>
           <span class="nav-badge">2026</span>
         </button>
-        <button class="sidebar-nav-item" data-section="typing-test" onclick="switchSection('typing-test')">
-          <span class="nav-label">Luyện Gõ Phím</span>
+
+        <div class="sidebar-section-label" style="padding-left:0;margin-top:4px;">Giải Trí</div>
+
+        <button class="sidebar-nav-item" data-section="focus" onclick="switchSection('focus')">
+          <span class="nav-label">Tập Trung & Âm Nhạc</span>
           <span class="nav-badge"
-            style="background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.3);">NEW</span>
-        </button>
-        <button class="sidebar-nav-item" data-section="converter" onclick="switchSection('converter')">
-          <span class="nav-label">Bộ Chuyển Đổi</span>
-          <span class="nav-badge"
-            style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">NEW</span>
-        </button>
-        <button class="sidebar-nav-item" data-section="bmi" onclick="switchSection('bmi')">
-          <span class="nav-label">Chỉ Số BMI</span>
-          <span class="nav-badge" style="background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.3);">NEW</span>
-        </button>
-        <button class="sidebar-nav-item" data-section="iq" onclick="switchSection('iq')">
-          <span class="nav-label">Kiểm Tra IQ</span>
-          <span class="nav-badge" style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">IQ</span>
-        </button>
-        <button class="sidebar-nav-item" data-section="eq" onclick="switchSection('eq')">
-          <span class="nav-label">Kiểm Tra EQ</span>
-          <span class="nav-badge" style="background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.3);">EQ</span>
-        </button>
-        <button class="sidebar-nav-item" data-section="lottery" onclick="switchSection('lottery')">
-          <span class="nav-label">Kết Quả Xổ Số</span>
-          <span class="nav-badge">HÔMNAY</span>
-        </button>
-        <button class="sidebar-nav-item" data-section="world-clock" onclick="switchSection('world-clock')">
-          <span class="nav-label">Đồng Hồ & Hẹn Giờ</span>
-        </button>
-        <button class="sidebar-nav-item" data-section="football" onclick="switchSection('football')">
-          <span class="nav-label">Bóng Đá</span>
-          <span class="nav-badge"
-            style="background:rgba(251,191,36,.15);color:#fbbf24;border-color:rgba(251,191,36,.3);">EPL</span>
-        </button>
-        <button class="sidebar-nav-item" data-section="downloader" onclick="switchSection('downloader')">
-          <span class="nav-label">Tải &amp; Công Cụ File</span>
+            style="background:rgba(94,106,210,.12);color:#7c86f0;border-color:rgba(94,106,210,.25);">POMO</span>
         </button>
         <button class="sidebar-nav-item" data-section="media" onclick="switchSection('media')">
           <span class="nav-label">Phim & Trò Chơi</span>
         </button>
-        <button class="sidebar-nav-item" data-section="focus" onclick="switchSection('focus')">
-          <span class="nav-label">Tập Trung &amp; Âm Nhạc</span>
+        <button class="sidebar-nav-item" data-section="emulator" onclick="switchSection('emulator')">
+          <span class="nav-label">Game Giả Lập NES</span>
           <span class="nav-badge"
-            style="background:rgba(99,102,241,.15);color:#a5b4fc;border-color:rgba(99,102,241,.3);">POMO</span>
+            style="background:rgba(239,68,68,.12);color:#f87171;border-color:rgba(239,68,68,.25);">HOT</span>
         </button>
+
+        <div class="sidebar-section-label" style="padding-left:0;margin-top:4px;">Công Cụ</div>
+
+        <button class="sidebar-nav-item" data-section="converter" onclick="switchSection('converter')">
+          <span class="nav-label">Bộ Chuyển Đổi Đơn Vị</span>
+          <span class="nav-badge"
+            style="background:rgba(59,130,246,.12);color:#7c86f0;border-color:rgba(59,130,246,.25);">NEW</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="qrcode" onclick="switchSection('qrcode')">
+          <span class="nav-label">QR & Rút Gọn Link</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="typing-test" onclick="switchSection('typing-test')">
+          <span class="nav-label">Luyện Gõ Phím</span>
+          <span class="nav-badge"
+            style="background:rgba(52,211,153,.12);color:#34d399;border-color:rgba(52,211,153,.25);">NEW</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="downloader" onclick="switchSection('downloader')">
+          <span class="nav-label">Tải & Công Cụ File</span>
+        </button>
+
       </div>
       <!-- Actions -->
       <div class="sidebar-actions">
@@ -210,13 +217,13 @@
 
       <!-- ════════ SECTION: FINANCE ════════ -->
       <section class="content-section active" id="section-finance">
-        <div class="page-title">Thị Trường Tài Chính</div>
+        <div class="page-title"><span class="page-icon">📊</span>Thị Trường Tài Chính</div>
         <div id="financeContent"></div>
       </section>
 
       <!-- ════════ SECTION: WEATHER ════════ -->
       <section class="content-section" id="section-weather">
-        <div class="page-title">Thời Tiết</div>
+        <div class="page-title"><span class="page-icon">🌤️</span>Thời Tiết</div>
         <div class="card">
           <div class="card-header">
             <div class="card-title">Dự Báo Thời Tiết</div>
@@ -247,7 +254,7 @@
 
       <!-- ════════ SECTION: CALENDAR ════════ -->
       <section class="content-section" id="section-calendar">
-        <div class="page-title">Lịch Âm Dương</div>
+        <div class="page-title"><span class="page-icon">📅</span>Lịch Âm Dương</div>
         <div id="calendarContent">
           <div class="skeleton skel-big"></div>
           <div class="skeleton skel-line" style="margin-top:10px;"></div>
@@ -259,7 +266,7 @@
 
       <!-- ════════ SECTION: NEWS ════════ -->
       <section class="content-section" id="section-news">
-        <div class="page-title">Tin Tức</div>
+        <div class="page-title"><span class="page-icon">📰</span>Tin Tức</div>
         <div class="card">
           <div class="card-header">
             <div class="card-title">Tin Tức Mới Nhất</div>
@@ -333,7 +340,8 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title">Body Mass Index · Chuẩn WHO Châu Á</div>
-            <span class="card-badge" style="background:rgba(52,211,153,.12);color:#34d399;border-color:rgba(52,211,153,.25);">NEW</span>
+            <span class="card-badge"
+              style="background:rgba(52,211,153,.12);color:#34d399;border-color:rgba(52,211,153,.25);">NEW</span>
           </div>
           <div id="bmiContent">
             <div class="skeleton skel-big"></div>
@@ -478,7 +486,7 @@
       <!-- Footer -->
       <footer>
         <p>
- Rellia Đại Dashboard · Dữ liệu từ
+          Rellia Đại Dashboard · Dữ liệu từ
           <a href="https://www.coingecko.com" target="_blank">CoinGecko</a>,
           <a href="https://www.frankfurter.app" target="_blank">Frankfurter (ECB)</a>,
           <a href="https://openweathermap.org" target="_blank">OpenWeatherMap</a>,
@@ -499,8 +507,7 @@
     <div class="cal-modal-content">
       <div class="cal-modal-header">
         <h3 id="calModalTitle">Chi Tiết Ngày</h3>
-        <button class="cal-modal-close"
- onclick="document.getElementById('calModal').classList.remove('open')"></button>
+        <button class="cal-modal-close" onclick="document.getElementById('calModal').classList.remove('open')"></button>
       </div>
       <div class="cal-modal-body" id="calModalBody">
         <!-- Filled dynamically -->
@@ -542,7 +549,7 @@
       const query = document.getElementById('sidebarSearch').value.toLowerCase().trim();
       const items = document.querySelectorAll('.sidebar-nav-item');
       const labels = document.querySelectorAll('.sidebar-section-label');
-      
+
       // Filter nav items
       items.forEach(item => {
         const text = item.textContent.toLowerCase();
@@ -554,7 +561,7 @@
       labels.forEach(label => {
         let sibling = label.nextElementSibling;
         let hasVisibleSibling = false;
-        
+
         while (sibling && !sibling.classList.contains('sidebar-section-label')) {
           if (sibling.classList.contains('sidebar-nav-item') && sibling.style.display !== 'none') {
             hasVisibleSibling = true;
@@ -562,7 +569,7 @@
           }
           sibling = sibling.nextElementSibling;
         }
-        
+
         label.style.display = hasVisibleSibling ? 'block' : 'none';
       });
     }
