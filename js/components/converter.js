@@ -684,8 +684,8 @@ export function renderBMICalculator(containerId = 'bmiContent') {
         <div class="conv-field">
           <label class="conv-label">Gi\u1edbi t\u00ednh</label>
           <div class="bmi-gender-toggle">
-            <button class="bmi-gender-btn active" id="bmi-gen-male">\ud83d\ude4b\u200d\u2642\ufe0f Nam</button>
-            <button class="bmi-gender-btn" id="bmi-gen-female">\ud83d\ude4b\u200d\u2640\ufe0f N\u1eef</button>
+            <button class="bmi-gender-btn active" id="bmi-gen-male" data-gender="male">\ud83d\ude4b\u200d\u2642\ufe0f Nam</button>
+            <button class="bmi-gender-btn" id="bmi-gen-female" data-gender="female">\ud83d\ude4b\u200d\u2640\ufe0f N\u1eef</button>
           </div>
         </div>
         <div class="conv-field">
