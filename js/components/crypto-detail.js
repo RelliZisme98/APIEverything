@@ -75,7 +75,7 @@ export function renderCryptoDetail(coin) {
     <!-- Right Column: Converter Calculator -->
     <div class="crypto-converter-card">
       <div class="crypto-converter-title">
-        <span>🧮</span> Bộ Quy Đổi Tiền Điện Tử
+ <span></span> Bộ Quy Đổi Tiền Điện Tử
       </div>
       
       <!-- Crypto input -->
@@ -94,8 +94,8 @@ export function renderCryptoDetail(coin) {
         <input type="number" id="fiatConvInput" class="crypto-conv-input" value="" step="any" min="0" />
         <div class="crypto-conv-label-wrap">
           <select id="fiatConvSelect" class="crypto-conv-select">
-            <option value="VND" ${currentFiat === 'VND' ? 'selected' : ''}>🇻🇳 VND</option>
-            <option value="USD" ${currentFiat === 'USD' ? 'selected' : ''}>🇺🇸 USD</option>
+ <option value="VND" ${currentFiat === 'VND' ? 'selected' : ''}>VND</option>
+ <option value="USD" ${currentFiat === 'USD' ? 'selected' : ''}>USD</option>
           </select>
         </div>
       </div>

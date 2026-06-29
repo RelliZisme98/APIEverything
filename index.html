@@ -11,7 +11,7 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet" />
 
   <!-- ── CSS – load order matters ── -->
@@ -54,7 +54,7 @@
 <body>
 
   <!-- ═══════════════ MOBILE HAMBURGER ═══════════════ -->
-  <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Mở menu">☰</button>
+ <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Mở menu"></button>
   <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
   <!-- ═══════════════ APP SHELL ═══════════════ -->
@@ -65,128 +65,113 @@
 
       <!-- Logo -->
       <div class="sidebar-logo">
-        <div class="sidebar-logo-icon">📊</div>
+ <div class="sidebar-logo-icon"></div>
         <div>
           <div class="sidebar-logo-text">Rellia<span> Đại</span></div>
           <div class="sidebar-logo-sub">Thông tin cần thiết hàng ngày</div>
         </div>
       </div>
 
+      <!-- Sidebar Search -->
+      <div class="sidebar-search-wrap">
+ <span class="search-icon"></span>
+        <input type="text" id="sidebarSearch" placeholder="Tìm kiếm nhanh công cụ..." oninput="filterSidebar()" />
+      </div>
+
       <!-- Nav: Tài chính -->
-      <div class="sidebar-section-label">💰 Tài Chính</div>
+      <div class="sidebar-section-label">Tài Chính</div>
       <div class="sidebar-nav" id="sidebarNav">
         <button class="sidebar-nav-item active" data-section="finance" onclick="switchSection('finance')">
-          <span class="nav-icon">💰</span>
           <span class="nav-label">Thị Trường Tài Chính</span>
           <span class="nav-badge">LIVE</span>
         </button>
 
         <!-- Nav: Thông tin -->
-        <div class="sidebar-section-label" style="padding-left:0;margin-top:6px;">🌐 Thông Tin</div>
+        <div class="sidebar-section-label" style="padding-left:0;margin-top:6px;">Thông Tin</div>
         <button class="sidebar-nav-item" data-section="weather" onclick="switchSection('weather')">
-          <span class="nav-icon">☀️</span>
           <span class="nav-label">Thời Tiết & AQI</span>
           <span class="nav-badge" id="weatherNavBadge">LIVE</span>
         </button>
         <button class="sidebar-nav-item" data-section="news" onclick="switchSection('news')">
-          <span class="nav-icon">📰</span>
           <span class="nav-label">Tin Tức 24h</span>
           <span class="nav-badge"
             style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">HOT</span>
         </button>
 
         <!-- Nav: Tiện ích -->
-        <div class="sidebar-section-label" style="padding-left:0;margin-top:6px;">🛠️ Tiện ích</div>
+        <div class="sidebar-section-label" style="padding-left:0;margin-top:6px;">Tiện ích</div>
         <button class="sidebar-nav-item" data-section="calendar" onclick="switchSection('calendar')">
-          <span class="nav-icon">📅</span>
           <span class="nav-label">Lịch &amp; Nghỉ Lễ</span>
           <span class="nav-badge">TỰ TÍNH</span>
         </button>
         <button class="sidebar-nav-item" data-section="travel" onclick="switchSection('travel')">
-          <span class="nav-icon">✈️</span>
           <span class="nav-label">Di Chuyển & Vé Xe</span>
         </button>
         <button class="sidebar-nav-item" data-section="todo" onclick="switchSection('todo')">
-          <span class="nav-icon">📝</span>
           <span class="nav-label">Ghi Chú & Todo</span>
         </button>
         <button class="sidebar-nav-item" data-section="lookup" onclick="switchSection('lookup')">
-          <span class="nav-icon">🔎</span>
           <span class="nav-label">Dịch Vụ Công</span>
           <span class="nav-badge">NEW</span>
         </button>
 
         <!-- Nav: Công cụ -->
-        <div class="sidebar-section-label" style="padding-left:0;margin-top:6px;">🔧 Công cụ</div>
+        <div class="sidebar-section-label" style="padding-left:0;margin-top:6px;">Công cụ</div>
         <button class="sidebar-nav-item" data-section="qrcode" onclick="switchSection('qrcode')">
-          <span class="nav-icon">🔗</span>
           <span class="nav-label">QR &amp; Rút Gọn Link</span>
           <span class="nav-badge"
             style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">NEW</span>
         </button>
         <button class="sidebar-nav-item" data-section="emulator" onclick="switchSection('emulator')">
-          <span class="nav-icon">🎮</span>
           <span class="nav-label">Game Giả Lập</span>
           <span class="nav-badge"
             style="background:rgba(239,68,68,.15);color:#f87171;border-color:rgba(239,68,68,.3);">HOT</span>
         </button>
         <button class="sidebar-nav-item" data-section="tax-calc" onclick="switchSection('tax-calc')">
-          <span class="nav-icon">🧮</span>
           <span class="nav-label">Tính Thuế TNCN</span>
           <span class="nav-badge">2026</span>
         </button>
         <button class="sidebar-nav-item" data-section="typing-test" onclick="switchSection('typing-test')">
-          <span class="nav-icon">⌨️</span>
           <span class="nav-label">Luyện Gõ Phím</span>
           <span class="nav-badge"
             style="background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.3);">NEW</span>
         </button>
         <button class="sidebar-nav-item" data-section="converter" onclick="switchSection('converter')">
-          <span class="nav-icon">📏</span>
           <span class="nav-label">Bộ Chuyển Đổi</span>
           <span class="nav-badge"
             style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">NEW</span>
         </button>
         <button class="sidebar-nav-item" data-section="bmi" onclick="switchSection('bmi')">
-          <span class="nav-icon">⚖️</span>
           <span class="nav-label">Chỉ Số BMI</span>
           <span class="nav-badge" style="background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.3);">NEW</span>
         </button>
         <button class="sidebar-nav-item" data-section="iq" onclick="switchSection('iq')">
-          <span class="nav-icon">🧠</span>
           <span class="nav-label">Kiểm Tra IQ</span>
           <span class="nav-badge" style="background:rgba(59,130,246,.15);color:#60a5fa;border-color:rgba(59,130,246,.3);">IQ</span>
         </button>
         <button class="sidebar-nav-item" data-section="eq" onclick="switchSection('eq')">
-          <span class="nav-icon">❤️</span>
           <span class="nav-label">Kiểm Tra EQ</span>
           <span class="nav-badge" style="background:rgba(52,211,153,.15);color:#34d399;border-color:rgba(52,211,153,.3);">EQ</span>
         </button>
         <button class="sidebar-nav-item" data-section="lottery" onclick="switchSection('lottery')">
-          <span class="nav-icon">🎰</span>
           <span class="nav-label">Kết Quả Xổ Số</span>
           <span class="nav-badge">HÔMNAY</span>
         </button>
         <button class="sidebar-nav-item" data-section="world-clock" onclick="switchSection('world-clock')">
-          <span class="nav-icon">🕐</span>
           <span class="nav-label">Đồng Hồ & Hẹn Giờ</span>
         </button>
         <button class="sidebar-nav-item" data-section="football" onclick="switchSection('football')">
-          <span class="nav-icon">⚽</span>
           <span class="nav-label">Bóng Đá</span>
           <span class="nav-badge"
             style="background:rgba(251,191,36,.15);color:#fbbf24;border-color:rgba(251,191,36,.3);">EPL</span>
         </button>
         <button class="sidebar-nav-item" data-section="downloader" onclick="switchSection('downloader')">
-          <span class="nav-icon">📥</span>
           <span class="nav-label">Tải &amp; Công Cụ File</span>
         </button>
         <button class="sidebar-nav-item" data-section="media" onclick="switchSection('media')">
-          <span class="nav-icon">🎬</span>
           <span class="nav-label">Phim & Trò Chơi</span>
         </button>
         <button class="sidebar-nav-item" data-section="focus" onclick="switchSection('focus')">
-          <span class="nav-icon">🍅</span>
           <span class="nav-label">Tập Trung &amp; Âm Nhạc</span>
           <span class="nav-badge"
             style="background:rgba(99,102,241,.15);color:#a5b4fc;border-color:rgba(99,102,241,.3);">POMO</span>
@@ -215,33 +200,33 @@
 
       <!-- Ticker tape -->
       <div class="ticker-wrap" id="tickerWrap">
-        <div class="ticker-label">📡 LIVE</div>
+        <div class="ticker-label">LIVE</div>
         <div id="tickerTrack" class="ticker-track">
-          <span class="ticker-item"><span class="symbol">⏳</span> <span class="val">Đang tải dữ liệu...</span></span>
-          <span class="ticker-item"><span class="symbol">⏳</span> <span class="val">Đang tải dữ liệu...</span></span>
-          <span class="ticker-item"><span class="symbol">⏳</span> <span class="val">Đang tải dữ liệu...</span></span>
+          <span class="ticker-item"><span class="val">Đang tải dữ liệu...</span></span>
+          <span class="ticker-item"><span class="val">Đang tải dữ liệu...</span></span>
+          <span class="ticker-item"><span class="val">Đang tải dữ liệu...</span></span>
         </div>
       </div>
 
       <!-- ════════ SECTION: FINANCE ════════ -->
       <section class="content-section active" id="section-finance">
-        <div class="page-title"><span class="page-icon">💰</span> Thị Trường Tài Chính</div>
+        <div class="page-title">Thị Trường Tài Chính</div>
         <div id="financeContent"></div>
       </section>
 
       <!-- ════════ SECTION: WEATHER ════════ -->
       <section class="content-section" id="section-weather">
-        <div class="page-title"><span class="page-icon">☀️</span> Thời Tiết</div>
+        <div class="page-title">Thời Tiết</div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="icon">☀️</span> Dự Báo Thời Tiết</div>
+            <div class="card-title">Dự Báo Thời Tiết</div>
             <span class="card-badge badge-manual" id="weatherBadge">
               <span class="status-dot dot-yellow"></span>ĐANG TẢI
             </span>
           </div>
           <!-- Quick city chips -->
           <div class="weather-chips-wrap">
-            <div class="weather-chips-label">⚡ Thành phố nhanh</div>
+            <div class="weather-chips-label">Thành phố nhanh</div>
             <div class="weather-chips" id="weatherQuickCities"></div>
           </div>
           <!-- City search -->
@@ -262,7 +247,7 @@
 
       <!-- ════════ SECTION: CALENDAR ════════ -->
       <section class="content-section" id="section-calendar">
-        <div class="page-title"><span class="page-icon">📅</span> Lịch Âm Dương</div>
+        <div class="page-title">Lịch Âm Dương</div>
         <div id="calendarContent">
           <div class="skeleton skel-big"></div>
           <div class="skeleton skel-line" style="margin-top:10px;"></div>
@@ -274,10 +259,10 @@
 
       <!-- ════════ SECTION: NEWS ════════ -->
       <section class="content-section" id="section-news">
-        <div class="page-title"><span class="page-icon">📰</span> Tin Tức</div>
+        <div class="page-title">Tin Tức</div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="icon">📰</span> Tin Tức Mới Nhất</div>
+            <div class="card-title">Tin Tức Mới Nhất</div>
             <span class="card-badge"
               style="background:rgba(251,191,36,0.12);color:var(--accent-yellow);border-color:rgba(251,191,36,0.25);">RSS</span>
           </div>
@@ -292,10 +277,10 @@
 
       <!-- ════════ SECTION: QR CODE & SHORTENER ════════ -->
       <section class="content-section" id="section-qrcode">
-        <div class="page-title"><span class="page-icon">🔗</span> QR &amp; Rút Gọn Link</div>
+        <div class="page-title">QR &amp; Rút Gọn Link</div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="icon">🔗</span> Tạo QR Code Nghệ Thuật &amp; Rút Gọn Link</div>
+            <div class="card-title">Tạo QR Code Nghệ Thuật &amp; Rút Gọn Link</div>
           </div>
           <div id="qrcodeContent">
             <div class="skeleton skel-big"></div>
@@ -305,10 +290,10 @@
 
       <!-- ════════ SECTION: RETRO EMULATOR ════════ -->
       <section class="content-section" id="section-emulator">
-        <div class="page-title"><span class="page-icon">🎮</span> Game Giả Lập Cổ Điển</div>
+        <div class="page-title">Game Giả Lập Cổ Điển</div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="icon">🎮</span> Trình Giả Lập NES (Điện tử 4 nút)</div>
+            <div class="card-title">Trình Giả Lập NES (Điện tử 4 nút)</div>
           </div>
           <div id="emulatorContent">
             <div class="skeleton skel-big"></div>
@@ -318,10 +303,10 @@
 
       <!-- ════════ SECTION: TYPING SPEED TEST ════════ -->
       <section class="content-section" id="section-typing-test">
-        <div class="page-title"><span class="page-icon">⌨️</span> Luyện Gõ Phím Nhanh</div>
+        <div class="page-title">Luyện Gõ Phím Nhanh</div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="icon">⌨️</span> Đo WPM &amp; Độ Chính Xác</div>
+            <div class="card-title">Đo WPM &amp; Độ Chính Xác</div>
           </div>
           <div id="typingTestContent">
             <div class="skeleton skel-big"></div>
@@ -331,10 +316,10 @@
 
       <!-- ════════ SECTION: UNIVERSAL CONVERTER ════════ -->
       <section class="content-section" id="section-converter">
-        <div class="page-title"><span class="page-icon">📏</span> Bộ Chuyển Đổi Đơn Vị Toàn Năng</div>
+        <div class="page-title">Bộ Chuyển Đổi Đơn Vị Toàn Năng</div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="icon">📏</span> Chuyển Đổi Dữ Liệu · Nhiệt Độ · Độ Dài · Tốc Độ</div>
+            <div class="card-title">Chuyển Đổi Dữ Liệu · Nhiệt Độ · Độ Dài · Tốc Độ</div>
           </div>
           <div id="converterContent">
             <div class="skeleton skel-big"></div>
@@ -344,10 +329,10 @@
 
       <!-- ════════ SECTION: BMI CALCULATOR ════════ -->
       <section class="content-section" id="section-bmi">
-        <div class="page-title"><span class="page-icon">⚖️</span> Máy Tính Chỉ Số BMI</div>
+        <div class="page-title">Máy Tính Chỉ Số BMI</div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="icon">🏥</span> Body Mass Index · Chuẩn WHO Châu Á</div>
+            <div class="card-title">Body Mass Index · Chuẩn WHO Châu Á</div>
             <span class="card-badge" style="background:rgba(52,211,153,.12);color:#34d399;border-color:rgba(52,211,153,.25);">NEW</span>
           </div>
           <div id="bmiContent">
@@ -358,7 +343,7 @@
 
       <!-- ════════ SECTION: IQ TEST ════════ -->
       <section class="content-section" id="section-iq">
-        <div class="page-title"><span class="page-icon">🧠</span> Bài Kiểm Tra Chỉ Số IQ</div>
+        <div class="page-title">Bài Kiểm Tra Chỉ Số IQ</div>
         <div id="iqContent">
           <div class="skeleton skel-big"></div>
         </div>
@@ -366,7 +351,7 @@
 
       <!-- ════════ SECTION: EQ TEST ════════ -->
       <section class="content-section" id="section-eq">
-        <div class="page-title"><span class="page-icon">❤️</span> Bài Kiểm Tra Chỉ Số EQ</div>
+        <div class="page-title">Bài Kiểm Tra Chỉ Số EQ</div>
         <div id="eqContent">
           <div class="skeleton skel-big"></div>
         </div>
@@ -374,10 +359,10 @@
 
       <!-- ════════ SECTION: TAX CALC ════════ -->
       <section class="content-section" id="section-tax-calc">
-        <div class="page-title"><span class="page-icon">🧮</span> Tính Thuế TNCN</div>
+        <div class="page-title">Tính Thuế TNCN</div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="icon">🧮</span> Máy tính thuế Thu nhập cá nhân</div>
+            <div class="card-title">Máy tính thuế Thu nhập cá nhân</div>
           </div>
           <div id="taxCalcContent"></div>
         </div>
@@ -385,10 +370,10 @@
 
       <!-- ════════ SECTION: LOTTERY ════════ -->
       <section class="content-section" id="section-lottery">
-        <div class="page-title"><span class="page-icon">🎰</span> Kết Quả Xổ Số</div>
+        <div class="page-title">Kết Quả Xổ Số</div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="icon">🎰</span> Kết quả xổ số hôm nay</div>
+            <div class="card-title">Kết quả xổ số hôm nay</div>
             <span class="card-badge"
               style="background:rgba(251,191,36,.12);color:var(--accent-yellow);border-color:rgba(251,191,36,.25);">HÔM
               NAY</span>
@@ -399,10 +384,10 @@
 
       <!-- ════════ SECTION: WORLD CLOCK ════════ -->
       <section class="content-section" id="section-world-clock">
-        <div class="page-title"><span class="page-icon">🕐</span> Đồng Hồ Thế Giới & Hẹn Giờ</div>
+        <div class="page-title">Đồng Hồ Thế Giới & Hẹn Giờ</div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="icon">🌍</span> World Clock · Bấm Giờ · Đếm Ngược</div>
+            <div class="card-title">World Clock · Bấm Giờ · Đếm Ngược</div>
           </div>
           <div id="worldClockContent"></div>
         </div>
@@ -410,10 +395,10 @@
 
       <!-- ════════ SECTION: FOOTBALL ════════ -->
       <section class="content-section" id="section-football">
-        <div class="page-title"><span class="page-icon">⚽</span> Bóng Đá: World Cup 2026 &amp; Premier League</div>
+        <div class="page-title">Bóng Đá: World Cup 2026 &amp; Premier League</div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="icon">🏆</span> Lịch thi đấu · Kết quả · Bảng Xếp Hạng</div>
+            <div class="card-title">Lịch thi đấu · Kết quả · Bảng Xếp Hạng</div>
             <span class="card-badge"
               style="background:rgba(251,191,36,.12);color:#fbbf24;border-color:rgba(251,191,36,.25);">LIVE</span>
           </div>
@@ -423,10 +408,10 @@
 
       <!-- ════════ SECTION: TRAVEL ════════ -->
       <section class="content-section" id="section-travel">
-        <div class="page-title"><span class="page-icon">✈️</span> Di Chuyển &amp; Vé Xe</div>
+        <div class="page-title">Di Chuyển &amp; Vé Xe</div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="icon">✈️</span> Hành Trình &amp; Chuyến Bay</div>
+            <div class="card-title">Hành Trình &amp; Chuyến Bay</div>
             <span class="card-badge badge-live"><span class="status-dot dot-green"></span>LIVE</span>
           </div>
           <div id="travelContent"></div>
@@ -435,10 +420,10 @@
 
       <!-- ════════ SECTION: TODO ════════ -->
       <section class="content-section" id="section-todo">
-        <div class="page-title"><span class="page-icon">📝</span> Ghi Chú &amp; Todo</div>
+        <div class="page-title">Ghi Chú &amp; Todo</div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="icon">📝</span> Quản Lý Công Việc</div>
+            <div class="card-title">Quản Lý Công Việc</div>
           </div>
           <div id="todoContent"></div>
         </div>
@@ -446,10 +431,10 @@
 
       <!-- ════════ SECTION: LOOKUP ════════ -->
       <section class="content-section" id="section-lookup">
-        <div class="page-title"><span class="page-icon">🔎</span> Tra Cứu Dịch Vụ Công</div>
+        <div class="page-title">Tra Cứu Dịch Vụ Công</div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="icon">🏛️</span> Tra Cứu &amp; Liên Kết Dịch Vụ</div>
+            <div class="card-title">Tra Cứu &amp; Liên Kết Dịch Vụ</div>
           </div>
           <div id="lookupContent"></div>
         </div>
@@ -457,16 +442,16 @@
 
       <!-- ════════ SECTION: DOWNLOADER ════════ -->
       <section class="content-section" id="section-downloader">
-        <div class="page-title"><span class="page-icon">📥</span> Tải &amp; Công Cụ File</div>
+        <div class="page-title">Tải &amp; Công Cụ File</div>
         <div class="vl-tab-bar" style="margin-bottom: 16px;">
           <button class="vl-tab active" id="dlTab-media" onclick="switchDownloaderTab('media')"
-            style="background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.4);color:#60a5fa;">📥 Tải Video &amp;
+            style="background:rgba(96,165,250,0.12);border-color:rgba(96,165,250,0.4);color:#60a5fa;">Tải Video &amp;
             Nhạc</button>
-          <button class="vl-tab" id="dlTab-files" onclick="switchDownloaderTab('files')">📁 Công Cụ File</button>
+          <button class="vl-tab" id="dlTab-files" onclick="switchDownloaderTab('files')">Công Cụ File</button>
         </div>
         <div class="card">
           <div class="card-header" id="dlCardHeader">
-            <div class="card-title" id="dlCardTitle"><span class="icon">📥</span> Trích Xuất Link Tải Phương Tiện</div>
+            <div class="card-title" id="dlCardTitle">Trích Xuất Link Tải Phương Tiện</div>
           </div>
           <div id="downloaderContent"></div>
           <div id="fileToolsContent" style="display: none;"></div>
@@ -475,10 +460,10 @@
 
       <!-- ════════ SECTION: MEDIA ════════ -->
       <section class="content-section" id="section-media">
-        <div class="page-title"><span class="page-icon">🎬</span> Phim &amp; Trò Chơi</div>
+        <div class="page-title">Phim &amp; Trò Chơi</div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="icon">🎬</span> Lịch Phim Chiếu Rạp &amp; Game Hot</div>
+            <div class="card-title">Lịch Phim Chiếu Rạp &amp; Game Hot</div>
           </div>
           <div id="mediaContent"></div>
         </div>
@@ -486,14 +471,14 @@
 
       <!-- ════════ SECTION: FOCUS MODE ════════ -->
       <section class="content-section" id="section-focus">
-        <div class="page-title"><span class="page-icon">🍅</span> Chế Độ Tập Trung</div>
+        <div class="page-title">Chế Độ Tập Trung</div>
         <div id="focusContent"></div>
       </section>
 
       <!-- Footer -->
       <footer>
         <p>
-          📡 Rellia Đại Dashboard · Dữ liệu từ
+ Rellia Đại Dashboard · Dữ liệu từ
           <a href="https://www.coingecko.com" target="_blank">CoinGecko</a>,
           <a href="https://www.frankfurter.app" target="_blank">Frankfurter (ECB)</a>,
           <a href="https://openweathermap.org" target="_blank">OpenWeatherMap</a>,
@@ -515,7 +500,7 @@
       <div class="cal-modal-header">
         <h3 id="calModalTitle">Chi Tiết Ngày</h3>
         <button class="cal-modal-close"
-          onclick="document.getElementById('calModal').classList.remove('open')">✕</button>
+ onclick="document.getElementById('calModal').classList.remove('open')"></button>
       </div>
       <div class="cal-modal-body" id="calModalBody">
         <!-- Filled dynamically -->
@@ -551,6 +536,37 @@
       document.getElementById('sidebar').classList.remove('open');
       document.getElementById('sidebarOverlay').classList.remove('visible');
     }
+
+    // ── Sidebar quick filter ──
+    function filterSidebar() {
+      const query = document.getElementById('sidebarSearch').value.toLowerCase().trim();
+      const items = document.querySelectorAll('.sidebar-nav-item');
+      const labels = document.querySelectorAll('.sidebar-section-label');
+      
+      // Filter nav items
+      items.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        const matches = text.includes(query);
+        item.style.display = matches ? 'flex' : 'none';
+      });
+
+      // Filter section labels based on whether they have visible siblings after them
+      labels.forEach(label => {
+        let sibling = label.nextElementSibling;
+        let hasVisibleSibling = false;
+        
+        while (sibling && !sibling.classList.contains('sidebar-section-label')) {
+          if (sibling.classList.contains('sidebar-nav-item') && sibling.style.display !== 'none') {
+            hasVisibleSibling = true;
+            break;
+          }
+          sibling = sibling.nextElementSibling;
+        }
+        
+        label.style.display = hasVisibleSibling ? 'block' : 'none';
+      });
+    }
+    window.filterSidebar = filterSidebar;
 
     // ── Switch Fx Tab ──
     function switchFxTab(tabName) {

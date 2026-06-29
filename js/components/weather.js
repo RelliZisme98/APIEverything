@@ -71,7 +71,7 @@ export function renderWeather(d, todayMinMax = null, containerId = 'weatherConte
   const sunset   = new Date(d.sys.sunset  * 1000).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
 
   // Heat index level
-  const heatLevel = temp >= 38 ? '🔴 Nguy hiểm' : temp >= 35 ? '🟠 Rất nóng' : temp >= 32 ? '🟡 Nóng' : '';
+ const heatLevel = temp >= 38 ? 'Nguy hiểm' : temp >= 35 ? 'Rất nóng' : temp >= 32 ? 'Nóng' : '';
 
   // Get AQI from state
   const aqi = state.aqiData?.aqi;
@@ -119,7 +119,7 @@ export function renderWeather(d, todayMinMax = null, containerId = 'weatherConte
         </div>
       </div>
       <div class="weather-location">
-        📍 ${d.name}, ${d.sys.country}
+ ${d.name}, ${d.sys.country}
         <span class="weather-desc-badge">${desc}</span>
       </div>
     </div>
@@ -127,33 +127,33 @@ export function renderWeather(d, todayMinMax = null, containerId = 'weatherConte
     <!-- ── Stats grid ── -->
     <div class="weather-stats-grid">
       <div class="wstat2">
-        <div class="wstat2-icon">🌡️</div>
+ <div class="wstat2-icon">️</div>
         <div class="wstat2-label">Cảm giác như</div>
         <div class="wstat2-val">${feels}°C</div>
       </div>
       <div class="wstat2">
-        <div class="wstat2-icon">💧</div>
+ <div class="wstat2-icon"></div>
         <div class="wstat2-label">Độ ẩm</div>
         <div class="wstat2-val">${humidity}%</div>
       </div>
       <div class="wstat2">
-        <div class="wstat2-icon">💨</div>
+ <div class="wstat2-icon"></div>
         <div class="wstat2-label">Gió</div>
         <div class="wstat2-val">${windKmh} km/h</div>
         <div class="wstat2-sub">${windDir}</div>
       </div>
       <div class="wstat2">
-        <div class="wstat2-icon">👁️</div>
+ <div class="wstat2-icon">️</div>
         <div class="wstat2-label">Tầm nhìn</div>
         <div class="wstat2-val">${vis}</div>
       </div>
       <div class="wstat2">
-        <div class="wstat2-icon">🌅</div>
+ <div class="wstat2-icon"></div>
         <div class="wstat2-label">Bình minh</div>
         <div class="wstat2-val">${sunrise}</div>
       </div>
       <div class="wstat2">
-        <div class="wstat2-icon">🌇</div>
+ <div class="wstat2-icon"></div>
         <div class="wstat2-label">Hoàng hôn</div>
         <div class="wstat2-val">${sunset}</div>
       </div>
@@ -163,7 +163,7 @@ export function renderWeather(d, todayMinMax = null, containerId = 'weatherConte
         <div class="wstat2-val">${pressure} hPa</div>
       </div>
       <div class="wstat2">
-        <div class="wstat2-icon">☁️</div>
+ <div class="wstat2-icon">️</div>
         <div class="wstat2-label">Mây che phủ</div>
         <div class="wstat2-val">${d.clouds?.all ?? '—'}%</div>
       </div>
@@ -209,14 +209,14 @@ export function renderWindyMap(lat, lon, containerId = 'weatherWindyMap') {
   };
 
   el.innerHTML = `
-    <div class="wf-section-label" style="margin-bottom: 8px;">🌀 Bản đồ thời tiết Windy</div>
+ <div class="wf-section-label" style="margin-bottom: 8px;">Bản đồ thời tiết Windy</div>
     
     <div class="windy-controls" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
-      <button class="windy-tab-btn active" data-overlay="rain" onclick="window.changeWindyOverlay('rain')">🌧️ Mưa & Sét</button>
-      <button class="windy-tab-btn" data-overlay="wind" onclick="window.changeWindyOverlay('wind')">💨 Gió & Bão</button>
-      <button class="windy-tab-btn" data-overlay="clouds" onclick="window.changeWindyOverlay('clouds')">☁️ Mây che phủ</button>
-      <button class="windy-tab-btn" data-overlay="temp" onclick="window.changeWindyOverlay('temp')">🌡️ Nhiệt độ</button>
-      <button class="windy-tab-btn" data-overlay="radar" onclick="window.changeWindyOverlay('radar')">📡 Radar thời tiết</button>
+ <button class="windy-tab-btn active" data-overlay="rain" onclick="window.changeWindyOverlay('rain')">️ Mưa & Sét</button>
+ <button class="windy-tab-btn" data-overlay="wind" onclick="window.changeWindyOverlay('wind')">Gió & Bão</button>
+ <button class="windy-tab-btn" data-overlay="clouds" onclick="window.changeWindyOverlay('clouds')">️ Mây che phủ</button>
+ <button class="windy-tab-btn" data-overlay="temp" onclick="window.changeWindyOverlay('temp')">️ Nhiệt độ</button>
+ <button class="windy-tab-btn" data-overlay="radar" onclick="window.changeWindyOverlay('radar')">Radar thời tiết</button>
     </div>
 
     <div class="windy-map-wrap" style="position:relative;width:100%;height:380px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid rgba(255,255,255,0.08);">
@@ -271,8 +271,8 @@ export function renderForecast(days, containerId = 'weatherForecast') {
     const icon   = WEATHER_ICONS[d.icon] ?? '🌡️';
     const popBar = d.pop > 0
       ? `<div class="wf-pop-bar"><div class="wf-pop-fill" style="width:${d.pop}%"></div></div>
-         <div class="wf-pop-label">🌧 ${d.pop}%</div>`
-      : '<div class="wf-pop-label" style="color:var(--text-muted)">☀️ Khô</div>';
+ <div class="wf-pop-label">${d.pop}%</div>`
+ : '<div class="wf-pop-label" style="color:var(--text-muted)">️ Khô</div>';
 
     return `
       <div class="wf-card">
@@ -285,12 +285,12 @@ export function renderForecast(days, containerId = 'weatherForecast') {
           <span class="wf-min">${d.tempMin}°</span>
         </div>
         ${popBar}
-        <div class="wf-wind">💨 ${d.windKmh} km/h</div>
+ <div class="wf-wind">${d.windKmh} km/h</div>
       </div>`;
   }).join('');
 
   el.innerHTML = `
-    <div class="wf-section-label">📅 Dự báo 5 ngày tới</div>
+ <div class="wf-section-label">Dự báo 5 ngày tới</div>
     <div class="wf-strip">${cards}</div>
   `;
 }
@@ -308,7 +308,7 @@ export function renderWeatherLoading(containerId = 'weatherContent') {
   if (!el) return;
   el.innerHTML = `
     <div style="display:flex;flex-direction:column;align-items:center;padding:24px;gap:10px;">
-      <div style="font-size:36px;animation:pulse-green 1.5s infinite;">🌍</div>
+ <div style="font-size:36px;animation:pulse-green 1.5s infinite;"></div>
       <div style="font-size:13px;color:var(--text-muted);">Đang lấy dữ liệu thời tiết...</div>
     </div>
   `;
@@ -317,7 +317,7 @@ export function renderWeatherLoading(containerId = 'weatherContent') {
 /** Show error */
 export function renderWeatherError(msg, containerId = 'weatherContent') {
   const el = document.getElementById(containerId);
-  if (el) el.innerHTML = `<div class="error-msg" style="margin-top:8px;">⚠️ ${msg}</div>`;
+ if (el) el.innerHTML = `<div class="error-msg" style="margin-top:8px;">️ ${msg}</div>`;
 }
 
 /** Toggle weather badge */
@@ -340,7 +340,7 @@ export function renderHourly(hours, containerId = 'weatherHourly') {
 
   const cards = hours.map(h => {
     const icon = WEATHER_ICONS[h.icon] ?? '🌡️';
-    const popText = h.pop > 0 ? `🌧️ ${h.pop}%` : '☀️ Khô';
+ const popText = h.pop > 0 ? `️ ${h.pop}%` : '️ Khô';
     return `
       <div class="wh-card">
         <div class="wh-time">${h.time}</div>
@@ -352,19 +352,19 @@ export function renderHourly(hours, containerId = 'weatherHourly') {
   }).join('');
 
   el.innerHTML = `
-    <div class="wf-section-label">🕒 Dự báo theo giờ (24h tới)</div>
+ <div class="wf-section-label">Dự báo theo giờ (24h tới)</div>
     <div class="wh-strip">${cards}</div>
   `;
 }
 
 function getAqiLevel(aqi) {
-  if (aqi == null) return { label: 'Chưa có dữ liệu', color: '#94a3b8', bg: 'rgba(148,163,184,0.05)', emoji: '❓' };
-  if (aqi <= 50)  return { label: 'Tốt',         color: '#4ade80', bg: 'rgba(74,222,128,0.05)',  emoji: '😊' };
-  if (aqi <= 100) return { label: 'Trung bình',   color: '#facc15', bg: 'rgba(250,204,21,0.05)',  emoji: '😐' };
-  if (aqi <= 150) return { label: 'Không tốt',    color: '#fb923c', bg: 'rgba(251,146,60,0.05)',  emoji: '😷' };
-  if (aqi <= 200) return { label: 'Có hại',       color: '#f87171', bg: 'rgba(248,113,113,0.05)', emoji: '🤢' };
-  if (aqi <= 300) return { label: 'Rất có hại',   color: '#c084fc', bg: 'rgba(192,132,252,0.05)', emoji: '☠️' };
-  return           { label: 'Nguy hiểm',          color: '#9f1239', bg: 'rgba(159,18,57,0.08)',  emoji: '☣️' };
+ if (aqi == null) return { label: 'Chưa có dữ liệu', color: '#94a3b8', bg: 'rgba(148,163,184,0.05)', emoji: '' };
+ if (aqi <= 50) return { label: 'Tốt', color: '#4ade80', bg: 'rgba(74,222,128,0.05)', emoji: '' };
+ if (aqi <= 100) return { label: 'Trung bình', color: '#facc15', bg: 'rgba(250,204,21,0.05)', emoji: '' };
+ if (aqi <= 150) return { label: 'Không tốt', color: '#fb923c', bg: 'rgba(251,146,60,0.05)', emoji: '' };
+ if (aqi <= 200) return { label: 'Có hại', color: '#f87171', bg: 'rgba(248,113,113,0.05)', emoji: '' };
+ if (aqi <= 300) return { label: 'Rất có hại', color: '#c084fc', bg: 'rgba(192,132,252,0.05)', emoji: '️' };
+ return { label: 'Nguy hiểm', color: '#9f1239', bg: 'rgba(159,18,57,0.08)', emoji: '️' };
 }
 
 function getAqiAdvice(aqi) {

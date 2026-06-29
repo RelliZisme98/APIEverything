@@ -94,7 +94,6 @@ export function renderGas(gridId = 'gasGrid', noteId = 'gasUpdated') {
     return `
       <div class="gas-item">
         <div class="gas-left">
-          <div class="gas-dot" style="background:${g.color};box-shadow:0 0 8px ${g.color}44;"></div>
           <div>
             <div class="gas-name">${g.name}</div>
             <div class="gas-sub">${g.sub}</div>
@@ -143,10 +142,10 @@ export function renderGas(gridId = 'gasGrid', noteId = 'gasUpdated') {
     }
 
     note.innerHTML = `
-      📋 Kỳ điều hành: <strong>${updatedDate}</strong> · Nguồn: ${sourceName}
+ Kỳ điều hành: <strong>${updatedDate}</strong> · Nguồn: ${sourceName}
       &nbsp;·&nbsp; Kỳ tiếp theo: <strong>${nextDateStr}</strong>
       <span style="margin-left:6px;padding:1px 7px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:10px;font-size:10px;color:#fbbf24;">
-        ⏳ ${daysLeft > 0 ? 'Còn ' + daysLeft + ' ngày' : 'Hôm nay'}
+        ${daysLeft > 0 ? 'Còn ' + daysLeft + ' ngày' : 'Hôm nay'}
       </span>`;
   }
 }

@@ -21,14 +21,14 @@ export function renderFileTools() {
       <div class="ft-row-grid">
         <!-- Image Converter & Compressor -->
         <div class="ft-box">
-          <div class="travel-title-sub">📸 Nén &amp; Chuyển Đổi Ảnh</div>
+ <div class="travel-title-sub">Nén &amp; Chuyển Đổi Ảnh</div>
           <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
             Chuyển đổi giữa PNG, JPG, WebP và giảm dung lượng trực quan (Canvas client-side).
           </div>
           
           <input type="file" id="imageFileInput" accept="image/*" style="display:none;" />
           <div class="ft-dropzone" id="imageDropzone">
-            <span class="ft-dropzone-icon">🖼️</span>
+ <span class="ft-dropzone-icon">️</span>
             <span class="ft-dropzone-text" id="imageDropzoneText">Chọn hoặc Kéo thả ảnh vào đây</span>
             <span class="ft-dropzone-sub">Hỗ trợ PNG, JPG, WebP, SVG</span>
           </div>
@@ -66,21 +66,21 @@ export function renderFileTools() {
             </div>
 
             <button id="btnConvertImage" class="btn-primary" style="margin-top: 6px;">
-              📥 Nén &amp; Tải ảnh về
+ Nén &amp; Tải ảnh về
             </button>
           </div>
         </div>
 
         <!-- ZIP Archiver -->
         <div class="ft-box">
-          <div class="travel-title-sub">📦 Nén nhiều File thành ZIP</div>
+ <div class="travel-title-sub">Nén nhiều File thành ZIP</div>
           <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">
             Gom nhiều tệp tin bất kỳ thành một file nén .zip duy nhất (chạy hoàn toàn cục bộ).
           </div>
 
           <input type="file" id="zipFileInput" multiple style="display:none;" />
           <div class="ft-dropzone" id="zipDropzone">
-            <span class="ft-dropzone-icon">📁</span>
+ <span class="ft-dropzone-icon"></span>
             <span class="ft-dropzone-text">Chọn hoặc Kéo thả nhiều tệp vào đây</span>
             <span class="ft-dropzone-sub">Thêm nhiều tệp tin bất kỳ</span>
           </div>
@@ -91,7 +91,7 @@ export function renderFileTools() {
               <div class="ft-file-list" id="zipFileList"></div>
             </div>
             <button id="btnCreateZip" class="btn-primary" style="margin-top: 14px;">
-              📦 Gom &amp; Tải file ZIP
+ Gom &amp; Tải file ZIP
             </button>
           </div>
         </div>
@@ -291,7 +291,7 @@ function renderZipFileList() {
       <span class="ft-file-name" title="${file.name}">${file.name}</span>
       <div style="display:flex; align-items:center; gap:10px;">
         <span class="ft-file-size">${formatBytes(file.size)}</span>
-        <button class="todo-card-btn delete" style="padding: 2px;" onclick="window.removeZipFile(${idx})">✕</button>
+ <button class="todo-card-btn delete" style="padding: 2px;" onclick="window.removeZipFile(${idx})"></button>
       </div>
     </div>
   `).join('');
@@ -307,7 +307,7 @@ async function createAndDownloadZip() {
 
   const btn = document.getElementById('btnCreateZip');
   btn.disabled = true;
-  btn.textContent = '📦 Đang nén file...';
+ btn.textContent = 'Đang nén file...';
 
   // Load JSZip dynamically
   if (!jszipLoaded) {
@@ -347,7 +347,7 @@ async function createAndDownloadZip() {
     alert('Không thể tạo file nén ZIP!');
   } finally {
     btn.disabled = false;
-    btn.textContent = '📦 Gom & Tải file ZIP';
+ btn.textContent = 'Gom & Tải file ZIP';
   }
 }
 
@@ -365,17 +365,17 @@ export function renderAudioTools() {
   box.id = 'ftAudioBox';
   box.className = 'ft-box';
   box.innerHTML = `
-    <div class="travel-title-sub">🎵 Chuyển Đổi Âm Thanh</div>
+ <div class="travel-title-sub">Chuyển Đổi Âm Thanh</div>
     <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">
       Chuyển đổi MP3/WAV/OGG/M4A → định dạng khác. Xử lý hoàn toàn trên trình duyệt, không upload lên server.
     </div>
     <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--accent-yellow);">
-      ⚠️ Hỗ trợ: Trình duyệt phải hỗ trợ MediaRecorder & Web Audio API (Chrome/Edge khuyến nghị).
+ ️ Hỗ trợ: Trình duyệt phải hỗ trợ MediaRecorder & Web Audio API (Chrome/Edge khuyến nghị).
     </div>
 
     <input type="file" id="audioFileInput" accept="audio/*" style="display:none;" />
     <div class="ft-dropzone" id="audioDropzone">
-      <span class="ft-dropzone-icon">🎵</span>
+ <span class="ft-dropzone-icon"></span>
       <span class="ft-dropzone-text" id="audioDropzoneText">Chọn hoặc kéo thả file âm thanh vào đây</span>
       <span class="ft-dropzone-sub">MP3, WAV, OGG, M4A, FLAC, AAC...</span>
     </div>
@@ -391,36 +391,36 @@ export function renderAudioTools() {
             <option value="audio/wav">WAV (.wav)</option>
           </select>
         </div>
-        <button id="btnConvertAudio" class="btn-primary" style="height:38px;">🔄 Chuyển đổi</button>
+ <button id="btnConvertAudio" class="btn-primary" style="height:38px;">Chuyển đổi</button>
       </div>
       <div id="audioConvertResult" style="margin-top:10px;"></div>
       <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">
-        💡 Để chuyển sang MP3 chính xác hơn, dùng công cụ ngoài: 
+ Để chuyển sang MP3 chính xác hơn, dùng công cụ ngoài: 
         <a href="https://convertio.co/vi/audio-converter/" target="_blank" rel="noopener" style="color:var(--accent-blue);">convertio.co ↗</a> hoặc
         <a href="https://cloudconvert.com/audio-converter" target="_blank" rel="noopener" style="color:var(--accent-blue);">cloudconvert.com ↗</a>
       </div>
     </div>
 
     <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);">
-      <div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:10px;">🔗 Công cụ chuyển đổi file nhanh (ngoài)</div>
+ <div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:10px;">Công cụ chuyển đổi file nhanh (ngoài)</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;">
         <a href="https://convertio.co/vi/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid rgba(96,165,250,0.2);border-radius:8px;text-decoration:none;background:rgba(96,165,250,0.05);font-size:11px;color:var(--text-primary);transition:all .2s;" class="ft-ext-link">
-          <span style="font-size:18px;">🔄</span><div><div style="font-weight:700;font-size:11px;">Convertio</div><div style="color:var(--text-muted);font-size:10px;">300+ định dạng file</div></div>
+ <span style="font-size:18px;"></span><div><div style="font-weight:700;font-size:11px;">Convertio</div><div style="color:var(--text-muted);font-size:10px;">300+ định dạng file</div></div>
         </a>
         <a href="https://cloudconvert.com/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid rgba(167,139,250,0.2);border-radius:8px;text-decoration:none;background:rgba(167,139,250,0.05);font-size:11px;color:var(--text-primary);transition:all .2s;" class="ft-ext-link">
-          <span style="font-size:18px;">☁️</span><div><div style="font-weight:700;font-size:11px;">CloudConvert</div><div style="color:var(--text-muted);font-size:10px;">Video, Audio, Docs</div></div>
+ <span style="font-size:18px;">️</span><div><div style="font-weight:700;font-size:11px;">CloudConvert</div><div style="color:var(--text-muted);font-size:10px;">Video, Audio, Docs</div></div>
         </a>
         <a href="https://www.ilovepdf.com/vi" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid rgba(248,113,113,0.2);border-radius:8px;text-decoration:none;background:rgba(248,113,113,0.05);font-size:11px;color:var(--text-primary);transition:all .2s;" class="ft-ext-link">
-          <span style="font-size:18px;">📄</span><div><div style="font-weight:700;font-size:11px;">iLovePDF</div><div style="color:var(--text-muted);font-size:10px;">PDF, Word, PPT, Excel</div></div>
+ <span style="font-size:18px;"></span><div><div style="font-weight:700;font-size:11px;">iLovePDF</div><div style="color:var(--text-muted);font-size:10px;">PDF, Word, PPT, Excel</div></div>
         </a>
         <a href="https://smallpdf.com/vi" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid rgba(52,211,153,0.2);border-radius:8px;text-decoration:none;background:rgba(52,211,153,0.05);font-size:11px;color:var(--text-primary);transition:all .2s;" class="ft-ext-link">
-          <span style="font-size:18px;">📁</span><div><div style="font-weight:700;font-size:11px;">SmallPDF</div><div style="color:var(--text-muted);font-size:10px;">Nén & chuyển PDF</div></div>
+ <span style="font-size:18px;"></span><div><div style="font-weight:700;font-size:11px;">SmallPDF</div><div style="color:var(--text-muted);font-size:10px;">Nén & chuyển PDF</div></div>
         </a>
         <a href="https://online-audio-converter.com/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid rgba(251,191,36,0.2);border-radius:8px;text-decoration:none;background:rgba(251,191,36,0.05);font-size:11px;color:var(--text-primary);transition:all .2s;" class="ft-ext-link">
-          <span style="font-size:18px;">🎵</span><div><div style="font-weight:700;font-size:11px;">Audio Converter</div><div style="color:var(--text-muted);font-size:10px;">MP3, WAV, OGG, FLAC...</div></div>
+ <span style="font-size:18px;"></span><div><div style="font-weight:700;font-size:11px;">Audio Converter</div><div style="color:var(--text-muted);font-size:10px;">MP3, WAV, OGG, FLAC...</div></div>
         </a>
         <a href="https://handbrake.fr/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid rgba(251,146,60,0.2);border-radius:8px;text-decoration:none;background:rgba(251,146,60,0.05);font-size:11px;color:var(--text-primary);transition:all .2s;" class="ft-ext-link">
-          <span style="font-size:18px;">🎬</span><div><div style="font-weight:700;font-size:11px;">HandBrake</div><div style="color:var(--text-muted);font-size:10px;">Video encoder miễn phí</div></div>
+ <span style="font-size:18px;"></span><div><div style="font-weight:700;font-size:11px;">HandBrake</div><div style="color:var(--text-muted);font-size:10px;">Video encoder miễn phí</div></div>
         </a>
       </div>
     </div>`;
@@ -448,7 +448,7 @@ export function renderAudioTools() {
 
   function loadAudioFile(file) {
     activeAudioFile = file;
-    document.getElementById('audioDropzoneText').textContent = `✅ ${file.name} (${(file.size/1048576).toFixed(2)} MB)`;
+ document.getElementById('audioDropzoneText').textContent = `${file.name} (${(file.size/1048576).toFixed(2)} MB)`;
     document.getElementById('audioSettingsBox').style.display = '';
     document.getElementById('audioConvertResult').innerHTML = '';
   }
@@ -486,14 +486,14 @@ export function renderAudioTools() {
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(url), 5000);
         ctx.close();
-        resultEl.innerHTML = `<div style="color:#4ade80;font-size:12px;">✅ Đã xuất: <strong>${outName}</strong> (${(blob.size/1048576).toFixed(2)} MB)</div>`;
+ resultEl.innerHTML = `<div style="color:#4ade80;font-size:12px;">Đã xuất: <strong>${outName}</strong> (${(blob.size/1048576).toFixed(2)} MB)</div>`;
       };
 
       recorder.start();
       source.start(0);
       source.onended = () => recorder.stop();
     } catch (err) {
-      resultEl.innerHTML = `<div style="color:#f87171;font-size:12px;">❌ Lỗi: ${err.message}. Thử dùng CloudConvert bên dưới.</div>`;
+ resultEl.innerHTML = `<div style="color:#f87171;font-size:12px;">Lỗi: ${err.message}. Thử dùng CloudConvert bên dưới.</div>`;
     }
   });
 }

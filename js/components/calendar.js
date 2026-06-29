@@ -64,7 +64,7 @@ export function renderCalendar(containerId = 'calendarContent') {
       <!-- Divider -->
       <div class="cal-hero-divider">
         <div class="cal-hero-divider-line"></div>
-        <div class="cal-hero-divider-icon">🌙</div>
+ <div class="cal-hero-divider-icon"></div>
         <div class="cal-hero-divider-line"></div>
       </div>
 
@@ -82,7 +82,7 @@ export function renderCalendar(containerId = 'calendarContent') {
     <!-- ══ Can Chi row ══ -->
     <div class="cal-canchi-row">
       <div class="cal-canchi-card">
-        <div class="cal-canchi-card-icon">🗓️</div>
+ <div class="cal-canchi-card-icon">️</div>
         <div class="cal-canchi-card-body">
           <div class="cal-canchi-card-label">Ngày</div>
           <div class="cal-canchi-card-value">${canchiDayStr}</div>
@@ -96,7 +96,7 @@ export function renderCalendar(containerId = 'calendarContent') {
         </div>
       </div>
       <div class="cal-canchi-card">
-        <div class="cal-canchi-card-icon">🎴</div>
+ <div class="cal-canchi-card-icon"></div>
         <div class="cal-canchi-card-body">
           <div class="cal-canchi-card-label">Năm</div>
           <div class="cal-canchi-card-value">${canchiYearStr}</div>
@@ -120,7 +120,7 @@ export function renderCalendar(containerId = 'calendarContent') {
     <div class="card" style="margin-top: 20px;">
       <div class="card-header" style="border-bottom: 1px solid var(--border); padding-bottom: 10px; padding-left: 0; background: transparent;">
         <div class="card-title" style="font-size: 14px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
-          <span>🎌</span> Ngày lễ & sự kiện quan trọng VN 2026–2027
+ <span></span> Ngày lễ & sự kiện quan trọng VN 2026–2027
         </div>
       </div>
       <div id="holidaysContent" style="padding-top: 14px;"></div>
@@ -295,7 +295,7 @@ function renderUpcomingEvents(lunarToday) {
         events.push({
           solarDate: `${day}/${month}`,
           lunarDate: `${lun.day}/${THANG_AM[lun.month]}`,
-          name:      `📌 [Cá nhân] ${ce.name}`,
+ name: `[Cá nhân] ${ce.name}`,
           daysAway:  i,
           isCustom:  true,
           eventId:   ce.id,
@@ -306,8 +306,8 @@ function renderUpcomingEvents(lunarToday) {
     // 3. Rằm & mùng 1
     if (lun.day === 1 || lun.day === 15) {
       const label = lun.day === 1
-        ? `🌑 Mùng Một tháng ${THANG_AM[lun.month]}`
-        : `🌕 Rằm tháng ${THANG_AM[lun.month]}`;
+ ? `Mùng Một tháng ${THANG_AM[lun.month]}`
+ : `Rằm tháng ${THANG_AM[lun.month]}`;
       if (!events.some(e => e.solarDate === `${day}/${month}` && !e.isCustom)) {
         events.push({
           solarDate: `${day}/${month}`,
@@ -332,7 +332,7 @@ function renderUpcomingEvents(lunarToday) {
 
   el.innerHTML = `
     <div class="cal-events-header">
-      <span class="cal-events-icon">📌</span>
+ <span class="cal-events-icon"></span>
       <span class="cal-events-title">Sự Kiện Sắp Tới</span>
     </div>
     <div class="cal-events-list">
@@ -349,7 +349,7 @@ function renderUpcomingEvents(lunarToday) {
           <div class="cal-event-row">
             <div class="cal-event-dates">
               <div class="cal-event-solar">${e.solarDate}</div>
-              <div class="cal-event-lunar">🌙 ${e.lunarDate} âm</div>
+ <div class="cal-event-lunar">${e.lunarDate} âm</div>
             </div>
             <div class="cal-event-info">
               <div class="cal-event-name">${e.name}</div>
@@ -398,26 +398,26 @@ function openDayDetailModal(day, month, year) {
     <!-- Detail Cards -->
     <div class="cal-detail-card">
       <div class="cal-detail-line">
-        <span class="cal-detail-label">☀️ Dương lịch:</span>
+ <span class="cal-detail-label">️ Dương lịch:</span>
         <span class="cal-detail-val">${formattedSolarDate}</span>
       </div>
       <div class="cal-detail-line">
-        <span class="cal-detail-label">🌙 Âm lịch:</span>
+ <span class="cal-detail-label">Âm lịch:</span>
         <span class="cal-detail-val lunar">${formattedLunarDate}</span>
       </div>
       <div class="cal-detail-line">
-        <span class="cal-detail-label">🏮 Can chi ngày:</span>
+ <span class="cal-detail-label">Can chi ngày:</span>
         <span class="cal-detail-val" style="color:var(--accent-purple);">${canchiDayStr}</span>
       </div>
       <div class="cal-detail-line">
-        <span class="cal-detail-label">📅 Can chi tháng:</span>
+ <span class="cal-detail-label">Can chi tháng:</span>
         <span class="cal-detail-val" style="color:var(--accent-purple);">${canchiMonthStr}</span>
       </div>
     </div>
 
     <!-- Event Marking Form -->
     <div class="cal-event-form">
-      <div class="cal-form-title">${existingEvent ? '✏️ Chỉnh sửa sự kiện cá nhân' : '🔔 Đánh dấu ngày quan trọng'}</div>
+ <div class="cal-form-title">${existingEvent ? '️ Chỉnh sửa sự kiện cá nhân' : 'Đánh dấu ngày quan trọng'}</div>
       <div class="cal-form-row">
         <label class="conv-label">Tên sự kiện</label>
         <input type="text" id="calEventName" class="field-input" placeholder="Ví dụ: Sinh nhật mẹ, giỗ chạp..." value="${existingEvent ? existingEvent.name : ''}" />
@@ -528,7 +528,7 @@ function openAddEventModal() {
   body.innerHTML = `
     <!-- Event Marking Form -->
     <div class="cal-event-form" style="border-top: none; padding-top: 0;">
-      <div class="cal-form-title">🔔 Đánh dấu ngày quan trọng</div>
+ <div class="cal-form-title">Đánh dấu ngày quan trọng</div>
       <div class="cal-form-row">
         <label class="conv-label">Tên sự kiện</label>
         <input type="text" id="calEventName" class="field-input" placeholder="Ví dụ: Sinh nhật mẹ, giỗ chạp..." value="" />
@@ -636,7 +636,7 @@ function editCustomEvent(eventId) {
   body.innerHTML = `
     <!-- Event Marking Form -->
     <div class="cal-event-form" style="border-top: none; padding-top: 0;">
-      <div class="cal-form-title">✏️ Chỉnh sửa sự kiện cá nhân</div>
+ <div class="cal-form-title">️ Chỉnh sửa sự kiện cá nhân</div>
       <div class="cal-form-row">
         <label class="conv-label">Tên sự kiện</label>
         <input type="text" id="calEventName" class="field-input" placeholder="Ví dụ: Sinh nhật mẹ, giỗ chạp..." value="${existingEvent.name}" />

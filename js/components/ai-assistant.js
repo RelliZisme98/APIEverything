@@ -73,17 +73,17 @@ export function initAIAssistant() {
       <div class="ai-chatbox-header">
         <div class="ai-chatbox-title">
           <div class="ai-status-dot"></div>
-          <strong>🤖 Robot Trợ Lý AI</strong>
+ <strong>Robot Trợ Lý AI</strong>
         </div>
         <div class="ai-chatbox-actions">
-          <button type="button" id="aiMuteBtn" class="ai-mute-btn" title="Bật/Tắt giọng nói Robot">${isMuted ? '🔇' : '🔊'}</button>
-          <button type="button" id="aiChatClose" class="ai-chat-close">✕</button>
+ <button type="button" id="aiMuteBtn" class="ai-mute-btn" title="Bật/Tắt giọng nói Robot">${isMuted ? '' : ''}</button>
+ <button type="button" id="aiChatClose" class="ai-chat-close"></button>
         </div>
       </div>
       
       <div id="aiChatBody" class="ai-chatbox-body">
         <div class="ai-msg ai-msg--system">
-          Xin chào! Tôi là Robot trợ lý ảo của Dashboard. Hãy hỏi tôi bất kỳ thông tin gì về thời tiết, chất lượng không khí (AQI), giá xăng, giá vàng, chứng khoán hay tỉ số bóng đá trực tiếp hôm nay nhé! 🤖
+ Xin chào! Tôi là Robot trợ lý ảo của Dashboard. Hãy hỏi tôi bất kỳ thông tin gì về thời tiết, chất lượng không khí (AQI), giá xăng, giá vàng, chứng khoán hay tỉ số bóng đá trực tiếp hôm nay nhé! 
         </div>
       </div>
  
@@ -114,7 +114,7 @@ export function initAIAssistant() {
     e.preventDefault();
     isMuted = !isMuted;
     localStorage.setItem('ai_muted', isMuted);
-    muteBtn.innerHTML = isMuted ? '🔇' : '🔊';
+ muteBtn.innerHTML = isMuted ? '' : '';
     if (isMuted) {
       stopAudio();
     }
@@ -317,7 +317,7 @@ async function handleSend(e) {
     }
   } catch (err) {
     removeTypingIndicator(typingId);
-    appendMessage(`⚠️ Lỗi: Không thể kết nối với Trợ lý AI (${err.message})`, 'system');
+ appendMessage(`️ Lỗi: Không thể kết nối với Trợ lý AI (${err.message})`, 'system');
   } finally {
     isSending = false;
   }

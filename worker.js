@@ -1580,25 +1580,25 @@ async function handleIQEQ(request, env) {
 
         let classification, desc;
         if (finalScore >= 140) {
-          classification = '🏆 Thiên Tài / Xuất Chúng (Top 0.1%)';
+ classification = 'Thiên Tài / Xuất Chúng (Top 0.1%)';
           desc = 'Chỉ số IQ cực kỳ vượt trội. Khả năng tư duy toán học lý thuyết, mật mã học, lý thuyết trò chơi và tư duy không gian đạt mức siêu việt.';
         } else if (finalScore >= 130) {
-          classification = '🌟 Trí Tuệ Vượt Trội (Top 2%)';
+ classification = 'Trí Tuệ Vượt Trội (Top 2%)';
           desc = 'Tư duy logic và phân tích sắc sảo. Giải quyết tốt hầu hết các câu đố lý thuyết đồ thị phức tạp và bài toán xác suất.';
         } else if (finalScore >= 120) {
-          classification = '💡 Trí Tuệ Cao (Top 10%)';
+ classification = 'Trí Tuệ Cao (Top 10%)';
           desc = 'Khả năng tư duy logic và toán học rất tốt. Khả năng giải quyết vấn đề nhanh nhạy dưới áp lực.';
         } else if (finalScore >= 110) {
-          classification = '✅ Trên Trung Bình (Top 25%)';
+ classification = 'Trên Trung Bình (Top 25%)';
           desc = 'Tư duy logic nhạy bén, hoàn thành tốt các câu hỏi hình học, dãy số và suy luận ở mức trung bình khá.';
         } else if (finalScore >= 95) {
-          classification = '📊 Trung Bình Khá (Top 50%)';
+ classification = 'Trung Bình Khá (Top 50%)';
           desc = 'Năng lực tư duy ở mức trung bình khá. Khả năng giải quyết các tình huống thực tế và tính toán cơ bản ổn định.';
         } else if (finalScore >= 80) {
-          classification = '📈 Trung Bình (Cần cải thiện)';
+ classification = 'Trung Bình (Cần cải thiện)';
           desc = 'Tư duy logic cơ bản tốt. Cần rèn luyện thêm khả năng phân tích chuỗi số phức tạp và hình học không gian.';
         } else {
-          classification = '🔰 Mới Bắt Đầu';
+ classification = 'Mới Bắt Đầu';
           desc = 'Hãy thường xuyên rèn luyện não bộ bằng các câu đố tư duy logic, toán đố cơ bản để nâng cao phản xạ.';
         }
 

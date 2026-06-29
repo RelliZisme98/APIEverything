@@ -21,7 +21,7 @@ export function renderTicker() {
     const canchi = canChiYear(lunar.year);
     items.push(
       `<span class="ticker-item">` +
-        `<span class="symbol">🌙 Lịch Âm</span> ` +
+ `<span class="symbol">Lịch Âm</span> ` +
         `<span class="val">${lunar.day}/${lunar.month} (${canchi})</span>` +
       `</span>`
     );
@@ -47,7 +47,7 @@ export function renderTicker() {
       const cls = pct >= 0 ? 'up' : 'dn';
       items.push(
         `<span class="ticker-item">` +
-          `<span class="symbol">📈 ${label}</span> ` +
+ `<span class="symbol">${label}</span> ` +
           `<span class="val">${price.toLocaleString('vi-VN', { maximumFractionDigits: 2 })}</span> ` +
           `<span class="${cls}">${sign}${pct.toFixed(2)}%</span>` +
         `</span>`
@@ -60,7 +60,7 @@ export function renderTicker() {
     for (const m of state.liveFootballMatches) {
       items.push(
         `<span class="ticker-item">` +
-          `<span class="symbol" style="color:var(--accent-red);font-weight:700;">🔴 LIVE ${m.league}</span> ` +
+ `<span class="symbol" style="color:var(--accent-red);font-weight:700;">LIVE ${m.league}</span> ` +
           `<span class="val">${m.home} ${m.homeScore} - ${m.awayScore} ${m.away}</span> ` +
           `<span style="color:var(--accent-green);font-weight:600;margin-left:4px;">(${m.time})</span>` +
         `</span>`
@@ -78,7 +78,7 @@ export function renderTicker() {
       const desc = state.weatherData.weather?.[0]?.description ?? '';
       items.push(
         `<span class="ticker-item">` +
-          `<span class="symbol">⛅ Thời tiết ${name}</span> ` +
+ `<span class="symbol">Thời tiết ${name}</span> ` +
           `<span class="val">${temp}°C · ${desc}</span>` +
         `</span>`
       );
@@ -100,7 +100,7 @@ export function renderTicker() {
 
     items.push(
       `<span class="ticker-item">` +
-        `<span class="symbol">🌫️ AQI ${city}</span> ` +
+ `<span class="symbol">️ AQI ${city}</span> ` +
         `<span class="val">${aqiVal}</span> ` +
         `<span style="color:${color};font-weight:600;">${aqiLabel}</span>` +
       `</span>`
@@ -118,7 +118,7 @@ export function renderTicker() {
     }
     items.push(
       `<span class="ticker-item">` +
-        `<span class="symbol">🏅 VÀNG</span> ` +
+ `<span class="symbol">VÀNG</span> ` +
         `<span class="val">${goldText}</span>` +
       `</span>`
     );
@@ -144,7 +144,7 @@ export function renderTicker() {
   for (const g of gasList.slice(0, 2)) {
     items.push(
       `<span class="ticker-item">` +
-        `<span class="symbol">⛽ ${g.name}</span> ` +
+ `<span class="symbol">${g.name}</span> ` +
         `<span class="val">${g.price.toLocaleString('vi-VN')}₫/lít</span>` +
       `</span>`
     );

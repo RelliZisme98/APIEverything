@@ -1,13 +1,13 @@
 import { state } from '../store/state.js';
 
 const PRIORITY_CURRENCIES = ['USD','EUR','GBP','JPY','CNY','AUD','SGD','KRW','THB','HKD'];
-const FLAGS = { USD:'🇺🇸', EUR:'🇪🇺', GBP:'🇬🇧', JPY:'🇯🇵', CNY:'🇨🇳', AUD:'🇦🇺',
-                SGD:'🇸🇬', KRW:'🇰🇷', THB:'🇹🇭', HKD:'🇭🇰', CHF:'🇨🇭', CAD:'🇨🇦' };
+const FLAGS = { USD:'', EUR:'', GBP:'', JPY:'', CNY:'', AUD:'',
+ SGD:'', KRW:'', THB:'', HKD:'', CHF:'', CAD:'' };
 
 export async function renderBankRates(containerId = 'bankRatesContent') {
   const el = document.getElementById(containerId);
   if (!el) return;
-  el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-muted);">🏦 Đang tải tỷ giá VCB...</div>`;
+ el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-muted);">Đang tải tỷ giá VCB...</div>`;
   try {
     const res = await fetch(`/vcb-rates`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -30,7 +30,7 @@ export async function renderBankRates(containerId = 'bankRatesContent') {
     ];
 
     const rows = sorted.map(r => {
-      const flag = FLAGS[r.code] ?? '🏳️';
+ const flag = FLAGS[r.code] ?? '️';
       const buyNum = parseFloat(r.buy?.replace(/,/g, '') || 0);
       const sellNum = parseFloat(r.sell?.replace(/,/g, '') || 0);
       const tranNum = parseFloat(r.transfer?.replace(/,/g, '') || 0);
@@ -48,7 +48,7 @@ export async function renderBankRates(containerId = 'bankRatesContent') {
 
     el.innerHTML = `
       <div class="br-meta">
-        🏦 <strong>Vietcombank</strong> · Cập nhật: ${updated}
+ <strong>Vietcombank</strong> · Cập nhật: ${updated}
         <span style="margin-left:8px;font-size:10px;color:var(--text-muted);">(VNĐ / ngoại tệ)</span>
       </div>
       <div style="overflow-x:auto;">
@@ -67,6 +67,6 @@ export async function renderBankRates(containerId = 'bankRatesContent') {
         </table>
       </div>`;
   } catch (err) {
-    el.innerHTML = `<div class="error-msg">⚠️ Không tải được tỷ giá: ${err.message}</div>`;
+ el.innerHTML = `<div class="error-msg">️ Không tải được tỷ giá: ${err.message}</div>`;
   }
 }

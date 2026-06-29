@@ -29,7 +29,7 @@ export async function renderVNIndex(containerId = 'vnindexContent', isSilent = f
   if (!el) return;
 
   if (!isSilent) {
-    el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;">📈 Đang tải dữ liệu chứng khoán...</div>`;
+ el.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;">Đang tải dữ liệu chứng khoán...</div>`;
   }
 
   try {
@@ -47,11 +47,11 @@ export async function renderVNIndex(containerId = 'vnindexContent', isSilent = f
     const vnDate = now.toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', weekday: 'long', day: '2-digit', month: '2-digit' });
 
     if (marketStatus === 'open') {
-      statusBanner = `<div class="vni-status-bar vni-status--open">🟢 THỊ TRƯỜNG ĐANG MỞ CỬA · ${vnTime} (giờ VN)</div>`;
+ statusBanner = `<div class="vni-status-bar vni-status--open">THỊ TRƯỜNG ĐANG MỞ CỬA · ${vnTime} (giờ VN)</div>`;
     } else if (marketStatus === 'closed') {
-      statusBanner = `<div class="vni-status-bar vni-status--closed">🔴 ĐÃ ĐÓNG CỬA · ${vnTime} (giờ VN) · Phiên tiếp theo: Ngày làm việc 9:00–11:30 và 13:00–15:00</div>`;
+ statusBanner = `<div class="vni-status-bar vni-status--closed">ĐÃ ĐÓNG CỬA · ${vnTime} (giờ VN) · Phiên tiếp theo: Ngày làm việc 9:00–11:30 và 13:00–15:00</div>`;
     } else if (marketStatus === 'weekend') {
-      statusBanner = `<div class="vni-status-bar vni-status--weekend">📅 CUỐI TUẦN · ${vnDate} · Thị trường nghỉ, hiển thị giá đóng cửa cuối tuần trước</div>`;
+ statusBanner = `<div class="vni-status-bar vni-status--weekend">CUỐI TUẦN · ${vnDate} · Thị trường nghỉ, hiển thị giá đóng cửa cuối tuần trước</div>`;
     }
 
     const indices = result?.indices ?? [];
@@ -104,8 +104,8 @@ export async function renderVNIndex(containerId = 'vnindexContent', isSilent = f
     } else {
       // No index data — show market status instead of error
       const msgs = {
-        closed:  '🕐 Thị trường đã đóng cửa. Đang hiển thị dữ liệu phiên gần nhất.',
-        weekend: '📅 Cuối tuần — thị trường nghỉ. Số liệu từ phiên đóng cửa thứ Sáu.',
+ closed: 'Thị trường đã đóng cửa. Đang hiển thị dữ liệu phiên gần nhất.',
+ weekend: 'Cuối tuần — thị trường nghỉ. Số liệu từ phiên đóng cửa thứ Sáu.',
         unknown: '⏳ Chưa lấy được dữ liệu chỉ số (nguồn dữ liệu tạm thời không khả dụng).',
       };
       indexSection = `
@@ -117,7 +117,7 @@ export async function renderVNIndex(containerId = 'vnindexContent', isSilent = f
 
     // ── Stock table ──
     if (!stocks?.length) {
-      el.innerHTML = indexSection + `<div class="error-msg">⚠️ Không tải được dữ liệu cổ phiếu.</div>`;
+ el.innerHTML = indexSection + `<div class="error-msg">️ Không tải được dữ liệu cổ phiếu.</div>`;
       return;
     }
 
@@ -170,10 +170,10 @@ export async function renderVNIndex(containerId = 'vnindexContent', isSilent = f
     el.innerHTML = `
       ${indexSection}
       <div class="vni-disclaimer">
-        📡 VN-Index: Yahoo Finance · VN30/HNX: ước tính từ basket · Cổ phiếu: VPS
+ VN-Index: Yahoo Finance · VN30/HNX: ước tính từ basket · Cổ phiếu: VPS
         &nbsp;·&nbsp; <span style="color:#c084fc">Tím = Trần</span> · <span style="color:#60a5fa">Xanh = Sàn</span>
       </div>
-      <div class="vni-section-label">📊 Cổ phiếu bluechip</div>
+ <div class="vni-section-label">Cổ phiếu bluechip</div>
       <div style="overflow-x:auto;">
         <table class="vni-table">
           <thead>
@@ -187,6 +187,6 @@ export async function renderVNIndex(containerId = 'vnindexContent', isSilent = f
       </div>`;
 
   } catch (err) {
-    el.innerHTML = `<div class="error-msg">⚠️ ${err.message}</div>`;
+ el.innerHTML = `<div class="error-msg">️ ${err.message}</div>`;
   }
 }

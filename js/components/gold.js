@@ -47,7 +47,7 @@ export function renderGold(xauUsd, source = '', containerId = 'goldContent') {
 
     <!-- ── Brand comparison table ── -->
     <div class="gold-brands-label">
-      🏪 ${isEstimated ? 'Giá ước tính tại các thương hiệu VN' : 'Giá thực tế tại các thương hiệu VN'}
+ ${isEstimated ? 'Giá ước tính tại các thương hiệu VN' : 'Giá thực tế tại các thương hiệu VN'}
       <span class="gold-brands-note">${isEstimated ? '(dựa trên giá quốc tế + phí)' : '(Cập nhật thời gian thực)'}</span>
     </div>
     <div class="gold-brand-table" id="goldBrandTable">
@@ -56,7 +56,7 @@ export function renderGold(xauUsd, source = '', containerId = 'goldContent') {
 
     <!-- ── Disclaimer ── -->
     <div class="gold-disclaimer">
-      ⚠️ ${isEstimated ? 'Giá thương hiệu là <strong>ước tính</strong> dựa trên giá quốc tế + phụ phí thông thường.' : 'Giá được cập nhật từ các cửa hàng tại Việt Nam.'}
+ ️ ${isEstimated ? 'Giá thương hiệu là <strong>ước tính</strong> dựa trên giá quốc tế + phụ phí thông thường.' : 'Giá được cập nhật từ các cửa hàng tại Việt Nam.'}
       Giá thực tế có thể khác — nhấn tên thương hiệu để xem giá chính xác.
     </div>
     <div class="gold-updated">⏱️ Cập nhật: ${new Date().toLocaleTimeString('vi-VN')}</div>
@@ -163,14 +163,14 @@ export function renderGoldFallback(containerId = 'goldContent') {
     </div>
 
     <div class="error-msg" style="margin-top:14px;">
-      💡 Không tải được giá vàng trực tiếp. Để xem giá chính xác, thêm
+ Không tải được giá vàng trực tiếp. Để xem giá chính xác, thêm
       <strong>GOLD_API_KEY</strong> vào file <code style="background:rgba(255,255,255,0.07);padding:1px 5px;border-radius:3px;">config.js</code>.
       Key miễn phí 100 req/ngày tại
       <a href="https://www.goldapi.io" target="_blank" style="color:var(--accent-blue);">goldapi.io</a>
     </div>
 
     <div class="gold-brands-label" style="margin-top:14px;">
-      🔗 Xem giá trực tiếp tại các thương hiệu
+ Xem giá trực tiếp tại các thương hiệu
     </div>
     <div class="gold-brand-table">
       ${GOLD_BRANDS.map(b => `

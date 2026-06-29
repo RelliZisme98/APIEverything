@@ -16,13 +16,13 @@ export function renderConverter(containerId = 'converterContent') {
     <div class="conv-wrapper">
       <!-- Category Tabs -->
       <div class="conv-tabs">
-        <button class="conv-tab-btn active" id="conv-tab-data" data-cat="data">💾 Dữ Liệu</button>
-        <button class="conv-tab-btn" id="conv-tab-temp" data-cat="temp">🌡️ Nhiệt Độ</button>
-        <button class="conv-tab-btn" id="conv-tab-length" data-cat="length">📏 Độ Dài</button>
-        <button class="conv-tab-btn" id="conv-tab-mass" data-cat="mass">⚖️ Khối Lượng</button>
-        <button class="conv-tab-btn" id="conv-tab-volume" data-cat="volume">🧪 Thể Tích</button>
-        <button class="conv-tab-btn" id="conv-tab-area" data-cat="area">📐 Diện Tích</button>
-        <button class="conv-tab-btn" id="conv-tab-speed" data-cat="speed">⚡ Tốc Độ</button>
+ <button class="conv-tab-btn active" id="conv-tab-data" data-cat="data">Dữ Liệu</button>
+ <button class="conv-tab-btn" id="conv-tab-temp" data-cat="temp">️ Nhiệt Độ</button>
+ <button class="conv-tab-btn" id="conv-tab-length" data-cat="length">Độ Dài</button>
+ <button class="conv-tab-btn" id="conv-tab-mass" data-cat="mass">️ Khối Lượng</button>
+ <button class="conv-tab-btn" id="conv-tab-volume" data-cat="volume">Thể Tích</button>
+ <button class="conv-tab-btn" id="conv-tab-area" data-cat="area">Diện Tích</button>
+ <button class="conv-tab-btn" id="conv-tab-speed" data-cat="speed">Tốc Độ</button>
       </div>
 
       <!-- Main Converter Box -->
@@ -51,7 +51,7 @@ export function renderConverter(containerId = 'converterContent') {
               <input type="number" class="conv-input" id="conv-data-tb" placeholder="Nhập số..." />
             </div>
           </div>
-          <div class="conv-tip">💡 Gợi ý: 1 GB = 1024 MB = 1,048,576 KB.</div>
+ <div class="conv-tip">Gợi ý: 1 GB = 1024 MB = 1,048,576 KB.</div>
         </div>
 
         <!-- 2. TEMPERATURE CONVERTER -->
@@ -70,7 +70,7 @@ export function renderConverter(containerId = 'converterContent') {
               <input type="number" class="conv-input" id="conv-temp-k" placeholder="Nhập số..." />
             </div>
           </div>
-          <div class="conv-tip">💡 Công thức: °F = (°C × 9/5) + 32 | K = °C + 273.15.</div>
+ <div class="conv-tip">Công thức: °F = (°C × 9/5) + 32 | K = °C + 273.15.</div>
         </div>
 
         <!-- 3. LENGTH CONVERTER -->
@@ -117,7 +117,7 @@ export function renderConverter(containerId = 'converterContent') {
           <div class="conv-ref-container">
             <!-- Table 1: Monitor Sizes -->
             <div class="conv-ref-card">
-              <div class="conv-ref-title">🖥️ Kích Thước Màn Hình (Tỷ lệ 16:9)</div>
+ <div class="conv-ref-title">️ Kích Thước Màn Hình (Tỷ lệ 16:9)</div>
               <table class="conv-ref-table">
                 <thead>
                   <tr>
@@ -164,7 +164,7 @@ export function renderConverter(containerId = 'converterContent') {
 
             <!-- Table 2: Length/Metric Cheat Sheet -->
             <div class="conv-ref-card">
-              <div class="conv-ref-title">📏 Quy Đổi Hệ Mét &amp; Anh Mỹ Thông Dụng</div>
+ <div class="conv-ref-title">Quy Đổi Hệ Mét &amp; Anh Mỹ Thông Dụng</div>
               <table class="conv-ref-table">
                 <thead>
                   <tr>
@@ -614,13 +614,13 @@ export function renderTimezoneConverter(containerId = 'tzConverterContent') {
     <div class="tz-section-wrap">
       <div class="tz-header">
         <div class="tz-input-wrap">
-          <label class="conv-label">\u23f0 Ch\u1ecdn th\u1eddi gian g\u1ed1c \u0111\u1ec3 quy \u0111\u1ed5i:</label>
+          <label class="conv-label">Ch\u1ecdn th\u1eddi gian g\u1ed1c \u0111\u1ec3 quy \u0111\u1ed5i:</label>
           <input type="datetime-local" class="conv-input tz-base-input" id="wc-tz-base" value="${localStr}" />
         </div>
-        <button class="btn-primary tz-now-btn" id="wc-tz-now">\u23f1 Hi\u1ec7n T\u1ea1i</button>
+        <button class="btn-primary tz-now-btn" id="wc-tz-now">Hi\u1ec7n T\u1ea1i</button>
       </div>
       <div class="tz-results-list" id="wc-tz-list"></div>
-      <div class="conv-tip">\ud83d\udca1 Ch\u1ec9 t\u00ednh to\u00e1n d\u1ef1a tr\u00ean offset UTC c\u1ed1 \u0111\u1ecbnh, ch\u01b0a t\u00ednh Daylight Saving Time (DST) theo m\u00f9a.</div>
+      <div class="conv-tip">Ch\u1ec9 t\u00ednh to\u00e1n d\u1ef1a tr\u00ean offset UTC c\u1ed1 \u0111\u1ecbnh, ch\u01b0a t\u00ednh Daylight Saving Time (DST) theo m\u00f9a.</div>
     </div>
   `;
 
@@ -630,7 +630,7 @@ export function renderTimezoneConverter(containerId = 'tzConverterContent') {
 
   function updateTimezones() {
     const baseVal = tzBaseInput.value;
-    if (!baseVal) { tzListWrap.innerHTML = '<div class="tz-error">\u26a0\ufe0f Vui l\u00f2ng ch\u1ecdn m\u1ed9c th\u1eddi gian g\u1ed1c.</div>'; return; }
+    if (!baseVal) { tzListWrap.innerHTML = '<div class="tz-error">Vui l\u00f2ng ch\u1ecdn m\u1ed9c th\u1eddi gian g\u1ed1c.</div>'; return; }
     const baseDate = new Date(baseVal);
     const systemOffsetHrs = -baseDate.getTimezoneOffset() / 60;
     tzListWrap.innerHTML = '';
@@ -680,12 +680,12 @@ export function renderBMICalculator(containerId = 'bmiContent') {
   container.innerHTML = `
     <div class="bmi-container">
       <div class="bmi-card">
-        <h3 style="margin:0;font-size:16px;color:var(--text-primary)">\ud83d\udcca Nh\u1eadp Ch\u1ec9 S\u1ed1 C\u01a1 Th\u1ec3</h3>
+        <h3 style="margin:0;font-size:16px;color:var(--text-primary)">Nh\u1eadp Ch\u1ec9 S\u1ed1 C\u01a1 Th\u1ec3</h3>
         <div class="conv-field">
           <label class="conv-label">Gi\u1edbi t\u00ednh</label>
           <div class="bmi-gender-toggle">
-            <button class="bmi-gender-btn active" id="bmi-gen-male" data-gender="male">\ud83d\ude4b\u200d\u2642\ufe0f Nam</button>
-            <button class="bmi-gender-btn" id="bmi-gen-female" data-gender="female">\ud83d\ude4b\u200d\u2640\ufe0f N\u1eef</button>
+            <button class="bmi-gender-btn active" id="bmi-gen-male" data-gender="male">Nam</button>
+            <button class="bmi-gender-btn" id="bmi-gen-female" data-gender="female">N\u1eef</button>
           </div>
         </div>
         <div class="conv-field">
@@ -699,7 +699,6 @@ export function renderBMICalculator(containerId = 'bmiContent') {
       </div>
       <div class="bmi-card" style="align-items:center;justify-content:center;">
         <div class="bmi-results-wrap" id="bmi-results-placeholder">
-          <span style="font-size:40px">\u2696\ufe0f</span>
           <p style="color:var(--text-muted);font-size:14px;margin:0;text-align:center">Vui l\u00f2ng nh\u1eadp chi\u1ec1u cao v\u00e0 c\u00e2n n\u1eb7ng \u0111\u1ec3 xem k\u1ebft qu\u1ea3 BMI.</p>
         </div>
         <div class="bmi-results-wrap" id="bmi-results-data" style="display:none;width:100%">
@@ -723,7 +722,7 @@ export function renderBMICalculator(containerId = 'bmiContent') {
       </div>
     </div>
     <div class="conv-tip" style="margin-top:16px">
-      \ud83d\udca1 Ch\u1ec9 s\u1ed1 BMI \u00e1p d\u1ee5ng theo chu\u1ea9n WHO Western Pacific Region d\u00e0nh cho ng\u01b0\u1eddi Ch\u00e2u \u00c1.
+      Ch\u1ec9 s\u1ed1 BMI \u00e1p d\u1ee5ng theo chu\u1ea9n WHO Western Pacific Region d\u00e0nh cho ng\u01b0\u1eddi Ch\u00e2u \u00c1.
     </div>
   `;
 
@@ -763,11 +762,11 @@ export function renderBMICalculator(containerId = 'bmiContent') {
     // Thiếu cân: < 18.5 | Bình thường: 18.5–22.9 | Thừa cân: 23–24.9
     // Béo phì I: 25–29.9 | Béo phì II: ≥ 30
     let status, color, pct;
-    if (bmi < 18.5)       { status = 'Thiếu cân (Gầy) 🔵'; color = '#60a5fa'; pct = Math.max(5, Math.min(24, ((bmi-10)/8.5)*20+5)); }
-    else if (bmi < 23.0)  { status = 'Bình thường (Cân đối) 🟢'; color = '#34d399'; pct = ((bmi-18.5)/4.4)*30+25; }
-    else if (bmi < 25.0)  { status = 'Thừa cân (Tiền béo phì) 🟡'; color = '#fbbf24'; pct = ((bmi-23.0)/2.0)*15+55; }
-    else if (bmi < 30.0)  { status = 'Béo phì độ I 🟠'; color = '#f97316'; pct = ((bmi-25.0)/5.0)*15+70; }
-    else                  { status = 'Béo phì độ II 🔴'; color = '#ef4444'; pct = Math.min(95, ((bmi-30.0)/10)*10+85); }
+ if (bmi < 18.5) { status = 'Thiếu cân (Gầy) '; color = '#60a5fa'; pct = Math.max(5, Math.min(24, ((bmi-10)/8.5)*20+5)); }
+ else if (bmi < 23.0) { status = 'Bình thường (Cân đối) '; color = '#34d399'; pct = ((bmi-18.5)/4.4)*30+25; }
+ else if (bmi < 25.0) { status = 'Thừa cân (Tiền béo phì) '; color = '#fbbf24'; pct = ((bmi-23.0)/2.0)*15+55; }
+ else if (bmi < 30.0) { status = 'Béo phì độ I '; color = '#f97316'; pct = ((bmi-25.0)/5.0)*15+70; }
+ else { status = 'Béo phì độ II '; color = '#ef4444'; pct = Math.min(95, ((bmi-30.0)/10)*10+85); }
 
     bmiStatusLbl.textContent = status;
     bmiStatusLbl.style.color = color;
@@ -792,7 +791,7 @@ export function renderBMICalculator(containerId = 'bmiContent') {
     } else if (bmi < 18.5) {
       tip += `<br><span style="font-size:11px;color:var(--text-muted)">Nên tăng khoảng <strong>${(parseFloat(minI) - w).toFixed(1)} kg</strong> để đạt cân nặng lý tưởng.</span>`;
     } else {
-      tip += `<br><span style="font-size:11px;color:var(--accent-green)">✅ Tuyệt vời! Duy trì cân nặng này nhé!</span>`;
+ tip += `<br><span style="font-size:11px;color:var(--accent-green)">Tuyệt vời! Duy trì cân nặng này nhé!</span>`;
     }
 
     bmiIdealLbl.innerHTML = tip;

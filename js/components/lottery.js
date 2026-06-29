@@ -6,19 +6,19 @@
 import { state } from '../store/state.js';
 
 const LOTTERY_REGIONS = [
-  { id: 'mien-bac',  label: '🎰 Miền Bắc',  color: '#f87171', drawDays: [0,1,2,3,4,5,6] },
-  { id: 'tp-hcm',    label: '🏙️ TP. HCM',   color: '#60a5fa', drawDays: [1,6] },
-  { id: 'da-nang',   label: '🌊 Đà Nẵng',    color: '#34d399', drawDays: [3,6] },
-  { id: 'dong-nai',  label: '🦋 Đồng Nai',   color: '#fbbf24', drawDays: [3] },
-  { id: 'can-tho',   label: '🌾 Cần Thơ',    color: '#a78bfa', drawDays: [4] },
-  { id: 'binh-duong',label: '🏗️ Bình Dương', color: '#fb923c', drawDays: [5] },
+ { id: 'mien-bac', label: 'Miền Bắc', color: '#f87171', drawDays: [0,1,2,3,4,5,6] },
+ { id: 'tp-hcm', label: '️ TP. HCM', color: '#60a5fa', drawDays: [1,6] },
+ { id: 'da-nang', label: 'Đà Nẵng', color: '#34d399', drawDays: [3,6] },
+ { id: 'dong-nai', label: 'Đồng Nai', color: '#fbbf24', drawDays: [3] },
+ { id: 'can-tho', label: 'Cần Thơ', color: '#a78bfa', drawDays: [4] },
+ { id: 'binh-duong',label: '️ Bình Dương', color: '#fb923c', drawDays: [5] },
 ];
 
 const VIETLOTT_GAMES = [
-  { id: 'power655', label: '⚡ Power 6/55', color: '#f43f5e', desc: 'Thứ 3, 5, 7 hàng tuần' },
-  { id: 'mega645', label: '💎 Mega 6/45',  color: '#8b5cf6', desc: 'Thứ 4, 6, CN hàng tuần' },
-  { id: 'max4d',   label: '🎯 Max 4D',     color: '#0ea5e9', desc: 'Thứ 2, 4, 6 hàng tuần' },
-  { id: 'keno',    label: '🎲 Keno',       color: '#10b981', desc: 'Hàng ngày' },
+ { id: 'power655', label: 'Power 6/55', color: '#f43f5e', desc: 'Thứ 3, 5, 7 hàng tuần' },
+ { id: 'mega645', label: 'Mega 6/45', color: '#8b5cf6', desc: 'Thứ 4, 6, CN hàng tuần' },
+ { id: 'max4d', label: 'Max 4D', color: '#0ea5e9', desc: 'Thứ 2, 4, 6 hàng tuần' },
+ { id: 'keno', label: 'Keno', color: '#10b981', desc: 'Hàng ngày' },
 ];
 
 let currentLotteryId   = 'mien-bac';
@@ -101,8 +101,8 @@ function buildUI(el, containerId) {
 
   el.innerHTML = `
     <div class="lot-mode-tabs">
-      <button class="lot-mode-tab ${currentLotteryMode === 'traditional' ? 'active' : ''}" onclick="window.selectLottery('${currentLotteryId}')">🎰 Xổ Số Truyền Thống</button>
-      <button class="lot-mode-tab ${currentLotteryMode === 'vietlott' ? 'active' : ''}" onclick="window.selectVietlott('${currentVietlottGame}')">✨ Vietlott</button>
+ <button class="lot-mode-tab ${currentLotteryMode === 'traditional' ? 'active' : ''}" onclick="window.selectLottery('${currentLotteryId}')">Xổ Số Truyền Thống</button>
+ <button class="lot-mode-tab ${currentLotteryMode === 'vietlott' ? 'active' : ''}" onclick="window.selectVietlott('${currentVietlottGame}')">Vietlott</button>
     </div>
 
     <div class="lot-chips" style="margin-top:10px;">
@@ -127,7 +127,7 @@ function buildUI(el, containerId) {
 
     <div id="lotSubTabBar" class="vl-tab-bar" style="margin-bottom: 12px;"></div>
 
-    <div id="lotteryData"><div class="lot-loading">🎱 Đang tải kết quả...</div></div>`;
+ <div id="lotteryData"><div class="lot-loading">Đang tải kết quả...</div></div>`;
 
   window.lotNavDate = (delta) => {
     const d = new Date(currentLotteryDate);
@@ -173,7 +173,7 @@ async function fetchAndRender() {
   const el = document.getElementById('lotteryData');
   if (!el) return;
 
-  el.innerHTML = `<div class="lot-loading">🎱 Đang tải kết quả ${region.label}...</div>`;
+ el.innerHTML = `<div class="lot-loading">Đang tải kết quả ${region.label}...</div>`;
 
   const subTabBar = document.getElementById('lotSubTabBar');
   if (subTabBar) subTabBar.innerHTML = '';
@@ -215,10 +215,10 @@ async function fetchAndRender() {
             <span class="lot-date">${new Date(currentLotteryDate).toLocaleDateString('vi-VN', { weekday:'long', day:'2-digit', month:'2-digit', year:'numeric' })}</span>
           </div>
           <div style="text-align:center;padding:30px;color:var(--text-muted);">
-            ${drawDay ? '📅 Ngày này không có lịch quay xổ số' : `⏳ Chưa có kết quả (quay lúc ${DRAW_TIMES[currentLotteryId] ?? '18:10'})`}
+ ${drawDay ? 'Ngày này không có lịch quay xổ số' : `⏳ Chưa có kết quả (quay lúc ${DRAW_TIMES[currentLotteryId] ?? '18:10'})`}
           </div>
           <div style="text-align:center;padding-bottom:14px;">
-            <a href="https://www.minhngoc.net.vn/${region.id}/" target="_blank" class="lot-link">🔗 Xem tại minhngoc.net.vn</a>
+ <a href="https://www.minhngoc.net.vn/${region.id}/" target="_blank" class="lot-link">Xem tại minhngoc.net.vn</a>
           </div>
         </div>`;
       return;
@@ -245,7 +245,7 @@ async function fetchAndRender() {
       }
     }
   } catch (err) {
-    el.innerHTML = `<div class="error-msg">⚠️ Lỗi tải dữ liệu: ${err.message}</div>`;
+ el.innerHTML = `<div class="error-msg">️ Lỗi tải dữ liệu: ${err.message}</div>`;
   }
 }
 
@@ -277,17 +277,17 @@ function renderTodayNotDrawnStatsPlaceholder(el, region) {
   el.innerHTML = `
     <div class="lot-wrap">
       <div class="lot-header" style="border-color:${region.color}30;background:${region.color}06;">
-        <span style="color:${region.color};">📊 Đầu/Đuôi Lô Tô - ${region.label}</span>
+ <span style="color:${region.color};">Đầu/Đuôi Lô Tô - ${region.label}</span>
         <span class="lot-date">${new Date().toLocaleDateString('vi-VN', { weekday:'long', day:'2-digit', month:'2-digit', year:'numeric' })}</span>
       </div>
       <div style="text-align:center;padding:30px;">
-        <div style="font-size:36px;margin-bottom:10px;">📊</div>
+ <div style="font-size:36px;margin-bottom:10px;"></div>
         <div style="font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">Chưa có kết quả quay số hôm nay</div>
         <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">
           Bảng thống kê đầu đuôi loto tự động hiển thị sau khi có kết quả chính thức.
         </div>
         <button class="btn-primary" onclick="window.switchLotSubTab('predict')" style="background:${region.color};border-color:${region.color};color:#000;font-weight:700;padding:6px 16px;font-size:12px;">
-          🔮 Xem nhận định & soi cầu hôm nay
+ Xem nhận định & soi cầu hôm nay
         </button>
       </div>
     </div>`;
@@ -336,7 +336,7 @@ function renderPrizes(el, data, region) {
       </div>
       <div class="lot-footer">
         <a href="https://www.minhngoc.net.vn/${region.id}/" target="_blank" class="lot-link">
-          🔗 Xem đầy đủ tại minhngoc.net.vn
+ Xem đầy đủ tại minhngoc.net.vn
         </a>
       </div>
     </div>`;
@@ -345,7 +345,7 @@ function renderPrizes(el, data, region) {
 async function fetchVietlott() {
   const dataDiv = document.getElementById('lotteryData');
   if (!dataDiv) return;
-  dataDiv.innerHTML = '<div class="lot-loading">✨ Đang tải kết quả Vietlott...</div>';
+ dataDiv.innerHTML = '<div class="lot-loading">Đang tải kết quả Vietlott...</div>';
 
   const game = VIETLOTT_GAMES.find(g => g.id === currentVietlottGame) ?? VIETLOTT_GAMES[0];
 
@@ -393,17 +393,17 @@ async function fetchVietlott() {
 
         <div class="vl-jackpot-row">
           <div class="vl-jackpot-card">
-            <div class="vl-jackpot-label">💰 Jackpot kỳ này</div>
+ <div class="vl-jackpot-label">Jackpot kỳ này</div>
             <div class="vl-jackpot-val" style="color:${game.color};">${jackpot}</div>
           </div>
           ${nextJP ? `<div class="vl-jackpot-card">
-            <div class="vl-jackpot-label">🚀 Jackpot kỳ sau (ước tính)</div>
+ <div class="vl-jackpot-label">Jackpot kỳ sau (ước tính)</div>
             <div class="vl-jackpot-val">${nextJP}</div>
           </div>` : ''}
         </div>
 
         <div class="vl-footer">
-          <a href="https://www.vietlott.vn" target="_blank" rel="noopener" class="lot-link">🔗 Vietlott chính thức</a>
+ <a href="https://www.vietlott.vn" target="_blank" rel="noopener" class="lot-link">Vietlott chính thức</a>
         </div>
       </div>`;
   } catch (err) {
@@ -418,7 +418,7 @@ async function fetchVietlott() {
               : 'Không thể kết nối tới máy chủ Vietlott. Vui lòng thử lại sau.'}
           </div>
           <a href="https://www.vietlott.vn" target="_blank" rel="noopener" class="lot-link" style="display:inline-block;margin-top:14px;">
-            🔗 Xem tại Vietlott.vn
+ Xem tại Vietlott.vn
           </a>
         </div>
       </div>`;
@@ -437,22 +437,22 @@ export function renderSubTabBar() {
     bar.innerHTML = `
       <button class="vl-tab ${currentTraditionalTab === 'result' ? 'active' : ''}" 
               onclick="window.switchLotSubTab('result')" 
-              style="${currentTraditionalTab === 'result' ? `background:${color}12;border-color:${color}40;color:${color};` : ''}">🎱 Kết quả giải</button>
+ style="${currentTraditionalTab === 'result' ? `background:${color}12;border-color:${color}40;color:${color};` : ''}">Kết quả giải</button>
       <button class="vl-tab ${currentTraditionalTab === 'stats' ? 'active' : ''}" 
               onclick="window.switchLotSubTab('stats')" 
-              style="${currentTraditionalTab === 'stats' ? `background:${color}12;border-color:${color}40;color:${color};` : ''}">📊 Đầu / Đuôi Lô Tô</button>
+ style="${currentTraditionalTab === 'stats' ? `background:${color}12;border-color:${color}40;color:${color};` : ''}">Đầu / Đuôi Lô Tô</button>
       <button class="vl-tab ${currentTraditionalTab === 'predict' ? 'active' : ''}" 
               onclick="window.switchLotSubTab('predict')" 
-              style="${currentTraditionalTab === 'predict' ? `background:${color}12;border-color:${color}40;color:${color};` : ''}">🔮 Soi Cầu / Dự Đoán</button>
+ style="${currentTraditionalTab === 'predict' ? `background:${color}12;border-color:${color}40;color:${color};` : ''}">Soi Cầu / Dự Đoán</button>
     `;
   } else {
     const game = VIETLOTT_GAMES.find(g => g.id === currentVietlottGame) ?? VIETLOTT_GAMES[0];
     const clr = game.color;
     bar.innerHTML = `
       <button class="vl-tab active" id="vlTab-result" onclick="window.switchVlSubTab('result')"
-              style="background:${clr}12;border-color:${clr}40;color:${clr};">🎱 Kết quả mới nhất</button>
-      <button class="vl-tab" id="vlTab-history" onclick="window.switchVlSubTab('history')">📅 Lịch sử</button>
-      <button class="vl-tab" id="vlTab-stats" onclick="window.switchVlSubTab('stats')">📊 Thống kê tần suất</button>
+ style="background:${clr}12;border-color:${clr}40;color:${clr};">Kết quả mới nhất</button>
+ <button class="vl-tab" id="vlTab-history" onclick="window.switchVlSubTab('history')">Lịch sử</button>
+ <button class="vl-tab" id="vlTab-stats" onclick="window.switchVlSubTab('stats')">Thống kê tần suất</button>
     `;
   }
 }
@@ -573,19 +573,19 @@ function renderTraditionalStats(el, data, region) {
   el.innerHTML = `
     <div class="lot-wrap">
       <div class="lot-header" style="border-color:${region.color}40;background:${region.color}08;">
-        <span style="color:${region.color};">📊 Bảng Đầu/Đuôi Lô Tô - ${region.label}</span>
+ <span style="color:${region.color};">Bảng Đầu/Đuôi Lô Tô - ${region.label}</span>
         <span class="lot-date">${dateDisplay}</span>
       </div>
       <div class="lot-stats-container" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px;">
         <div>
-          <div style="font-size:12px;font-weight:700;color:var(--accent-blue);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.04em;">🔴 Bảng Đầu Lô</div>
+ <div style="font-size:12px;font-weight:700;color:var(--accent-blue);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.04em;">Bảng Đầu Lô</div>
           <table class="br-table lot-stats-table">
             <thead><tr><th style="text-align:center;">Đầu</th><th>Đuôi Lô Tô tương ứng</th></tr></thead>
             <tbody>${getRows(dauGroups, true)}</tbody>
           </table>
         </div>
         <div>
-          <div style="font-size:12px;font-weight:700;color:var(--accent-green);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.04em;">🟢 Bảng Đuôi Lô</div>
+ <div style="font-size:12px;font-weight:700;color:var(--accent-green);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.04em;">Bảng Đuôi Lô</div>
           <table class="br-table lot-stats-table">
             <thead><tr><th style="text-align:center;">Đuôi</th><th>Đầu Lô Tô tương ứng</th></tr></thead>
             <tbody>${getRows(duoiGroups, false)}</tbody>
@@ -689,21 +689,21 @@ function renderTraditionalPredict(el, data, region) {
   el.innerHTML = `
     <div class="lot-wrap">
       <div class="lot-header" style="border-color:${region.color}40;background:${region.color}08;">
-        <span style="color:${region.color};">🔮 Nhận Định & Soi Cầu - ${region.label}</span>
+ <span style="color:${region.color};">Nhận Định & Soi Cầu - ${region.label}</span>
       </div>
       <div style="padding:16px;">
-        <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.04em;">💡 Phân tích & Gợi ý cầu lô</div>
+ <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.04em;">Phân tích & Gợi ý cầu lô</div>
         ${sugHtml}
 
         <div style="margin-top:20px;border-top:1px solid var(--border);padding-top:16px;">
-          <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.04em;">🎲 Quay số lấy hên / Xin lộc may mắn</div>
+ <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.04em;">Quay số lấy hên / Xin lộc may mắn</div>
           <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
             <select id="spinType" class="field-input" style="width:140px;background:rgba(255,255,255,0.05);border-color:var(--border);">
               <option value="loto">Lô tô (2 số)</option>
               <option value="cap">Cặp song thủ (2x2 số)</option>
               <option value="dacbiet">Giải đặc biệt</option>
             </select>
-            <button class="btn-primary" onclick="window.spinLuckyLottery()" style="background:${region.color};border-color:${region.color};color:#000;font-weight:700;">✨ Bắt đầu quay</button>
+ <button class="btn-primary" onclick="window.spinLuckyLottery()" style="background:${region.color};border-color:${region.color};color:#000;font-weight:700;">Bắt đầu quay</button>
           </div>
           <div id="luckySpinResult" style="display:flex;justify-content:center;gap:10px;min-height:50px;align-items:center;">
             <div style="color:var(--text-muted);font-size:12px;font-style:italic;">Hãy chọn loại số và nhấn "Bắt đầu quay"</div>
@@ -718,7 +718,7 @@ function renderTraditionalPredict(el, data, region) {
     if (!resDiv) return;
 
     const type = document.getElementById('spinType')?.value ?? 'loto';
-    resDiv.innerHTML = `<div style="font-size:24px;animation:spin 1s infinite;">🌀</div>`;
+ resDiv.innerHTML = `<div style="font-size:24px;animation:spin 1s infinite;"></div>`;
 
     setTimeout(() => {
       let resultHtml = '';
@@ -747,7 +747,7 @@ function renderTraditionalPredict(el, data, region) {
 }
 
 async function renderVietlottHistory(el) {
-  el.innerHTML = `<div class="lot-loading">📅 Đang tải lịch sử...</div>`;
+ el.innerHTML = `<div class="lot-loading">Đang tải lịch sử...</div>`;
   const game = VIETLOTT_GAMES.find(g => g.id === currentVietlottGame);
 
   try {
@@ -780,7 +780,7 @@ async function renderVietlottHistory(el) {
     el.innerHTML = `
       <div class="vl-result-card" style="border-color:${game.color}30;">
         <div class="vl-header">
-          <div class="vl-title" style="color:${game.color};">📅 Lịch sử ${game.label}</div>
+ <div class="vl-title" style="color:${game.color};">Lịch sử ${game.label}</div>
           <div class="vl-date">${history.length} kỳ gần nhất</div>
         </div>
         <div class="vl-hist-list">${rows}</div>
@@ -791,7 +791,7 @@ async function renderVietlottHistory(el) {
 }
 
 async function renderVietlottStats(el) {
-  el.innerHTML = `<div class="lot-loading">📊 Đang tính toán thống kê...</div>`;
+ el.innerHTML = `<div class="lot-loading">Đang tính toán thống kê...</div>`;
   const game = VIETLOTT_GAMES.find(g => g.id === currentVietlottGame);
 
   try {
@@ -835,13 +835,13 @@ async function renderVietlottStats(el) {
     el.innerHTML = `
       <div class="vl-result-card" style="border-color:${game.color}30;">
         <div class="vl-header">
-          <div class="vl-title" style="color:${game.color};">📊 Thống kê ${game.label}</div>
+ <div class="vl-title" style="color:${game.color};">Thống kê ${game.label}</div>
           <div class="vl-date">Dựa trên ${all.length} kỳ quay</div>
         </div>
         <div style="padding:16px;">
-          <div class="vl-stat-title" style="color:#f87171;">🔥 10 số ra nhiều nhất</div>
+ <div class="vl-stat-title" style="color:#f87171;">10 số ra nhiều nhất</div>
           <div class="vl-stat-list">${barHtml(hot,'#f87171')}</div>
-          <div class="vl-stat-title" style="color:#60a5fa;margin-top:16px;">❄️ 10 số ra ít nhất</div>
+ <div class="vl-stat-title" style="color:#60a5fa;margin-top:16px;">️ 10 số ra ít nhất</div>
           <div class="vl-stat-list">${barHtml(cold,'#60a5fa')}</div>
         </div>
       </div>`;

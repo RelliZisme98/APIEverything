@@ -9,7 +9,7 @@ export function renderTaxCalc(containerId = 'taxCalcContent') {
 
   el.innerHTML = `
     <div class="tax-hero">
-      <div class="tax-hero-icon">🧮</div>
+ <div class="tax-hero-icon"></div>
       <div>
         <div class="tax-hero-title">Tính Thuế TNCN 2026 (Cá nhân cư trú)</div>
         <div class="tax-hero-sub">Theo Luật thuế TNCN 2026 · Biểu lũy tiến 5 bậc · Giảm trừ bản thân 15,5 triệu/tháng</div>
@@ -37,8 +37,8 @@ export function renderTaxCalc(containerId = 'taxCalcContent') {
       <div class="tax-row">
         <label class="tax-label">Đóng BHXH, BHYT, BHTN</label>
         <div class="tax-toggle-group">
-          <button class="tax-toggle active" id="taxBhxhYes" onclick="window.taxSetBhxh(true)">✅ Có (8%+1.5%+1% lương)</button>
-          <button class="tax-toggle" id="taxBhxhNo"  onclick="window.taxSetBhxh(false)">❌ Không</button>
+ <button class="tax-toggle active" id="taxBhxhYes" onclick="window.taxSetBhxh(true)">Có (8%+1.5%+1% lương)</button>
+ <button class="tax-toggle" id="taxBhxhNo" onclick="window.taxSetBhxh(false)">Không</button>
         </div>
       </div>
     </div>
@@ -50,7 +50,7 @@ export function renderTaxCalc(containerId = 'taxCalcContent') {
     <div id="taxResult" style="margin-top:16px;"></div>
 
     <div class="tax-brackets">
-      <div class="tax-brackets-title">📊 Biểu thuế lũy tiến 5 bậc 2026 (thu nhập tính thuế/tháng)</div>
+ <div class="tax-brackets-title">Biểu thuế lũy tiến 5 bậc 2026 (thu nhập tính thuế/tháng)</div>
       <table class="tax-table">
         <thead><tr><th>Bậc</th><th>Phần thu nhập tính thuế/tháng</th><th>Thuế suất</th><th>Thuế tối đa bậc</th></tr></thead>
         <tbody>
@@ -62,7 +62,7 @@ export function renderTaxCalc(containerId = 'taxCalcContent') {
         </tbody>
       </table>
       <div class="tax-note">
-        📌 Giảm trừ bản thân: <strong>15,5 triệu/tháng</strong> &nbsp;·&nbsp;
+ Giảm trừ bản thân: <strong>15,5 triệu/tháng</strong> &nbsp;·&nbsp;
         Giảm trừ người phụ thuộc: <strong>6,2 triệu/người/tháng</strong> &nbsp;·&nbsp;
         Ngưỡng chịu thuế (0 NPT): <strong>&gt; 15,5 triệu/tháng</strong>
       </div>
@@ -154,13 +154,13 @@ export function renderTaxCalc(containerId = 'taxCalcContent') {
           <div style="font-size:10px;color:var(--text-muted);">Thu nhập tính thuế: ${fmt(taxable)} · Thuế suất hiệu quả: ${effectiveRate}%</div>
         </div>
         <div class="tax-result-card tax-result-net" style="border-color:rgba(52,211,153,0.4);">
-          <div class="tax-result-label">💰 Lương NET thực nhận</div>
+ <div class="tax-result-label">Lương NET thực nhận</div>
           <div class="tax-result-val" style="color:#34d399;font-size:28px;">${fmt(net)}</div>
         </div>
       </div>
       ${breakdown.length ? `
       <details style="margin-top:12px;">
-        <summary style="cursor:pointer;font-size:12px;color:var(--text-muted);">📊 Chi tiết tính thuế lũy tiến</summary>
+ <summary style="cursor:pointer;font-size:12px;color:var(--text-muted);">Chi tiết tính thuế lũy tiến</summary>
         <table class="tax-table" style="margin-top:8px;">
           <thead><tr><th>Bậc</th><th>Thu nhập tính thuế</th><th>Thuế</th></tr></thead>
           <tbody>${bdRows}</tbody>

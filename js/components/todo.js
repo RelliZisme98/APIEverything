@@ -8,9 +8,9 @@ let todoFilter = 'all'; // category filter
 const LOCAL_TASKS_KEY = 'rellia_todo_tasks';
 
 const DEFAULT_CATEGORIES = [
-  { id: 'work',     label: 'Công việc 💼' },
-  { id: 'personal', label: 'Cá nhân 🏡' },
-  { id: 'urgent',   label: 'Khẩn cấp 🚨' }
+ { id: 'work', label: 'Công việc ' },
+ { id: 'personal', label: 'Cá nhân ' },
+ { id: 'urgent', label: 'Khẩn cấp ' }
 ];
 
 function getCustomCategories() {
@@ -85,10 +85,10 @@ function formatDueDate(dueDate) {
   const today = todayStr();
   const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowStr = tomorrow.toISOString().split('T')[0];
-  if (dueDate === today) return '📅 Hôm nay';
-  if (dueDate === tomorrowStr) return '📅 Ngày mai';
-  if (isOverdue(dueDate)) return `⚠️ Quá hạn: ${dueDate}`;
-  return `📅 ${dueDate}`;
+ if (dueDate === today) return 'Hôm nay';
+ if (dueDate === tomorrowStr) return 'Ngày mai';
+ if (isOverdue(dueDate)) return `️ Quá hạn: ${dueDate}`;
+ return `${dueDate}`;
 }
 
 function getDueDateColor(dueDate, status) {
@@ -109,7 +109,7 @@ export function renderTodo() {
       <div class="todo-sync-panel">
         <div class="todo-sync-header" id="syncHeader" style="cursor:default;">
           <div class="todo-sync-title">
-            ☁️ Đồng bộ đám mây
+ ️ Đồng bộ đám mây
             <span id="syncIndicator" class="status-dot dot-yellow"></span>
             <span id="syncText" style="font-size:11px;color:var(--text-muted);">Đang kết nối...</span>
           </div>
@@ -118,11 +118,11 @@ export function renderTodo() {
 
       <!-- View Tabs + Stats -->
       <div class="todo-view-tabs" id="todoViewTabs">
-        <button class="todo-view-tab active" data-view="board">📋 Kanban</button>
-        <button class="todo-view-tab" data-view="all">📝 Tất cả</button>
-        <button class="todo-view-tab" data-view="upcoming">📅 Sắp tới</button>
+ <button class="todo-view-tab active" data-view="board">Kanban</button>
+ <button class="todo-view-tab" data-view="all">Tất cả</button>
+ <button class="todo-view-tab" data-view="upcoming">Sắp tới</button>
         <button class="todo-view-tab" data-view="due-soon">⏰ Sắp đến hạn</button>
-        <button class="todo-view-tab" data-view="overdue">🔴 Quá hạn</button>
+ <button class="todo-view-tab" data-view="overdue">Quá hạn</button>
       </div>
 
       <!-- Stats bar -->
@@ -130,7 +130,7 @@ export function renderTodo() {
 
       <!-- Add Task Form -->
       <div class="todo-quick-add">
-        <div class="travel-title-sub">➕ Thêm công việc mới</div>
+ <div class="travel-title-sub">Thêm công việc mới</div>
         <div class="todo-form-grid">
           <div class="travel-select-wrap">
             <label>Tiêu đề <span class="tax-req">*</span></label>
@@ -150,9 +150,9 @@ export function renderTodo() {
           <div class="travel-select-wrap">
             <label>Mức ưu tiên</label>
             <select id="todoPrioritySelect" class="field-input">
-              <option value="normal">⚪ Bình thường</option>
-              <option value="high">🟡 Cao</option>
-              <option value="critical">🔴 Khẩn cấp</option>
+ <option value="normal">Bình thường</option>
+ <option value="high">Cao</option>
+ <option value="critical">Khẩn cấp</option>
             </select>
           </div>
         </div>
@@ -184,7 +184,7 @@ export function renderTodo() {
   // Bind add events
   document.getElementById('btnAddTodo').addEventListener('click', addNewTodo);
   document.getElementById('btnAddNewCategory').addEventListener('click', () => {
-    const newCatName = prompt('Nhập tên phân loại mới (ví dụ: Học tập 📚):');
+ const newCatName = prompt('Nhập tên phân loại mới (ví dụ: Học tập ):');
     if (newCatName?.trim()) {
       const cleanName = newCatName.trim();
       const catId = cleanName.toLowerCase().replace(/\s+/g, '_');
@@ -332,15 +332,15 @@ function renderListView(el) {
   const filtered = getFilteredTasks();
 
   const viewTitles = {
-    all:       '📝 Tất cả công việc',
-    upcoming:  '📅 Công việc sắp tới (có hạn chót)',
+ all: 'Tất cả công việc',
+ upcoming: 'Công việc sắp tới (có hạn chót)',
     'due-soon':'⏰ Sắp đến hạn (7 ngày)',
-    overdue:   '🔴 Công việc quá hạn',
+ overdue: 'Công việc quá hạn',
   };
 
   if (!filtered.length) {
     el.innerHTML = `<div class="todo-empty-view">
-      <div style="font-size:36px;margin-bottom:10px;">${activeView === 'overdue' ? '🎉' : '📭'}</div>
+ <div style="font-size:36px;margin-bottom:10px;">${activeView === 'overdue' ? '' : ''}</div>
       <div style="font-size:15px;font-weight:700;color:var(--text-primary);">${activeView === 'overdue' ? 'Không có task quá hạn!' : 'Không có công việc nào'}</div>
       <div style="font-size:12px;color:var(--text-muted);margin-top:6px;">
         ${activeView === 'overdue' ? 'Tuyệt vời! Bạn đang đúng deadline.' : 'Hãy thêm công việc mới ở form phía trên.'}
@@ -360,7 +360,7 @@ function renderListView(el) {
   });
 
   el.innerHTML = `
-    <div class="todo-list-header">${viewTitles[activeView] ?? '📝 Danh sách'} <span class="todo-count-badge">${sorted.length}</span></div>
+ <div class="todo-list-header">${viewTitles[activeView] ?? 'Danh sách'} <span class="todo-count-badge">${sorted.length}</span></div>
     <div class="todo-list-view">
       ${sorted.map(task => renderTaskListItem(task)).join('')}
     </div>`;
@@ -385,12 +385,12 @@ function renderTaskListItem(task) {
     ? `<span class="todo-due-date" style="${getDueDateColor(task.dueDate, task.status)}">${formatDueDate(task.dueDate)}</span>`
     : '';
 
-  const priorityIcon = { critical: '🔴', high: '🟡', normal: '' }[task.priority] || '';
+ const priorityIcon = { critical: '', high: '', normal: '' }[task.priority] || '';
 
   const statusOptions = [
-    { v: 'todo',  l: '📋 Cần làm' },
-    { v: 'doing', l: '⚡ Đang làm' },
-    { v: 'done',  l: '✅ Xong' },
+ { v: 'todo', l: 'Cần làm' },
+ { v: 'doing', l: 'Đang làm' },
+ { v: 'done', l: 'Xong' },
   ];
 
   return `
@@ -410,7 +410,7 @@ function renderTaskListItem(task) {
           </select>
         </div>
       </div>
-      <button class="todo-card-btn delete todo-list-delete" onclick="window.deleteTodoTask('${task.id}')">✕</button>
+ <button class="todo-card-btn delete todo-list-delete" onclick="window.deleteTodoTask('${task.id}')"></button>
     </div>`;
 }
 
@@ -419,21 +419,21 @@ function renderKanban(el) {
     <div class="todo-board">
       <div class="todo-column" id="col-todo">
         <div class="todo-col-header">
-          <span class="todo-col-title">📋 Cần Làm</span>
+ <span class="todo-col-title">Cần Làm</span>
           <span class="todo-col-count" id="count-todo">0</span>
         </div>
         <div class="todo-list-container" id="list-todo"></div>
       </div>
       <div class="todo-column" id="col-doing">
         <div class="todo-col-header">
-          <span class="todo-col-title">⚡ Đang Làm</span>
+ <span class="todo-col-title">Đang Làm</span>
           <span class="todo-col-count" id="count-doing">0</span>
         </div>
         <div class="todo-list-container" id="list-doing"></div>
       </div>
       <div class="todo-column" id="col-done">
         <div class="todo-col-header">
-          <span class="todo-col-title">✅ Đã Xong</span>
+ <span class="todo-col-title">Đã Xong</span>
           <span class="todo-col-count" id="count-done">0</span>
         </div>
         <div class="todo-list-container" id="list-done"></div>
@@ -475,16 +475,16 @@ function renderTasks() {
       : '';
 
     const overdueClass = isOverdue(task.dueDate) && task.status !== 'done' ? ' todo-card--overdue' : '';
-    const priorityIcon = { critical: '🔴 ', high: '🟡 ', normal: '' }[task.priority] || '';
+ const priorityIcon = { critical: '', high: '', normal: '' }[task.priority] || '';
     card.className += overdueClass;
 
     let moveButtonsHTML = '';
     if (task.status === 'todo') {
-      moveButtonsHTML = `<button class="todo-card-btn" onclick="window.moveTodoTask('${task.id}','doing')">Bắt đầu ➔</button>`;
+ moveButtonsHTML = `<button class="todo-card-btn" onclick="window.moveTodoTask('${task.id}','doing')">Bắt đầu </button>`;
     } else if (task.status === 'doing') {
       moveButtonsHTML = `
         <button class="todo-card-btn" onclick="window.moveTodoTask('${task.id}','todo')">◀ Trả lại</button>
-        <button class="todo-card-btn" onclick="window.moveTodoTask('${task.id}','done')">Hoàn thành ➔</button>`;
+ <button class="todo-card-btn" onclick="window.moveTodoTask('${task.id}','done')">Hoàn thành </button>`;
     } else {
       moveButtonsHTML = `<button class="todo-card-btn" onclick="window.moveTodoTask('${task.id}','doing')">◀ Làm lại</button>`;
     }

@@ -9,11 +9,11 @@ const API = (params) => `/football?${new URLSearchParams(params)}`;
 const VN_TZ = 'Asia/Ho_Chi_Minh';
 
 const LEAGUES = {
-  pl: { id: 'eng.1', label: '🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League', color: '#60a5fa' },
-  laliga: { id: 'esp.1', label: '🇪🇸 La Liga', color: '#fbbf24' },
-  seriea: { id: 'ita.1', label: '🇮🇹 Serie A', color: '#34d399' },
-  ucl: { id: 'uefa.champs', label: '🏆 Champions League', color: '#a78bfa' },
-  wc: { id: 'fifa.world', label: '🌎 World Cup 2026', color: '#fb923c' },
+ pl: { id: 'eng.1', label: '󠁧󠁢󠁥󠁮󠁧󠁿 Premier League', color: '#60a5fa' },
+ laliga: { id: 'esp.1', label: 'La Liga', color: '#fbbf24' },
+ seriea: { id: 'ita.1', label: 'Serie A', color: '#34d399' },
+ ucl: { id: 'uefa.champs', label: 'Champions League', color: '#a78bfa' },
+ wc: { id: 'fifa.world', label: 'World Cup 2026', color: '#fb923c' },
 };
 
 // ── State ──────────────────────────────────────────────────────────
@@ -83,9 +83,9 @@ function buildShell(el) {
   ).join('');
 
   const tabs = [
-    { key:'fixtures', label:'📅 Trận Đấu' },
-    { key:'table',    label:'📊 Bảng Xếp Hạng' },
-    { key:'stats',    label:'🏆 Thống Kê' },
+ { key:'fixtures', label:'Trận Đấu' },
+ { key:'table', label:'Bảng Xếp Hạng' },
+ { key:'stats', label:'Thống Kê' },
   ].map(t =>
     `<button class="fb-tab ${t.key===_tab?'active':''}" onclick="window._fbTab('${t.key}')"
        style="${t.key===_tab?`border-color:${lg.color}40;color:${lg.color};background:${lg.color}0d;`:''}">${t.label}</button>`
@@ -134,7 +134,7 @@ async function loadLeagueData(silent = false) {
   const main = document.getElementById('fbMain');
   if (!main) return;
 
-  if (!silent) main.innerHTML = `<div class="fb-loading">⚽ Đang tải dữ liệu bóng đá...</div>`;
+ if (!silent) main.innerHTML = `<div class="fb-loading">Đang tải dữ liệu bóng đá...</div>`;
 
   try {
     const params = { league: leagueId, type };
@@ -155,7 +155,7 @@ async function loadLeagueData(silent = false) {
     _cache[cacheKey] = data;
     renderMain();
   } catch (err) {
-    if (!silent) main.innerHTML = `<div class="error-msg">⚠️ Lỗi tải dữ liệu: ${err.message}</div>`;
+ if (!silent) main.innerHTML = `<div class="error-msg">️ Lỗi tải dữ liệu: ${err.message}</div>`;
   }
 }
 
@@ -164,7 +164,7 @@ function renderMain() {
   if (!main) return;
   const type = _tab === 'fixtures' ? 'scoreboard' : _tab === 'table' ? 'table' : 'statistics';
   const data = _cache[`${_league}_${type}_${_dateOffset}`];
-  if (!data) { main.innerHTML = `<div class="fb-loading">⚽ Đang tải...</div>`; return; }
+ if (!data) { main.innerHTML = `<div class="fb-loading">Đang tải...</div>`; return; }
 
   if (_tab === 'table') renderTable(main, data);
   else if (_tab === 'stats') renderStats(main, data);
@@ -176,7 +176,7 @@ function renderFixtureList(el, data) {
   const events = data.events || [];
 
   if (!events.length) {
-    el.innerHTML = `<div class="fb-empty">📅 Hiện chưa có trận đấu nào trong vòng này.</div>`;
+ el.innerHTML = `<div class="fb-empty">Hiện chưa có trận đấu nào trong vòng này.</div>`;
     return;
   }
 
@@ -196,7 +196,7 @@ function renderFixtureList(el, data) {
     html += `
       <div class="fb-date-group">
         <div class="fb-date-header ${today ? 'fb-today' : ''}" style="${today ? `border-color:${lg.color};color:${lg.color};` : ''}">
-          <span>${today ? '🔴 TRẬN ĐẤU HÔM NAY' : fmtDateHeader(dateKey)}</span>
+ <span>${today ? 'TRẬN ĐẤU HÔM NAY' : fmtDateHeader(dateKey)}</span>
           <span>${evs.length} trận</span>
         </div>`;
 
@@ -291,7 +291,7 @@ async function loadMatchDetail(eventId, lg) {
     const data = await res.json();
     renderMatchDetail(container, data, lg);
   } catch (err) {
-    container.innerHTML = `<div class="error-msg" style="padding:10px 0;">⚠️ Lỗi tải chi tiết: ${err.message}</div>`;
+ container.innerHTML = `<div class="error-msg" style="padding:10px 0;">️ Lỗi tải chi tiết: ${err.message}</div>`;
   }
 }
 
@@ -347,7 +347,7 @@ function renderMatchDetail(el, data, lg) {
 
     statsHtml = statsList ? `
       <div class="fb-stats-container">
-        <div class="fb-detail-sec-title">📊 Thống kê trận đấu</div>
+ <div class="fb-detail-sec-title">Thống kê trận đấu</div>
         ${statsList}
       </div>` : '';
   }
@@ -361,10 +361,10 @@ function renderMatchDetail(el, data, lg) {
       const text = ev.text || '';
       const type = ev.type?.text || 'Sự kiện';
       
-      let icon = '⚽';
-      if (type.includes('Yellow')) icon = '🟨';
-      else if (type.includes('Red')) icon = '🟥';
-      else if (type.includes('Substitution')) icon = '🔄';
+ let icon = '';
+ if (type.includes('Yellow')) icon = '';
+ else if (type.includes('Red')) icon = '';
+ else if (type.includes('Substitution')) icon = '';
 
       // Skip event descriptions that are blank
       if (!text && !time) return '';
@@ -531,11 +531,11 @@ function renderMatchDetail(el, data, lg) {
     const saves = getVal('saves');
     
     const badges = [];
-    if (goals > 0) badges.push(`⚽${goals > 1 ? `x${goals}` : ''}`);
-    if (assists > 0) badges.push(`🅰️${assists > 1 ? `x${assists}` : ''}`);
-    if (rc > 0) badges.push('🟥');
-    else if (yc > 0) badges.push('🟨');
-    if (saves > 0 && player.position?.abbreviation === 'G') badges.push(`🧤${saves}`);
+ if (goals > 0) badges.push(`${goals > 1 ? `x${goals}` : ''}`);
+ if (assists > 0) badges.push(`️${assists > 1 ? `x${assists}` : ''}`);
+ if (rc > 0) badges.push('');
+ else if (yc > 0) badges.push('');
+ if (saves > 0 && player.position?.abbreviation === 'G') badges.push(`${saves}`);
     
     if (player.subbedIn) badges.push('⬆️');
     if (player.subbedOut) badges.push('⬇️');
@@ -565,7 +565,7 @@ function renderMatchDetail(el, data, lg) {
         : '';
 
       const isPOTM = potmPlayer && p.athlete?.id === potmPlayer.id;
-      const potmCrown = isPOTM ? '👑 ' : '';
+ const potmCrown = isPOTM ? '' : '';
       const potmStyle = isPOTM ? 'style="background: rgba(251, 191, 36, 0.06); border: 1px solid rgba(251, 191, 36, 0.2) !important;"' : '';
         
       return `
@@ -585,14 +585,14 @@ function renderMatchDetail(el, data, lg) {
     return `
       <div class="fb-roster-col">
         <h4 style="border-bottom: 2px solid ${side === 'home' ? 'var(--accent-blue)' : 'var(--accent-yellow)'}; padding-bottom: 6px; margin-bottom: 10px;">
-          ${side === 'home' ? '🏠 Chủ nhà' : '✈️ Khách'} (Sơ đồ: ${teamData.formation || 'N/A'})
+ ${side === 'home' ? 'Chủ nhà' : '️ Khách'} (Sơ đồ: ${teamData.formation || 'N/A'})
         </h4>
-        <div class="fb-roster-sub-title">🏃 Đá chính</div>
+ <div class="fb-roster-sub-title">Đá chính</div>
         <div class="fb-roster-list">
           ${starters.map(renderPlayer).join('')}
         </div>
         ${subs.length ? `
-          <div class="fb-roster-sub-title">🛋️ Dự bị</div>
+ <div class="fb-roster-sub-title">️ Dự bị</div>
           <div class="fb-roster-list">
             ${subs.map(renderPlayer).join('')}
           </div>
@@ -605,7 +605,7 @@ function renderMatchDetail(el, data, lg) {
   if (homeRosterHtml || awayRosterHtml) {
     rosterHtml = `
       <div class="fb-stats-container" style="margin-top: 14px;">
-        <div class="fb-detail-sec-title">🏃 Đội hình & Cầu thủ</div>
+ <div class="fb-detail-sec-title">Đội hình & Cầu thủ</div>
         <div class="fb-roster-grid">
           ${homeRosterHtml}
           ${awayRosterHtml}
@@ -657,11 +657,11 @@ function renderMatchDetail(el, data, lg) {
     scorersHtml = `
       <div class="fb-scorers-container">
         <div class="fb-scorers-col home-scorers">
-          ${homeGoals.map(g => `<div class="fb-scorer-item">⚽ ${g}</div>`).join('')}
+ ${homeGoals.map(g => `<div class="fb-scorer-item">${g}</div>`).join('')}
         </div>
         <div class="fb-scorers-divider"></div>
         <div class="fb-scorers-col away-scorers">
-          ${awayGoals.map(g => `<div class="fb-scorer-item">⚽ ${g}</div>`).join('')}
+ ${awayGoals.map(g => `<div class="fb-scorer-item">${g}</div>`).join('')}
         </div>
       </div>`;
   }
@@ -670,7 +670,7 @@ function renderMatchDetail(el, data, lg) {
   if (potmPlayer) {
     potmHtml = `
       <div class="fb-potm-container">
-        <span class="fb-potm-badge">👑 POTM</span>
+ <span class="fb-potm-badge">POTM</span>
         <span class="fb-potm-info">
           <strong>${potmPlayer.name}</strong> (${potmPlayer.teamName}) - 
           <span class="fb-potm-rating">${potmPlayer.rating}</span>
@@ -688,9 +688,9 @@ function renderMatchDetail(el, data, lg) {
 
   // 5. Info Card
   const info = data.gameInfo || {};
-  const ref = info.referee?.displayName ? ` · ⚖️ Trọng tài: ${info.referee.displayName}` : '';
+ const ref = info.referee?.displayName ? ` · ️ Trọng tài: ${info.referee.displayName}` : '';
   const venue = [info.venue?.fullName, info.venue?.address?.city].filter(Boolean).join(' - ');
-  const venueStr = venue ? `📍 Sân: ${venue}` : '';
+ const venueStr = venue ? `Sân: ${venue}` : '';
 
   el.innerHTML = `
     <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;padding:4px 0;">
@@ -712,7 +712,7 @@ function renderTable(el, data) {
   const children = data.children || [];
 
   if (!children.length) {
-    el.innerHTML = `<div class="fb-empty">📊 Hiện chưa có dữ liệu bảng xếp hạng.</div>`;
+ el.innerHTML = `<div class="fb-empty">Hiện chưa có dữ liệu bảng xếp hạng.</div>`;
     return;
   }
 
@@ -830,18 +830,18 @@ async function openTeamPanel(teamId, teamName, teamBadgeUrl) {
 
   inner.innerHTML = `
     <div class="fb-tp-header">
-      <button class="fb-tp-close" onclick="window._fbCloseTeam()">✕</button>
+ <button class="fb-tp-close" onclick="window._fbCloseTeam()"></button>
       <div class="fb-tp-hero">
         ${badge(teamBadgeUrl, 44)}
         <div>
           <div class="fb-tp-name">${teamName}</div>
-          <div class="fb-tp-meta" id="fbTeamMeta">🌍 Đang tải thông tin CLB...</div>
+ <div class="fb-tp-meta" id="fbTeamMeta">Đang tải thông tin CLB...</div>
         </div>
       </div>
     </div>
     <div class="fb-tp-desc" id="fbTeamDesc">Đang tải mô tả chi tiết...</div>
     <div class="fb-tp-section">
-      <div class="fb-tp-section-title">📅 Trận đấu gần đây & sắp tới</div>
+ <div class="fb-tp-section-title">Trận đấu gần đây & sắp tới</div>
       <div id="fbTeamSchedule" class="fb-loading">⏳ Đang tải lịch đấu CLB...</div>
     </div>`;
 
@@ -859,7 +859,7 @@ async function openTeamPanel(teamId, teamName, teamBadgeUrl) {
 
     renderTeamDetails(teamData, schedData, teamName);
   } catch (err) {
-    document.getElementById('fbTeamSchedule').innerHTML = `<div class="error-msg">⚠️ Lỗi tải: ${err.message}</div>`;
+ document.getElementById('fbTeamSchedule').innerHTML = `<div class="error-msg">️ Lỗi tải: ${err.message}</div>`;
   }
 }
 
@@ -870,7 +870,7 @@ function renderTeamDetails(teamData, schedData, teamName) {
   const schedEl = document.getElementById('fbTeamSchedule');
 
   if (metaEl) {
-    const location = team.venue?.fullName ? `🏟️ ${team.venue.fullName}` : 'Sân vận động';
+ const location = team.venue?.fullName ? `️ ${team.venue.fullName}` : 'Sân vận động';
     metaEl.innerHTML = `${location}`;
   }
 
@@ -938,7 +938,7 @@ function renderStats(el, data) {
   const statsList = data.stats || [];
 
   if (!statsList.length) {
-    el.innerHTML = `<div class="fb-empty">📊 Hiện chưa có dữ liệu thống kê cá nhân.</div>`;
+ el.innerHTML = `<div class="fb-empty">Hiện chưa có dữ liệu thống kê cá nhân.</div>`;
     return;
   }
 
@@ -989,8 +989,8 @@ function renderStats(el, data) {
 
   el.innerHTML = `
     <div class="fb-stats-grid">
-      ${renderCol('Vua phá lưới', '⚽', goalsData)}
-      ${renderCol('Vua kiến tạo', '🅰️', assistsData)}
+ ${renderCol('Vua phá lưới', '', goalsData)}
+ ${renderCol('Vua kiến tạo', '️', assistsData)}
     </div>`;
 }
 

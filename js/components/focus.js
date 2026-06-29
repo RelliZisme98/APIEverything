@@ -21,37 +21,37 @@ const SOUNDS = [
   {
     id: 'lofi',
     name: 'Lofi Hip-Hop',
-    emoji: '🎵',
+ emoji: '',
     url: 'https://stream.zeno.fm/f3wvbbqmdg8uv',
   },
   {
     id: 'rain',
     name: 'Tiếng Mưa',
-    emoji: '🌧️',
+ emoji: '️',
     url: 'https://www.soundjay.com/nature/sounds/rain-01.mp3',
   },
   {
     id: 'forest',
     name: 'Rừng Nhiệt Đới',
-    emoji: '🌿',
+ emoji: '',
     url: 'https://www.soundjay.com/nature/sounds/forest-1.mp3',
   },
   {
     id: 'cafe',
     name: 'Quán Cafe',
-    emoji: '☕',
+ emoji: '',
     url: 'https://stream.zeno.fm/yn65f92gzk8uv',
   },
   {
     id: 'ocean',
     name: 'Sóng Biển',
-    emoji: '🌊',
+ emoji: '',
     url: 'https://www.soundjay.com/nature/sounds/ocean-wave-1.mp3',
   },
   {
     id: 'white',
     name: 'White Noise',
-    emoji: '📻',
+ emoji: '',
     url: 'https://stream.zeno.fm/v06a2qmgzk8uv',
   },
 ];
@@ -71,14 +71,14 @@ const LOFI_TRACKS = [
 ];
 
 const TIPS = [
-  '💡 Tập trung vào một nhiệm vụ duy nhất trong mỗi Pomodoro.',
-  '🧠 Sau 4 Pomodoro, hãy nghỉ dài 15-30 phút để não phục hồi tốt nhất.',
-  '📵 Tắt thông báo điện thoại để không bị gián đoạn trong giờ tập trung.',
-  '💧 Uống nước trong giờ nghỉ ngắn để duy trì năng lượng nhận thức.',
-  '✍️ Viết ra nhiệm vụ cụ thể trước khi bắt đầu Pomodoro để tránh lan man.',
-  '🎯 Một Pomodoro tốt = một nhiệm vụ hoàn thành, không phải nhiều việc làm dở.',
-  '🌿 Nhìn ra cửa sổ hoặc nhắm mắt 20 giây trong giờ nghỉ để giảm mỏi mắt.',
-  '🚫 Nếu bị xao nhãng, ghi nhanh ý tưởng vào notepad rồi quay lại ngay.',
+ 'Tập trung vào một nhiệm vụ duy nhất trong mỗi Pomodoro.',
+ 'Sau 4 Pomodoro, hãy nghỉ dài 15-30 phút để não phục hồi tốt nhất.',
+ 'Tắt thông báo điện thoại để không bị gián đoạn trong giờ tập trung.',
+ 'Uống nước trong giờ nghỉ ngắn để duy trì năng lượng nhận thức.',
+ '️ Viết ra nhiệm vụ cụ thể trước khi bắt đầu Pomodoro để tránh lan man.',
+ 'Một Pomodoro tốt = một nhiệm vụ hoàn thành, không phải nhiều việc làm dở.',
+ 'Nhìn ra cửa sổ hoặc nhắm mắt 20 giây trong giờ nghỉ để giảm mỏi mắt.',
+ 'Nếu bị xao nhãng, ghi nhanh ý tưởng vào notepad rồi quay lại ngay.',
 ];
 
 // ── State ───────────────────────────────────────────────
@@ -122,7 +122,7 @@ export function renderFocus() {
   el.innerHTML = `
     <!-- Notification overlay -->
     <div class="focus-notify" id="focusNotify">
-      <span class="focus-notify-icon" id="focusNotifyIcon">🎉</span>
+ <span class="focus-notify-icon" id="focusNotifyIcon"></span>
       <span id="focusNotifyText">Phiên làm việc hoàn thành!</span>
     </div>
 
@@ -131,7 +131,7 @@ export function renderFocus() {
       <!-- ══ DIGITAL CLOCK ══ -->
       <div class="focus-clock-card" style="grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(99, 102, 241, 0.2); padding: 18px 28px; border-radius: 20px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.05); gap: 20px; flex-wrap: wrap;">
         <div style="display: flex; align-items: center; gap: 14px;">
-          <span style="font-size: 28px; line-height: 1;">🕰️</span>
+ <span style="font-size: 28px; line-height: 1;">️</span>
           <div>
             <div style="font-size: 11px; color: rgba(165, 180, 252, 0.7); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Giờ Hiện Tại</div>
             <div id="focus-current-date" style="font-size: 14px; color: var(--text-secondary); margin-top: 4px; font-weight: 500;">Đang tải ngày tháng...</div>
@@ -145,9 +145,9 @@ export function renderFocus() {
 
         <!-- Mode tabs -->
         <div class="pomodoro-modes">
-          <button class="pomodoro-mode-btn active" id="pomo-mode-work"    onclick="focusSwitchMode('work')">🎯 Làm Việc</button>
-          <button class="pomodoro-mode-btn"        id="pomo-mode-short"   onclick="focusSwitchMode('short')">☕ Nghỉ Ngắn</button>
-          <button class="pomodoro-mode-btn"        id="pomo-mode-long"    onclick="focusSwitchMode('long')">🌙 Nghỉ Dài</button>
+ <button class="pomodoro-mode-btn active" id="pomo-mode-work" onclick="focusSwitchMode('work')">Làm Việc</button>
+ <button class="pomodoro-mode-btn" id="pomo-mode-short" onclick="focusSwitchMode('short')">Nghỉ Ngắn</button>
+ <button class="pomodoro-mode-btn" id="pomo-mode-long" onclick="focusSwitchMode('long')">Nghỉ Dài</button>
         </div>
 
         <!-- SVG Ring Timer -->
@@ -185,7 +185,7 @@ export function renderFocus() {
         <!-- Controls -->
         <div class="pomodoro-controls">
           <button class="pomodoro-btn pomodoro-btn-secondary" id="pomoResetBtn"
-            onclick="focusReset()" title="Đặt lại">🔄</button>
+ onclick="focusReset()" title="Đặt lại"></button>
           <button class="pomodoro-btn pomodoro-btn-main" id="pomoPlayBtn"
             onclick="focusToggle()" title="Bắt đầu / Dừng">▶</button>
           <button class="pomodoro-btn pomodoro-btn-secondary" id="pomoSkipBtn"
@@ -201,7 +201,7 @@ export function renderFocus() {
         <div class="pomodoro-custom" style="display: flex; flex-direction: column; gap: 10px; width: 100%; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
           <!-- Work Duration Row -->
           <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-            <span style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); min-width: 90px; text-align: left;">🎯 Làm việc:</span>
+ <span style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); min-width: 90px; text-align: left;">Làm việc:</span>
             <div style="display: flex; align-items: center; gap: 6px;">
               <input type="number" id="customWorkHour" min="0" max="23" value="0" style="width: 55px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e2e8f0; padding: 6px; text-align: center; font-size: 13px; font-weight: 600;" onchange="focusUpdateDuration('work')" />
               <span style="font-size: 11px; color: var(--text-muted);">giờ</span>
@@ -211,7 +211,7 @@ export function renderFocus() {
           </div>
           <!-- Short Break Row -->
           <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-            <span style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); min-width: 90px; text-align: left;">☕ Nghỉ ngắn:</span>
+ <span style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); min-width: 90px; text-align: left;">Nghỉ ngắn:</span>
             <div style="display: flex; align-items: center; gap: 6px;">
               <input type="number" id="customShortHour" min="0" max="23" value="0" style="width: 55px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e2e8f0; padding: 6px; text-align: center; font-size: 13px; font-weight: 600;" onchange="focusUpdateDuration('short')" />
               <span style="font-size: 11px; color: var(--text-muted);">giờ</span>
@@ -221,7 +221,7 @@ export function renderFocus() {
           </div>
           <!-- Long Break Row -->
           <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-            <span style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); min-width: 90px; text-align: left;">🌙 Nghỉ dài:</span>
+ <span style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); min-width: 90px; text-align: left;">Nghỉ dài:</span>
             <div style="display: flex; align-items: center; gap: 6px;">
               <input type="number" id="customLongHour" min="0" max="23" value="0" style="width: 55px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e2e8f0; padding: 6px; text-align: center; font-size: 13px; font-weight: 600;" onchange="focusUpdateDuration('long')" />
               <span style="font-size: 11px; color: var(--text-muted);">giờ</span>
@@ -234,7 +234,7 @@ export function renderFocus() {
 
       <!-- ══ AMBIENT SOUND CARD ══ -->
       <div class="ambient-card">
-        <div class="ambient-title">🎧 Âm Thanh Xung Quanh</div>
+ <div class="ambient-title">Âm Thanh Xung Quanh</div>
 
         <div class="ambient-sounds">
           ${SOUNDS.map(s => `
@@ -249,7 +249,7 @@ export function renderFocus() {
         <!-- Lofi Music Player (Only visible when Lofi is playing) -->
         <div id="lofiPlayer" class="lofi-player" style="display: none; align-items: center; justify-content: space-between; margin-top: 15px; padding: 12px 16px; background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.1); border-radius: 12px; font-size: 13px;">
           <div style="display: flex; align-items: center; gap: 10px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 80%;">
-            <span style="font-size: 16px; display: inline-block; animation: pomoSpin 4s linear infinite;">🎵</span>
+ <span style="font-size: 16px; display: inline-block; animation: pomoSpin 4s linear infinite;"></span>
             <span id="lofiTrackTitle" style="font-weight: 600; color: #a5b4fc; overflow: hidden; text-overflow: ellipsis;">Đang tải nhạc...</span>
           </div>
           <button onclick="focusLofiNext()" style="background: none; border: none; color: rgba(255,255,255,0.7); cursor: pointer; font-size: 18px; padding: 4px; display: flex; align-items: center; justify-content: center; transition: color 0.2s; outline: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.7)'" title="Bài tiếp theo">⏭️</button>
@@ -257,10 +257,10 @@ export function renderFocus() {
 
         <!-- Volume -->
         <div class="ambient-volume">
-          <span class="ambient-volume-icon">🔈</span>
+ <span class="ambient-volume-icon"></span>
           <input type="range" id="ambientVolume" min="0" max="100" value="40"
             oninput="focusSetVolume(this.value)" title="Âm lượng">
-          <span class="ambient-volume-icon">🔊</span>
+ <span class="ambient-volume-icon"></span>
         </div>
 
         <!-- Daily tip -->
@@ -459,16 +459,16 @@ function onSessionEnd() {
     updateDotsDisplay();
     if (completedSessions === 0) {
       nextMode = 'long';
-      notifyIcon = '🌙';
-      notifyText = '🎉 Hoàn thành 4 Pomodoro! Đã đến giờ nghỉ dài 15 phút.';
+ notifyIcon = '';
+ notifyText = 'Hoàn thành 4 Pomodoro! Đã đến giờ nghỉ dài 15 phút.';
     } else {
       nextMode = 'short';
-      notifyIcon = '☕';
-      notifyText = `✅ Phiên làm việc hoàn thành! Hãy nghỉ ngắn 5 phút.`;
+ notifyIcon = '';
+ notifyText = `Phiên làm việc hoàn thành! Hãy nghỉ ngắn 5 phút.`;
     }
   } else {
     nextMode = 'work';
-    notifyIcon = '🎯';
+ notifyIcon = '';
     notifyText = '⏰ Hết giờ nghỉ! Sẵn sàng cho phiên tập trung tiếp theo?';
   }
 

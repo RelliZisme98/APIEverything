@@ -308,7 +308,7 @@
 
 /* 4. Bubble Tooltip & Prominence */
 .ai-bubble::after {
-  content: "Hỏi Trợ Lý AI 🤖";
+ content: "Hỏi Trợ Lý AI ";
   position: absolute;
   right: 70px;
   top: 50%;

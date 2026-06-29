@@ -12,29 +12,34 @@ html, body {
 }
 
 /* ── Hamburger button ───────────────────────────────────────── */
+/* ── Hamburger button ───────────────────────────────────────── */
 .sidebar-toggle {
   display: none;
   position: fixed;
-  top: 12px;
-  left: 12px;
+  top: 14px;
+  left: 14px;
   z-index: 99999;
-  background: rgba(13, 20, 36, 0.92);
-  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(11, 15, 25, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--text-primary);
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border-radius: 12px;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 20px;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 2px 16px rgba(0,0,0,0.4);
-  transition: all .2s;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s var(--ease-out);
 }
 .sidebar-toggle:hover {
-  background: rgba(96,165,250,0.15);
-  border-color: rgba(96,165,250,0.3);
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+.sidebar-toggle:active {
+  transform: scale(0.92);
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -42,29 +47,27 @@ html, body {
    ══════════════════════════════════════════════════════════════ */
 @media (max-width: 900px) {
 
-  /* FIX: .app-shell has z-index:1 which creates a stacking context.
-     Overlay (z-index:90) is OUTSIDE app-shell so it beats the sidebar
-     (z-index:150) which is INSIDE app-shell regardless of its z-index value.
-     Reset app-shell stacking context on mobile so sidebar competes globally. */
+  /* FIX: .app-shell has z-index:1 which creates a stacking context. */
   .app-shell {
     z-index: auto !important;
     position: static !important;
   }
 
-  /* Sidebar: slide-in drawer with SOLID background */
+  /* Sidebar: slide-in drawer with modern glassmorphism */
   .sidebar {
     position: fixed;
-    left: -260px;
+    left: -270px;
     top: 0;
     height: 100vh;
-    width: 250px;
-    min-width: 250px;
-    background: #0d1424 !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    transition: left 0.28s cubic-bezier(.4,0,.2,1);
+    width: 260px;
+    min-width: 260px;
+    background: rgba(11, 15, 25, 0.96) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     z-index: 9999 !important;
-    box-shadow: 4px 0 40px rgba(0,0,0,0.7);
+    box-shadow: 10px 0 40px rgba(0,0,0,0.5);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
   }
   .sidebar.open { left: 0; }
   .sidebar-overlay {
@@ -73,14 +76,18 @@ html, body {
   .sidebar-overlay.visible { display: block; }
   .sidebar-toggle { display: flex; }
 
-  /* Content: full width */
+  /* Content: full width with better padding */
   .content-section {
-    padding: 60px 14px 24px;  /* top: leave room for hamburger */
+    padding: 76px 16px 32px;  /* top: leave room for hamburger */
+  }
+
+  .card {
+    padding: 18px; /* Tighter padding on tablet/mobile */
   }
 
   .page-title {
-    font-size: 18px;
-    margin-bottom: 16px;
+    font-size: 20px;
+    margin-bottom: 20px;
   }
 
   /* Ticker: hide on very small */
@@ -123,18 +130,20 @@ html, body {
   .wf-row { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
   /* Footer: smaller */
-  footer { font-size: 11px; padding: 16px 14px; }
+  footer { font-size: 11px; padding: 24px 16px; }
 }
 
-/* ══════════════════════════════════════════════════════════════
-   PHONE (≤ 600px)
-   ══════════════════════════════════════════════════════════════ */
+/* ── Phone (≤ 600px) ────────────────────────────────────────── */
 @media (max-width: 600px) {
 
-  .content-section { padding: 56px 12px 20px; }
+  .content-section { padding: 72px 14px 24px; }
 
-  .page-title { font-size: 16px; gap: 8px; }
-  .page-title .page-icon { font-size: 18px; }
+  .card {
+    padding: 16px; /* Even tighter padding on phones */
+  }
+
+  .page-title { font-size: 18px; gap: 10px; }
+  .page-title .page-icon { font-size: 20px; }
 
   /* Crypto: 2 cols still ok */
   .crypto-grid { grid-template-columns: repeat(2, 1fr) !important; }
@@ -206,7 +215,7 @@ html, body {
   /* Sidebar sections */
   .sidebar-logo-text { font-size: 16px; }
   .sidebar-clock-time { font-size: 18px; }
-  .sidebar-nav-item { font-size: 12px; padding: 8px 10px; }
+  .sidebar-nav-item { font-size: 12.5px; padding: 9px 12px 9px 14px; }
 
   /* Card header badge: shrink */
   .card-badge { font-size: 9px; padding: 2px 6px; }
@@ -248,7 +257,7 @@ html, body {
 /* ── Touch improvements ─────────────────────────────────────── */
 @media (hover: none) {
   /* Bigger tap targets */
-  .sidebar-nav-item { padding: 11px 12px; }
+  .sidebar-nav-item { padding: 10px 12px 10px 14px; }
   .lot-chip         { padding: 8px 14px; }
   .news-tab         { padding: 8px 14px; }
   .sw-btn           { min-height: 40px; }

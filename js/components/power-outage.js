@@ -30,28 +30,28 @@ function todayLabel() {
 const EVN_REGIONS = [
   {
     key: 'hanoi', short: 'Hà Nội', label: 'EVNHANOI – Hà Nội',
-    icon: '🏙️', color: '#60a5fa', hotline: '1900 1288', format: 'json',
+ icon: '️', color: '#60a5fa', hotline: '1900 1288', format: 'json',
     noAutoLoad: true,
     officialUrl: () => `https://evnhanoi.vn/search/power-cut`,
     note: 'API yêu cầu xác thực — tra cứu trực tiếp trên trang chính thức',
   },
   {
     key: 'npc', short: 'Miền Bắc', label: 'EVNNPC – Miền Bắc (27 tỉnh)',
-    icon: '🏔️', color: '#a78bfa', hotline: '1900 6769', format: 'html',
+ icon: '️', color: '#a78bfa', hotline: '1900 6769', format: 'html',
     noAutoLoad: true,
     officialUrl: () => `https://cskh.npc.com.vn/TraCuu/TraCuuLichNgungGiamCungCapDien`,
     note: 'API không phản hồi ổn định — tra cứu trực tiếp trên trang chính thức',
   },
   {
     key: 'cpc', short: 'Miền Trung', label: 'EVNCPC – Miền Trung & Tây Nguyên',
-    icon: '🌊', color: '#fbbf24', hotline: '1900 1909', format: 'json',
+ icon: '', color: '#fbbf24', hotline: '1900 1909', format: 'json',
     noAutoLoad: true,
     officialUrl: () => `https://cskh.cpc.vn/tra-cuu/lich-tam-ngung-cung-cap-dien/khu-vuc`,
     note: 'API không phản hồi ổn định — tra cứu trực tiếp trên trang chính thức',
   },
   {
     key: 'spc', short: 'Miền Nam', label: 'EVNSPC – Miền Nam (21 tỉnh)',
-    icon: '🌴', color: '#34d399', hotline: '1900 1006', format: 'html',
+ icon: '', color: '#34d399', hotline: '1900 1006', format: 'html',
     noAutoLoad: false,
     officialUrl: () => `https://cskh.evnspc.vn/TraCuu/LichNgungGiamCungCapDien`,
     note: null,
@@ -109,11 +109,11 @@ function renderJsonCard(it, color) {
   const badge    = status ? `<span class="po-status-badge" style="background:${isActive ? 'rgba(239,68,68,0.15)' : 'rgba(34,197,94,0.15)'};color:${isActive ? '#f87171' : '#4ade80'}">${status}</span>` : '';
   const time     = timeInfo || (timeFrom ? `${timeFrom}${timeTo ? ' → ' + timeTo : ''}` : '');
   return `<div class="po-card" style="border-left-color:${color}">
-    <div class="po-card-header"><span class="po-card-area">⚡ ${area}</span>${badge}</div>
-    ${ngay ? `<div class="po-card-meta">📅 ${ngay}</div>` : ''}
-    ${district && district !== area ? `<div class="po-card-meta">📍 ${district}</div>` : ''}
-    ${time ? `<div class="po-card-time">🕐 ${time}</div>` : ''}
-    ${reason ? `<div class="po-card-reason">📋 ${reason}</div>` : ''}
+ <div class="po-card-header"><span class="po-card-area">${area}</span>${badge}</div>
+ ${ngay ? `<div class="po-card-meta">${ngay}</div>` : ''}
+ ${district && district !== area ? `<div class="po-card-meta">${district}</div>` : ''}
+ ${time ? `<div class="po-card-time">${time}</div>` : ''}
+ ${reason ? `<div class="po-card-reason">${reason}</div>` : ''}
   </div>`;
 }
 
@@ -122,10 +122,10 @@ function renderHtmlCard(item, color) {
   const [col0, col1, col2, col3, col4] = item._raw || [];
   if (!col0) return '';
   return `<div class="po-card" style="border-left-color:${color}">
-    <div class="po-card-header"><span class="po-card-area">⚡ ${col0}</span></div>
-    ${(col1 || col2) ? `<div class="po-card-time">🕐 ${col1 || ''}${col2 ? ' → ' + col2 : ''}</div>` : ''}
-    ${col3 ? `<div class="po-card-meta">📍 ${col3}</div>` : ''}
-    ${col4 ? `<div class="po-card-reason">📋 ${col4}</div>` : ''}
+ <div class="po-card-header"><span class="po-card-area">${col0}</span></div>
+ ${(col1 || col2) ? `<div class="po-card-time">${col1 || ''}${col2 ? ' → ' + col2 : ''}</div>` : ''}
+ ${col3 ? `<div class="po-card-meta">${col3}</div>` : ''}
+ ${col4 ? `<div class="po-card-reason">${col4}</div>` : ''}
   </div>`;
 }
 
@@ -137,7 +137,7 @@ function renderOfficialBlock(region) {
         <span class="po-official-note">ℹ️ ${region.note}</span>
       </div>
       <a href="${region.officialUrl()}" target="_blank" rel="noopener" class="po-official-btn" style="background:${region.color}22;border-color:${region.color}44;color:${region.color}">
-        🔍 Tra cứu lịch cúp điện hôm nay ↗
+ Tra cứu lịch cúp điện hôm nay ↗
       </a>
     </div>`;
 }
@@ -172,7 +172,7 @@ async function loadRegionToday(region) {
 
     if (!items.length) {
       bodyEl.innerHTML = `
-        <div class="po-empty">✅ Không có lịch cúp điện hôm nay tại vùng này.</div>
+ <div class="po-empty">Không có lịch cúp điện hôm nay tại vùng này.</div>
         <div style="margin-top:8px;text-align:center">
           <a href="${region.officialUrl()}" target="_blank" rel="noopener" class="po-official-link">Xác nhận trên trang chính thức ↗</a>
         </div>`;
@@ -185,7 +185,7 @@ async function loadRegionToday(region) {
   } catch (err) {
     if (badgeEl) { badgeEl.textContent = 'Lỗi'; badgeEl.style.color = '#f87171'; badgeEl.style.background = 'rgba(248,113,113,0.1)'; }
     bodyEl.innerHTML = `
-      <div class="po-error">⚠️ Không thể tải tự động: ${err.message}</div>
+ <div class="po-error">️ Không thể tải tự động: ${err.message}</div>
       ${renderOfficialBlock(region)}`;
   }
 }

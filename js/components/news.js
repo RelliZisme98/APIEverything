@@ -12,7 +12,7 @@ export async function renderNews(containerId = 'newsContent', isSilent = false) 
   if (!el) return;
 
   if (!isSilent) {
-    el.innerHTML = `<div class="news-loading">📰 Đang tải tin tức...</div>`;
+    el.innerHTML = `<div class="news-loading">Đang tải tin tức...</div>`;
   }
 
   // Source tabs
@@ -38,7 +38,7 @@ export async function renderNews(containerId = 'newsContent', isSilent = false) 
     if (!articles.length) {
       el.innerHTML = `
         <div class="news-tabs">${tabs()}</div>
-        <div class="error-msg">⚠️ Không tải được tin tức. Vui lòng kiểm tra lại kết nối mạng hoặc thử lại sau.</div>`;
+ <div class="error-msg">️ Không tải được tin tức. Vui lòng kiểm tra lại kết nối mạng hoặc thử lại sau.</div>`;
       return;
     }
 
@@ -54,7 +54,7 @@ export async function renderNews(containerId = 'newsContent', isSilent = false) 
           </div>
           <div class="news-title">${a.title}</div>
           ${i === 0 && a.desc ? `<div class="news-desc">${a.desc}</div>` : ''}
-          <div class="news-meta">🕒 ${relativeTime(a.pubDate)}</div>
+          <div class="news-meta">${relativeTime(a.pubDate)}</div>
         </div>
       </div>
     `).join('');
@@ -73,7 +73,7 @@ export async function renderNews(containerId = 'newsContent', isSilent = false) 
     _ensureReaderDOM();
 
   } catch (err) {
-    el.innerHTML = `<div class="news-tabs">${tabs()}</div><div class="error-msg">⚠️ ${err.message}</div>`;
+ el.innerHTML = `<div class="news-tabs">${tabs()}</div><div class="error-msg">️ ${err.message}</div>`;
   }
 }
 
@@ -91,7 +91,7 @@ function _ensureReaderDOM() {
           <a id="nrOpenLink" href="#" target="_blank" rel="noopener" class="nr-open-btn" title="Mở trang gốc">
             ↗ Trang gốc
           </a>
-          <button class="nr-close-btn" onclick="window.closeNewsReader()" title="Đóng">✕</button>
+ <button class="nr-close-btn" onclick="window.closeNewsReader()" title="Đóng"></button>
         </div>
       </div>
       <div class="nr-body">
@@ -118,7 +118,7 @@ window.openNewsArticle = async (idx) => {
   document.getElementById('nrMeta').textContent    = relativeTime(article.pubDate);
   document.getElementById('nrOpenLink').href       = article.link;
   document.getElementById('nrContent').innerHTML   =
-    `<div class="nr-loading">⏳ Đang tải nội dung bài viết...</div>`;
+    `<div class="nr-loading">Đang tải nội dung bài viết...</div>`;
 
   if (article.img) {
     document.getElementById('nrThumb').style.backgroundImage = `url('${article.img}')`;

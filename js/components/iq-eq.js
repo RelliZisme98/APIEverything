@@ -38,7 +38,7 @@ function showError(container, text, retryFn) {
     <div class="iqeq-wrapper">
       <div class="iqeq-screen active">
         <div class="iqeq-intro-card" style="text-align: center; border-color: rgba(239, 68, 68, 0.3);">
-          <div style="font-size: 40px; margin-bottom: 15px;">❌</div>
+ <div style="font-size: 40px; margin-bottom: 15px;"></div>
           <div class="iqeq-intro-title" style="color: #ef4444;">Đã xảy ra lỗi</div>
           <div class="iqeq-intro-desc" style="margin-bottom: 20px;">${text}</div>
           <button class="btn-primary" id="iqeq-btn-retry" style="background:#ef4444; border-color:#ef4444;">Thử lại</button>
@@ -139,7 +139,7 @@ export function renderIQ(containerId = 'iqContent') {
       <!-- Màn hình nhập thông tin & miễn trừ trách nhiệm -->
       <div class="iqeq-screen active" id="iq-scr-intro">
         <div class="iqeq-intro-card">
-          <div class="iqeq-intro-icon">🧠</div>
+ <div class="iqeq-intro-icon"></div>
           <div>
             <div class="iqeq-intro-title">Bài Kiểm Tra Trí Tuệ (IQ Test)</div>
             <div class="iqeq-intro-desc">
@@ -161,7 +161,7 @@ export function renderIQ(containerId = 'iqContent') {
         </div>
 
         <div class="iqeq-disclaimer-box">
-          <div class="iqeq-disclaimer-title">⚠️ MIỄN TRỪ TRÁCH NHIỆM</div>
+ <div class="iqeq-disclaimer-title">️ MIỄN TRỪ TRÁCH NHIỆM</div>
           <div class="iqeq-disclaimer-body">
             Bài kiểm tra này chỉ mang tính chất <strong>tham khảo và giải trí</strong>. Kết quả trắc nghiệm không có giá trị học thuật hay chẩn đoán chính thức được cấp phép bởi bất kỳ cơ sở y tế hay hiệp hội khoa học nào. Chúng tôi không chịu bất cứ trách nhiệm nào đối với những suy diễn hay hành vi phát sinh từ kết quả của bạn.
           </div>
@@ -240,15 +240,15 @@ export function renderIQ(containerId = 'iqContent') {
         </div>
 
         <div class="iqeq-analysis-box" style="margin-top: 20px;">
-          <div class="iqeq-analysis-title">📋 NHẬN XÉT CHI TIẾT</div>
+ <div class="iqeq-analysis-title">NHẬN XÉT CHI TIẾT</div>
           <div class="iqeq-analysis-text" id="iq-res-desc">Đang phân tích dữ liệu...</div>
         </div>
 
         <div class="iqeq-analysis-box" style="margin-top: 20px;">
-          <div class="iqeq-analysis-title" style="color: #60a5fa;">📊 THANG ĐIỂM IQ & PHÂN PHỐI DÂN SỐ</div>
+ <div class="iqeq-analysis-title" style="color: #60a5fa;">THANG ĐIỂM IQ & PHÂN PHỐI DÂN SỐ</div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 13px;">
             <div style="background: rgba(255,255,255,0.015); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); line-height: 1.5;">
-              <strong style="color: #60a5fa;">🎯 Thang điểm IQ chuẩn:</strong>
+ <strong style="color: #60a5fa;">Thang điểm IQ chuẩn:</strong>
               <div style="margin-top: 6px; color: var(--text-secondary);">
                 • <strong>Trên 130</strong>: Xuất chúng (Top 2% dân số)<br>
                 • <strong>115 - 129</strong>: Trí tuệ cao (Top 13.5% dân số)<br>
@@ -257,7 +257,7 @@ export function renderIQ(containerId = 'iqContent') {
               </div>
             </div>
             <div style="background: rgba(255,255,255,0.015); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); line-height: 1.5;">
-              <strong style="color: #60a5fa;">💡 Ý nghĩa kết quả IQ:</strong>
+ <strong style="color: #60a5fa;">Ý nghĩa kết quả IQ:</strong>
               <div style="margin-top: 6px; color: var(--text-secondary);">
                 Điểm số được tính toán dựa trên khả năng giải quyết 25 câu hỏi thuộc 3 mức độ khó tăng dần (Dễ, Trung bình, Khó) tương ứng với các kỹ năng logic, toán học và hình học không gian.
               </div>
@@ -410,7 +410,7 @@ function loadIQQuestion() {
   document.getElementById('iq-btn-prev').style.visibility = activeState.currIdx === 0 ? 'hidden' : 'visible';
   const nextBtn = document.getElementById('iq-btn-next');
   if (activeState.currIdx === activeState.limitQuestions - 1) {
-    nextBtn.textContent = 'Nộp bài thi ➔';
+ nextBtn.textContent = 'Nộp bài thi ';
   } else {
     nextBtn.textContent = 'Câu tiếp theo ▶';
   }
@@ -541,7 +541,7 @@ export function renderEQ(containerId = 'eqContent') {
       <!-- Màn hình nhập thông tin & miễn trừ trách nhiệm -->
       <div class="iqeq-screen active" id="eq-scr-intro">
         <div class="iqeq-intro-card">
-          <div class="iqeq-intro-icon">❤️</div>
+ <div class="iqeq-intro-icon">️</div>
           <div>
             <div class="iqeq-intro-title">Bài Kiểm Tra Trí Tuệ Cảm Xúc (EQ Test)</div>
             <div class="iqeq-intro-desc">
@@ -563,7 +563,7 @@ export function renderEQ(containerId = 'eqContent') {
         </div>
 
         <div class="iqeq-disclaimer-box">
-          <div class="iqeq-disclaimer-title">⚠️ MIỄN TRỪ TRÁCH NHIỆM</div>
+ <div class="iqeq-disclaimer-title">️ MIỄN TRỪ TRÁCH NHIỆM</div>
           <div class="iqeq-disclaimer-body">
             Bài kiểm tra này chỉ mang tính chất <strong>tham khảo và giải trí</strong>. Kết quả trắc nghiệm không có giá trị học thuật hay chẩn đoán chính thức được cấp phép bởi bất kỳ cơ sở y tế hay hiệp hội khoa học nào. Chúng tôi không chịu bất cứ trách nhiệm nào đối với những suy diễn hay hành vi phát sinh từ kết quả của bạn.
           </div>
@@ -652,27 +652,27 @@ export function renderEQ(containerId = 'eqContent') {
         </div>
 
         <div class="iqeq-analysis-box" style="margin-top: 20px;">
-          <div class="iqeq-analysis-title">📋 NHẬN XÉT CHI TIẾT</div>
+ <div class="iqeq-analysis-title">NHẬN XÉT CHI TIẾT</div>
           <div class="iqeq-analysis-text" id="eq-res-desc">Đang phân tích dữ liệu...</div>
         </div>
 
         <div class="iqeq-analysis-box" style="margin-top: 20px;">
-          <div class="iqeq-analysis-title" style="color: #34d399;">📊 GIẢI THÍCH CHI TIẾT KHÍA CẠNH EQ</div>
+ <div class="iqeq-analysis-title" style="color: #34d399;">GIẢI THÍCH CHI TIẾT KHÍA CẠNH EQ</div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 13px;">
             <div style="background: rgba(255,255,255,0.015); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
-              <strong style="color: #818cf8;">🧠 Thấu cảm (Empathy):</strong>
+ <strong style="color: #818cf8;">Thấu cảm (Empathy):</strong>
               <p style="margin: 4px 0 0; color: var(--text-secondary); line-height: 1.5;">Khả năng cảm nhận và thấu hiểu cảm xúc, nhu cầu và quan điểm của người khác. Điểm cao thể hiện sự tinh tế và lắng nghe tốt.</p>
             </div>
             <div style="background: rgba(255,255,255,0.015); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
-              <strong style="color: #34d399;">⚡ Tự điều chỉnh (Self-Regulation):</strong>
+ <strong style="color: #34d399;">Tự điều chỉnh (Self-Regulation):</strong>
               <p style="margin: 4px 0 0; color: var(--text-secondary); line-height: 1.5;">Khả năng kiểm soát các cơn bốc đồng, làm chủ cảm xúc khi căng thẳng và thích ứng nhanh với môi trường thay đổi.</p>
             </div>
             <div style="background: rgba(255,255,255,0.015); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
-              <strong style="color: #f472b6;">🤝 Kỹ năng xã hội (Social Skills):</strong>
+ <strong style="color: #f472b6;">Kỹ năng xã hội (Social Skills):</strong>
               <p style="margin: 4px 0 0; color: var(--text-secondary); line-height: 1.5;">Khả năng xây dựng mối quan hệ xã hội tốt đẹp, làm việc nhóm, đàm phán thuyết phục và khéo léo xử lý xung đột.</p>
             </div>
             <div style="background: rgba(255,255,255,0.015); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
-              <strong style="color: #fbbf24;">🔍 Tự nhận thức (Self-Awareness):</strong>
+ <strong style="color: #fbbf24;">Tự nhận thức (Self-Awareness):</strong>
               <p style="margin: 4px 0 0; color: var(--text-secondary); line-height: 1.5;">Khả năng tự hiểu rõ ưu khuyết điểm, nhu cầu cảm xúc và động lực cá nhân để đưa ra các quyết định hành vi sáng suốt.</p>
             </div>
           </div>

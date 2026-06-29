@@ -7,92 +7,92 @@ import { renderTimezoneConverter } from './converter.js';
 // ── Full timezone database ──────────────────────────────────────────
 const ALL_TIMEZONES = [
   // ── Đông Nam Á ──
-  { city: 'Hà Nội',         zone: 'Asia/Ho_Chi_Minh',  flag: '🇻🇳', utc: '+7',  region: 'Đông Nam Á' },
-  { city: 'TP. Hồ Chí Minh',zone: 'Asia/Ho_Chi_Minh',  flag: '🇻🇳', utc: '+7',  region: 'Đông Nam Á' },
-  { city: 'Bangkok',        zone: 'Asia/Bangkok',       flag: '🇹🇭', utc: '+7',  region: 'Đông Nam Á' },
-  { city: 'Singapore',      zone: 'Asia/Singapore',     flag: '🇸🇬', utc: '+8',  region: 'Đông Nam Á' },
-  { city: 'Kuala Lumpur',   zone: 'Asia/Kuala_Lumpur',  flag: '🇲🇾', utc: '+8',  region: 'Đông Nam Á' },
-  { city: 'Jakarta',        zone: 'Asia/Jakarta',       flag: '🇮🇩', utc: '+7',  region: 'Đông Nam Á' },
-  { city: 'Manila',         zone: 'Asia/Manila',        flag: '🇵🇭', utc: '+8',  region: 'Đông Nam Á' },
-  { city: 'Phnom Penh',     zone: 'Asia/Phnom_Penh',    flag: '🇰🇭', utc: '+7',  region: 'Đông Nam Á' },
-  { city: 'Yangon',         zone: 'Asia/Rangoon',       flag: '🇲🇲', utc: '+6:30',region: 'Đông Nam Á' },
-  { city: 'Vientiane',      zone: 'Asia/Vientiane',     flag: '🇱🇦', utc: '+7',  region: 'Đông Nam Á' },
+ { city: 'Hà Nội', zone: 'Asia/Ho_Chi_Minh', flag: '', utc: '+7', region: 'Đông Nam Á' },
+ { city: 'TP. Hồ Chí Minh',zone: 'Asia/Ho_Chi_Minh', flag: '', utc: '+7', region: 'Đông Nam Á' },
+ { city: 'Bangkok', zone: 'Asia/Bangkok', flag: '', utc: '+7', region: 'Đông Nam Á' },
+ { city: 'Singapore', zone: 'Asia/Singapore', flag: '', utc: '+8', region: 'Đông Nam Á' },
+ { city: 'Kuala Lumpur', zone: 'Asia/Kuala_Lumpur', flag: '', utc: '+8', region: 'Đông Nam Á' },
+ { city: 'Jakarta', zone: 'Asia/Jakarta', flag: '', utc: '+7', region: 'Đông Nam Á' },
+ { city: 'Manila', zone: 'Asia/Manila', flag: '', utc: '+8', region: 'Đông Nam Á' },
+ { city: 'Phnom Penh', zone: 'Asia/Phnom_Penh', flag: '', utc: '+7', region: 'Đông Nam Á' },
+ { city: 'Yangon', zone: 'Asia/Rangoon', flag: '', utc: '+6:30',region: 'Đông Nam Á' },
+ { city: 'Vientiane', zone: 'Asia/Vientiane', flag: '', utc: '+7', region: 'Đông Nam Á' },
 
   // ── Đông Á ──
-  { city: 'Tokyo',          zone: 'Asia/Tokyo',         flag: '🇯🇵', utc: '+9',  region: 'Đông Á' },
-  { city: 'Seoul',          zone: 'Asia/Seoul',         flag: '🇰🇷', utc: '+9',  region: 'Đông Á' },
-  { city: 'Bắc Kinh',       zone: 'Asia/Shanghai',      flag: '🇨🇳', utc: '+8',  region: 'Đông Á' },
-  { city: 'Thượng Hải',     zone: 'Asia/Shanghai',      flag: '🇨🇳', utc: '+8',  region: 'Đông Á' },
-  { city: 'Hồng Kông',      zone: 'Asia/Hong_Kong',     flag: '🇭🇰', utc: '+8',  region: 'Đông Á' },
-  { city: 'Đài Bắc',        zone: 'Asia/Taipei',        flag: '🇹🇼', utc: '+8',  region: 'Đông Á' },
-  { city: 'Ulaanbaatar',    zone: 'Asia/Ulaanbaatar',   flag: '🇲🇳', utc: '+8',  region: 'Đông Á' },
+ { city: 'Tokyo', zone: 'Asia/Tokyo', flag: '', utc: '+9', region: 'Đông Á' },
+ { city: 'Seoul', zone: 'Asia/Seoul', flag: '', utc: '+9', region: 'Đông Á' },
+ { city: 'Bắc Kinh', zone: 'Asia/Shanghai', flag: '', utc: '+8', region: 'Đông Á' },
+ { city: 'Thượng Hải', zone: 'Asia/Shanghai', flag: '', utc: '+8', region: 'Đông Á' },
+ { city: 'Hồng Kông', zone: 'Asia/Hong_Kong', flag: '', utc: '+8', region: 'Đông Á' },
+ { city: 'Đài Bắc', zone: 'Asia/Taipei', flag: '', utc: '+8', region: 'Đông Á' },
+ { city: 'Ulaanbaatar', zone: 'Asia/Ulaanbaatar', flag: '', utc: '+8', region: 'Đông Á' },
 
   // ── Nam Á ──
-  { city: 'New Delhi',      zone: 'Asia/Kolkata',       flag: '🇮🇳', utc: '+5:30',region: 'Nam Á' },
-  { city: 'Mumbai',         zone: 'Asia/Kolkata',       flag: '🇮🇳', utc: '+5:30',region: 'Nam Á' },
-  { city: 'Karachi',        zone: 'Asia/Karachi',       flag: '🇵🇰', utc: '+5',  region: 'Nam Á' },
-  { city: 'Dhaka',          zone: 'Asia/Dhaka',         flag: '🇧🇩', utc: '+6',  region: 'Nam Á' },
-  { city: 'Colombo',        zone: 'Asia/Colombo',       flag: '🇱🇰', utc: '+5:30',region: 'Nam Á' },
-  { city: 'Kathmandu',      zone: 'Asia/Kathmandu',     flag: '🇳🇵', utc: '+5:45',region: 'Nam Á' },
+ { city: 'New Delhi', zone: 'Asia/Kolkata', flag: '', utc: '+5:30',region: 'Nam Á' },
+ { city: 'Mumbai', zone: 'Asia/Kolkata', flag: '', utc: '+5:30',region: 'Nam Á' },
+ { city: 'Karachi', zone: 'Asia/Karachi', flag: '', utc: '+5', region: 'Nam Á' },
+ { city: 'Dhaka', zone: 'Asia/Dhaka', flag: '', utc: '+6', region: 'Nam Á' },
+ { city: 'Colombo', zone: 'Asia/Colombo', flag: '', utc: '+5:30',region: 'Nam Á' },
+ { city: 'Kathmandu', zone: 'Asia/Kathmandu', flag: '', utc: '+5:45',region: 'Nam Á' },
 
   // ── Trung Đông ──
-  { city: 'Dubai',          zone: 'Asia/Dubai',         flag: '🇦🇪', utc: '+4',  region: 'Trung Đông' },
-  { city: 'Riyadh',         zone: 'Asia/Riyadh',        flag: '🇸🇦', utc: '+3',  region: 'Trung Đông' },
-  { city: 'Tehran',         zone: 'Asia/Tehran',        flag: '🇮🇷', utc: '+3:30',region: 'Trung Đông' },
-  { city: 'Istanbul',       zone: 'Europe/Istanbul',    flag: '🇹🇷', utc: '+3',  region: 'Trung Đông' },
-  { city: 'Tel Aviv',       zone: 'Asia/Jerusalem',     flag: '🇮🇱', utc: '+3',  region: 'Trung Đông' },
-  { city: 'Kuwait City',    zone: 'Asia/Kuwait',        flag: '🇰🇼', utc: '+3',  region: 'Trung Đông' },
+ { city: 'Dubai', zone: 'Asia/Dubai', flag: '', utc: '+4', region: 'Trung Đông' },
+ { city: 'Riyadh', zone: 'Asia/Riyadh', flag: '', utc: '+3', region: 'Trung Đông' },
+ { city: 'Tehran', zone: 'Asia/Tehran', flag: '', utc: '+3:30',region: 'Trung Đông' },
+ { city: 'Istanbul', zone: 'Europe/Istanbul', flag: '', utc: '+3', region: 'Trung Đông' },
+ { city: 'Tel Aviv', zone: 'Asia/Jerusalem', flag: '', utc: '+3', region: 'Trung Đông' },
+ { city: 'Kuwait City', zone: 'Asia/Kuwait', flag: '', utc: '+3', region: 'Trung Đông' },
 
   // ── Châu Âu ──
-  { city: 'London',         zone: 'Europe/London',      flag: '🇬🇧', utc: '+1',  region: 'Châu Âu' },
-  { city: 'Paris',          zone: 'Europe/Paris',       flag: '🇫🇷', utc: '+2',  region: 'Châu Âu' },
-  { city: 'Berlin',         zone: 'Europe/Berlin',      flag: '🇩🇪', utc: '+2',  region: 'Châu Âu' },
-  { city: 'Rome',           zone: 'Europe/Rome',        flag: '🇮🇹', utc: '+2',  region: 'Châu Âu' },
-  { city: 'Madrid',         zone: 'Europe/Madrid',      flag: '🇪🇸', utc: '+2',  region: 'Châu Âu' },
-  { city: 'Amsterdam',      zone: 'Europe/Amsterdam',   flag: '🇳🇱', utc: '+2',  region: 'Châu Âu' },
-  { city: 'Brussels',       zone: 'Europe/Brussels',    flag: '🇧🇪', utc: '+2',  region: 'Châu Âu' },
-  { city: 'Stockholm',      zone: 'Europe/Stockholm',   flag: '🇸🇪', utc: '+2',  region: 'Châu Âu' },
-  { city: 'Oslo',           zone: 'Europe/Oslo',        flag: '🇳🇴', utc: '+2',  region: 'Châu Âu' },
-  { city: 'Warsaw',         zone: 'Europe/Warsaw',      flag: '🇵🇱', utc: '+2',  region: 'Châu Âu' },
-  { city: 'Prague',         zone: 'Europe/Prague',      flag: '🇨🇿', utc: '+2',  region: 'Châu Âu' },
-  { city: 'Vienna',         zone: 'Europe/Vienna',      flag: '🇦🇹', utc: '+2',  region: 'Châu Âu' },
-  { city: 'Zurich',         zone: 'Europe/Zurich',      flag: '🇨🇭', utc: '+2',  region: 'Châu Âu' },
-  { city: 'Athens',         zone: 'Europe/Athens',      flag: '🇬🇷', utc: '+3',  region: 'Châu Âu' },
-  { city: 'Bucharest',      zone: 'Europe/Bucharest',   flag: '🇷🇴', utc: '+3',  region: 'Châu Âu' },
-  { city: 'Moscow',         zone: 'Europe/Moscow',      flag: '🇷🇺', utc: '+3',  region: 'Châu Âu' },
-  { city: 'Helsinki',       zone: 'Europe/Helsinki',    flag: '🇫🇮', utc: '+3',  region: 'Châu Âu' },
-  { city: 'Kyiv',           zone: 'Europe/Kiev',        flag: '🇺🇦', utc: '+3',  region: 'Châu Âu' },
-  { city: 'Lisbon',         zone: 'Europe/Lisbon',      flag: '🇵🇹', utc: '+1',  region: 'Châu Âu' },
-  { city: 'Dublin',         zone: 'Europe/Dublin',      flag: '🇮🇪', utc: '+1',  region: 'Châu Âu' },
+ { city: 'London', zone: 'Europe/London', flag: '', utc: '+1', region: 'Châu Âu' },
+ { city: 'Paris', zone: 'Europe/Paris', flag: '', utc: '+2', region: 'Châu Âu' },
+ { city: 'Berlin', zone: 'Europe/Berlin', flag: '', utc: '+2', region: 'Châu Âu' },
+ { city: 'Rome', zone: 'Europe/Rome', flag: '', utc: '+2', region: 'Châu Âu' },
+ { city: 'Madrid', zone: 'Europe/Madrid', flag: '', utc: '+2', region: 'Châu Âu' },
+ { city: 'Amsterdam', zone: 'Europe/Amsterdam', flag: '', utc: '+2', region: 'Châu Âu' },
+ { city: 'Brussels', zone: 'Europe/Brussels', flag: '', utc: '+2', region: 'Châu Âu' },
+ { city: 'Stockholm', zone: 'Europe/Stockholm', flag: '', utc: '+2', region: 'Châu Âu' },
+ { city: 'Oslo', zone: 'Europe/Oslo', flag: '', utc: '+2', region: 'Châu Âu' },
+ { city: 'Warsaw', zone: 'Europe/Warsaw', flag: '', utc: '+2', region: 'Châu Âu' },
+ { city: 'Prague', zone: 'Europe/Prague', flag: '', utc: '+2', region: 'Châu Âu' },
+ { city: 'Vienna', zone: 'Europe/Vienna', flag: '', utc: '+2', region: 'Châu Âu' },
+ { city: 'Zurich', zone: 'Europe/Zurich', flag: '', utc: '+2', region: 'Châu Âu' },
+ { city: 'Athens', zone: 'Europe/Athens', flag: '', utc: '+3', region: 'Châu Âu' },
+ { city: 'Bucharest', zone: 'Europe/Bucharest', flag: '', utc: '+3', region: 'Châu Âu' },
+ { city: 'Moscow', zone: 'Europe/Moscow', flag: '', utc: '+3', region: 'Châu Âu' },
+ { city: 'Helsinki', zone: 'Europe/Helsinki', flag: '', utc: '+3', region: 'Châu Âu' },
+ { city: 'Kyiv', zone: 'Europe/Kiev', flag: '', utc: '+3', region: 'Châu Âu' },
+ { city: 'Lisbon', zone: 'Europe/Lisbon', flag: '', utc: '+1', region: 'Châu Âu' },
+ { city: 'Dublin', zone: 'Europe/Dublin', flag: '', utc: '+1', region: 'Châu Âu' },
 
   // ── Châu Mỹ ──
-  { city: 'New York',       zone: 'America/New_York',   flag: '🇺🇸', utc: '-4',  region: 'Châu Mỹ' },
-  { city: 'Los Angeles',    zone: 'America/Los_Angeles',flag: '🇺🇸', utc: '-7',  region: 'Châu Mỹ' },
-  { city: 'Chicago',        zone: 'America/Chicago',    flag: '🇺🇸', utc: '-5',  region: 'Châu Mỹ' },
-  { city: 'Houston',        zone: 'America/Chicago',    flag: '🇺🇸', utc: '-5',  region: 'Châu Mỹ' },
-  { city: 'Phoenix',        zone: 'America/Phoenix',    flag: '🇺🇸', utc: '-7',  region: 'Châu Mỹ' },
-  { city: 'Toronto',        zone: 'America/Toronto',    flag: '🇨🇦', utc: '-4',  region: 'Châu Mỹ' },
-  { city: 'Vancouver',      zone: 'America/Vancouver',  flag: '🇨🇦', utc: '-7',  region: 'Châu Mỹ' },
-  { city: 'São Paulo',      zone: 'America/Sao_Paulo',  flag: '🇧🇷', utc: '-3',  region: 'Châu Mỹ' },
-  { city: 'Buenos Aires',   zone: 'America/Argentina/Buenos_Aires', flag:'🇦🇷',utc:'-3',region:'Châu Mỹ'},
-  { city: 'Mexico City',    zone: 'America/Mexico_City',flag: '🇲🇽', utc: '-5',  region: 'Châu Mỹ' },
-  { city: 'Santiago',       zone: 'America/Santiago',   flag: '🇨🇱', utc: '-3',  region: 'Châu Mỹ' },
-  { city: 'Bogotá',         zone: 'America/Bogota',     flag: '🇨🇴', utc: '-5',  region: 'Châu Mỹ' },
-  { city: 'Lima',           zone: 'America/Lima',       flag: '🇵🇪', utc: '-5',  region: 'Châu Mỹ' },
+ { city: 'New York', zone: 'America/New_York', flag: '', utc: '-4', region: 'Châu Mỹ' },
+ { city: 'Los Angeles', zone: 'America/Los_Angeles',flag: '', utc: '-7', region: 'Châu Mỹ' },
+ { city: 'Chicago', zone: 'America/Chicago', flag: '', utc: '-5', region: 'Châu Mỹ' },
+ { city: 'Houston', zone: 'America/Chicago', flag: '', utc: '-5', region: 'Châu Mỹ' },
+ { city: 'Phoenix', zone: 'America/Phoenix', flag: '', utc: '-7', region: 'Châu Mỹ' },
+ { city: 'Toronto', zone: 'America/Toronto', flag: '', utc: '-4', region: 'Châu Mỹ' },
+ { city: 'Vancouver', zone: 'America/Vancouver', flag: '', utc: '-7', region: 'Châu Mỹ' },
+ { city: 'São Paulo', zone: 'America/Sao_Paulo', flag: '', utc: '-3', region: 'Châu Mỹ' },
+ { city: 'Buenos Aires', zone: 'America/Argentina/Buenos_Aires', flag:'',utc:'-3',region:'Châu Mỹ'},
+ { city: 'Mexico City', zone: 'America/Mexico_City',flag: '', utc: '-5', region: 'Châu Mỹ' },
+ { city: 'Santiago', zone: 'America/Santiago', flag: '', utc: '-3', region: 'Châu Mỹ' },
+ { city: 'Bogotá', zone: 'America/Bogota', flag: '', utc: '-5', region: 'Châu Mỹ' },
+ { city: 'Lima', zone: 'America/Lima', flag: '', utc: '-5', region: 'Châu Mỹ' },
 
   // ── Châu Phi ──
-  { city: 'Cairo',          zone: 'Africa/Cairo',       flag: '🇪🇬', utc: '+3',  region: 'Châu Phi' },
-  { city: 'Lagos',          zone: 'Africa/Lagos',       flag: '🇳🇬', utc: '+1',  region: 'Châu Phi' },
-  { city: 'Johannesburg',   zone: 'Africa/Johannesburg',flag: '🇿🇦', utc: '+2',  region: 'Châu Phi' },
-  { city: 'Nairobi',        zone: 'Africa/Nairobi',     flag: '🇰🇪', utc: '+3',  region: 'Châu Phi' },
-  { city: 'Casablanca',     zone: 'Africa/Casablanca',  flag: '🇲🇦', utc: '+1',  region: 'Châu Phi' },
+ { city: 'Cairo', zone: 'Africa/Cairo', flag: '', utc: '+3', region: 'Châu Phi' },
+ { city: 'Lagos', zone: 'Africa/Lagos', flag: '', utc: '+1', region: 'Châu Phi' },
+ { city: 'Johannesburg', zone: 'Africa/Johannesburg',flag: '', utc: '+2', region: 'Châu Phi' },
+ { city: 'Nairobi', zone: 'Africa/Nairobi', flag: '', utc: '+3', region: 'Châu Phi' },
+ { city: 'Casablanca', zone: 'Africa/Casablanca', flag: '', utc: '+1', region: 'Châu Phi' },
 
   // ── Châu Đại Dương ──
-  { city: 'Sydney',         zone: 'Australia/Sydney',   flag: '🇦🇺', utc: '+10', region: 'Châu Đại Dương' },
-  { city: 'Melbourne',      zone: 'Australia/Melbourne',flag: '🇦🇺', utc: '+10', region: 'Châu Đại Dương' },
-  { city: 'Perth',          zone: 'Australia/Perth',    flag: '🇦🇺', utc: '+8',  region: 'Châu Đại Dương' },
-  { city: 'Auckland',       zone: 'Pacific/Auckland',   flag: '🇳🇿', utc: '+12', region: 'Châu Đại Dương' },
-  { city: 'Honolulu',       zone: 'Pacific/Honolulu',   flag: '🇺🇸', utc: '-10', region: 'Châu Đại Dương' },
+ { city: 'Sydney', zone: 'Australia/Sydney', flag: '', utc: '+10', region: 'Châu Đại Dương' },
+ { city: 'Melbourne', zone: 'Australia/Melbourne',flag: '', utc: '+10', region: 'Châu Đại Dương' },
+ { city: 'Perth', zone: 'Australia/Perth', flag: '', utc: '+8', region: 'Châu Đại Dương' },
+ { city: 'Auckland', zone: 'Pacific/Auckland', flag: '', utc: '+12', region: 'Châu Đại Dương' },
+ { city: 'Honolulu', zone: 'Pacific/Honolulu', flag: '', utc: '-10', region: 'Châu Đại Dương' },
 ];
 
 // Default displayed clocks (5 zones)
@@ -142,7 +142,7 @@ export function renderWorldClock(containerId = 'worldClockContent') {
 
   el.innerHTML = `
     <!-- World Clocks -->
-    <div class="wc-section-label">🌍 Đồng Hồ Thế Giới</div>
+ <div class="wc-section-label">Đồng Hồ Thế Giới</div>
 
     <!-- Add clock control -->
     <div class="wc-controls">
@@ -197,12 +197,12 @@ export function renderWorldClock(containerId = 'worldClockContent') {
           <button class="sw-btn sw-btn--start" id="cdStartBtn" onclick="window.cdToggle()">▶ Bắt đầu</button>
           <button class="sw-btn sw-btn--reset"               onclick="window.cdReset()">↺ Reset</button>
         </div>
-        <div class="cd-done" id="cdDone" style="display:none;">🎉 Xong rồi!</div>
+ <div class="cd-done" id="cdDone" style="display:none;">Xong rồi!</div>
       </div>
     </div>
 
     <!-- Timezone Converter -->
-    <div class="wc-section-label" style="margin-top:24px;">🕐 Quy Đổi Múi Giờ</div>
+ <div class="wc-section-label" style="margin-top:24px;">Quy Đổi Múi Giờ</div>
     <div id="tzConverterContent"></div>`;
 
 
@@ -231,7 +231,7 @@ export function renderWorldClock(containerId = 'worldClockContent') {
 }
 
 function getZoneInfo(zone) {
-  return ALL_TIMEZONES.find(z => z.zone === zone) ?? { city: zone, flag: '🌐', utc: '?' };
+ return ALL_TIMEZONES.find(z => z.zone === zone) ?? { city: zone, flag: '', utc: '?' };
 }
 
 function getUtcOffset(zone) {
@@ -261,12 +261,12 @@ function updateClockGrid() {
       <div class="wc-card" title="${zone}">
         <div class="wc-card-top">
           <div class="wc-flag">${info.flag}</div>
-          <button class="wc-remove-btn" onclick="window._wcRemove('${zone}')" title="Xóa">✕</button>
+ <button class="wc-remove-btn" onclick="window._wcRemove('${zone}')" title="Xóa"></button>
         </div>
         <div class="wc-city">${info.city}</div>
         <div class="wc-utc">${utcStr}</div>
         <div class="wc-time">${t}</div>
-        <div class="wc-date">${d} ${isDay ? '☀️' : '🌙'}</div>
+ <div class="wc-date">${d} ${isDay ? '️' : ''}</div>
       </div>`;
   }).join('');
 }
