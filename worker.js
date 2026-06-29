@@ -1357,120 +1357,7 @@ async function handleEvents(request, env) {
 
 // ── NGÂN HÀNG ĐỀ THI IQ BẢO MẬT TRÊN SERVER (100 CÂU) ────────────────────────
 const SERVER_IQ_POOL = [
-  // ══ NHÓM 1: DÃY SỐ & TOÁN HỌC - DỄ (index 0-19) ══
-  { q: "Số tiếp theo: 2, 4, 8, 16, ...", options: ["24","32","30","64"], ans: 1 },
-  { q: "Số tiếp theo (Fibonacci): 1, 1, 2, 3, 5, 8, 13, ...", options: ["15","21","25","34"], ans: 1 },
-  { q: "Dãy số: 3, 5, 9, 17, ...", options: ["25","33","35","41"], ans: 1 },
-  { q: "Dãy số: 1, 4, 9, 16, 25, ...", options: ["30","35","36","49"], ans: 2 },
-  { q: "Dãy số: 2, 5, 11, 23, ...", options: ["45","46","47","49"], ans: 2 },
-  { q: "Dãy số: 1, 8, 27, 64, ...", options: ["100","125","150","200"], ans: 1 },
-  { q: "Dãy số: 40, 38, 35, 31, 26, ...", options: ["20","21","22","19"], ans: 0 },
-  { q: "Dãy số: 5, 7, 11, 19, 35, ...", options: ["51","67","71","75"], ans: 1 },
-  { q: "Dãy số: 1, 2, 6, 24, 120, ...", options: ["240","600","720","840"], ans: 2 },
-  { q: "Dãy số: 2, 3, 8, 63, ...", options: ["3968","3969","3970","4000"], ans: 0 },
-  { q: "Điền số: 1, 2, 3, 6, 11, 20, 37, ...", options: ["58","68","72","76"], ans: 1 },
-  { q: "Quy luật: 4, 9, 20, 43, 90, ...", options: ["181","183","185","187"], ans: 2 },
-  { q: "Dãy số: 7, 9, 13, 21, 37, ...", options: ["53","69","73","81"], ans: 1 },
-  { q: "Điền số: 1, 5, 13, 29, 61, ...", options: ["121","125","127","129"], ans: 1 },
-  { q: "Dãy số: 2, 10, 30, 68, ...", options: ["100","120","130","150"], ans: 2 },
-  { q: "Số tiếp theo: 2, 4, 3, 9, 4, 16, 5, ...", options: ["20","25","30","36"], ans: 1 },
-  { q: "8 → 64, 9 → 81, 10 → ?", options: ["90","100","110","120"], ans: 1 },
-  { q: "3 → 12, 4 → 20, 5 → 30, 6 → ?", options: ["36","40","42","48"], ans: 2 },
-  { q: "Dãy số: 0, 3, 8, 15, 24, ...", options: ["30","35","36","40"], ans: 1 },
-  { q: "Dãy số: 2, 6, 12, 20, ...", options: ["28","30","32","36"], ans: 1 },
-
-  // ══ NHÓM 2: DÃY SỐ NÂNG CAO - TRUNG BÌNH (index 20-39) ══
-  { q: "Dãy số: 1, 3, 7, 13, 21, 31, ...", options: ["39","41","43","45"], ans: 2 },
-  { q: "Dãy số: 1, 2, 5, 14, 42, ...", options: ["122","132","132","132"], ans: 1 },
-  { q: "Dãy số: 2, 3, 5, 8, 13, 21, 34, ... (Fibonacci nhân đôi bước nhảy)", options: ["55","67","68","72"], ans: 0 },
-  { q: "Dãy: 1, 11, 21, 1211, 111221, ... (Look-and-say). Số tiếp theo bắt đầu bằng?", options: ["31","312","312211","13"], ans: 2 },
-  { q: "Tổng các số từ 1 đến 100 bằng bao nhiêu?", options: ["4950","5000","5050","5100"], ans: 2 },
-  { q: "Nếu a×b = 48, b×c = 36, a×c = 24, thì a×b×c = ?", options: ["144","288","196","207"], ans: 0 },
-  { q: "Một công ty tăng trưởng 20% năm 1, giảm 20% năm 2. So với ban đầu, kết quả là?", options: ["Tăng 0%","Giảm 4%","Tăng 4%","Không đổi"], ans: 1 },
-  { q: "Ba người A, B, C làm xong việc lần lượt trong 6, 8, 12 ngày. Cả 3 làm cùng mất mấy ngày?", options: ["2","2.5","3","4"], ans: 1 },
-  { q: "Số nguyên tố nào là số chẵn duy nhất?", options: ["1","2","4","0"], ans: 1 },
-  { q: "X, X+2, X+4 đều là số nguyên tố. X = ?", options: ["3","5","7","11"], ans: 0 },
-  { q: "Tổng 3 số nguyên dương liên tiếp là 48. Số lớn nhất là?", options: ["15","16","17","18"], ans: 2 },
-  { q: "Số có 4 chữ số chia hết cho 9 và 11, chữ số hàng nghìn là 1: ?", options: ["1188","1287","1386","1485"], ans: 0 },
-  { q: "Nếu 5! = 120, thì 7!/5! = ?", options: ["12","42","56","72"], ans: 1 },
-  { q: "Dãy: 1/2, 2/3, 3/4, 4/5, ... Số tiếp theo?", options: ["5/6","6/7","5/7","4/6"], ans: 0 },
-  { q: "Tìm x: log₂(x) + log₂(x+2) = 3", options: ["2","3","4","6"], ans: 0 },
-  { q: "Vận tốc trung bình đi 60km/h, về 40km/h. VTB cả chuyến = ?", options: ["48","50","52","54"], ans: 0 },
-  { q: "Một hình vuông cạnh a. Đường chéo = ?", options: ["a√2","a√3","2a","a²"], ans: 0 },
-  { q: "Tổng các góc ngoài của bất kỳ đa giác lồi nào = ?", options: ["180°","270°","360°","540°"], ans: 2 },
-  { q: "Có bao nhiêu số nguyên tố nhỏ hơn 30?", options: ["8","9","10","11"], ans: 2 },
-  { q: "Hai tàu cách nhau 300km, chạy ngược chiều, tốc độ 60 và 90 km/h. Gặp nhau sau bao lâu?", options: ["1.5h","2h","2.5h","3h"], ans: 1 },
-
-  // ══ NHÓM 3: TƯ DUY NGÔN NGỮ & LOGIC - TRUNG BÌNH (index 40-59) ══
-  { q: "Nếu tất cả A là B, và không có B nào là C, thì...", options: ["Không có A nào là C","Một số A là C","Tất cả A là C","Không xác định"], ans: 0 },
-  { q: "Bố Mary có 5 con gái: Nana, Nene, Nini, Nono. Con thứ 5 tên gì?", options: ["Nunu","Nyny","Mary","Nene"], ans: 2 },
-  { q: "Mary 16 tuổi, gấp 4 lần tuổi em. Khi Mary gấp 2 lần tuổi em thì Mary bao nhiêu tuổi?", options: ["20","24","26","28"], ans: 1 },
-  { q: "Cây gậy + quả bóng = 1.10$. Gậy đắt hơn bóng 1$. Bóng giá = ?", options: ["0.05$","0.10$","0.15$","0.50$"], ans: 0 },
-  { q: "5 máy làm 5 sp trong 5 phút. 100 máy làm 100 sp mất bao lâu?", options: ["5 phút","20 phút","100 phút","50 phút"], ans: 0 },
-  { q: "Mảng súng phủ hồ sau 48 ngày, mỗi ngày tăng gấp đôi. Phủ nửa hồ mất mấy ngày?", options: ["24","47","36","12"], ans: 1 },
-  { q: "3 con mèo bắt 3 chuột trong 3 phút. 100 mèo bắt 100 chuột mất?", options: ["3 phút","100 phút","33 phút","1 phút"], ans: 0 },
-  { q: "Gia đình có 6 con trai, mỗi người có 1 chị gái. Tổng bao nhiêu con?", options: ["7","8","12","11"], ans: 0 },
-  { q: "Hộp A nhãn đỏ, B nhãn xanh, C nhãn 'Đỏ hoặc Xanh'. Tất cả nhãn sai. Lấy 1 bóng đỏ từ C, hộp A chứa?", options: ["Đỏ","Xanh","Hỗn hợp","Không xác định"], ans: 1 },
-  { q: "Người đàn ông: 'Cha của người đó là con trai duy nhất của cha tôi'. Người trong tranh là ai?", options: ["Con trai","Cha ông","Chính ông","Cháu"], ans: 0 },
-  { q: "Ngày mai của ngày hôm qua là thứ Sáu. Ngày kia là thứ mấy?", options: ["Chủ Nhật","Thứ Bảy","Thứ Hai","Thứ Ba"], ans: 0 },
-  { q: "Có bao nhiêu chữ số 9 từ 1 đến 100?", options: ["10","11","19","20"], ans: 3 },
-  { q: "Cửa hàng bán cam: lần 1 bán nửa và 1 quả, lần 2 bán nửa và 1 quả, còn 1 quả. Ban đầu có?", options: ["8","10","12","14"], ans: 1 },
-  { q: "Tàu dài 100m qua cầu dài 100m, vận tốc 10m/s. Mất bao lâu?", options: ["10s","20s","30s","15s"], ans: 1 },
-  { q: "Vận tốc trung bình đi 10km/h, về 15km/h = ?", options: ["12km/h","12.5km/h","13km/h","11km/h"], ans: 0 },
-  { q: "Một hình lập phương có cạnh 3cm. Tổng diện tích bề mặt = ?", options: ["27cm²","36cm²","54cm²","72cm²"], ans: 2 },
-  { q: "Nếu đảo ngược 'ROMA', được từ có nghĩa là tình yêu trong tiếng Tây Ban Nha?", options: ["AMOR","MOAR","RAMO","ARMO"], ans: 0 },
-  { q: "Xe buýt: 10 người lên đầu. Trạm 1: xuống 3, lên 5. Trạm 2: xuống 4, lên 2. Còn mấy người (kể tài xế)?", options: ["10","11","12","13"], ans: 1 },
-  { q: "Số thứ tự của chữ S trong bảng chữ cái tiếng Anh là?", options: ["18","19","20","21"], ans: 1 },
-  { q: "Trong 23 người, xác suất có 2 người sinh cùng ngày sinh (cùng ngày tháng) > 50%. Đúng hay sai?", options: ["Đúng","Sai","Không xác định","Cần thêm dữ liệu"], ans: 0 },
-
-  // ══ NHÓM 4: TƯ DUY KHÔNG GIAN & HÌNH HỌC KHÓ (index 60-79) ══
-  { q: "Số tam giác trong một tam giác chia làm 4 phần bằng 3 đường thẳng?", options: ["5","9","10","13"], ans: 1 },
-  { q: "Hình lập phương 3×3×3 được tô màu mặt ngoài. Bao nhiêu khối nhỏ có đúng 2 mặt được tô?", options: ["8","12","16","24"], ans: 1 },
-  { q: "Hình lập phương 3×3×3. Bao nhiêu khối nhỏ không có mặt nào được tô?", options: ["0","1","4","8"], ans: 1 },
-  { q: "Một tờ giấy hình vuông gấp đôi 4 lần. Tổng số lớp giấy = ?", options: ["8","12","16","32"], ans: 2 },
-  { q: "Chóp tứ giác đều có bao nhiêu mặt tam giác?", options: ["2","3","4","5"], ans: 2 },
-  { q: "Lăng trụ lục giác đều có bao nhiêu cạnh?", options: ["12","14","16","18"], ans: 3 },
-  { q: "Đồng hồ lúc 3h15: góc giữa kim giờ và kim phút = ?", options: ["0°","7.5°","15°","30°"], ans: 1 },
-  { q: "Trong ảo giác Müller-Lyer, hai đoạn thẳng A và B thực ra?", options: ["A dài hơn","B dài hơn","Bằng nhau","Không so sánh được"], ans: 2 },
-  { q: "Tổng tất cả các góc ngoài của hình ngũ giác (pentagon) = ?", options: ["180°","360°","540°","720°"], ans: 1 },
-  { q: "Một hình cầu bán kính r được bao bọc vừa khít trong một hình lập phương. Tỷ lệ thể tích cầu/lập phương ≈ ?", options: ["π/4","π/6","π/3","π/8"], ans: 1 },
-  { q: "Khai triển hình lập phương (Net): có bao nhiêu cách gấp hợp lệ từ 6 hình vuông?", options: ["8","10","11","12"], ans: 2 },
-  { q: "Đường tròn lớn nhất nội tiếp tam giác đều cạnh 6cm có bán kính = ?", options: ["√3","2√3","3","√6"], ans: 0 },
-  { q: "Hình xuyến (torus) có bao nhiêu lỗ?", options: ["0","1","2","4"], ans: 1 },
-  { q: "Dải Möbius có bao nhiêu mặt?", options: ["1","2","3","4"], ans: 0 },
-  { q: "Hình lập phương được cắt theo đường chéo không gian. Mặt cắt là hình gì?", options: ["Tam giác","Tứ giác","Hình chữ nhật","Lục giác"], ans: 3 },
-  { q: "Một cung tròn 60° trên đường tròn bán kính 6cm có chiều dài cung = ?", options: ["2π","4π","6π","8π"], ans: 0 },
-  { q: "Parabol y = x² và đường thẳng y = 4 giao nhau tại mấy điểm?", options: ["0","1","2","4"], ans: 2 },
-  { q: "Sin(30°) × Cos(60°) + Cos(30°) × Sin(60°) = ?", options: ["0","0.5","1","√3/2"], ans: 2 },
-  { q: "Vectơ (3,4) có độ dài = ?", options: ["5","7","√7","√25"], ans: 0 },
-  { q: "Đường thẳng qua 2 điểm (1,2) và (3,6) có hệ số góc = ?", options: ["1","2","3","4"], ans: 1 },
-
-  // ══ NHÓM 5: LOGIC NÂNG CAO & EINSTEIN PUZZLES (index 80-99) ══
-  { q: "Mệnh đề 'Nếu trời mưa thì đường ướt'. Mệnh đề nào tương đương?", options: ["Nếu đường ướt thì trời mưa","Nếu trời không mưa thì đường không ướt","Nếu đường không ướt thì trời không mưa","Trời mưa khi và chỉ khi đường ướt"], ans: 2 },
-  { q: "Trong 100 người: 70 biết tiếng Anh, 80 biết tiếng Pháp. Tối thiểu bao nhiêu người biết cả hai?", options: ["10","30","50","70"], ans: 1 },
-  { q: "Bài toán Einstein: Người Đức nuôi cá. Có 5 nhà màu sắc khác nhau, 5 quốc tịch, 5 thức uống, 5 thuốc lá, 5 vật nuôi. Phương pháp giải chính xác là?", options: ["Thử tất cả","Loại trừ logic (elimination)","Xác suất","Đoán ngẫu nhiên"], ans: 1 },
-  { q: "Paradox sinh nhật: Trong nhóm 23 người, P(có 2 người sinh cùng ngày) ≈ ?", options: ["23%","50.7%","75%","90%"], ans: 1 },
-  { q: "Quy nạp toán học (Mathematical induction) gồm mấy bước?", options: ["1","2","3","4"], ans: 1 },
-  { q: "Trong lý thuyết tập hợp, A ∩ (B ∪ C) = ?", options: ["(A∩B) ∪ (A∩C)","(A∪B) ∩ (A∪C)","A ∪ (B∩C)","(A∩B) ∩ (A∩C)"], ans: 0 },
-  { q: "Sắp xếp 8 quân hậu cờ vua trên bàn 8×8 sao cho không quân nào ăn quân khác. Có bao nhiêu cách?", options: ["72","88","92","96"], ans: 2 },
-  { q: "Số bước tối thiểu để giải Tháp Hà Nội (Tower of Hanoi) với n đĩa = ?", options: ["n²","2n-1","n!","2ⁿ-1"], ans: 3 },
-  { q: "Nghịch lý Achilles và con rùa (Zeno): Achilles không bao giờ đuổi kịp rùa vì chuỗi vô hạn. Chuỗi đó có tổng hữu hạn vì?", options: ["Chuỗi phân kỳ","Chuỗi hội tụ","Chuỗi xen kẽ","Chuỗi hình học tổng = ∞"], ans: 1 },
-  { q: "Bài toán Monty Hall: Bạn chọn 1 trong 3 cửa. Host mở 1 cửa có dê. Đổi cửa có xác suất thắng = ?", options: ["1/3","1/2","2/3","3/4"], ans: 2 },
-  { q: "Số Catalan thứ 4 (C₄) = ?", options: ["5","14","42","132"], ans: 1 },
-  { q: "Trong lý thuyết đồ thị, điều kiện để đồ thị có chu trình Euler là?", options: ["Mọi đỉnh bậc chẵn","Mọi đỉnh bậc lẻ","Liên thông","Mọi đỉnh bậc chẵn và liên thông"], ans: 3 },
-  { q: "Hàm f(x) = xⁿ có đạo hàm f'(x) = ?", options: ["nxⁿ","nxⁿ⁻¹","(n+1)xⁿ","xⁿ/n"], ans: 1 },
-  { q: "Chuỗi Taylor của eˣ tại x=0: eˣ = ?", options: ["1+x+x²+x³+...","1+x+x²/2!+x³/3!+...","x+x²+x³+...","1+x+x³/3!+..."], ans: 1 },
-  { q: "Định lý Pythagore mở rộng: c² = a² + b² - 2ab·cos(C). Khi C=90°, cos(C) = ?", options: ["1","-1","0","0.5"], ans: 2 },
-  { q: "Bài toán Königsberg 7 cầu: Euler chứng minh không có đường đi qua mỗi cầu đúng 1 lần vì?", options: ["Đồ thị không liên thông","Có hơn 2 đỉnh bậc lẻ","Số cầu quá nhiều","Đồ thị có vòng lặp"], ans: 1 },
-  { q: "Trong mã hóa RSA, bảo mật dựa trên độ khó của bài toán nào?", options: ["Chia số nguyên tố","Phân tích ra thừa số nguyên tố của số lớn","Căn bậc hai số nguyên tố","Cộng số nguyên tố"], ans: 1 },
-  { q: "Độ phức tạp thời gian trung bình của thuật toán Quick Sort = ?", options: ["O(n)","O(n log n)","O(n²)","O(log n)"], ans: 1 },
-  { q: "Định lý Bayes: P(A|B) = P(B|A)·P(A)/P(B). Ứng dụng chính trong AI là?", options: ["Hồi quy tuyến tính","Naive Bayes Classifier","K-Means","Gradient Descent"], ans: 1 },
-  { q: "Số Ramsey R(3,3) — số người tối thiểu trong bữa tiệc để đảm bảo có 3 người quen nhau hoặc 3 người lạ nhau = ?", options: ["5","6","7","8"], ans: 1 },
-  { q: "Có tổng cộng bao nhiêu hình tam giác trong hình tam giác chia làm 4 phần bằng nhau?\", options: [\"4\",\"5\",\"8\",\"10\"], ans: 3,", options: ["4","5","8","10"], ans: 3,
-    svg: `<svg class="iqeq-svg-diagram" viewBox="0 0 100 100"><polygon points="50,15 90,85 10,85" fill="none" stroke="#fbbf24" stroke-width="2"/><line x1="50" y1="15" x2="50" y2="85" stroke="#fbbf24" stroke-width="2"/><line x1="30" y1="50" x2="70" y2="50" stroke="#fbbf24" stroke-width="2"/></svg>`
-  }
 ];
-
 
 // ── NGÂN HÀNG ĐỀ THI EQ BẢO MẬT TRÊN SERVER (100 CÂU) ────────────────────────
 const SERVER_EQ_POOL = [
@@ -1608,26 +1495,23 @@ async function handleIQEQ(request, env) {
     if (request.method === 'GET' && action === 'questions') {
       const type = searchParams.get('type') || 'IQ';
       if (type === 'IQ') {
-        // Phân nhóm 5 cấp độ:
-        // Nhóm 1 - Dễ (dãy số cơ bản): index 0-19
-        const pool1 = Array.from({ length: 20 }, (_, i) => i);
-        // Nhóm 2 - Trung bình (toán nâng cao): index 20-39
-        const pool2 = Array.from({ length: 20 }, (_, i) => i + 20);
-        // Nhóm 3 - Khá (ngôn ngữ & logic): index 40-59
-        const pool3 = Array.from({ length: 20 }, (_, i) => i + 40);
-        // Nhóm 4 - Khó (không gian & hình học): index 60-79
-        const pool4 = Array.from({ length: 20 }, (_, i) => i + 60);
-        // Nhóm 5 - Rất khó (logic nâng cao): index 80-99
-        const pool5 = Array.from({ length: 20 }, (_, i) => i + 80);
+        // Phân nhóm 4 cấp độ từ 150 câu:
+        // Nhóm 1 - Dễ (0-29): 30 câu
+        const pool1 = Array.from({ length: 30 }, (_, i) => i);
+        // Nhóm 2 - Trung bình (30-69): 40 câu
+        const pool2 = Array.from({ length: 40 }, (_, i) => i + 30);
+        // Nhóm 3 - Khó (70-109): 40 câu
+        const pool3 = Array.from({ length: 40 }, (_, i) => i + 70);
+        // Nhóm 4 - Rất khó / Cực khó (110-149): 40 câu
+        const pool4 = Array.from({ length: 40 }, (_, i) => i + 110);
 
-        // Lấy ngẫu nhiên: 5 + 5 + 6 + 5 + 4 = 25 câu
+        // Lấy ngẫu nhiên: 5 + 7 + 7 + 6 = 25 câu
         const sel1 = pool1.sort(() => 0.5 - Math.random()).slice(0, 5);
-        const sel2 = pool2.sort(() => 0.5 - Math.random()).slice(0, 5);
-        const sel3 = pool3.sort(() => 0.5 - Math.random()).slice(0, 6);
-        const sel4 = pool4.sort(() => 0.5 - Math.random()).slice(0, 5);
-        const sel5 = pool5.sort(() => 0.5 - Math.random()).slice(0, 4);
+        const sel2 = pool2.sort(() => 0.5 - Math.random()).slice(0, 7);
+        const sel3 = pool3.sort(() => 0.5 - Math.random()).slice(0, 7);
+        const sel4 = pool4.sort(() => 0.5 - Math.random()).slice(0, 6);
 
-        const indices = [...sel1, ...sel2, ...sel3, ...sel4, ...sel5].sort((a, b) => a - b);
+        const indices = [...sel1, ...sel2, ...sel3, ...sel4].sort((a, b) => a - b);
         
         const safeQuestions = indices.map(idx => {
           const original = SERVER_IQ_POOL[idx];
@@ -1680,42 +1564,42 @@ async function handleIQEQ(request, env) {
       let responsePayload = {};
 
       if (test_type === 'IQ') {
-        // Chấm điểm có trọng số theo nhóm độ khó
+        // Chấm điểm có trọng số theo nhóm độ khó thực tế
         answers.forEach(item => {
           const original = SERVER_IQ_POOL[item.qIdx];
           if (original && item.selected === original.ans) {
-            // Trọng số: nhóm 1=1đ, nhóm 2=1.2đ, nhóm 3=1.4đ, nhóm 4=1.6đ, nhóm 5=2đ
             const idx = item.qIdx;
-            const weight = idx < 20 ? 1 : idx < 40 ? 1.2 : idx < 60 ? 1.4 : idx < 80 ? 1.6 : 2;
+            // Nhóm 1 (0-29): 1.0đ, Nhóm 2 (30-69): 1.3đ, Nhóm 3 (70-109): 1.7đ, Nhóm 4 (110-149): 2.2đ
+            const weight = idx < 30 ? 1.0 : idx < 70 ? 1.3 : idx < 110 ? 1.7 : 2.2;
             rawCorrect += weight;
           }
         });
-        // Max có thể đạt: 5×1 + 5×1.2 + 6×1.4 + 5×1.6 + 4×2 = 5+6+8.4+8+8 = 35.4
-        const scorePct = Math.min(rawCorrect / 35.4, 1);
-        finalScore = Math.round(70 + (scorePct * 70)); // thang 70-140
+        // Max weight có thể đạt: 5*1.0 + 7*1.3 + 7*1.7 + 6*2.2 = 5.0 + 9.1 + 11.9 + 13.2 = 39.2
+        const scorePct = Math.min(rawCorrect / 39.2, 1);
+        finalScore = Math.round(70 + (scorePct * 75)); // Thang điểm từ 70 đến 145
 
         let classification, desc;
         if (finalScore >= 140) {
-          classification = '🏆 Thiên Tài (Top 0.1%)';
-          desc = 'Kết quả xuất sắc tuyệt đối. Bạn giải được cả câu hỏi logic nâng cao và toán học phức tạp ở mức chuyên gia.';
+          classification = '🏆 Thiên Tài / Xuất Chúng (Top 0.1%)';
+          desc = 'Chỉ số IQ cực kỳ vượt trội. Khả năng tư duy toán học lý thuyết, mật mã học, lý thuyết trò chơi và tư duy không gian đạt mức siêu việt.';
         } else if (finalScore >= 130) {
-          classification = '🌟 Xuất Chúng (Top 2%)';
-          desc = 'Tư duy phân tích sắc bén vượt trội. Bạn xử lý tốt các bài toán không gian, hình học và logic nâng cao.';
+          classification = '🌟 Trí Tuệ Vượt Trội (Top 2%)';
+          desc = 'Tư duy logic và phân tích sắc sảo. Giải quyết tốt hầu hết các câu đố lý thuyết đồ thị phức tạp và bài toán xác suất.';
         } else if (finalScore >= 120) {
           classification = '💡 Trí Tuệ Cao (Top 10%)';
-          desc = 'Khả năng lý luận logic và toán học rất tốt. Bạn vượt qua hầu hết các câu hỏi ở mức khó.';
+          desc = 'Khả năng tư duy logic và toán học rất tốt. Khả năng giải quyết vấn đề nhanh nhạy dưới áp lực.';
         } else if (finalScore >= 110) {
           classification = '✅ Trên Trung Bình (Top 25%)';
-          desc = 'Tư duy logic ổn định và tốt. Bạn xử lý tốt phần lớn câu hỏi, còn một số dạng khó cần rèn luyện thêm.';
-        } else if (finalScore >= 90) {
-          classification = '📊 Trung Bình (Top 50%)';
-          desc = 'Năng lực tư duy ở mức trung bình. Hãy luyện thêm dạng bài toán không gian và dãy số nâng cao.';
+          desc = 'Tư duy logic nhạy bén, hoàn thành tốt các câu hỏi hình học, dãy số và suy luận ở mức trung bình khá.';
+        } else if (finalScore >= 95) {
+          classification = '📊 Trung Bình Khá (Top 50%)';
+          desc = 'Năng lực tư duy ở mức trung bình khá. Khả năng giải quyết các tình huống thực tế và tính toán cơ bản ổn định.';
         } else if (finalScore >= 80) {
-          classification = '📈 Dưới Trung Bình (Cần cải thiện)';
-          desc = 'Tư duy logic cần được rèn luyện thêm. Bắt đầu với các bài toán cơ bản và dần nâng cao.';
+          classification = '📈 Trung Bình (Cần cải thiện)';
+          desc = 'Tư duy logic cơ bản tốt. Cần rèn luyện thêm khả năng phân tích chuỗi số phức tạp và hình học không gian.';
         } else {
           classification = '🔰 Mới Bắt Đầu';
-          desc = 'Hãy thử luyện tập với các câu đố logic đơn giản hằng ngày để nâng cao khả năng tư duy.';
+          desc = 'Hãy thường xuyên rèn luyện não bộ bằng các câu đố tư duy logic, toán đố cơ bản để nâng cao phản xạ.';
         }
 
         responsePayload = {
