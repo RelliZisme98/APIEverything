@@ -1796,7 +1796,7 @@ function parseRSS(xmlText) {
       image: imageUrl
     });
   }
-  return items.slice(0, 20); // Return top 20 news items
+  return items;
 }
 
 

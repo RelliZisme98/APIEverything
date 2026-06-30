@@ -27,8 +27,8 @@ export async function renderNews(containerId = 'newsContent', isSilent = false) 
   `).join('');
 
   try {
-    // Fetch a larger pool of articles (up to 48) to support pagination
-    const articles = await fetchNews(currentSource, 48);
+    // Fetch all available articles to support complete pagination
+    const articles = await fetchNews(currentSource);
     currentArticles = articles;
     state.newsArticles = articles.map(a => ({
       source: a.source,
