@@ -2659,7 +2659,7 @@ async function handleDownloader(request) {
           },
           body: JSON.stringify({
             url: url,
-            filenamePattern: 'basic',
+            filenameStyle: 'basic',
             alwaysProxy: true
           }),
           signal: AbortSignal.timeout(15000)
