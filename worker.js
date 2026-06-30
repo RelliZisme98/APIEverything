@@ -1948,8 +1948,8 @@ async function handleTaxLookup(request) {
 
   if (isNumericMST) {
     const cleanMST = q.replace(/[^0-9]/g, '');
-    if (cleanMST.length !== 10 && cleanMST.length !== 13) {
-      return cors(JSON.stringify({ error: 'Mã số thuế Việt Nam hợp lệ phải có đúng 10 chữ số (doanh nghiệp chính) hoặc 13 chữ số (chi nhánh).' }), 400);
+    if (cleanMST.length !== 9 && cleanMST.length !== 10 && cleanMST.length !== 12 && cleanMST.length !== 13) {
+      return cors(JSON.stringify({ error: 'Mã số thuế / CCCD / CMND hợp lệ phải có 9, 10, 12 hoặc 13 chữ số.' }), 400);
     }
 
     // 1. Try Minh Chuyen API
