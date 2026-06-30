@@ -153,7 +153,7 @@ export function renderDownloader() {
   container.innerHTML = `
     <div class="dl-wrap">
       <div class="dl-box">
- <div class="travel-title-sub">Dán link video hoặc nhạc cần tải</div>
+        <div class="travel-title-sub">Dán link video hoặc nhạc cần tải</div>
         <div class="dl-input-group">
           <input type="text" id="dlUrlInput" class="field-input" placeholder="Dán link Tiktok, Youtube, Facebook, Instagram, Soundcloud..." />
           <button id="btnFetchDl" class="btn-primary">Trích xuất</button>
@@ -179,23 +179,6 @@ export function renderDownloader() {
           </div>
           <div class="dl-platform-card">
             <span class="dl-platform-icon"><i class="fab fa-soundcloud" style="color:#ff5500;"></i></span>
-            <span>SoundCloud</span>
-          </div>
-        </div>
-          <div class="dl-platform-card">
- <span class="dl-platform-icon"></span>
-            <span>YouTube</span>
-          </div>
-          <div class="dl-platform-card">
- <span class="dl-platform-icon"></span>
-            <span>Facebook</span>
-          </div>
-          <div class="dl-platform-card">
- <span class="dl-platform-icon"></span>
-            <span>Instagram</span>
-          </div>
-          <div class="dl-platform-card">
- <span class="dl-platform-icon">️</span>
             <span>SoundCloud</span>
           </div>
         </div>

@@ -2639,13 +2639,13 @@ async function handleDownloader(request) {
 
     const cobaltInstances = [
       'https://subito-c.meowing.de',
-      'https://dog.kittycat.boo',
-      'https://melon.clxxped.lol',
-      'https://nuko-c.meowing.de',
-      'https://grapefruit.clxxped.lol',
-      'https://rue-cobalt.xenon.zone',
-      'https://cobalt.alpha.wolfy.love',
+      'https://cobalt.omega.wolfy.love',
       'https://cobaltapi.squair.xyz',
+      'https://nuko-c.meowing.de',
+      'https://api.cobalt.blackcat.sweeux.org',
+      'https://cobalt.alpha.wolfy.love',
+      'https://rue-cobalt.xenon.zone',
+      'https://dog.kittycat.boo',
       'https://api.qwkuns.me'
     ];
 
@@ -2697,6 +2697,8 @@ async function handleDownloadProxy(request) {
   // Only allow known Cobalt/media domains to prevent open-redirect abuse
   const ALLOWED_HOSTS = [
     'cobalt.blackcat.sweeux.org',
+    'api.cobalt.blackcat.sweeux.org',
+    'sweeux.org',
     'xenon.zone',
     'meowing.de',
     'kittycat.boo',
@@ -2714,6 +2716,10 @@ async function handleDownloadProxy(request) {
     'soundcloud.com',
     'sndcdn.com',
     'tiktok.com',
+    'tiktokcdn.com',
+    'tiktokcdn-us.com',
+    'byteoversea.com',
+    'ibyteimg.com',
     'ttwcdn.net',
     'ttoverseaus.net',
   ];
