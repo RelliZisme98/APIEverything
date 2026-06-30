@@ -90,7 +90,7 @@ export async function renderNews(containerId = 'newsContent', isSilent = false) 
            role="button" tabindex="0"
            onclick="window.openNewsArticle(${i})"
            onkeydown="if(event.key==='Enter')window.openNewsArticle(${i})">
-        ${a.img ? `<div class="news-thumb" style="background-image:url('${a.img}')"></div>` : ''}
+        ${a.img ? `<img class="news-thumb" src="${a.img}" referrerpolicy="no-referrer" alt="" loading="lazy" />` : ''}
         <div class="news-card-body">
           <div class="news-source-badge" style="background:${a.color}20;color:${a.color};">
             ${a.logo} ${a.source}
@@ -152,7 +152,7 @@ function _ensureReaderDOM() {
         </div>
       </div>
       <div class="nr-body">
-        <div id="nrThumb" class="nr-thumb"></div>
+        <img id="nrThumb" class="nr-thumb" referrerpolicy="no-referrer" alt="" />
         <h1 id="nrTitle" class="nr-title"></h1>
         <div id="nrMeta" class="nr-meta"></div>
         <div id="nrContent" class="nr-content"></div>
@@ -178,8 +178,9 @@ window.openNewsArticle = async (idx) => {
     `<div class="nr-loading">Đang tải nội dung bài viết...</div>`;
 
   if (article.img) {
-    document.getElementById('nrThumb').style.backgroundImage = `url('${article.img}')`;
-    document.getElementById('nrThumb').style.display = 'block';
+    const nrThumb = document.getElementById('nrThumb');
+    nrThumb.src = article.img;
+    nrThumb.style.display = 'block';
   } else {
     document.getElementById('nrThumb').style.display = 'none';
   }
