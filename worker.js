@@ -2041,25 +2041,37 @@ async function handleTaxLookup(request) {
         const html = await res.text();
         
         // Match detail page
-        const nameMatch = html.match(/<span class="title-c">([^<]+)<\/span>/i) ||
-                          html.match(/<h1[^>]* itemprop="name">([^<]+)<\/h1>/i) ||
-                          html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
+        const nameMatch = html.match(/itemprop="name"><span[^>]*>([^<]+)<\/span>/i) ||
+                          html.match(/itemprop='name'><span[^>]*>([^<]+)<\/span>/i) ||
+                          html.match(/itemprop="name">([^<]+)/i) ||
+                          html.match(/itemprop='name'>([^<]+)/i);
         
-        const mstMatch = html.match(/itemprop="taxID"><b>([0-9-]{10,14})<\/b>/i) ||
-                         html.match(/Mã số thuế<\/td>\s*<td><b>([0-9-]{10,14})<\/b>/i) ||
-                         html.match(/class="copy">([0-9-]{10,14})<\/span>/i);
+        const mstMatch = html.match(/itemprop="taxID"><span[^>]*>([0-9-]+)<\/span>/i) ||
+                         html.match(/itemprop='taxID'><span[^>]*>([0-9-]+)<\/span>/i) ||
+                         html.match(/itemprop="taxID"><b>([0-9-]+)<\/b>/i) ||
+                         html.match(/itemprop='taxID'><b>([0-9-]+)<\/b>/i) ||
+                         html.match(/Mã số thuế<\/td>\s*<td><b>([0-9-]+)<\/b>/i) ||
+                         html.match(/Mã số thuế<\/td>\s*<td><span[^>]*>([0-9-]+)<\/span>/i);
 
-        const addrMatch = html.match(/itemprop="address">([^<]+)<\/td>/i) ||
-                          html.match(/Địa chỉ<\/td>\s*<td>([^<]+)<\/td>/i);
+        const addrMatch = html.match(/Địa chỉ[^<]*<\/td>\s*<td>\s*<span[^>]*>([^<]+)<\/span>/i) ||
+                          html.match(/Địa chỉ[^<]*<\/td>\s*<td>\s*<span[^>]*>\s*<a[^>]*>([^<]+)<\/a>/i) ||
+                          html.match(/Địa chỉ[^<]*<\/td>\s*<td>([^<]+)<\/td>/i) ||
+                          html.match(/itemprop="address">([^<]+)<\/td>/i) ||
+                          html.match(/itemprop='address'>([^<]+)<\/td>/i);
 
-        const repMatch = html.match(/itemprop="alumniOf">([^<]+)<\/td>/i) ||
+        const repMatch = html.match(/Người đại diện<\/td>\s*<td>\s*<span[^>]*>\s*<a[^>]*>([^<]+)<\/a>/i) ||
                          html.match(/Người đại diện<\/td>\s*<td>\s*<a[^>]*>([^<]+)<\/a>/i) ||
-                         html.match(/Người đại diện<\/td>\s*<td>([^<]+)<\/td>/i);
+                         html.match(/Người đại diện<\/td>\s*<td>([^<]+)<\/td>/i) ||
+                         html.match(/itemprop="alumniOf">([^<]+)<\/td>/i) ||
+                         html.match(/itemprop='alumniOf'>([^<]+)<\/td>/i);
+
+        const managedMatch = html.match(/Quản lý bởi<\/td>\s*<td>\s*<span[^>]*>([^<]+)<\/span>/i) ||
+                             html.match(/Quản lý bởi<\/td>\s*<td>([^<]+)<\/td>/i);
 
         if (nameMatch) {
           const name = nameMatch[1].trim();
           const mst = mstMatch ? mstMatch[1].trim() : cleanMST;
-          const address = addrMatch ? addrMatch[1].trim() : 'Không rõ';
+          const address = addrMatch ? addrMatch[1].trim() : (managedMatch ? `Quản lý bởi: ${managedMatch[1].trim()}` : 'Không rõ');
           const representative = repMatch ? repMatch[1].trim() : name;
 
           return cors(JSON.stringify({
