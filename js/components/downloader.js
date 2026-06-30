@@ -21,11 +21,23 @@ async function blobDownload(downloadUrl, suggestedFilename) {
   const bid = 'dlB_' + Date.now();
   const tid = 'dlT_' + Date.now();
 
-  const card = resultDiv.querySelector('.dl-result-card');
+  const card = resultDiv?.querySelector('.dl-result-card');
   if (card) {
-    const btnArea = card.querySelector('.dl-buttons');
-    if (btnArea) btnArea.innerHTML = `
-      <div id="${pid}" style="width:100%;">
+    let statusArea = card.querySelector('.dl-status-area');
+    if (!statusArea) {
+      statusArea = document.createElement('div');
+      statusArea.className = 'dl-status-area';
+      statusArea.style.cssText = 'margin-top: 12px; width: 100%;';
+      const info = card.querySelector('.dl-info');
+      if (info) {
+        info.appendChild(statusArea);
+      } else {
+        card.appendChild(statusArea);
+      }
+    }
+    statusArea.style.display = 'block';
+    statusArea.innerHTML = `
+      <div id="${pid}" style="width:100%; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 12px; border-radius: 8px;">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
           <span class="status-dot dot-yellow" style="flex-shrink:0;"></span>
           <span id="${tid}" style="font-size:13px;color:var(--text-muted);">Đang chuẩn bị tải xuống...</span>
@@ -99,19 +111,36 @@ async function blobDownload(downloadUrl, suggestedFilename) {
 
     if (bar()) bar().style.width = '100%';
     const prog = document.getElementById(pid);
-    if (prog) prog.innerHTML = `
-      <div style="display:flex;align-items:center;gap:8px;color:#4ade80;font-size:13px;">
- Tải xong! <strong>${filename}</strong> · ${formatBytes(received)}
-      </div>`;
+    if (prog) {
+      prog.style.borderColor = 'rgba(74, 222, 128, 0.2)';
+      prog.style.background = 'rgba(74, 222, 128, 0.04)';
+      prog.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;color:#4ade80;font-size:13px;">
+          <i class="fas fa-check-circle"></i> Tải xong! <strong>${filename}</strong> · ${formatBytes(received)}
+        </div>`;
+    }
 
   } catch (err) {
     console.error('[blobDownload]', err);
     const prog = document.getElementById(pid);
-    if (prog) prog.innerHTML = `
-      <div style="color:#f87171;font-size:12px;line-height:1.5;">
- ${err.message}<br>
- <a href="${downloadUrl}" target="_blank" style="color:var(--accent-blue);font-size:11px;">Thử mở link trực tiếp ↗</a>
-      </div>`;
+    if (prog) {
+      prog.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+      prog.style.background = 'rgba(239, 68, 68, 0.04)';
+      prog.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;align-items:center;gap:8px;color:#f87171;font-size:13px;font-weight:600;">
+            <i class="fas fa-exclamation-circle"></i> Tải qua máy chủ thất bại
+          </div>
+          <div style="color:var(--text-muted);font-size:12px;line-height:1.5;">
+            ${err.message}
+          </div>
+          <div style="margin-top:4px;">
+            <a class="dl-btn dl-btn--fallback" href="${downloadUrl}" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;gap:4px;padding:6px 12px;font-size:12px;">
+              Thử tải trực tiếp <i class="fas fa-external-link-alt"></i>
+            </a>
+          </div>
+        </div>`;
+    }
   }
 }
 
@@ -133,9 +162,26 @@ export function renderDownloader() {
         <div class="travel-title-sub" style="margin-top: 20px;">Nền tảng hỗ trợ</div>
         <div class="dl-platforms">
           <div class="dl-platform-card">
- <span class="dl-platform-icon"></span>
+            <span class="dl-platform-icon"><i class="fab fa-tiktok"></i></span>
             <span>TikTok</span>
           </div>
+          <div class="dl-platform-card">
+            <span class="dl-platform-icon"><i class="fab fa-youtube" style="color:#ef4444;"></i></span>
+            <span>YouTube</span>
+          </div>
+          <div class="dl-platform-card">
+            <span class="dl-platform-icon"><i class="fab fa-facebook" style="color:#1877f2;"></i></span>
+            <span>Facebook</span>
+          </div>
+          <div class="dl-platform-card">
+            <span class="dl-platform-icon"><i class="fab fa-instagram" style="color:#e1306c;"></i></span>
+            <span>Instagram</span>
+          </div>
+          <div class="dl-platform-card">
+            <span class="dl-platform-icon"><i class="fab fa-soundcloud" style="color:#ff5500;"></i></span>
+            <span>SoundCloud</span>
+          </div>
+        </div>
           <div class="dl-platform-card">
  <span class="dl-platform-icon"></span>
             <span>YouTube</span>
@@ -221,24 +267,25 @@ async function fetchMediaDownload(url) {
             <div class="dl-info">
               <div>
                 <div class="dl-title">${d.title || 'Video TikTok'}</div>
- <div class="dl-author">Kênh: @${d.author?.unique_id} (${d.author?.nickname})</div>
+                <div class="dl-author">Kênh: @${d.author?.unique_id} (${d.author?.nickname})</div>
               </div>
               <div class="dl-buttons" style="display:flex;gap:8px;flex-wrap:wrap;">
                 <button class="dl-btn dl-btn--video" onclick="window._dlBlob('${d.play}','${videoFilename}')">
- Tải Video (Proxy)
+                  <i class="fas fa-download"></i> Tải Video (Proxy)
                 </button>
                 <a class="dl-btn dl-btn--fallback" href="${d.play}" download="${videoFilename}" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;padding:10px 14px;font-size:13px;white-space:nowrap;">
- Tải trực tiếp
+                  <i class="fas fa-external-link-alt"></i> Tải trực tiếp
                 </a>
                 ${d.music ? `
                   <button class="dl-btn dl-btn--audio" onclick="window._dlBlob('${d.music}','${audioFilename}')">
- Tải Nhạc (Proxy)
+                    <i class="fas fa-music"></i> Tải Nhạc (Proxy)
                   </button>
                   <a class="dl-btn dl-btn--fallback" href="${d.music}" download="${audioFilename}" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;padding:10px 14px;font-size:13px;white-space:nowrap;">
- Nhạc trực tiếp
+                    <i class="fas fa-external-link-alt"></i> Nhạc trực tiếp
                   </a>
                 ` : ''}
               </div>
+              <div class="dl-status-area" style="margin-top: 12px; width: 100%; display: none;"></div>
             </div>
           </div>
         `;
@@ -285,15 +332,29 @@ async function fetchMediaDownload(url) {
 
         resultDiv.innerHTML = `
           <div class="dl-result-card">
- <div style="font-size: 32px; padding: 20px;"></div>
+            <img class="dl-thumbnail" src="${d.cover}" alt="Thumbnail" />
             <div class="dl-info">
               <div>
-                <div class="dl-title">${isYouTube ? 'YouTube Playlist / Album' : 'Danh sách tệp phương tiện'}</div>
-                <div class="dl-author">Đã trích xuất danh sách liên kết thành công.</div>
+                <div class="dl-title">${d.title || 'Video TikTok'}</div>
+                <div class="dl-author">Kênh: @${d.author?.unique_id} (${d.author?.nickname})</div>
               </div>
-              <div class="dl-buttons" style="flex-wrap: wrap; gap: 8px;">
-                ${pickerHtml}
+              <div class="dl-buttons" style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="dl-btn dl-btn--video" onclick="window._dlBlob('${d.play}','${videoFilename}')">
+                  <i class="fas fa-download"></i> Tải Video (Proxy)
+                </button>
+                <a class="dl-btn dl-btn--fallback" href="${d.play}" download="${videoFilename}" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;padding:10px 14px;font-size:13px;white-space:nowrap;">
+                  <i class="fas fa-external-link-alt"></i> Tải trực tiếp
+                </a>
+                ${d.music ? `
+                  <button class="dl-btn dl-btn--audio" onclick="window._dlBlob('${d.music}','${audioFilename}')">
+                    <i class="fas fa-music"></i> Tải Nhạc (Proxy)
+                  </button>
+                  <a class="dl-btn dl-btn--fallback" href="${d.music}" download="${audioFilename}" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;padding:10px 14px;font-size:13px;white-space:nowrap;">
+                    <i class="fas fa-external-link-alt"></i> Nhạc trực tiếp
+                  </a>
+                ` : ''}
               </div>
+              <div class="dl-status-area" style="margin-top: 12px; width: 100%; display: none;"></div>
             </div>
           </div>
         `;
