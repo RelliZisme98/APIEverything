@@ -119,8 +119,14 @@ export function renderWeather(d, todayMinMax = null, containerId = 'weatherConte
         </div>
       </div>
       <div class="weather-location">
- ${d.name}, ${d.sys.country}
+        ${d.name}, ${d.sys.country}
         <span class="weather-desc-badge">${desc}</span>
+        ${d.coord ? `
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px; display: flex; gap: 12px; font-family: 'Inter', sans-serif;">
+          <span><i class="fas fa-map-marker-alt" style="color: var(--accent-blue); margin-right: 4px;"></i> Vĩ độ: <strong style="color: var(--text-secondary);">${d.coord.lat.toFixed(4)}°</strong></span>
+          <span>Kinh độ: <strong style="color: var(--text-secondary);">${d.coord.lon.toFixed(4)}°</strong></span>
+        </div>
+        ` : ''}
       </div>
     </div>
 

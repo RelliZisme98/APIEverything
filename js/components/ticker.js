@@ -78,8 +78,8 @@ export function renderTicker() {
     try {
       const temp = Math.round(state.weatherData.main?.temp);
       let name = state.weatherData.name;
-      if (name === 'Ho Chi Minh City') name = 'TP.HCM';
-      else if (name === 'Hanoi') name = 'Hà Nội';
+      if (name === 'Ho Chi Minh City' || name.includes('Hồ Chí Minh')) name = 'TP.HCM';
+      else if (name === 'Hanoi' || name.includes('Hà Nội')) name = 'Hà Nội';
       const desc = state.weatherData.weather?.[0]?.description ?? '';
       items.push(
         `<span class="ticker-item">` +
@@ -95,8 +95,19 @@ export function renderTicker() {
   // ── 4. AQI of Selected City ──
   if (state.aqiData) {
     const aqiVal = state.aqiData.aqi;
-    const aqiLabel = state.aqiData.label;
-    const city = state.aqiData.city;
+    let aqiLabel = 'Tốt';
+    if (aqiVal > 300) aqiLabel = 'Nguy hiểm';
+    else if (aqiVal > 200) aqiLabel = 'Rất có hại';
+    else if (aqiVal > 150) aqiLabel = 'Có hại';
+    else if (aqiVal > 100) aqiLabel = 'Không tốt';
+    else if (aqiVal > 50) aqiLabel = 'Trung bình';
+
+    let city = '';
+    if (state.weatherData) {
+      city = state.weatherData.name;
+      if (city === 'Ho Chi Minh City' || city.includes('Hồ Chí Minh')) city = 'TP.HCM';
+      else if (city === 'Hanoi' || city.includes('Hà Nội')) city = 'Hà Nội';
+    }
 
     let color = 'var(--accent-green)';
     if (aqiVal > 150) color = 'var(--accent-red)';
