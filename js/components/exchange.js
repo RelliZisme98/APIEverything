@@ -5,7 +5,7 @@
 
 import { FX_META } from '../api/exchange.js';
 
-let _converterInitialized = false;
+import { state } from '../store/state.js';
 
 /**
  * @param {Array<{cur, rateToVnd, source}>} rows
@@ -67,22 +67,22 @@ function initConverter(rows) {
   // Build options
   const currencies = Object.keys(FX_META); // Includes VND
 
-  if (!_converterInitialized) {
-    _converterInitialized = true;
+  if (!fromSelect.dataset.initialized) {
+    fromSelect.dataset.initialized = 'true';
 
     const buildOptions = (selectedVal) => {
       return currencies.map(cur => {
         const meta = FX_META[cur] || {};
         const isSel = cur === selectedVal ? 'selected' : '';
- return `<option value="${cur}" ${isSel}>${meta.flag || '️'} ${cur} - ${meta.name || cur}</option>`;
+        return `<option value="${cur}" ${isSel}>${meta.flag || '️'} ${cur} - ${meta.name || cur}</option>`;
       }).join('');
     };
 
     fromSelect.innerHTML = buildOptions('USD');
     toSelect.innerHTML   = buildOptions('VND');
 
-    // Attach listeners
-    const triggerCalc = () => calculate(rows, fromSelect, toSelect, amountInp, resultDiv, detailDiv);
+    // Attach listeners using the latest state data
+    const triggerCalc = () => calculate(state.fxData || rows, fromSelect, toSelect, amountInp, resultDiv, detailDiv);
     amountInp.addEventListener('input', triggerCalc);
     fromSelect.addEventListener('change', triggerCalc);
     toSelect.addEventListener('change', triggerCalc);

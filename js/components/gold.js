@@ -3,7 +3,7 @@
  * Renders the gold price card with international spot + Vietnamese brand comparison.
  */
 
-import { fmtPrice }       from '../utils/formatters.js';
+import { fmtPrice } from '../utils/formatters.js';
 import { computeGoldVnd } from '../api/gold.js';
 import { GOLD_BRANDS, computeBrandPrices } from '../data/gold-brands.js';
 import { CONFIG, state } from '../store/state.js';
@@ -97,16 +97,13 @@ function renderBrandRows(xauUsd, unit) {
 
     if (isEstimated) {
       const prices = computeBrandPrices(brand, xauUsd, CONFIG.usdToVnd);
-      buy  = unit === 'chi' ? prices.buyPerChi  : prices.buyPerLuong;
+      buy = unit === 'chi' ? prices.buyPerChi : prices.buyPerLuong;
       sell = unit === 'chi' ? prices.sellPerChi : prices.sellPerLuong;
     }
 
     return `
       <div class="gold-brand-row">
         <div class="gold-brand-left">
-          <span class="gold-brand-icon" style="background:${brand.color}22;border:1px solid ${brand.color}44;">
-            ${brand.icon}
-          </span>
           <div>
             <a class="gold-brand-name" href="${brand.url}" target="_blank" rel="noopener"
                style="color:${brand.color};">${brand.name}</a>
@@ -177,9 +174,6 @@ export function renderGoldFallback(containerId = 'goldContent') {
         <a class="gold-brand-row" href="${b.url}" target="_blank" rel="noopener"
            style="text-decoration:none;color:inherit;">
           <div class="gold-brand-left">
-            <span class="gold-brand-icon" style="background:${b.color}22;border:1px solid ${b.color}44;">
-              ${b.icon}
-            </span>
             <div>
               <div class="gold-brand-name" style="color:${b.color};">${b.name}</div>
               <div class="gold-brand-type">${b.note}</div>

@@ -38,7 +38,6 @@ export const GOLD_BRANDS = [
   {
     id: 'sjc',
     name: 'SJC',
- icon: '',
     type: 'Vàng miếng 24K (999.9)',
     buyPremium: 0.030,  // mua vào ~3% above international
     sellPremium: 0.075,  // bán ra  ~7.5% above international
@@ -49,7 +48,6 @@ export const GOLD_BRANDS = [
   {
     id: 'doji',
     name: 'DOJI',
- icon: '',
     type: 'Vàng nữ trang & miếng (999)',
     buyPremium: 0.022,  // ~2.2%
     sellPremium: 0.060,  // ~6.0%
@@ -60,7 +58,6 @@ export const GOLD_BRANDS = [
   {
     id: 'pnj',
     name: 'PNJ',
- icon: '',
     type: 'Vàng nữ trang (610 – 750)',
     buyPremium: 0.020,  // ~2.0%
     sellPremium: 0.065,  // ~6.5%
@@ -71,7 +68,6 @@ export const GOLD_BRANDS = [
   {
     id: 'btmc',
     name: 'Bảo Tín Minh Châu',
-    icon: '⭐',
     type: 'Vàng miếng & nữ trang (999)',
     buyPremium: 0.022,  // calibrated: actual 13,370K vs intl 13,086K → 2.17%
     sellPremium: 0.060,  // calibrated: actual 13,870K vs intl 13,086K → 5.98%
@@ -82,7 +78,6 @@ export const GOLD_BRANDS = [
   {
     id: 'btmh',
     name: 'Bảo Tín Mạnh Hải',
- icon: '',
     type: 'Vàng miếng & nhẫn (999.9)',
     buyPremium: 0.022,  // ~2.2%
     sellPremium: 0.065,  // ~6.5%

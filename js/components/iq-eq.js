@@ -627,57 +627,67 @@ export function renderEQ(containerId = 'eqContent') {
         </div>
 
         <div class="iqeq-eq-breakdown">
-          <div class="iqeq-eq-breakdown-title">Biểu đồ khía cạnh EQ</div>
+          <div class="iqeq-eq-breakdown-title" style="display: flex; align-items: center; gap: 8px;">
+            <span>📊</span> Biểu đồ khía cạnh EQ
+          </div>
           
-          <div class="iqeq-dim-row">
-            <div class="iqeq-dim-name">Thấu cảm</div>
-            <div class="iqeq-dim-bar-wrap"><div class="iqeq-dim-bar-fill" id="eq-bar-empathy" style="width:0%; background:#818cf8;"></div></div>
-            <div class="iqeq-dim-score" id="eq-lbl-empathy">0%</div>
+          <div class="iqeq-dim-row" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600;">
+              <span style="color: var(--text-primary);">Thấu cảm (Empathy)</span>
+              <span id="eq-lbl-empathy" style="color: var(--text-primary); font-family: 'JetBrains Mono', monospace;">0%</span>
+            </div>
+            <div class="iqeq-dim-bar-wrap" style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; width: 100%;">
+              <div class="iqeq-dim-bar-fill" id="eq-bar-empathy" style="width:0%; height: 100%; background: linear-gradient(90deg, #818cf8, #a78bfa); border-radius: 4px; transition: width 1s ease;"></div>
+            </div>
           </div>
-          <div class="iqeq-dim-row">
-            <div class="iqeq-dim-name">Tự điều chỉnh</div>
-            <div class="iqeq-dim-bar-wrap"><div class="iqeq-dim-bar-fill" id="eq-bar-selfReg" style="width:0%; background:#34d399;"></div></div>
-            <div class="iqeq-dim-score" id="eq-lbl-selfReg">0%</div>
+
+          <div class="iqeq-dim-row" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600;">
+              <span style="color: var(--text-primary);">Tự điều chỉnh (Self-Regulation)</span>
+              <span id="eq-lbl-selfReg" style="color: var(--text-primary); font-family: 'JetBrains Mono', monospace;">0%</span>
+            </div>
+            <div class="iqeq-dim-bar-wrap" style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; width: 100%;">
+              <div class="iqeq-dim-bar-fill" id="eq-bar-selfReg" style="width:0%; height: 100%; background: linear-gradient(90deg, #34d399, #059669); border-radius: 4px; transition: width 1s ease;"></div>
+            </div>
           </div>
-          <div class="iqeq-dim-row">
-            <div class="iqeq-dim-name">Kỹ năng xã hội</div>
-            <div class="iqeq-dim-bar-wrap"><div class="iqeq-dim-bar-fill" id="eq-bar-social" style="width:0%; background:#f472b6;"></div></div>
-            <div class="iqeq-dim-score" id="eq-lbl-social">0%</div>
+
+          <div class="iqeq-dim-row" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600;">
+              <span style="color: var(--text-primary);">Kỹ năng xã hội (Social Skills)</span>
+              <span id="eq-lbl-social" style="color: var(--text-primary); font-family: 'JetBrains Mono', monospace;">0%</span>
+            </div>
+            <div class="iqeq-dim-bar-wrap" style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; width: 100%;">
+              <div class="iqeq-dim-bar-fill" id="eq-bar-social" style="width:0%; height: 100%; background: linear-gradient(90deg, #f472b6, #db2777); border-radius: 4px; transition: width 1s ease;"></div>
+            </div>
           </div>
-          <div class="iqeq-dim-row">
-            <div class="iqeq-dim-name">Tự nhận thức</div>
-            <div class="iqeq-dim-bar-wrap"><div class="iqeq-dim-bar-fill" id="eq-bar-selfAwa" style="width:0%; background:#fbbf24;"></div></div>
-            <div class="iqeq-dim-score" id="eq-lbl-selfAwa">0%</div>
+
+          <div class="iqeq-dim-row" style="display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600;">
+              <span style="color: var(--text-primary);">Tự nhận thức (Self-Awareness)</span>
+              <span id="eq-lbl-selfAwa" style="color: var(--text-primary); font-family: 'JetBrains Mono', monospace;">0%</span>
+            </div>
+            <div class="iqeq-dim-bar-wrap" style="height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden; width: 100%;">
+              <div class="iqeq-dim-bar-fill" id="eq-bar-selfAwa" style="width:0%; height: 100%; background: linear-gradient(90deg, #fbbf24, #d97706); border-radius: 4px; transition: width 1s ease;"></div>
+            </div>
           </div>
         </div>
 
         <div class="iqeq-analysis-box" style="margin-top: 20px;">
- <div class="iqeq-analysis-title">NHẬN XÉT CHI TIẾT</div>
-          <div class="iqeq-analysis-text" id="eq-res-desc">Đang phân tích dữ liệu...</div>
+          <div class="iqeq-analysis-title" style="display: flex; align-items: center; gap: 8px;">
+            <span>📝</span> Nhận xét tổng quan
+          </div>
+          <div class="iqeq-analysis-text" id="eq-res-desc" style="line-height: 1.8;">Đang phân tích dữ liệu...</div>
         </div>
 
         <div class="iqeq-analysis-box" style="margin-top: 20px;">
- <div class="iqeq-analysis-title" style="color: #34d399;">GIẢI THÍCH CHI TIẾT KHÍA CẠNH EQ</div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 13px;">
-            <div style="background: rgba(255,255,255,0.015); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
- <strong style="color: #818cf8;">Thấu cảm (Empathy):</strong>
-              <p style="margin: 4px 0 0; color: var(--text-secondary); line-height: 1.5;">Khả năng cảm nhận và thấu hiểu cảm xúc, nhu cầu và quan điểm của người khác. Điểm cao thể hiện sự tinh tế và lắng nghe tốt.</p>
-            </div>
-            <div style="background: rgba(255,255,255,0.015); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
- <strong style="color: #34d399;">Tự điều chỉnh (Self-Regulation):</strong>
-              <p style="margin: 4px 0 0; color: var(--text-secondary); line-height: 1.5;">Khả năng kiểm soát các cơn bốc đồng, làm chủ cảm xúc khi căng thẳng và thích ứng nhanh với môi trường thay đổi.</p>
-            </div>
-            <div style="background: rgba(255,255,255,0.015); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
- <strong style="color: #f472b6;">Kỹ năng xã hội (Social Skills):</strong>
-              <p style="margin: 4px 0 0; color: var(--text-secondary); line-height: 1.5;">Khả năng xây dựng mối quan hệ xã hội tốt đẹp, làm việc nhóm, đàm phán thuyết phục và khéo léo xử lý xung đột.</p>
-            </div>
-            <div style="background: rgba(255,255,255,0.015); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
- <strong style="color: #fbbf24;">Tự nhận thức (Self-Awareness):</strong>
-              <p style="margin: 4px 0 0; color: var(--text-secondary); line-height: 1.5;">Khả năng tự hiểu rõ ưu khuyết điểm, nhu cầu cảm xúc và động lực cá nhân để đưa ra các quyết định hành vi sáng suốt.</p>
-            </div>
+          <div class="iqeq-analysis-title" style="color: #34d399; display: flex; align-items: center; gap: 8px;">
+            <span>🔍</span> Đánh giá chi tiết từng khía cạnh
+          </div>
+          <div class="iqeq-detailed-analysis-grid" id="eq-detailed-analysis" style="display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 12px;">
+            <!-- Danh sách khía cạnh chi tiết sẽ được tự động điền tại đây -->
           </div>
           
-          <div style="margin-top: 16px; padding: 12px; background: rgba(52, 211, 153, 0.05); border: 1px dashed rgba(52, 211, 153, 0.2); border-radius: 6px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.5;">
+          <div style="margin-top: 20px; padding: 12px; background: rgba(52, 211, 153, 0.05); border: 1px dashed rgba(52, 211, 153, 0.2); border-radius: 6px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.5;">
             <strong>Mức độ đánh giá theo điểm số EQ tổng quát:</strong><br>
             • <span style="color: #34d399; font-weight:bold;">120 trở lên</span>: Cao (Cực kỳ nhạy bén cảm xúc)<br>
             • <span style="color: #60a5fa; font-weight:bold;">100 - 119</span>: Khá / Cân bằng tốt<br>
@@ -849,9 +859,93 @@ async function finishEQTest() {
           level = 'Khá';
           levelColor = '#60a5fa';
         }
-        lbl.innerHTML = `${val}% <span style="font-size:11px; font-weight:normal; color:${levelColor}; margin-left:6px;">(${level})</span>`;
+        lbl.innerHTML = `${val}% <span style="font-size:11.5px; font-weight:700; color:${levelColor}; margin-left:6px;">(${level})</span>`;
       }
     });
+
+    // Điền phân tích chi tiết từng khía cạnh
+    const detailedContainer = document.getElementById('eq-detailed-analysis');
+    if (detailedContainer) {
+      detailedContainer.innerHTML = '';
+      
+      const dimDetails = {
+        empathy: {
+          name: 'Thấu cảm (Empathy)',
+          color: '#818cf8',
+          icon: '🤝',
+          desc: {
+            high: 'Bạn sở hữu khả năng thấu cảm xuất sắc. Bạn cực kỳ nhạy bén trong việc nhận diện và thấu hiểu cảm xúc của người khác, biết lắng nghe chân thành và luôn là chỗ dựa tinh thần đáng tin cậy.',
+            med: 'Khả năng thấu cảm của bạn ở mức khá tốt. Bạn biết quan tâm và nhận thức được cảm xúc của người xung quanh, tuy nhiên đôi lúc cần chú ý thêm đến các biểu hiện phi ngôn ngữ tinh tế của đối phương.',
+            low: 'Chỉ số thấu cảm của bạn cần cải thiện. Bạn có xu hướng tập trung giải quyết vấn đề trên phương diện lý trí hơn là cảm xúc. Hãy tập lắng nghe nhiều hơn và thử đặt mình vào vị trí của người khác.'
+          }
+        },
+        selfReg: {
+          name: 'Tự điều chỉnh (Self-Regulation)',
+          color: '#34d399',
+          icon: '🧘',
+          desc: {
+            high: 'Bạn làm chủ cảm xúc bản thân vô cùng tốt. Dù dưới áp lực lớn hay trong tranh chấp, bạn vẫn giữ được sự bình tĩnh, sáng suốt, đưa ra quyết định dựa trên lý trí thay vì phản ứng bốc đồng.',
+            med: 'Khả năng kiểm soát cảm xúc của bạn ở mức cân bằng. Bạn làm chủ được bản thân trong hầu hết tình huống, nhưng khi đối mặt với căng thẳng dồn dập, cảm xúc đôi lúc vẫn có thể chi phối bạn.',
+            low: 'Bạn dễ bị cảm xúc nhất thời hoặc áp lực chi phối mạnh mẽ. Hãy tập thói quen dừng lại 3 giây trước khi phát ngôn lúc nóng giận, đồng thời thực hành các phương pháp giải tỏa căng thẳng lành mạnh.'
+          }
+        },
+        social: {
+          name: 'Kỹ năng xã hội (Social Skills)',
+          color: '#f472b6',
+          icon: '💬',
+          desc: {
+            high: 'Kỹ năng giao tiếp và kết nối xã hội của bạn rất vượt trội. Bạn khéo léo trong việc xây dựng sự đồng thuận, phối hợp làm việc nhóm hiệu quả và giải quyết mâu thuẫn một cách hòa bình.',
+            med: 'Bạn xây dựng được các mối quan hệ tương đối tốt đẹp và hài hòa. Bạn thích nghi ổn trong môi trường tập thể, song có thể chủ động hơn nữa trong việc dẫn dắt và thuyết phục người khác.',
+            low: 'Bạn có phần khép kín hoặc gặp khó khăn khi phối hợp tập thể và xử lý bất đồng. Hãy cởi mở chia sẻ quan điểm của mình hơn và bắt đầu rèn luyện từ việc tương tác nhóm nhỏ.'
+          }
+        },
+        selfAwa: {
+          name: 'Tự nhận thức (Self-Awareness)',
+          color: '#fbbf24',
+          icon: '👁️',
+          desc: {
+            high: 'Khả năng tự thấu hiểu bản thân của bạn rất cao. Bạn nhận diện rõ rệt ưu khuyết điểm, các yếu tố kích thích cảm xúc cá nhân cũng như mục tiêu sống, từ đó định hướng hành vi rất nhất quán.',
+            med: 'Mức độ tự nhận thức của bạn ở mức khá. Bạn hiểu tương đối rõ nhu cầu của mình, nhưng thỉnh thoảng vẫn chưa thực sự hiểu rõ nguồn cơn sâu xa của một số phản ứng cảm xúc cá nhân.',
+            low: 'Bạn cần dành thêm thời gian chiêm nghiệm và phản chiếu lại bản thân. Hãy thử viết nhật ký cảm xúc hàng ngày hoặc đón nhận những nhận xét khách quan từ người thân để hiểu rõ mình hơn.'
+          }
+        }
+      };
+
+      dims.forEach(d => {
+        const val = result.breakdown[d] || 0;
+        const info = dimDetails[d];
+        let status = 'Cần cải thiện';
+        let statusColor = '#ef4444';
+        let text = info.desc.low;
+        
+        if (val >= 75) {
+          status = 'Cao';
+          statusColor = '#10b981';
+          text = info.desc.high;
+        } else if (val >= 50) {
+          status = 'Khá';
+          statusColor = '#60a5fa';
+          text = info.desc.med;
+        }
+
+        detailedContainer.innerHTML += `
+          <div style="background: rgba(255,255,255,0.015); padding: 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); display: flex; gap: 16px; align-items: flex-start;">
+            <div style="font-size: 20px; padding: 8px; background: ${info.color}10; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid ${info.color}20; color: ${info.color}; width: 40px; height: 40px;">
+              ${info.icon}
+            </div>
+            <div style="flex: 1;">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <span style="font-weight: 700; font-size: 14px; color: var(--text-primary);">${info.name}</span>
+                <span style="font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px; background: ${statusColor}15; color: ${statusColor}; border: 1px solid ${statusColor}30;">
+                  ${val}% - ${status}
+                </span>
+              </div>
+              <p style="margin: 8px 0 0; color: var(--text-secondary); font-size: 13px; line-height: 1.6;">${text}</p>
+            </div>
+          </div>
+        `;
+      });
+    }
   } catch (err) {
     showError(container, err.message, () => renderEQ('eqContent'));
   }

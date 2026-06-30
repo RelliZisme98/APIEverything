@@ -9,15 +9,15 @@ const API = (params) => `/football?${new URLSearchParams(params)}`;
 const VN_TZ = 'Asia/Ho_Chi_Minh';
 
 const LEAGUES = {
+ wc: { id: 'fifa.world', label: 'World Cup 2026', color: '#fb923c' },
  pl: { id: 'eng.1', label: '󠁧󠁢󠁥󠁮󠁧󠁿 Premier League', color: '#60a5fa' },
  laliga: { id: 'esp.1', label: 'La Liga', color: '#fbbf24' },
  seriea: { id: 'ita.1', label: 'Serie A', color: '#34d399' },
  ucl: { id: 'uefa.champs', label: 'Champions League', color: '#a78bfa' },
- wc: { id: 'fifa.world', label: 'World Cup 2026', color: '#fb923c' },
 };
 
 // ── State ──────────────────────────────────────────────────────────
-let _league   = 'pl';
+let _league   = 'wc';
 let _tab      = 'fixtures'; // fixtures | table
 let _cache    = {};
 let _timer    = null;
@@ -232,9 +232,25 @@ function renderMatchCard(e, lg) {
   const awayBadge = away.team?.logos?.[0]?.href || away.team?.logo || '';
   const awayScore = away.score ?? 0;
   
-  const scoreStr = !isPre ? `${homeScore} – ${awayScore}` : 'vs';
-  const vnTime = toVNTime(e.date);
+  const homeWinner = home.winner === true;
+  const awayWinner = away.winner === true;
   
+  let scoreStr = !isPre ? `${homeScore} – ${awayScore}` : 'vs';
+  
+  // Handle penalty shootout scores if they exist
+  let homeShootout = home.shootoutScore;
+  let awayShootout = away.shootoutScore;
+  if ((homeShootout === undefined || homeShootout === null) && home.linescores && home.linescores.length > 2) {
+    if (status?.name?.includes('PEN') || status?.name?.includes('SHOOTOUT') || status?.detail?.toLowerCase().includes('pen') || status?.detail?.toLowerCase().includes('shootout')) {
+      homeShootout = home.linescores[home.linescores.length - 1]?.value ?? home.linescores[home.linescores.length - 1]?.displayValue;
+      awayShootout = away.linescores[away.linescores.length - 1]?.value ?? away.linescores[away.linescores.length - 1]?.displayValue;
+    }
+  }
+  if (homeShootout !== undefined && awayShootout !== undefined && homeShootout !== null && awayShootout !== null) {
+    scoreStr = `${homeScore} – ${awayScore} (${homeShootout} - ${awayShootout} pen)`;
+  }
+  
+  const vnTime = toVNTime(e.date);
   const statusText = status?.detail || vnTime;
   const venue = competition?.venue?.fullName || '';
 
@@ -252,7 +268,7 @@ function renderMatchCard(e, lg) {
         <div class="fb-team-col fb-team-col--home">
           <button class="fb-team-btn" onclick="event.stopPropagation();window._fbTeam('${home.team?.id}','${homeName}','${homeBadge}')">
             ${badge(homeBadge, 24)}
-            <span class="fb-match-team-name ${isPost && parseInt(homeScore) > parseInt(awayScore) ? 'fb-winner' : ''}">${homeName}</span>
+            <span class="fb-match-team-name ${isPost && homeWinner ? 'fb-winner' : ''}">${homeName}</span>
           </button>
         </div>
 
@@ -268,7 +284,7 @@ function renderMatchCard(e, lg) {
         <!-- Right: Away team -->
         <div class="fb-team-col fb-team-col--away">
           <button class="fb-team-btn fb-team-btn--away" onclick="event.stopPropagation();window._fbTeam('${away.team?.id}','${awayName}','${awayBadge}')">
-            <span class="fb-match-team-name ${isPost && parseInt(awayScore) > parseInt(homeScore) ? 'fb-winner' : ''}">${awayName}</span>
+            <span class="fb-match-team-name ${isPost && awayWinner ? 'fb-winner' : ''}">${awayName}</span>
             ${badge(awayBadge, 24)}
           </button>
         </div>
@@ -1022,12 +1038,23 @@ export async function fetchLiveScores() {
           const home = competitors.find(c => c.homeAway === 'home') || {};
           const away = competitors.find(c => c.homeAway === 'away') || {};
 
+          let homeShootout = home.shootoutScore;
+          let awayShootout = away.shootoutScore;
+          if ((homeShootout === undefined || homeShootout === null) && home.linescores && home.linescores.length > 2) {
+            if (status?.name?.includes('PEN') || status?.name?.includes('SHOOTOUT') || status?.detail?.toLowerCase().includes('pen') || status?.detail?.toLowerCase().includes('shootout')) {
+              homeShootout = home.linescores[home.linescores.length - 1]?.value ?? home.linescores[home.linescores.length - 1]?.displayValue;
+              awayShootout = away.linescores[away.linescores.length - 1]?.value ?? away.linescores[away.linescores.length - 1]?.displayValue;
+            }
+          }
+
           allMatches.push({
             league: leagueShortNames[key] || key.toUpperCase(),
             home: home.team?.displayName || 'HOME',
             away: away.team?.displayName || 'AWAY',
             homeScore: home.score ?? 0,
             awayScore: away.score ?? 0,
+            homeShootout: homeShootout !== undefined && homeShootout !== null ? homeShootout : null,
+            awayShootout: awayShootout !== undefined && awayShootout !== null ? awayShootout : null,
             status: status?.state || 'pre', // 'pre' | 'in' | 'post'
             statusDetail: status?.detail || 'Chưa diễn ra',
             date: e.date ? new Date(e.date).toLocaleString('vi-VN', { timeZone: VN_TZ }) : ''
@@ -1040,6 +1067,8 @@ export async function fetchLiveScores() {
               away: away.team?.abbreviation || away.team?.shortDisplayName || away.team?.displayName || 'AWAY',
               homeScore: home.score ?? 0,
               awayScore: away.score ?? 0,
+              homeShootout: homeShootout !== undefined && homeShootout !== null ? homeShootout : null,
+              awayShootout: awayShootout !== undefined && awayShootout !== null ? awayShootout : null,
               time: status.detail || 'LIVE'
             });
           }
@@ -1049,6 +1078,19 @@ export async function fetchLiveScores() {
       }
     });
     await Promise.all(promises);
+
+    // Sort matches: World Cup 2026 first, then others
+    const leagueOrder = ['World Cup 2026', 'Ngoại hạng Anh', 'La Liga', 'Serie A', 'UCL'];
+    allMatches.sort((a, b) => {
+      const idxA = leagueOrder.indexOf(a.league);
+      const idxB = leagueOrder.indexOf(b.league);
+      return (idxA !== -1 ? idxA : 99) - (idxB !== -1 ? idxB : 99);
+    });
+    liveMatches.sort((a, b) => {
+      const idxA = leagueOrder.indexOf(a.league);
+      const idxB = leagueOrder.indexOf(b.league);
+      return (idxA !== -1 ? idxA : 99) - (idxB !== -1 ? idxB : 99);
+    });
   } catch (err) {
     console.warn('[Football Live] error:', err.message);
   }

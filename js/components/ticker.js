@@ -1,4 +1,5 @@
 /**
+ * 
  * components/ticker.js
  * Builds and updates the scrolling ticker tape.
  */
@@ -21,8 +22,8 @@ export function renderTicker() {
     const canchi = canChiYear(lunar.year);
     items.push(
       `<span class="ticker-item">` +
- `<span class="symbol">Lịch Âm</span> ` +
-        `<span class="val">${lunar.day}/${lunar.month} (${canchi})</span>` +
+      `<span class="symbol">Lịch Âm</span> ` +
+      `<span class="val">${lunar.day}/${lunar.month} (${canchi})</span>` +
       `</span>`
     );
   } catch (err) {
@@ -47,9 +48,9 @@ export function renderTicker() {
       const cls = pct >= 0 ? 'up' : 'dn';
       items.push(
         `<span class="ticker-item">` +
- `<span class="symbol">${label}</span> ` +
-          `<span class="val">${price.toLocaleString('vi-VN', { maximumFractionDigits: 2 })}</span> ` +
-          `<span class="${cls}">${sign}${pct.toFixed(2)}%</span>` +
+        `<span class="symbol">${label}</span> ` +
+        `<span class="val">${price.toLocaleString('vi-VN', { maximumFractionDigits: 2 })}</span> ` +
+        `<span class="${cls}">${sign}${pct.toFixed(2)}%</span>` +
         `</span>`
       );
     }
@@ -58,11 +59,15 @@ export function renderTicker() {
   // ── 2.5. Live Football Matches ──
   if (state.liveFootballMatches?.length) {
     for (const m of state.liveFootballMatches) {
+      let scoreText = `${m.homeScore} - ${m.awayScore}`;
+      if (m.homeShootout !== undefined && m.awayShootout !== undefined && m.homeShootout !== null && m.awayShootout !== null) {
+        scoreText = `${m.homeScore} - ${m.awayScore} (${m.homeShootout}-${m.awayShootout} pen)`;
+      }
       items.push(
         `<span class="ticker-item">` +
- `<span class="symbol" style="color:var(--accent-red);font-weight:700;">LIVE ${m.league}</span> ` +
-          `<span class="val">${m.home} ${m.homeScore} - ${m.awayScore} ${m.away}</span> ` +
-          `<span style="color:var(--accent-green);font-weight:600;margin-left:4px;">(${m.time})</span>` +
+        `<span class="symbol" style="color:var(--accent-red);font-weight:700;">LIVE ${m.league}</span> ` +
+        `<span class="val">${m.home} ${scoreText} ${m.away}</span> ` +
+        `<span style="color:var(--accent-green);font-weight:600;margin-left:4px;">(${m.time})</span>` +
         `</span>`
       );
     }
@@ -78,8 +83,8 @@ export function renderTicker() {
       const desc = state.weatherData.weather?.[0]?.description ?? '';
       items.push(
         `<span class="ticker-item">` +
- `<span class="symbol">Thời tiết ${name}</span> ` +
-          `<span class="val">${temp}°C · ${desc}</span>` +
+        `<span class="symbol">Thời tiết ${name}</span> ` +
+        `<span class="val">${temp}°C · ${desc}</span>` +
         `</span>`
       );
     } catch (err) {
@@ -92,7 +97,7 @@ export function renderTicker() {
     const aqiVal = state.aqiData.aqi;
     const aqiLabel = state.aqiData.label;
     const city = state.aqiData.city;
-    
+
     let color = 'var(--accent-green)';
     if (aqiVal > 150) color = 'var(--accent-red)';
     else if (aqiVal > 100) color = '#fb923c';
@@ -100,9 +105,9 @@ export function renderTicker() {
 
     items.push(
       `<span class="ticker-item">` +
- `<span class="symbol">️ AQI ${city}</span> ` +
-        `<span class="val">${aqiVal}</span> ` +
-        `<span style="color:${color};font-weight:600;">${aqiLabel}</span>` +
+      `<span class="symbol">️ AQI ${city}</span> ` +
+      `<span class="val">${aqiVal}</span> ` +
+      `<span style="color:${color};font-weight:600;">${aqiLabel}</span>` +
       `</span>`
     );
   }
@@ -118,8 +123,8 @@ export function renderTicker() {
     }
     items.push(
       `<span class="ticker-item">` +
- `<span class="symbol">VÀNG</span> ` +
-        `<span class="val">${goldText}</span>` +
+      `<span class="symbol">VÀNG</span> ` +
+      `<span class="val">${goldText}</span>` +
       `</span>`
     );
   }
@@ -144,8 +149,8 @@ export function renderTicker() {
   for (const g of gasList.slice(0, 2)) {
     items.push(
       `<span class="ticker-item">` +
- `<span class="symbol">${g.name}</span> ` +
-        `<span class="val">${g.price.toLocaleString('vi-VN')}₫/lít</span>` +
+      `<span class="symbol">${g.name}</span> ` +
+      `<span class="val">${g.price.toLocaleString('vi-VN')}₫/lít</span>` +
       `</span>`
     );
   }
@@ -153,14 +158,14 @@ export function renderTicker() {
   // ── 7. Crypto Prices (First 8 coins) ──
   if (state.cryptoData?.length) {
     for (const c of state.cryptoData.slice(0, 8)) {
-      const chg  = c.price_change_percentage_24h ?? 0;
+      const chg = c.price_change_percentage_24h ?? 0;
       const sign = chg >= 0 ? '+' : '';
-      const cls  = chg >= 0 ? 'up' : 'dn';
+      const cls = chg >= 0 ? 'up' : 'dn';
       items.push(
         `<span class="ticker-item">` +
-          `<span class="symbol">${c.symbol.toUpperCase()}</span> ` +
-          `<span class="val">${fmtPrice(c.current_price)}</span> ` +
-          `<span class="${cls}">${sign}${chg.toFixed(2)}%</span>` +
+        `<span class="symbol">${c.symbol.toUpperCase()}</span> ` +
+        `<span class="val">${fmtPrice(c.current_price)}</span> ` +
+        `<span class="${cls}">${sign}${chg.toFixed(2)}%</span>` +
         `</span>`
       );
     }
@@ -172,8 +177,8 @@ export function renderTicker() {
       if (!rateToVnd) continue;
       items.push(
         `<span class="ticker-item">` +
-          `<span class="symbol">${cur}/VND</span> ` +
-          `<span class="val">${Math.round(rateToVnd).toLocaleString('vi-VN')}₫</span>` +
+        `<span class="symbol">${cur}/VND</span> ` +
+        `<span class="val">${Math.round(rateToVnd).toLocaleString('vi-VN')}₫</span>` +
         `</span>`
       );
     }

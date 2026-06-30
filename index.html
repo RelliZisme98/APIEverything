@@ -62,7 +62,7 @@
 <body>
 
   <!-- ═══════════════ MOBILE HAMBURGER ═══════════════ -->
- <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Mở menu"></button>
+ <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Mở menu"><i class="fas fa-bars"></i></button>
   <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
   <!-- ═══════════════ APP SHELL ═══════════════ -->
@@ -534,13 +534,36 @@
     }
 
     function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('open');
-      document.getElementById('sidebarOverlay').classList.toggle('visible');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      const toggleBtn = document.getElementById('sidebarToggle');
+      const icon = toggleBtn ? toggleBtn.querySelector('i') : null;
+
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('visible');
+      document.body.classList.toggle('sidebar-open');
+
+      if (sidebar.classList.contains('open')) {
+        if (icon) icon.className = 'fas fa-times';
+        if (toggleBtn) toggleBtn.setAttribute('title', 'Đóng menu');
+      } else {
+        if (icon) icon.className = 'fas fa-bars';
+        if (toggleBtn) toggleBtn.setAttribute('title', 'Mở menu');
+      }
     }
 
     function closeSidebar() {
-      document.getElementById('sidebar').classList.remove('open');
-      document.getElementById('sidebarOverlay').classList.remove('visible');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      const toggleBtn = document.getElementById('sidebarToggle');
+      const icon = toggleBtn ? toggleBtn.querySelector('i') : null;
+
+      if (sidebar) sidebar.classList.remove('open');
+      if (overlay) overlay.classList.remove('visible');
+      document.body.classList.remove('sidebar-open');
+
+      if (icon) icon.className = 'fas fa-bars';
+      if (toggleBtn) toggleBtn.setAttribute('title', 'Mở menu');
     }
 
     // ── Sidebar quick filter ──
