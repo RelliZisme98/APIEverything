@@ -5,8 +5,25 @@ import { fetchNews, fetchArticle, relativeTime, FEEDS } from '../api/news.js';
 import { state } from '../store/state.js';
 
 let currentSource = 'vnexpress';
+let currentCategory = 'all';
 let currentArticles = [];
 let visibleCount = 12;
+
+const CATEGORIES = {
+  all: 'Mới nhất',
+  thoisu: 'Thời sự',
+  thegioi: 'Thế giới',
+  kinhdoanh: 'Kinh doanh',
+  giaitri: 'Giải trí',
+  thethao: 'Thể thao',
+  congnghe: 'Công nghệ'
+};
+
+const SOURCE_CATEGORIES = {
+  genk: ['all', 'congnghe'],
+  tinhte: ['all', 'congnghe'],
+  kenh14: ['all', 'giaitri', 'thethao']
+};
 
 export async function renderNews(containerId = 'newsContent', isSilent = false) {
   const el = document.getElementById(containerId);
@@ -26,9 +43,28 @@ export async function renderNews(containerId = 'newsContent', isSilent = false) 
     </button>
   `).join('');
 
+  // Category tabs
+  const getAllowedCategories = () => {
+    return SOURCE_CATEGORIES[currentSource] || Object.keys(CATEGORIES);
+  };
+
+  const categoryTabs = () => {
+    const allowed = getAllowedCategories();
+    return `
+      <div class="news-category-tabs">
+        ${allowed.map(catKey => `
+          <button class="news-cat-tab ${catKey === currentCategory ? 'active' : ''}"
+                  onclick="window.newsSelectCategory('${catKey}')">
+            ${CATEGORIES[catKey]}
+          </button>
+        `).join('')}
+      </div>
+    `;
+  };
+
   try {
     // Fetch all available articles to support complete pagination
-    const articles = await fetchNews(currentSource);
+    const articles = await fetchNews(currentSource, currentCategory);
     currentArticles = articles;
     state.newsArticles = articles.map(a => ({
       source: a.source,
@@ -41,6 +77,7 @@ export async function renderNews(containerId = 'newsContent', isSilent = false) 
     if (!articles.length) {
       el.innerHTML = `
         <div class="news-tabs">${tabs()}</div>
+        ${categoryTabs()}
         <div class="error-msg">⚠️ Không tải được tin tức. Vui lòng kiểm tra lại kết nối mạng hoặc thử lại sau.</div>`;
       return;
     }
@@ -76,6 +113,7 @@ export async function renderNews(containerId = 'newsContent', isSilent = false) 
 
     el.innerHTML = `
       <div class="news-tabs">${tabs()}</div>
+      ${categoryTabs()}
       <div class="news-grid">${cards}</div>
       ${loadMoreButton}
       <div class="news-footer">
@@ -89,7 +127,10 @@ export async function renderNews(containerId = 'newsContent', isSilent = false) 
     _ensureReaderDOM();
 
   } catch (err) {
-    el.innerHTML = `<div class="news-tabs">${tabs()}</div><div class="error-msg">⚠️ ${err.message}</div>`;
+    el.innerHTML = `
+      <div class="news-tabs">${tabs()}</div>
+      ${categoryTabs()}
+      <div class="error-msg">⚠️ ${err.message}</div>`;
   }
 }
 
@@ -181,6 +222,12 @@ document.addEventListener('keydown', e => {
 
 window.newsSelectSource = async (src) => {
   currentSource = src;
+  currentCategory = 'all';
+  await renderNews();
+};
+
+window.newsSelectCategory = async (cat) => {
+  currentCategory = cat;
   await renderNews();
 };
 

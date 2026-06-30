@@ -526,13 +526,33 @@ async function handleTaxCheck() {
     const response = await fetch(`/api/tax-lookup?q=${encodeURIComponent(input)}`);
     if (!response.ok) {
       const errData = await response.json();
-      resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Lỗi: ${errData.error || 'Không tìm thấy kết quả phù hợp.'}</div>`;
+      resDiv.innerHTML = `
+        <div class="lk-result-box" style="color:#f87171;">
+          <div>⚠️ Lỗi: ${errData.error || 'Không tìm thấy thông tin doanh nghiệp khớp với mã số thuế hoặc từ khóa này.'}</div>
+          <div style="margin-top: 12px; font-size: 12px; color: var(--text-secondary); border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px; line-height: 1.4;">
+            💡 <strong>Mẹo tra cứu cá nhân:</strong> Một số mã số thuế cá nhân mới hoặc bảo mật cao không thể tra cứu tự động. Bạn có thể truy cập trực tiếp trang chính thức của Tổng cục Thuế:
+            <div style="margin-top: 6px;">
+              <a href="https://canhan.gdt.gov.vn" target="_blank" class="lot-link" style="padding: 4px 12px; font-size:11px; display: inline-block;">canhan.gdt.gov.vn ↗</a>
+            </div>
+            hoặc tra cứu trên ứng dụng di động <strong>eTax Mobile</strong> của Ngành Thuế.
+          </div>
+        </div>`;
       return;
     }
 
     const data = await response.json();
     if (!data.results || data.results.length === 0) {
-      resDiv.innerHTML = `<div class="lk-result-box" style="color:#fbbf24;">⚠️ Không tìm thấy thông tin khớp với từ khóa của bạn.</div>`;
+      resDiv.innerHTML = `
+        <div class="lk-result-box" style="color:#fbbf24;">
+          <div>⚠️ Không tìm thấy thông tin khớp với từ khóa của bạn.</div>
+          <div style="margin-top: 12px; font-size: 12px; color: var(--text-secondary); border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px; line-height: 1.4;">
+            💡 <strong>Mẹo tra cứu cá nhân:</strong> Một số mã số thuế cá nhân mới hoặc bảo mật cao không thể tra cứu tự động. Bạn có thể truy cập trực tiếp trang chính thức của Tổng cục Thuế:
+            <div style="margin-top: 6px;">
+              <a href="https://canhan.gdt.gov.vn" target="_blank" class="lot-link" style="padding: 4px 12px; font-size:11px; display: inline-block;">canhan.gdt.gov.vn ↗</a>
+            </div>
+            hoặc tra cứu trên ứng dụng di động <strong>eTax Mobile</strong> của Ngành Thuế.
+          </div>
+        </div>`;
       return;
     }
 

@@ -70,13 +70,13 @@ export function relativeTime(dateStr) {
 }
 
 /** Fetch RSS via Cloudflare proxy */
-export async function fetchNews(sourceKey = 'vnexpress') {
+export async function fetchNews(sourceKey = 'vnexpress', categoryKey = 'all') {
   const feed = FEEDS[sourceKey];
   if (!feed) return [];
 
   try {
     const res = await fetch(
-      `/api/news?source=${encodeURIComponent(sourceKey)}`,
+      `/api/news?source=${encodeURIComponent(sourceKey)}&category=${encodeURIComponent(categoryKey)}`,
       { signal: AbortSignal.timeout(10000) }
     );
     if (!res.ok) throw new Error(`HTTP ${res.status}`);

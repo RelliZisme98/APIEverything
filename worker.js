@@ -1710,37 +1710,136 @@ async function handleApiNews(request) {
 
   const { searchParams } = new URL(request.url);
   const source = searchParams.get('source') || 'vnexpress';
+  const category = searchParams.get('category') || 'all';
 
-  let feedUrl = 'https://vnexpress.net/rss/tin-moi-nhat.rss';
-  if (source === 'tuoitre') {
-    feedUrl = 'https://tuoitre.vn/rss/tin-moi-nhat.rss';
-  } else if (source === 'dantri') {
-    feedUrl = 'https://dantri.com.vn/rss/home.rss';
-  } else if (source === 'genk') {
-    feedUrl = 'https://genk.vn/rss/home.rss';
-  } else if (source === 'thanhnien') {
-    feedUrl = 'https://thanhnien.vn/rss/home.rss';
-  } else if (source === 'vietnamnet') {
-    feedUrl = 'https://vietnamnet.vn/rss/thoi-su.rss';
-  } else if (source === 'vtv') {
-    feedUrl = 'https://vtv.vn/rss/home.rss';
-  } else if (source === 'tinhte') {
-    feedUrl = 'https://tinhte.vn/rss';
-  } else if (source === 'kenh14') {
-    feedUrl = 'https://kenh14.vn/rss/home.rss';
+  const FEEDS_MAP = {
+    vnexpress: {
+      all: 'https://vnexpress.net/rss/tin-moi-nhat.rss',
+      thoisu: 'https://vnexpress.net/rss/thoi-su.rss',
+      thegioi: 'https://vnexpress.net/rss/the-gioi.rss',
+      kinhdoanh: 'https://vnexpress.net/rss/kinh-doanh.rss',
+      giaitri: 'https://vnexpress.net/rss/giai-tri.rss',
+      thethao: 'https://vnexpress.net/rss/the-thao.rss',
+      congnghe: 'https://vnexpress.net/rss/so-hoa.rss'
+    },
+    tuoitre: {
+      all: 'https://tuoitre.vn/rss/tin-moi-nhat.rss',
+      thoisu: 'https://tuoitre.vn/rss/thoi-su.rss',
+      thegioi: 'https://tuoitre.vn/rss/the-gioi.rss',
+      kinhdoanh: 'https://tuoitre.vn/rss/kinh-doanh.rss',
+      giaitri: 'https://tuoitre.vn/rss/giai-tri.rss',
+      thethao: 'https://tuoitre.vn/rss/the-thao.rss',
+      congnghe: 'https://tuoitre.vn/rss/nhip-song-so.rss'
+    },
+    dantri: {
+      all: 'https://dantri.com.vn/rss/home.rss',
+      thoisu: 'https://dantri.com.vn/rss/xa-hoi.rss',
+      thegioi: 'https://dantri.com.vn/rss/the-gioi.rss',
+      kinhdoanh: 'https://dantri.com.vn/rss/kinh-doanh.rss',
+      giaitri: 'https://dantri.com.vn/rss/giai-tri.rss',
+      thethao: 'https://dantri.com.vn/rss/the-thao.rss',
+      congnghe: 'https://dantri.com.vn/rss/suc-manh-so.rss'
+    },
+    thanhnien: {
+      all: 'https://thanhnien.vn/rss/home.rss',
+      thoisu: 'https://thanhnien.vn/rss/thoi-su.rss',
+      thegioi: 'https://thanhnien.vn/rss/the-gioi.rss',
+      kinhdoanh: 'https://thanhnien.vn/rss/kinh-te.rss',
+      giaitri: 'https://thanhnien.vn/rss/giai-tri.rss',
+      thethao: 'https://thanhnien.vn/rss/the-thao.rss',
+      congnghe: 'https://thanhnien.vn/rss/cong-nghe-thong-tin.rss'
+    },
+    vietnamnet: {
+      all: 'https://vietnamnet.vn/rss/tin-moi-nong.rss',
+      thoisu: 'https://vietnamnet.vn/rss/thoi-su.rss',
+      thegioi: 'https://vietnamnet.vn/rss/the-gioi.rss',
+      kinhdoanh: 'https://vietnamnet.vn/rss/kinh-doanh.rss',
+      giaitri: 'https://vietnamnet.vn/rss/giai-tri.rss',
+      thethao: 'https://vietnamnet.vn/rss/the-thao.rss',
+      congnghe: 'https://vietnamnet.vn/rss/thong-tin-truyen-thong.rss'
+    },
+    vtv: {
+      all: 'https://vtv.vn/rss/home.rss',
+      thoisu: 'https://vtv.vn/rss/trong-nuoc.rss',
+      thegioi: 'https://vtv.vn/rss/the-gioi.rss',
+      kinhdoanh: 'https://vtv.vn/rss/kinh-te.rss',
+      giaitri: 'https://vtv.vn/rss/van-hoa-giai-tri.rss',
+      thethao: 'https://vtv.vn/rss/the-thao.rss',
+      congnghe: 'https://vtv.vn/rss/cong-nghe.rss'
+    },
+    genk: {
+      all: 'https://genk.vn/rss/home.rss',
+      congnghe: 'https://genk.vn/rss/home.rss'
+    },
+    tinhte: {
+      all: 'https://tinhte.vn/rss',
+      congnghe: 'https://tinhte.vn/rss'
+    },
+    kenh14: {
+      all: 'https://kenh14.vn/rss/home.rss',
+      giaitri: 'https://kenh14.vn/star.rss',
+      thethao: 'https://kenh14.vn/sport.rss'
+    }
+  };
+
+  const sourceFeeds = FEEDS_MAP[source] || FEEDS_MAP.vnexpress;
+
+  let urlsToFetch = [];
+  if (category === 'all') {
+    // Merge the main feed and up to 3 major category feeds in parallel
+    urlsToFetch = [
+      sourceFeeds.all,
+      sourceFeeds.thoisu,
+      sourceFeeds.thegioi,
+      sourceFeeds.kinhdoanh
+    ].filter(Boolean);
+  } else {
+    const targetUrl = sourceFeeds[category] || sourceFeeds.all;
+    urlsToFetch = [targetUrl];
   }
 
   try {
-    const res = await fetch(feedUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      }
-    });
-    if (!res.ok) throw new Error(`Fetch RSS feed failed: ${res.status}`);
-    const xmlText = await res.text();
-    const items = parseRSS(xmlText);
+    const fetchPromises = urlsToFetch.map(url =>
+      fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        },
+        signal: AbortSignal.timeout(6000)
+      })
+      .then(r => r.ok ? r.text() : '')
+      .catch(e => {
+        console.warn(`Failed to fetch feed ${url}:`, e.message);
+        return '';
+      })
+    );
 
-    return new Response(JSON.stringify(items), {
+    const xmlTexts = await Promise.all(fetchPromises);
+    let allItems = [];
+    for (const xmlText of xmlTexts) {
+      if (xmlText) {
+        allItems = allItems.concat(parseRSS(xmlText));
+      }
+    }
+
+    // Deduplicate by link or title
+    const seen = new Set();
+    const uniqueItems = [];
+    for (const item of allItems) {
+      const key = item.link || item.title;
+      if (key && !seen.has(key)) {
+        seen.add(key);
+        uniqueItems.push(item);
+      }
+    }
+
+    // Sort by pubDate descending
+    uniqueItems.sort((a, b) => {
+      const dateA = a.pubDate ? new Date(a.pubDate).getTime() : 0;
+      const dateB = b.pubDate ? new Date(b.pubDate).getTime() : 0;
+      return dateB - dateA;
+    });
+
+    return new Response(JSON.stringify(uniqueItems), {
       status: 200,
       headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS }
     });
@@ -1955,7 +2054,8 @@ async function handleTaxLookup(request) {
     // 1. Try Minh Chuyen API
     try {
       const res = await fetch(`https://mst.minhchuyen.online/api/mst/${cleanMST}`, {
-        headers: { 'User-Agent': 'Mozilla/5.0' }
+        headers: { 'User-Agent': 'Mozilla/5.0' },
+        signal: AbortSignal.timeout(1500)
       });
       if (res.ok) {
         const data = await res.json();
@@ -1979,7 +2079,8 @@ async function handleTaxLookup(request) {
     // 2. Try VietQR API
     try {
       const res = await fetch(`https://api.vietqr.io/v2/business/${cleanMST}`, {
-        headers: { 'User-Agent': 'Mozilla/5.0' }
+        headers: { 'User-Agent': 'Mozilla/5.0' },
+        signal: AbortSignal.timeout(2000)
       });
       if (res.ok) {
         const data = await res.json();
@@ -2006,7 +2107,8 @@ async function handleTaxLookup(request) {
       const res = await fetch(`https://thongtindoanhnghiep.co/api/company/${cleanMST}`, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        }
+        },
+        signal: AbortSignal.timeout(1500)
       });
       if (res.ok) {
         const data = await res.json();
@@ -2029,16 +2131,23 @@ async function handleTaxLookup(request) {
 
     // 4. Try scraping masothue.com
     try {
-      const res = await fetch(`https://masothue.com/Search/?q=${cleanMST}`, {
+      const res = await fetch(`https://masothue.com/Search/?q=${cleanMST}&type=auto`, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, Gecko) Chrome/120.0.0.0 Safari/537.36',
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
           'Accept-Language': 'vi,en-US;q=0.7,en;q=0.3',
           'Referer': 'https://masothue.com/'
-        }
+        },
+        signal: AbortSignal.timeout(3500)
       });
       if (res.ok) {
-        const html = await res.text();
+        const finalUrl = res.url || '';
+        const path = new URL(finalUrl).pathname;
+        const isDetailPage = /^\/[0-9-]{10,14}/.test(path);
+        if (!isDetailPage) {
+          console.warn(`MasoThue scraper redirected to a non-detail URL: ${finalUrl}`);
+        } else {
+          const html = await res.text();
         
         // Match detail page
         const nameMatch = html.match(/itemprop="name"><span[^>]*>([^<]+)<\/span>/i) ||
@@ -2108,6 +2217,7 @@ async function handleTaxLookup(request) {
             results
           }));
         }
+      }
       }
     } catch (err) {
       console.warn('MasoThue scraper failed:', err);
