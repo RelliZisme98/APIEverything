@@ -1358,6 +1358,146 @@ async function handleEvents(request, env) {
 
 // ── NGÂN HÀNG ĐỀ THI IQ BẢO MẬT TRÊN SERVER (100 CÂU) ────────────────────────
 const SERVER_IQ_POOL = [
+  { q: "Số tiếp theo trong dãy: 2, 4, 8, 16, ...", options: ["24", "32", "30", "64"], ans: 1 },
+  { q: "Số tiếp theo trong dãy: 1, 1, 2, 3, 5, 8, 13, ...", options: ["15", "21", "25", "34"], ans: 1 },
+  { q: "Số tiếp theo trong dãy: 3, 5, 9, 17, ...", options: ["25", "33", "35", "41"], ans: 1 },
+  { q: "Số tiếp theo trong dãy: 100, 90, 81, 73, ...", options: ["65", "66", "67", "68"], ans: 1 },
+  { q: "Số tiếp theo trong dãy: 2, 3, 5, 7, 11, 13, ...", options: ["15", "17", "19", "21"], ans: 1 },
+  { q: "Số tiếp theo trong dãy: 1, 4, 9, 16, 25, ...", options: ["30", "35", "36", "49"], ans: 2 },
+  { q: "Số tiếp theo trong dãy: 10, 15, 21, 28, ...", options: ["35", "36", "38", "40"], ans: 1 },
+  { q: "Số tiếp theo trong dãy: 2, 5, 11, 23, ...", options: ["45", "46", "47", "49"], ans: 2 },
+  { q: "Số tiếp theo trong dãy: 1, 8, 27, 64, ...", options: ["100", "125", "150", "200"], ans: 1 },
+  { q: "Số tiếp theo trong dãy: 2, 6, 12, 20, ...", options: ["28", "30", "32", "36"], ans: 1 },
+  { q: "Số tiếp theo trong dãy: 40, 38, 35, 31, 26, ...", options: ["20", "21", "22", "19"], ans: 0 },
+  { q: "Số tiếp theo trong dãy: 1, 3, 6, 10, 15, ...", options: ["18", "20", "21", "25"], ans: 2 },
+  { q: "Số tiếp theo trong dãy: 5, 7, 11, 19, 35, ...", options: ["51", "67", "71", "75"], ans: 1 },
+  { q: "Số tiếp theo trong dãy: 1, 2, 6, 24, 120, ...", options: ["240", "600", "720", "840"], ans: 2 },
+  { q: "Số tiếp theo trong dãy: 9, 16, 25, 36, ...", options: ["40", "45", "49", "54"], ans: 2 },
+  { q: "Số nào thay thế dấu hỏi: 8 -> 64, 9 -> 81, 10 -> ?", options: ["90", "100", "110", "120"], ans: 1 },
+  { q: "Số nào thích hợp: 3 -> 12, 4 -> 20, 5 -> 30, 6 -> ?", options: ["36", "40", "42", "48"], ans: 2 },
+  { q: "Số nào tiếp theo: 7, 9, 13, 21, 37, ...", options: ["53", "69", "73", "81"], ans: 1 },
+  { q: "Số nào tiếp theo: 80, 40, 20, 10, ...", options: ["5", "2.5", "0", "8"], ans: 0 },
+  { q: "Điền số tiếp theo: 1, 5, 13, 29, 61, ...", options: ["121", "125", "127", "129"], ans: 1 },
+  { q: "Quy luật số: 4, 9, 20, 43, 90, ...", options: ["181", "183", "185", "187"], ans: 2 },
+  { q: "Tìm số tiếp theo: 2, 10, 30, 68, ...", options: ["100", "120", "130", "150"], ans: 2 },
+  { q: "Điền số tiếp theo: 0, 3, 8, 15, 24, ...", options: ["30", "35", "36", "40"], ans: 1 },
+  { q: "Điền số tiếp theo: 2, 3, 8, 63, ...", options: ["3968", "3969", "3970", "4000"], ans: 0 },
+  { q: "Điền số tiếp theo: 2, 4, 3, 9, 4, 16, 5, ...", options: ["20", "25", "30", "36"], ans: 1 },
+  { q: "Điền số tiếp theo: 1, 2, 3, 6, 11, 20, 37, ...", options: ["58", "68", "72", "76"], ans: 1 },
+  { q: "Tìm số lớn nhất có 3 chữ số khác nhau?", options: ["999", "987", "986", "978"], ans: 1 },
+  { q: "Tìm số bé nhất có 3 chữ số khác nhau?", options: ["100", "101", "102", "111"], ans: 2 },
+  { q: "Số nào không thuộc nhóm số nguyên tố: 3, 5, 7, 9, 11, 13?", options: ["5", "7", "9", "11"], ans: 2 },
+  { q: "Một nhóm người có 5 người bắt tay nhau đôi một. Hỏi có tổng cộng bao nhiêu cái bắt tay?", options: ["5", "10", "15", "20"], ans: 1 },
+  { q: "Trong phòng có 10 người. Mỗi người chào nhau 1 lần. Hỏi có bao nhiêu lời chào?", options: ["45", "90", "100", "50"], ans: 0 },
+  { q: "Cắt một sợi dây dài 10m thành các đoạn 2m. Cần cắt mấy nhát?", options: ["3", "4", "5", "6"], ans: 1 },
+  { q: "Đồng hồ chỉ 3h15. Góc giữa kim giờ và kim phút là bao nhiêu độ?", options: ["0 độ", "7.5 độ", "15 độ", "30 độ"], ans: 1 },
+  { q: "Một hộp có 5 bi đỏ, 5 bi xanh. Lấy ngẫu nhiên mấy bi để chắc chắn có 2 bi cùng màu?", options: ["2", "3", "4", "6"], ans: 1 },
+  { q: "Nếu ngày hôm kia là thứ Hai, thì ngày mai là thứ mấy?", options: ["Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"], ans: 1 },
+  { q: "Chữ cái tiếp theo trong chuỗi: A, C, E, G, ...", options: ["H", "I", "J", "K"], ans: 1 },
+  { q: "Chữ cái tiếp theo trong chuỗi: Z, X, V, T, ...", options: ["S", "R", "Q", "P"], ans: 1 },
+  { q: "Chữ cái tiếp theo trong chuỗi: A, D, G, J, ...", options: ["L", "M", "N", "O"], ans: 1 },
+  { q: "Chữ cái tiếp theo trong chuỗi: B, D, G, K, ...", options: ["N", "O", "P", "Q"], ans: 2 },
+  { q: "Chữ cái tiếp theo trong chuỗi: Z, W, T, Q, ...", options: ["M", "N", "O", "P"], ans: 1 },
+  { q: "Chữ cái tiếp theo trong chuỗi: A, B, D, G, K, ...", options: ["N", "O", "P", "Q"], ans: 2 },
+  { q: "Từ nào khác loại nhất với các từ còn lại?", options: ["Táo", "Cam", "Cà rốt", "Lê"], ans: 2 },
+  { q: "Từ nào khác loại nhất?", options: ["Sắt", "Đồng", "Nhôm", "Gỗ"], ans: 3 },
+  { q: "Từ nào khác loại nhất?", options: ["Hà Nội", "Hải Phòng", "New York", "Đà Nẵng"], ans: 2 },
+  { q: "Từ nào khác loại nhất?", options: ["Chạy", "Đi bộ", "Nhảy", "Suy nghĩ"], ans: 3 },
+  { q: "Từ nào viết đúng chính tả tiếng Việt?", options: ["Sản xuất", "Sản suất", "Sản sất", "Xản xuất"], ans: 0 },
+  { q: "Tìm từ đúng chính tả:", options: ["Trêu chọc", "Chêu chọc", "Trêu trọc", "Chêu trọc"], ans: 0 },
+  { q: "Tìm từ đúng chính tả:", options: ["Sơ suất", "Sơ xuất", "Xơ suất", "Xơ xuất"], ans: 0 },
+  { q: "Tìm từ đúng chính tả:", options: ["Dành dụm", "Giành dụm", "Dành giụm", "Giành giụm"], ans: 0 },
+  { q: "Sách đối với Đọc giống như Nhạc đối với...", options: ["Hát", "Nghe", "Đàn", "Viết"], ans: 1 },
+  { q: "Chân đối với Đi giống như Tay đối với...", options: ["Nhìn", "Cầm", "Nghe", "Ngửi"], ans: 1 },
+  { q: "Nước đối với Khát giống như Thức ăn đối với...", options: ["Mệt", "Đói", "No", "Thèm"], ans: 1 },
+  { q: "Đóng băng đối với Lạnh giống như Bay hơi đối với...", options: ["Nóng", "Mát", "Ẩm", "Khô"], ans: 0 },
+  { q: "Kim loại đối với Dẫn điện giống như Gỗ đối với...", options: ["Cách điện", "Dẫn nhiệt", "Nóng chảy", "Đàn hồi"], ans: 0 },
+  { q: "Kim cường đối với Cứng giống như Than chì đối với...", options: ["Mềm", "Đắt", "Sáng", "Dẻo"], ans: 0 },
+  { q: "Nếu tất cả A là B, tất cả B là C, thì tất cả A chắc chắn là C?", options: ["Đúng", "Sai", "Không xác định", "Chỉ đúng một nửa"], ans: 0 },
+  { q: "Nếu một vài A là B, và tất cả B là C, thì tất cả A có phải là C không?", options: ["Đúng", "Sai", "Có thể đúng có thể sai", "Không có liên hệ"], ans: 2 },
+  { q: "Bố của Mary có 5 người con gái: Nana, Nene, Nini, Nono. Người con thứ 5 tên gì?", options: ["Nunu", "Nyny", "Mary", "Nene"], ans: 2 },
+  { q: "Mary 16 tuổi, gấp 4 lần tuổi em trai. Hỏi khi Mary gấp 2 lần tuổi em trai thì Mary bao nhiêu tuổi?", options: ["20", "24", "26", "28"], ans: 1 },
+  { q: "Một cây gậy và một quả bóng giá 1.10$. Cây gậy đắt hơn quả bóng 1.00$. Quả bóng giá bao nhiêu?", options: ["0.05$", "0.10$", "1.00$", "0.50$"], ans: 0 },
+  { q: "5 máy tạo ra 5 sản phẩm trong 5 phút. Hỏi cần bao lâu để 100 máy tạo ra 100 sản phẩm?", options: ["5 phút", "20 phút", "100 phút", "50 phút"], ans: 0 },
+  { q: "Mảng súng phủ kín hồ sau 48 ngày. Mỗi ngày mảng súng tăng gấp đôi diện tích. Cần mấy ngày để phủ nửa hồ?", options: ["24 ngày", "47 ngày", "36 ngày", "12 ngày"], ans: 1 },
+  { q: "Một cái bể nước mất 6 giờ để đầy nếu dùng vòi A, mất 12 giờ nếu dùng vòi B. Hỏi mở cả hai vòi mất bao lâu?", options: ["3 giờ", "4 giờ", "5 giờ", "6 giờ"], ans: 1 },
+  { q: "Nếu đảo ngược các chữ cái trong từ 'ROMA', bạn sẽ được từ nào có nghĩa là tình yêu?", options: ["AMOR", "MOAR", "RAMO", "ARMO"], ans: 0 },
+  { q: "Con cua có 8 chân và 2 càng. Con nhện có mấy chân?", options: ["6", "8", "10", "12"], ans: 1 },
+  { q: "3 con mèo bắt 3 con chuột trong 3 phút. Hỏi 100 con mèo bắt 100 con chuột trong bao nhiêu phút?", options: ["3 phút", "100 phút", "33 phút", "1 phút"], ans: 0 },
+  { q: "Nếu bạn đi về hướng Đông rồi rẽ trái, bạn sẽ hướng về hướng nào?", options: ["Bắc", "Nam", "Tây", "Đông Bắc"], ans: 0 },
+  { q: "Một đoàn tàu dài 100m đi qua cây cầu dài 100m với vận tốc 10m/s. Mất bao lâu để tàu qua hết cầu?", options: ["10s", "20s", "30s", "15s"], ans: 1 },
+  { q: "Từ nào có nghĩa trái ngược với từ 'Khởi đầu'?", options: ["Kết thúc", "Bắt đầu", "Tiếp tục", "Tạm dừng"], ans: 0 },
+  { q: "Một cửa hàng bán cam. Lần 1 bán nửa số cam và 1 quả. Lần 2 bán nửa số còn lại và 1 quả. Còn lại 1 quả. Hỏi ban đầu có mấy quả?", options: ["8", "10", "12", "14"], ans: 1 },
+  { q: "Một chiếc áo giá 20$. Giảm giá 20%, giá mới là bao nhiêu?", options: ["15$", "16$", "18$", "10$"], ans: 1 },
+  { q: "Cái gì luôn đến vào ngày mai nhưng không bao giờ đến hôm nay?", options: ["Ngày mai", "Ngày hôm qua", "Tương lai", "Quá khứ"], ans: 0 },
+  { q: "Có bao nhiêu chữ số 9 trong dãy số từ 1 đến 100?", options: ["10", "11", "19", "20"], ans: 3 },
+  { q: "Một người đi từ A đến B với vận tốc 10km/h và quay về với 15km/h. Vận tốc trung bình của cả chuyến đi là?", options: ["12km/h", "12.5km/h", "13km/h", "11km/h"], ans: 0 },
+  { q: "Có 3 chiếc hộp: Hộp A chứa bóng đỏ, Hộp B chứa bóng xanh, Hộp C ghi 'Bóng Đỏ hoặc Xanh'. Biết tất cả các nhãn dán đều dán sai. Nếu bạn lấy 1 quả bóng từ Hộp C và thấy nó là màu Đỏ, thì Hộp A chắc chắn chứa bóng màu gì?", options: ["Bóng đỏ", "Bóng xanh", "Bóng hỗn hợp", "Không thể xác định"], ans: 1 },
+  { q: "Một người đàn ông chỉ vào một bức tranh và nói: 'Cha của người đó là con trai duy nhất của cha tôi'. Hỏi người trong bức tranh là ai đối với ông ta?", options: ["Con trai ông ta", "Cha ông ta", "Ông ta", "Cháu ông ta"], ans: 0 },
+  { q: "Nếu ngày mai của ngày hôm qua là thứ Sáu, thì ngày kia là thứ mấy?", options: ["Chủ Nhật", "Thứ Bảy", "Thứ Hai", "Thứ Ba"], ans: 0 },
+  { q: "Trong một gia đình có 6 người con trai, mỗi người con trai có 1 người chị gái. Hỏi gia đình có mấy người con?", options: ["7", "8", "12", "11"], ans: 0 },
+  { q: "Một chiếc xe buýt chạy từ điểm đầu có 10 người. Trạm thứ nhất xuống 3 người, lên 5 người. Trạm thứ hai xuống 4 người, lên 2 người. Hỏi có bao nhiêu người trên xe buýt hiện tại (kể cả tài xế)?", options: ["10", "11", "12", "13"], ans: 1 },
+  { q: "Tìm số tiếp theo của chuỗi số đảo chữ: 12, 21, 34, 43, 56, ...", options: ["65", "67", "76", "78"], ans: 0 },
+  { q: "Hãy chọn hình học hoàn chỉnh tiếp theo trong chuỗi tuần hoàn bên dưới:", options: ["Hình tròn", "Hình vuông", "Hình tam giác", "Hình lục giác"], ans: 0,
+    svg: `<svg class="iqeq-svg-diagram" viewBox="0 0 200 60"><rect x="15" y="15" width="30" height="30" fill="none" stroke="#60a5fa" stroke-width="2"/><circle cx="85" cy="30" r="15" fill="none" stroke="#60a5fa" stroke-width="2"/><rect x="135" y="15" width="30" height="30" fill="none" stroke="#60a5fa" stroke-width="2"/><text x="175" y="38" fill="#fbbf24" font-size="20" font-weight="bold">?</text></svg>`
+  },
+  { q: "Hãy xác định hình còn thiếu trong ô vuông ma trận logic 2x2 sau:", options: ["Hình vuông nét đứt", "Hình tròn nét đứt", "Hình tam giác nét liền", "Hình vuông nét liền"], ans: 0,
+    svg: `<svg class="iqeq-svg-diagram" viewBox="0 0 100 100"><line x1="50" y1="0" x2="50" y2="100" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/><line x1="0" y1="50" x2="100" y2="50" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/><circle cx="25" cy="25" r="12" fill="none" stroke="#34d399" stroke-width="2"/><circle cx="75" cy="25" r="12" fill="none" stroke="#34d399" stroke-dasharray="2,2" stroke-width="2"/><rect x="15" y="65" width="20" height="20" fill="none" stroke="#34d399" stroke-width="2"/><text x="70" y="80" fill="#60a5fa" font-size="14" font-weight="bold">?</text></svg>`
+  },
+  { q: "Có tổng cộng bao nhiêu hình tam giác đơn và ghép trong hình vẽ bên dưới?", options: ["4", "5", "6", "8"], ans: 2,
+    svg: `<svg class="iqeq-svg-diagram" viewBox="0 0 100 100"><polygon points="50,15 90,85 10,85" fill="none" stroke="#fbbf24" stroke-width="2"/><line x1="50" y1="15" x2="50" y2="85" stroke="#fbbf24" stroke-width="2"/><line x1="30" y1="50" x2="70" y2="50" stroke="#fbbf24" stroke-width="2"/></svg>`
+  },
+  { q: "Để hình vẽ đạt đối xứng trục dọc (giữa), phần nét đứt bên phải cần được thay thế bằng hình học nào?", options: ["Đường đi sang trái", "Góc nhọn hướng sang phải", "Đường thẳng đứng hoàn hảo", "Đường tròn khép kín"], ans: 1,
+    svg: `<svg class="iqeq-svg-diagram" viewBox="0 0 100 100"><line x1="50" y1="5" x2="50" y2="95" stroke="rgba(255,255,255,0.3)" stroke-dasharray="2,2"/><path d="M20,20 L40,50 L20,80" fill="none" stroke="#f472b6" stroke-width="2.5"/><path d="M50,50 L75,50" fill="none" stroke="#f472b6" stroke-width="2.5" stroke-dasharray="2,2"/><text x="70" y="40" fill="#fbbf24" font-size="14">?</text></svg>`
+  },
+  { q: "Xác định hướng xoay tiếp theo của kim mũi tên trong sơ đồ xoay logic:", options: ["Hướng bên Trái (Tây)", "Hướng đi Lên (Bắc)", "Hướng bên Phải (Đông)", "Hướng đi Xuống (Nam)"], ans: 0,
+    svg: `<svg class="iqeq-svg-diagram" viewBox="0 0 200 60"><g stroke="#818cf8" stroke-width="2" fill="none"><line x1="25" y1="40" x2="25" y2="10" marker-end="url(#arrow)"/><line x1="75" y1="25" x2="95" y2="25"/><line x1="135" y1="10" x2="135" y2="40"/></g><text x="175" y="38" fill="#fbbf24" font-size="20">?</text></svg>`
+  },
+  { q: "Hình tròn nào có kích thước lớn hơn trong ảo ảnh quang học bên dưới?", options: ["Hình tròn bên Trái", "Hình tròn bên Phải", "Hai hình tròn bằng nhau", "Không thể đo đạc"], ans: 2,
+    svg: `<svg class="iqeq-svg-diagram" viewBox="0 0 200 80"><circle cx="50" cy="40" r="10" fill="#34d399"/><circle cx="50" cy="18" r="4" fill="rgba(255,255,255,0.2)"/><circle cx="50" cy="62" r="4" fill="rgba(255,255,255,0.2)"/><circle cx="28" cy="40" r="4" fill="rgba(255,255,255,0.2)"/><circle cx="72" cy="40" r="4" fill="rgba(255,255,255,0.2)"/><circle cx="150" cy="40" r="10" fill="#34d399"/><circle cx="150" cy="15" r="12" fill="rgba(255,255,255,0.2)"/><circle cx="150" cy="65" r="12" fill="rgba(255,255,255,0.2)"/><circle cx="120" cy="40" r="12" fill="rgba(255,255,255,0.2)"/><circle cx="180" cy="40" r="12" fill="rgba(255,255,255,0.2)"/></svg>`
+  },
+  { q: "Xác định số lượng các ô vuông có trong lưới ô cờ 3x3 sau:", options: ["9", "10", "13", "14"], ans: 3,
+    svg: `<svg class="iqeq-svg-diagram" viewBox="0 0 90 90" stroke="#a7f3d0" stroke-width="2" fill="none"><rect x="15" y="15" width="60" height="60"/><line x1="35" y1="15" x2="35" y2="75"/><line x1="55" y1="15" x2="55" y2="75"/><line x1="15" y1="35" x2="75" y2="35"/><line x1="15" y1="55" x2="75" y2="55"/></svg>`
+  },
+  { q: "Chọn hình học đại diện khớp với biểu thức cộng hình học dưới đây:", options: ["Hình vuông chứa một vòng tròn bên trong", "Hình tròn chứa một hình vuông bên trong", "Hình vuông nét đứt", "Hình tròn nét đứt"], ans: 0,
+    svg: `<svg class="iqeq-svg-diagram" viewBox="0 0 200 60" stroke="#f472b6" stroke-width="2" fill="none"><rect x="10" y="20" width="20" height="20"/><text x="40" y="36" fill="#fff" font-size="14">+</text><circle cx="65" cy="30" r="8"/><text x="85" y="36" fill="#fff" font-size="14">=</text><text x="115" y="38" fill="#fbbf24" font-size="18">?</text></svg>`
+  },
+  { q: "Xác định phần tư còn thiếu để khôi phục cấu trúc đường tròn đồng tâm bên dưới:", options: ["Góc phần tư có nét vẽ ngược", "Góc phần tư có 2 cung tròn", "Góc phần tư trống rỗng", "Góc phần tư có 1 cung tròn"], ans: 1,
+    svg: `<svg class="iqeq-svg-diagram" viewBox="0 0 100 100" stroke="#818cf8" stroke-width="2" fill="none"><circle cx="50" cy="50" r="40" stroke-dasharray="10, 5"/><circle cx="50" cy="50" r="20"/><path d="M 50 10 A 40 40 0 0 1 90 50 L 50 50 Z" stroke="#34d399"/><rect x="50" y="50" width="40" height="40" stroke="rgba(255,255,255,0.2)" stroke-dasharray="2,2"/><text x="65" y="75" fill="#fbbf24" font-size="16">?</text></svg>`
+  },
+  { q: "Trong các nhóm đường thẳng song song sau, đường nào có chiều dài ngắn nhất?", options: ["Đường A", "Đường B", "Đường C", "Tất cả bằng nhau"], ans: 3,
+    svg: `<svg class="iqeq-svg-diagram" viewBox="0 0 200 80" stroke="#fff" stroke-width="2"><line x1="20" y1="20" x2="180" y2="20"/><line x1="20" y1="40" x2="180" y2="40"/><line x1="20" y1="60" x2="180" y2="60"/><path d="M 10 10 L 30 30 M 190 10 L 170 30" stroke="#f87171"/><path d="M 30 30 L 10 50 M 170 30 L 190 50" stroke="#f87171"/><path d="M 10 50 L 30 70 M 190 50 L 170 70" stroke="#f87171"/></svg>`
+  },
+  { q: "Xác định chữ số thay thế dấu chấm hỏi trong dãy số xoắn ốc logic:", options: ["12", "14", "15", "16"], ans: 1,
+    svg: `<svg class="iqeq-svg-diagram" viewBox="0 0 100 100" stroke="#fbbf24" stroke-width="1.5" fill="none"><rect x="10" y="10" width="80" height="80"/><line x1="50" y1="10" x2="50" y2="90"/><line x1="10" y1="50" x2="90" y2="50"/><text x="25" y="35" fill="#fff" font-size="12">2</text><text x="65" y="35" fill="#fff" font-size="12">5</text><text x="65" y="75" fill="#fff" font-size="12">9</text><text x="25" y="75" fill="#34d399" font-size="14" font-weight="bold">?</text></svg>`
+  },
+  { q: "Hình ngôi sao 5 cánh có mấy góc nhọn ở đỉnh?", options: ["4", "5", "6", "10"], ans: 1,
+    svg: `<svg class="iqeq-svg-diagram" viewBox="0 0 80 80" stroke="#fbbf24" stroke-width="2" fill="none"><polygon points="40,5 49,29 75,29 54,44 62,68 40,53 18,68 26,44 5,29 31,29"/></svg>`
+  },
+  { q: "Chọn hình thể hiện mặt cắt ngang của hình trụ tròn xiên bên dưới:", options: ["Hình tròn", "Hình bầu dục (Ellipse)", "Hình chữ nhật", "Hình tam giác"], ans: 1,
+    svg: `<svg class="iqeq-svg-diagram" viewBox="0 0 100 100" stroke="#34d399" stroke-width="2" fill="none"><ellipse cx="50" cy="25" rx="20" ry="8"/><line x1="30" y1="25" x2="30" y2="75"/><line x1="70" y1="25" x2="70" y2="75"/><ellipse cx="50" cy="75" rx="20" ry="8" stroke-dasharray="2,2"/><line x1="20" y1="40" x2="80" y2="60" stroke="#f87171" stroke-width="1.5"/></svg>`
+  },
+  { q: "Hình biểu diễn nào mô tả góc nhìn từ trên xuống (top-down) của hình chóp tứ giác?", options: ["Hình vuông có 2 đường chéo", "Hình tròn có tâm", "Hình tam giác cân", "Hai hình chữ nhật ghép lại"], ans: 0,
+    svg: `<svg class="iqeq-svg-diagram" viewBox="0 0 100 100" stroke="#818cf8" stroke-width="2" fill="none"><polygon points="50,15 85,75 15,75"/><line x1="50" y1="15" x2="50" y2="75" stroke-dasharray="2,2"/></svg>`
+  },
+  { q: "Hãy tìm quy luật màu sắc để chọn ô tròn tiếp theo điền vào dấu chấm hỏi:", options: ["Ô màu Đỏ", "Ô màu Xanh", "Ô màu Vàng", "Ô màu Trắng"], ans: 1,
+    svg: `<svg class="iqeq-svg-diagram" viewBox="0 0 200 60"><circle cx="20" cy="30" r="12" fill="#f87171"/><circle cx="60" cy="30" r="12" fill="#60a5fa"/><circle cx="100" cy="30" r="12" fill="#f87171"/><circle cx="140" cy="30" r="12" fill="#60a5fa"/><text x="175" y="38" fill="#fff" font-size="20">?</text></svg>`
+  },
+  { q: "Xác định góc tạo bởi hai kim đồng hồ khi đồng hồ chỉ đúng 6 giờ?", options: ["90 độ", "120 độ", "180 độ", "360 độ"], ans: 2,
+    svg: `<svg class="iqeq-svg-diagram" viewBox="0 0 80 80" stroke="#34d399" stroke-width="2" fill="none"><circle cx="40" cy="40" r="30"/><line x1="40" y1="40" x2="40" y2="15"/><line x1="40" y1="40" x2="40" y2="65" stroke="#f87171"/></svg>`
+  },
+  { q: "Xác định số lượng các tam giác nhỏ trong hình ngũ giác đều sau:", options: ["3", "5", "6", "10"], ans: 1,
+    svg: `<svg class="iqeq-svg-diagram" viewBox="0 0 80 80" stroke="#818cf8" stroke-width="1.5" fill="none"><polygon points="40,10 70,32 58,68 22,68 10,32"/><line x1="40" y1="10" x2="58" y2="68"/><line x1="40" y1="10" x2="22" y2="68"/></svg>`
+  },
+  { q: "Xác định nét vẽ còn thiếu để khôi phục chữ H đối xứng qua gương ngang:", options: ["Nét ngang dịch xuống", "Nét ngang dịch lên", "Nét ngang ở chính giữa", "Không cần nét ngang"], ans: 2,
+    svg: `<svg class="iqeq-svg-diagram" viewBox="0 0 80 80" stroke="#fff" stroke-width="3" fill="none"><line x1="20" y1="15" x2="20" y2="65"/><line x1="60" y1="15" x2="60" y2="65"/><line x1="20" y1="40" x2="60" y2="40" stroke="#f87171" stroke-dasharray="2,2"/></svg>`
+  },
+  { q: "Hình hộp lập phương có bao nhiêu đỉnh tổng cộng?", options: ["6 đỉnh", "8 đỉnh", "12 đỉnh", "16 đỉnh"], ans: 1,
+    svg: `<svg class="iqeq-svg-diagram" viewBox="0 0 80 80" stroke="#34d399" stroke-width="1.5" fill="none"><rect x="15" y="25" width="40" height="40"/><rect x="25" y="15" width="40" height="40"/><line x1="15" y1="25" x2="25" y2="15"/><line x1="55" y1="25" x2="65" y2="15"/><line x1="15" y1="65" x2="25" y2="55"/><line x1="55" y1="65" x2="65" y2="55"/></svg>`
+  },
+  { q: "Chọn hình thể hiện đầy đủ các trục đối xứng của một hình tròn:", options: ["1 trục", "2 trục", "4 trục", "Vô số trục"], ans: 3,
+    svg: `<svg class="iqeq-svg-diagram" viewBox="0 0 80 80" stroke="rgba(255,255,255,0.4)" stroke-width="1" fill="none"><circle cx="40" cy="40" r="30" stroke="#fbbf24" stroke-width="2"/><line x1="40" y1="5" x2="40" y2="75"/><line x1="5" y1="40" x2="75" y2="40"/><line x1="15" y1="15" x2="65" y2="65"/><line x1="15" y1="65" x2="65" y2="15"/></svg>`
+  }
 ];
 
 // ── NGÂN HÀNG ĐỀ THI EQ BẢO MẬT TRÊN SERVER (100 CÂU) ────────────────────────
@@ -1477,16 +1617,13 @@ async function handleIQEQ(request, env) {
 
   const url = env.SUPABASE_URL ? env.SUPABASE_URL.trim().replace(/^['\"]|['\"]$/g, '') : '';
   const key = env.SUPABASE_KEY ? env.SUPABASE_KEY.trim().replace(/^['\"]|['\"]$/g, '') : '';
+  const hasDb = !!(url && key);
 
-  if (!url || !key) {
-    return cors(JSON.stringify({ error: 'Supabase URL or Key is missing' }), 503);
-  }
-
-  const supabaseHeaders = {
+  const supabaseHeaders = hasDb ? {
     'apikey': key,
     'Authorization': `Bearer ${key}`,
     'Content-Type': 'application/json'
-  };
+  } : null;
 
   const { searchParams } = new URL(request.url);
   const action = searchParams.get('action') || 'list';
@@ -1675,20 +1812,29 @@ async function handleIQEQ(request, env) {
         created_at: new Date().toISOString()
       };
 
-      await fetch(`${url}/rest/v1/iqeq_results`, {
-        method: 'POST',
-        headers: {
-          ...supabaseHeaders,
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify(dbPayload)
-      });
+      if (hasDb) {
+        try {
+          await fetch(`${url}/rest/v1/iqeq_results`, {
+            method: 'POST',
+            headers: {
+              ...supabaseHeaders,
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify(dbPayload)
+          });
+        } catch (dbErr) {
+          console.error('Failed to save IQ/EQ result to Supabase:', dbErr);
+        }
+      }
 
       return cors(JSON.stringify(responsePayload), 200);
     }
 
     // 3. ĐỌC LỊCH SỬ KẾT QUẢ ĐÃ LƯU
     if (request.method === 'GET' && action === 'list') {
+      if (!hasDb) {
+        return cors(JSON.stringify([]), 200);
+      }
       const res = await fetch(`${url}/rest/v1/iqeq_results?select=*&order=created_at.desc`, {
         headers: supabaseHeaders
       });
