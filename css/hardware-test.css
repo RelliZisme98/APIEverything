@@ -1,0 +1,515 @@
+/* css/hardware-test.css */
+
+.test-container {
+  display: flex;
+  gap: 20px;
+  min-height: 500px;
+  animation: fadeIn 0.3s ease;
+}
+
+@media (max-width: 900px) {
+  .test-container {
+    flex-direction: column;
+  }
+}
+
+/* Sidebar navigation for tests */
+.test-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 200px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 12px;
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+}
+
+@media (max-width: 900px) {
+  .test-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 8px;
+  }
+}
+
+.test-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.test-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+}
+
+.test-nav-btn.active {
+  background: rgba(96, 165, 250, 0.12);
+  border-color: rgba(96, 165, 250, 0.25);
+  color: var(--accent-blue);
+}
+
+/* Main display area */
+.test-content-area {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 24px;
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  position: relative;
+}
+
+.test-panel {
+  display: none;
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  height: 100%;
+}
+
+.test-panel.active {
+  display: block;
+}
+
+/* Keyboard Test Styles */
+.keyboard-wrapper {
+  display: flex;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 15px;
+  width: max-content;
+}
+
+#keyboard-layout-container {
+  width: 100%;
+  overflow: visible;
+  transition: height 0.2s ease;
+}
+
+.keyboard-main-block {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.keyboard-row {
+  display: flex;
+  gap: 5px;
+  justify-content: flex-start;
+}
+
+.keyboard-nav-block {
+  display: grid;
+  grid-template-columns: repeat(3, 36px);
+  grid-template-rows: repeat(6, 40px);
+  gap: 5px;
+}
+
+.keyboard-numpad-block {
+  display: grid;
+  grid-template-columns: repeat(4, 36px);
+  grid-template-rows: repeat(6, 40px);
+  gap: 5px;
+}
+
+.key-cap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2px;
+  min-width: 36px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: bold;
+  color: var(--text-secondary);
+  cursor: default;
+  user-select: none;
+  transition: all 0.08s ease;
+  box-sizing: border-box;
+}
+
+.key-cap.spacer {
+  background: transparent !important;
+  border-color: transparent !important;
+  pointer-events: none;
+}
+
+.key-cap.pressed {
+  background: var(--accent-blue) !important;
+  color: #fff !important;
+  border-color: #93c5fd !important;
+  box-shadow: 0 0 12px rgba(96, 165, 250, 0.6);
+  transform: scale(0.95);
+}
+
+.key-cap.tested {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+/* Custom key widths */
+.key-backspace { width: 72px; }
+.key-tab { width: 54px; }
+.key-backslash { width: 45px; }
+.key-capslock { width: 68px; }
+.key-enter { width: 77px; }
+.key-shift-l { width: 90px; }
+.key-shift-r { width: 90px; }
+.key-ctrl { width: 50px; }
+.key-win { width: 50px; }
+.key-alt { width: 50px; }
+.key-space { width: 250px; }
+.key-fn { width: 50px; }
+
+.key-numpad-add {
+  grid-row: span 2;
+  height: 85px;
+}
+
+.key-numpad-enter {
+  grid-row: span 2;
+  height: 85px;
+}
+
+.key-numpad-zero {
+  grid-column: span 2;
+  min-width: 77px;
+}
+
+/* Mouse Test Styles */
+.mouse-test-wrapper {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  gap: 20px;
+  margin-top: 15px;
+}
+
+@media (max-width: 800px) {
+  .mouse-test-wrapper {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mouse-buttons-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.mouse-btn-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.mouse-btn-indicator.active {
+  background: rgba(52, 211, 153, 0.12);
+  border-color: rgba(52, 211, 153, 0.4);
+  color: #34d399;
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.2);
+}
+
+.mouse-wheel-box {
+  grid-column: span 2;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.mouse-wheel-arrow {
+  font-size: 24px;
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+
+.mouse-wheel-arrow.scrolling-up {
+  color: var(--accent-blue);
+  transform: translateY(-10px);
+}
+
+.mouse-wheel-arrow.scrolling-down {
+  color: var(--accent-purple);
+  transform: translateY(10px);
+}
+
+.mouse-canvas-area {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  height: 350px;
+  position: relative;
+  cursor: crosshair;
+}
+
+.mouse-canvas-info {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* Audio Test Styles */
+.audio-test-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 15px;
+}
+
+@media (max-width: 700px) {
+  .audio-test-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.audio-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.audio-channels {
+  display: flex;
+  gap: 10px;
+}
+
+.audio-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.audio-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.audio-btn.playing {
+  background: rgba(96, 165, 250, 0.15);
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+}
+
+.audio-mic-visualizer {
+  height: 80px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.mic-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+  transition: width 0.05s ease-out;
+}
+
+/* Battery Test Styles */
+.battery-status-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.battery-visual {
+  width: 120px;
+  height: 200px;
+  border: 4px solid var(--text-secondary);
+  border-radius: 18px;
+  padding: 6px;
+  position: relative;
+}
+
+.battery-visual::after {
+  content: '';
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 12px;
+  background: var(--text-secondary);
+  border-radius: 6px 6px 0 0;
+}
+
+.battery-level-fill {
+  width: 100%;
+  height: 100%;
+  background: var(--accent-green);
+  border-radius: 10px;
+  transform-origin: bottom;
+  transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.5s;
+}
+
+.battery-visual.charging .battery-level-fill {
+  background: #fbbf24;
+  animation: pulseCharge 1.5s infinite alternate;
+}
+
+.battery-info-text {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 250px;
+}
+
+.battery-stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* Gamepad Test Styles */
+.gamepad-connect-status {
+  text-align: center;
+  padding: 40px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.01);
+  margin-top: 15px;
+}
+
+.gamepad-visualizer {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr;
+  gap: 20px;
+  margin-top: 20px;
+  align-items: center;
+}
+
+@media (max-width: 800px) {
+  .gamepad-visualizer {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gamepad-column {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 16px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.analog-stick-box {
+  width: 100px;
+  height: 100px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  margin: 0 auto;
+  position: relative;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.analog-stick-dot {
+  width: 20px;
+  height: 20px;
+  background: var(--accent-blue);
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: transform 0.05s ease-out;
+  box-shadow: 0 0 8px rgba(96, 165, 250, 0.6);
+}
+
+.gamepad-btn-indicator {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.gamepad-btn-indicator.active {
+  background: rgba(96, 165, 250, 0.15);
+  color: var(--accent-blue);
+  font-weight: 700;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseCharge {
+  0% { opacity: 0.7; }
+  100% { opacity: 1; }
+}

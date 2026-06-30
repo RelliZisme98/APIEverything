@@ -66,6 +66,112 @@ const POSTAL_CODES = {
   "bka": { name: "Bắc Kạn", code: "26000" }
 };
 
+const LICENSE_PLATES = [
+  { code: "29, 30, 31, 32, 33, 40", province: "Hà Nội", status: "Hoạt động", note: "Mã 33 trước đây thuộc tỉnh Hà Tây (sáp nhập vào Hà Nội năm 2008)." },
+  { code: "41, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59", province: "TP. Hồ Chí Minh", status: "Hoạt động", note: "" },
+  { code: "15, 16", province: "Hải Phòng", status: "Hoạt động", note: "" },
+  { code: "43", province: "Đà Nẵng", status: "Hoạt động", note: "" },
+  { code: "65", province: "Cần Thơ", status: "Hoạt động", note: "" },
+  { code: "33", province: "Hà Tây (Cũ)", status: "Sáp nhập", note: "Đã sáp nhập vào Hà Nội từ 2008. Hiện tại mã 33 vẫn tiếp tục được cấp cho một số quận huyện tại Hà Nội." },
+  { code: "67", province: "An Giang", status: "Hoạt động", note: "" },
+  { code: "72", province: "Bà Rịa - Vũng Tàu", status: "Hoạt động", note: "" },
+  { code: "94", province: "Bạc Liêu", status: "Hoạt động", note: "Tách ra từ tỉnh Minh Hải cũ." },
+  { code: "98", province: "Bắc Giang", status: "Hoạt động", note: "Tách ra từ tỉnh Hà Bắc cũ." },
+  { code: "97", province: "Bắc Kạn", status: "Hoạt động", note: "" },
+  { code: "99", province: "Bắc Ninh", status: "Hoạt động", note: "Tách ra từ tỉnh Hà Bắc cũ." },
+  { code: "71", province: "Bến Tre", status: "Hoạt động", note: "" },
+  { code: "61", province: "Bình Dương", status: "Hoạt động", note: "Tách ra từ tỉnh Sông Bé cũ." },
+  { code: "77", province: "Bình Định", status: "Hoạt động", note: "" },
+  { code: "93", province: "Bình Phước", status: "Hoạt động", note: "Tách ra từ tỉnh Sông Bé cũ." },
+  { code: "86", province: "Bình Thuận", status: "Hoạt động", note: "" },
+  { code: "69", province: "Cà Mau", status: "Hoạt động", note: "Tách ra từ tỉnh Minh Hải cũ." },
+  { code: "11", province: "Cao Bằng", status: "Hoạt động", note: "" },
+  { code: "47", province: "Đắk Lắk", status: "Hoạt động", note: "" },
+  { code: "48", province: "Đắk Nông", status: "Hoạt động", note: "" },
+  { code: "27", province: "Điện Biên", status: "Hoạt động", note: "" },
+  { code: "39, 60", province: "Đồng Nai", status: "Hoạt động", note: "" },
+  { code: "66", province: "Đồng Tháp", status: "Hoạt động", note: "" },
+  { code: "81", province: "Gia Lai", status: "Hoạt động", note: "" },
+  { code: "23", province: "Hà Giang", status: "Hoạt động", note: "" },
+  { code: "90", province: "Hà Nam", status: "Hoạt động", note: "Tách ra từ tỉnh Nam Hà cũ." },
+  { code: "38", province: "Hà Tĩnh", status: "Hoạt động", note: "Tách ra từ tỉnh Nghệ Tĩnh cũ." },
+  { code: "34", province: "Hải Dương", status: "Hoạt động", note: "Tách ra từ tỉnh Hải Hưng cũ." },
+  { code: "95", province: "Hậu Giang", status: "Hoạt động", note: "Tách ra từ tỉnh Cần Thơ cũ." },
+  { code: "28", province: "Hòa Bình", status: "Hoạt động", note: "" },
+  { code: "89", province: "Hưng Yên", status: "Hoạt động", note: "Tách ra từ tỉnh Hải Hưng cũ." },
+  { code: "79", province: "Khánh Hòa", status: "Hoạt động", note: "" },
+  { code: "68", province: "Kiên Giang", status: "Hoạt động", note: "" },
+  { code: "82", province: "Kon Tum", status: "Hoạt động", note: "" },
+  { code: "25", province: "Lai Châu", status: "Hoạt động", note: "" },
+  { code: "12", province: "Lạng Sơn", status: "Hoạt động", note: "" },
+  { code: "24", province: "Lào Cai", status: "Hoạt động", note: "" },
+  { code: "49", province: "Lâm Đồng", status: "Hoạt động", note: "" },
+  { code: "62", province: "Long An", status: "Hoạt động", note: "" },
+  { code: "18", province: "Nam Định", status: "Hoạt động", note: "Tách ra từ tỉnh Nam Hà cũ." },
+  { code: "37", province: "Nghệ An", status: "Hoạt động", note: "Tách ra từ tỉnh Nghệ Tĩnh cũ." },
+  { code: "35", province: "Ninh Bình", status: "Hoạt động", note: "" },
+  { code: "85", province: "Ninh Thuận", status: "Hoạt động", note: "" },
+  { code: "19", province: "Phú Thọ", status: "Hoạt động", note: "" },
+  { code: "78", province: "Phú Yên", status: "Hoạt động", note: "" },
+  { code: "73", province: "Quảng Bình", status: "Hoạt động", note: "Tách ra từ tỉnh Bình Trị Thiên cũ." },
+  { code: "92", province: "Quảng Nam", status: "Hoạt động", note: "" },
+  { code: "76", province: "Quảng Ngãi", status: "Hoạt động", note: "" },
+  { code: "14", province: "Quảng Ninh", status: "Hoạt động", note: "" },
+  { code: "74", province: "Quảng Trị", status: "Hoạt động", note: "Tách ra từ tỉnh Bình Trị Thiên cũ." },
+  { code: "83", province: "Sóc Trăng", status: "Hoạt động", note: "" },
+  { code: "26", province: "Sơn La", status: "Hoạt động", note: "" },
+  { code: "70", province: "Tây Ninh", status: "Hoạt động", note: "" },
+  { code: "17", province: "Thái Bình", status: "Hoạt động", note: "" },
+  { code: "20", province: "Thái Nguyên", status: "Hoạt động", note: "" },
+  { code: "36", province: "Thanh Hóa", status: "Hoạt động", note: "" },
+  { code: "75", province: "Thừa Thiên Huế", status: "Hoạt động", note: "Tách ra từ tỉnh Bình Trị Thiên cũ." },
+  { code: "63", province: "Tiền Giang", status: "Hoạt động", note: "" },
+  { code: "84", province: "Trà Vinh", status: "Hoạt động", note: "" },
+  { code: "22", province: "Tuyên Quang", status: "Hoạt động", note: "" },
+  { code: "64", province: "Vĩnh Long", status: "Hoạt động", note: "" },
+  { code: "88", province: "Vĩnh Phúc", status: "Hoạt động", note: "" },
+  { code: "21", province: "Yên Bái", status: "Hoạt động", note: "" }
+];
+
+const NEW_PROVINCES_2025 = [
+  { id: 1, name: "An Giang", merged: "Kiên Giang + An Giang", capital: "Kiên Giang", codes: "68, 67", area: "9.888,9", population: "3.679.200", note: "Hợp nhất toàn bộ địa giới hành chính của tỉnh Kiên Giang và tỉnh An Giang." },
+  { id: 2, name: "Bắc Ninh", merged: "Bắc Giang + Bắc Ninh", capital: "Bắc Giang", codes: "98, 99", area: "4.718,6", population: "3.509.100", note: "Hợp nhất toàn bộ địa giới hành chính của tỉnh Bắc Giang và tỉnh Bắc Ninh." },
+  { id: 3, name: "Cà Mau", merged: "Bạc Liêu + Cà Mau", capital: "Cà Mau", codes: "94, 69", area: "7.942,4", population: "2.140.600", note: "Hợp nhất toàn bộ địa giới hành chính của tỉnh Bạc Liêu và tỉnh Cà Mau." },
+  { id: 4, name: "Cao Bằng", merged: "Giữ nguyên", capital: "Cao Bằng", codes: "11", area: "6.700,39", population: "543.050", note: "Giữ nguyên địa giới hành chính tỉnh Cao Bằng." },
+  { id: 5, name: "Đắk Lắk", merged: "Phú Yên + Đắk Lắk", capital: "Đắk Lắk", codes: "78, 47", area: "18.096,4", population: "2.831.300", note: "Hợp nhất toàn bộ địa giới hành chính của tỉnh Phú Yên và tỉnh Đắk Lắk." },
+  { id: 6, name: "Điện Biên", merged: "Giữ nguyên", capital: "Điện Biên", codes: "27", area: "9.539,93", population: "633.980", note: "Giữ nguyên địa giới hành chính tỉnh Điện Biên." },
+  { id: 7, name: "Đồng Nai", merged: "Bình Phước + Đồng Nai", capital: "Đồng Nai", codes: "93, 39, 60", area: "12.737,2", population: "4.427.700", note: "Hợp nhất toàn bộ địa giới hành chính của tỉnh Bình Phước và tỉnh Đồng Nai." },
+  { id: 8, name: "Đồng Tháp", merged: "Tiền Giang + Đồng Tháp", capital: "Tiền Giang", codes: "63, 66", area: "5.938,7", population: "3.397.200", note: "Hợp nhất toàn bộ địa giới hành chính của tỉnh Tiền Giang và tỉnh Đồng Tháp." },
+  { id: 9, name: "Gia Lai", merged: "Gia Lai + Bình Định", capital: "Bình Định", codes: "81, 77", area: "21.576,5", population: "3.153.300", note: "Hợp nhất toàn bộ địa giới hành chính của tỉnh Gia Lai và tỉnh Bình Định." },
+  { id: 10, name: "Hà Tĩnh", merged: "Giữ nguyên", capital: "Hà Tĩnh", codes: "38", area: "5.994,45", population: "1.317.200", note: "Giữ nguyên địa giới hành chính tỉnh Hà Tĩnh." },
+  { id: 11, name: "Hưng Yên", merged: "Thái Bình + Hưng Yên", capital: "Hưng Yên", codes: "17, 89", area: "2.514,8", population: "3.208.400", note: "Hợp nhất toàn bộ địa giới hành chính của tỉnh Thái Bình và tỉnh Hưng Yên." },
+  { id: 12, name: "Khánh Hoà", merged: "Khánh Hòa + Ninh Thuận", capital: "Khánh Hòa", codes: "79, 85", area: "8.555,9", population: "1.882.000", note: "Hợp nhất toàn bộ địa giới hành chính của tỉnh Khánh Hòa và tỉnh Ninh Thuận." },
+  { id: 13, name: "Lai Châu", merged: "Giữ nguyên", capital: "Lai Châu", codes: "25", area: "9.068,73", population: "482.100", note: "Giữ nguyên địa giới hành chính tỉnh Lai Châu." },
+  { id: 14, name: "Lâm Đồng", merged: "Đắk Nông + Lâm Đồng + Bình Thuận", capital: "Lâm Đồng", codes: "48, 49, 86", area: "24.233,1", population: "3.324.400", note: "Hợp nhất toàn bộ địa giới hành chính của 3 tỉnh Đắk Nông, Lâm Đồng và Bình Thuận." },
+  { id: 15, name: "Lạng Sơn", merged: "Giữ nguyên", capital: "Lạng Sơn", codes: "12", area: "8.310,18", population: "802.090", note: "Giữ nguyên địa giới hành chính tỉnh Lạng Sơn." },
+  { id: 16, name: "Lào Cai", merged: "Lào Cai + Yên Bái", capital: "Yên Bái", codes: "24, 21", area: "13.257,0", population: "1.656.500", note: "Hợp nhất toàn bộ địa giới hành chính của tỉnh Lào Cai và tỉnh Yên Bái." },
+  { id: 17, name: "Nghệ An", merged: "Giữ nguyên", capital: "Nghệ An", codes: "37", area: "16.486,49", population: "3.416.900", note: "Giữ nguyên địa giới hành chính tỉnh Nghệ An." },
+  { id: 18, name: "Ninh Bình", merged: "Hà Nam + Ninh Bình + Nam Định", capital: "Ninh Bình", codes: "90, 35, 18", area: "3.942,6", population: "3.818.700", note: "Hợp nhất toàn bộ địa giới hành chính của 3 tỉnh Hà Nam, Ninh Bình và Nam Định." },
+  { id: 19, name: "Phú Thọ", merged: "Hòa Bình + Vĩnh Phúc + Phú Thọ", capital: "Phú Thọ", codes: "28, 88, 19", area: "9.361,4", population: "3.663.600", note: "Hợp nhất toàn bộ địa giới hành chính của 3 tỉnh Hòa Bình, Vĩnh Phúc và Phú Thọ." },
+  { id: 20, name: "Quảng Ngãi", merged: "Quảng Ngãi + Kon Tum", capital: "Quảng Ngãi", codes: "76, 82", area: "14.832,6", population: "1.861.700", note: "Hợp nhất toàn bộ địa giới hành chính của tỉnh Quảng Ngãi và tỉnh Kon Tum." },
+  { id: 21, name: "Quảng Ninh", merged: "Giữ nguyên", capital: "Quảng Ninh", codes: "14", area: "6.207,93", population: "1.362.880", note: "Giữ nguyên địa giới hành chính tỉnh Quảng Ninh." },
+  { id: 22, name: "Quảng Trị", merged: "Quảng Bình + Quảng Trị", capital: "Quảng Bình", codes: "73, 74", area: "12.700,0", population: "1.584.000", note: "Hợp nhất toàn bộ địa giới hành chính của tỉnh Quảng Bình và tỉnh Quảng Trị." },
+  { id: 23, name: "Sơn La", merged: "Giữ nguyên", capital: "Sơn La", codes: "26", area: "14.109,83", population: "1.300.130", note: "Giữ nguyên địa giới hành chính tỉnh Sơn La." },
+  { id: 24, name: "Tây Ninh", merged: "Long An + Tây Ninh", capital: "Tây Ninh", codes: "62, 70", area: "8.536,5", population: "2.959.000", note: "Hợp nhất toàn bộ địa giới hành chính của tỉnh Long An và tỉnh Tây Ninh." },
+  { id: 25, name: "Thái Nguyên", merged: "Bắc Kạn + Thái Nguyên", capital: "Thái Nguyên", codes: "97, 20", area: "8.375,3", population: "1.694.500", note: "Hợp nhất toàn bộ địa giới hành chính của tỉnh Bắc Kạn và tỉnh Thái Nguyên." },
+  { id: 26, name: "Thanh Hóa", merged: "Giữ nguyên", capital: "Thanh Hóa", codes: "36", area: "11.114,71", population: "3.722.060", note: "Giữ nguyên địa giới hành chính tỉnh Thanh Hóa." },
+  { id: 27, name: "TP. Cần Thơ", merged: "Sóc Trăng + Hậu Giang + TP. Cần Thơ", capital: "Cần Thơ", codes: "83, 95, 65", area: "6.360,8", population: "3.207.000", note: "Hợp nhất tỉnh Sóc Trăng, tỉnh Hậu Giang và TP. Cần Thơ thành TP. Cần Thơ mới trực thuộc Trung ương." },
+  { id: 28, name: "TP. Đà Nẵng", merged: "Quảng Nam + TP. Đà Nẵng", capital: "Đà Nẵng", codes: "92, 43", area: "11.859,6", population: "2.819.900", note: "Hợp nhất toàn bộ địa giới hành chính của tỉnh Quảng Nam và TP. Đà Nẵng thành thành phố trực thuộc Trung ương mới." },
+  { id: 29, name: "TP. Hà Nội", merged: "Giữ nguyên", capital: "Hà Nội", codes: "29, 30, 31, 32, 33, 40", area: "3.359,84", population: "8.435.650", note: "Giữ nguyên địa giới hành chính thành phố Hà Nội." },
+  { id: 30, name: "TP. Hải Phòng", merged: "Hải Dương + TP. Hải Phòng", capital: "Hải Phòng", codes: "34, 15, 16", area: "3.194,7", population: "4.102.700", note: "Hợp nhất toàn bộ địa giới hành chính của tỉnh Hải Dương và TP. Hải Phòng thành thành phố trực thuộc Trung ương mới." },
+  { id: 31, name: "TP. Hồ Chí Minh", merged: "Bình Dương + TPHCM + Bà Rịa - Vũng Tàu", capital: "Hồ Chí Minh", codes: "61, 41, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 72", area: "6.772,6", population: "13.608.800", note: "Hợp nhất tỉnh Bình Dương, TP. Hồ Chí Minh và tỉnh Bà Rịa - Vũng Tàu thành thành phố trực thuộc Trung ương mới." },
+  { id: 32, name: "TP. Huế", merged: "Giữ nguyên", capital: "Huế", codes: "75", area: "4.947,11", population: "1.160.220", note: "Nâng cấp toàn bộ địa giới hành chính của tỉnh Thừa Thiên Huế thành thành phố Huế trực thuộc Trung ương." },
+  { id: 33, name: "Tuyên Quang", merged: "Hà Giang + Tuyên Quang", capital: "Tuyên Quang", codes: "23, 22", area: "13.795,6", population: "1.731.600", note: "Hợp nhất toàn bộ địa giới hành chính của tỉnh Hà Giang và tỉnh Tuyên Quang." },
+  { id: 34, name: "Vĩnh Long", merged: "Bến Tre + Vĩnh Long + Trà Vinh", capital: "Vĩnh Long", codes: "71, 64, 84", area: "6.296,2", population: "3.367.400", note: "Hợp nhất toàn bộ địa giới hành chính của 3 tỉnh Bến Tre, Vĩnh Long và Trà Vinh." }
+];
+
+let currentPlatesMode = 'new'; // 'new' for 34 provinces, 'old' for 63 provinces
+
 export function renderLookup() {
   const container = document.getElementById('lookupContent');
   if (!container) return;
@@ -74,17 +180,19 @@ export function renderLookup() {
     <div class="lk-wrap">
       <!-- Tabs -->
       <div class="lk-tabs">
-        <button class="lk-tab-btn active" data-pane="spam">⚠️ Kiểm tra Spam</button>
+        <button class="lk-tab-btn active" data-pane="spam">Kiểm tra Spam</button>
         <button class="lk-tab-btn" data-pane="tax">Mã số thuế</button>
         <button class="lk-tab-btn" data-pane="postal">Mã bưu chính</button>
-        <button class="lk-tab-btn" data-pane="gov">🏛️ Dịch vụ công</button>
+        <button class="lk-tab-btn" data-pane="plates">Biển số xe</button>
+        <button class="lk-tab-btn" data-pane="gps">Tọa độ GPS</button>
+        <button class="lk-tab-btn" data-pane="gov">Dịch vụ công</button>
         <button class="lk-tab-btn" data-pane="power">Lịch Cúp Điện</button>
         <button class="lk-tab-btn" data-pane="traffic">Phạt Nguội</button>
       </div>
 
       <!-- PANE 1: SPAM CHECK -->
       <div class="lk-pane active" id="pane-spam">
-        <div class="travel-title-sub">⚠️ Kiểm tra độ an toàn của Số điện thoại &amp; Email</div>
+        <div class="travel-title-sub">Kiểm tra độ an toàn của Số điện thoại &amp; Email</div>
         <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">
           Phát hiện số điện thoại quảng cáo rác, lừa đảo, nhà mạng hoặc email bị lộ trong các vụ rò rỉ dữ liệu lớn.
         </div>
@@ -121,9 +229,79 @@ export function renderLookup() {
         <div id="postalResult"></div>
       </div>
 
-      <!-- PANE 4: GOV SERVICES -->
+      <!-- PANE 4: LICENSE PLATES -->
+      <div class="lk-pane" id="pane-plates">
+        <div class="travel-title-sub">Tra cứu Biển số xe &amp; Sáp nhập ĐVHC cấp tỉnh (2025)</div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">
+          Nghị quyết 60-NQ/TW năm 2025 của Ban Chấp hành Trung ương Đảng thống nhất phương án sáp nhập 63 tỉnh thành còn 34 ĐVHC cấp tỉnh mới.
+        </div>
+        <div style="display: flex; gap: 8px; margin-bottom: 15px;">
+          <button id="btnPlatesNew" class="lk-gov-tab active" style="border-radius: 8px;">Bản đồ 34 Tỉnh Mới (2025)</button>
+          <button id="btnPlatesOld" class="lk-gov-tab" style="border-radius: 8px;">63 Tỉnh Thành Cũ</button>
+        </div>
+        <div class="lk-search-box">
+          <input type="text" id="platesInput" class="field-input" placeholder="Nhập tên tỉnh thành mới, cũ, hoặc số biển số (ví dụ: Lâm Đồng, Đắk Nông hoặc 48)..." />
+          <button id="btnSearchPlates" class="btn-primary">Tìm kiếm</button>
+        </div>
+        <div id="platesResult" style="margin-top: 15px;">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <!-- PANE 5: GPS GEOLOCATION -->
+      <div class="lk-pane" id="pane-gps">
+        <div class="travel-title-sub">Định Vị &amp; Xác Định Tọa Độ GPS</div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px;">
+          Xác định chính xác Vĩ độ (Latitude), Kinh độ (Longitude) của vị trí hiện tại và tra cứu địa chỉ thực tế từ bản đồ.
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:15px; align-items:center; padding:20px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.05); border-radius:12px;">
+          <button id="btnGetGps" class="btn-primary" style="padding:12px 24px; font-weight:600; font-size:14px; background:linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); border:none; display:flex; align-items:center; gap:8px;">
+            <i class="fas fa-crosshairs"></i> Lấy Vị Trí Hiện Tại
+          </button>
+          
+          <div id="gpsLoading" style="display:none; color:var(--text-muted); font-size:13px;">
+            <i class="fas fa-spinner fa-spin"></i> Đang kết nối tín hiệu GPS từ thiết bị...
+          </div>
+
+          <div id="gpsResult" style="width:100%; display:none;">
+            <!-- Coordinates Grid -->
+            <div class="gps-grid" style="margin-bottom:15px; width: 100%;">
+              <div class="gps-card">
+                <div style="font-size:12px; color:var(--text-muted); margin-bottom:5px;">Vĩ độ (Latitude)</div>
+                <div id="gps-lat-val" style="font-size:20px; font-weight:700; color:var(--accent-blue);">--</div>
+              </div>
+              <div class="gps-card">
+                <div style="font-size:12px; color:var(--text-muted); margin-bottom:5px;">Kinh độ (Longitude)</div>
+                <div id="gps-lon-val" style="font-size:20px; font-weight:700; color:var(--accent-purple);">--</div>
+              </div>
+            </div>
+
+            <!-- Additional info -->
+            <div class="lk-result-box" style="margin-bottom:15px;">
+              <table class="lk-details-table">
+                <tr><td>Độ chính xác (Accuracy)</td><td id="gps-acc-val">--</td></tr>
+                <tr><td>Thời gian định vị</td><td id="gps-time-val">--</td></tr>
+                <tr><td>Địa chỉ thực tế (Ước tính)</td><td id="gps-address-val" style="font-weight:600; color:var(--text-primary);">Đang tải địa chỉ...</td></tr>
+              </table>
+            </div>
+
+            <!-- Map Actions -->
+            <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; width:100%;">
+              <a id="btnGmapsLink" href="#" target="_blank" class="btn-primary" style="text-decoration:none; background:#4285F4; border:none; display:flex; align-items:center; gap:8px;">
+                <i class="fab fa-google"></i> Xem trên Google Maps
+              </a>
+              <a id="btnOsmLink" href="#" target="_blank" class="btn-primary" style="text-decoration:none; background:#7EBC12; border:none; display:flex; align-items:center; gap:8px;">
+                <i class="fas fa-map-marked-alt"></i> Xem trên OpenStreetMap
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANE 6: GOV SERVICES -->
       <div class="lk-pane" id="pane-gov">
-        <div class="travel-title-sub">🏛️ Tra Cứu Dịch Vụ Công Trực Tuyến</div>
+        <div class="travel-title-sub">Tra Cứu Dịch Vụ Công Trực Tuyến</div>
 
         <!-- Gov sub-tabs -->
         <div class="lk-gov-tabs">
@@ -236,7 +414,7 @@ export function renderLookup() {
         </div>
       </div>
 
-      <!-- PANE 5: POWER OUTAGES -->
+      <!-- PANE 7: POWER OUTAGES -->
       <div class="lk-pane" id="pane-power">
         <div class="travel-title-sub">Tra Cứu Lịch Cúp Điện Toàn Quốc</div>
         <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">
@@ -251,7 +429,7 @@ export function renderLookup() {
         </div>
       </div>
 
-      <!-- PANE 6: TRAFFIC FINES -->
+      <!-- PANE 8: TRAFFIC FINES -->
       <div class="lk-pane" id="pane-traffic">
         <div class="travel-title-sub">Tra Cứu Phạt Nguội Giao Thông</div>
         <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">
@@ -291,6 +469,37 @@ export function renderLookup() {
   document.getElementById('btnCheckSpam').addEventListener('click', handleSpamCheck);
   document.getElementById('btnCheckTax').addEventListener('click', handleTaxCheck);
   document.getElementById('postalSelect').addEventListener('change', handlePostalChange);
+
+  // License Plates init and search
+  renderAllPlates();
+  document.getElementById('btnSearchPlates')?.addEventListener('click', () => {
+    const q = document.getElementById('platesInput').value;
+    renderAllPlates(q);
+  });
+  document.getElementById('platesInput')?.addEventListener('input', (e) => {
+    renderAllPlates(e.target.value);
+  });
+
+  // License Plates Toggle
+  const btnNew = document.getElementById('btnPlatesNew');
+  const btnOld = document.getElementById('btnPlatesOld');
+
+  btnNew?.addEventListener('click', () => {
+    btnNew.classList.add('active');
+    btnOld?.classList.remove('active');
+    currentPlatesMode = 'new';
+    renderAllPlates(document.getElementById('platesInput').value);
+  });
+
+  btnOld?.addEventListener('click', () => {
+    btnOld.classList.add('active');
+    btnNew?.classList.remove('active');
+    currentPlatesMode = 'old';
+    renderAllPlates(document.getElementById('platesInput').value);
+  });
+
+  // GPS init
+  document.getElementById('btnGetGps')?.addEventListener('click', handleGetGps);
 
   // GPLX lookup
   document.getElementById('btnCheckGPLX')?.addEventListener('click', () => {
@@ -345,6 +554,12 @@ export function renderLookup() {
   });
   document.getElementById('taxInput').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') handleTaxCheck();
+  });
+  document.getElementById('platesInput')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      const q = document.getElementById('platesInput').value;
+      renderAllPlates(q);
+    }
   });
   document.getElementById('gplxInput')?.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') document.getElementById('btnCheckGPLX').click();
@@ -412,13 +627,13 @@ function handleSpamCheck() {
       const gmobile = ['99', '59'];
       const mvno = ['87', '55'];
 
-      hasCarrier = viettel.includes(prefix2) || 
-                   mobi.includes(prefix2) || 
-                   vina.includes(prefix2) || 
-                   vnm.includes(prefix2) || 
-                   gmobile.includes(prefix2) || 
-                   mvno.includes(prefix2) || 
-                   mvno.includes(prefix3);
+      hasCarrier = viettel.includes(prefix2) ||
+        mobi.includes(prefix2) ||
+        vina.includes(prefix2) ||
+        vnm.includes(prefix2) ||
+        gmobile.includes(prefix2) ||
+        mvno.includes(prefix2) ||
+        mvno.includes(prefix3);
     }
 
     if (!hasCarrier) {
@@ -560,11 +775,11 @@ async function handleTaxCheck() {
 
     let html = `<div style="display:flex; flex-direction:column; gap:12px; max-height:450px; overflow-y:auto; padding-right:4px;">`;
     data.results.forEach(company => {
-      const mstHTML = company.mstImg 
+      const mstHTML = company.mstImg
         ? `<img src="${company.mstImg}" style="max-height: 18px; vertical-align: middle;" alt="MST" />`
         : company.mst;
 
-      const detailLink = company.url 
+      const detailLink = company.url
         ? `<div style="margin-top: 10px; text-align: right;">
             <a href="${company.url}" target="_blank" class="lot-link" style="padding: 4px 12px; font-size:11px;">
               Xem chi tiết đối tác 
@@ -612,4 +827,170 @@ function handlePostalChange() {
       <div class="postal-code-val">${data.code}</div>
     </div>
   `;
+}
+
+// ─── LICENSE PLATES SEARCH ────────────────────────────────────────────────────
+function renderAllPlates(filter = '') {
+  const resultDiv = document.getElementById('platesResult');
+  if (!resultDiv) return;
+
+  const query = filter.toLowerCase().trim();
+
+  if (currentPlatesMode === 'new') {
+    const filtered = NEW_PROVINCES_2025.filter(item => {
+      return item.name.toLowerCase().includes(query) ||
+        item.merged.toLowerCase().includes(query) ||
+        item.capital.toLowerCase().includes(query) ||
+        item.codes.toLowerCase().includes(query);
+    });
+
+    if (filtered.length === 0) {
+      resultDiv.innerHTML = `<div class="lk-result-box" style="color:#fbbf24;">⚠️ Không tìm thấy đơn vị hành chính mới nào khớp với "${filter}".</div>`;
+      return;
+    }
+
+    let html = `<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap:12px; max-height:500px; overflow-y:auto; padding-right:5px;">`;
+    filtered.forEach(item => {
+      const isMerged = item.merged !== 'Giữ nguyên';
+      const tagClass = isMerged ? 'lk-status--danger' : 'lk-status--safe';
+      const tagText = isMerged ? 'Sáp nhập / Hợp nhất' : 'Giữ nguyên';
+
+      html += `
+        <div class="lk-result-box" style="margin:0; padding:12px 16px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.01);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; width:100%;">
+            <span style="font-weight:700; font-size:15px; color:var(--accent-blue); flex:1;">${item.id}. ${item.name}</span>
+            <span class="lk-status-tag ${tagClass}" style="font-size:10px; padding:2px 6px; margin-left:10px; margin-bottom:0;">${tagText}</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:4px; font-size:12px; margin-bottom:6px;">
+            <div><span style="color:var(--text-muted);">Các đơn vị:</span> <span style="font-weight:600; color:var(--text-primary);">${item.merged}</span></div>
+            <div><span style="color:var(--text-muted);">Trung tâm hành chính:</span> <span style="font-weight:600; color:var(--accent-green);">${item.capital}</span></div>
+            <div style="display:flex; justify-content:space-between; gap:10px; margin-top:2px; margin-bottom:2px;">
+              <div><span style="color:var(--text-muted);">Diện tích:</span> <span style="font-weight:600; color:var(--text-primary);">${item.area} km²</span></div>
+              <div><span style="color:var(--text-muted);">Dân số:</span> <span style="font-weight:600; color:var(--text-primary);">${item.population} người</span></div>
+            </div>
+            <div style="margin-top:4px;"><span style="color:var(--text-muted);">Mã biển số xe gộp:</span> <span style="font-size:14px; font-weight:800; color:var(--accent-yellow);">${item.codes}</span></div>
+          </div>
+          ${item.note ? `
+          <div style="font-size:11px; color:var(--text-muted); border-top: 1px solid rgba(255,255,255,0.05); padding-top:6px; margin-top:6px; line-height:1.4;">
+            <i>${item.note}</i>
+          </div>
+          ` : ''}
+        </div>
+      `;
+    });
+    html += `</div>`;
+    resultDiv.innerHTML = html;
+  } else {
+    const filtered = LICENSE_PLATES.filter(item => {
+      return item.province.toLowerCase().includes(query) || item.code.toLowerCase().includes(query);
+    });
+
+    if (filtered.length === 0) {
+      resultDiv.innerHTML = `<div class="lk-result-box" style="color:#fbbf24;">⚠️ Không tìm thấy tỉnh thành hoặc biển số xe cũ nào khớp với "${filter}".</div>`;
+      return;
+    }
+
+    let html = `<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:12px; max-height:500px; overflow-y:auto; padding-right:5px;">`;
+    filtered.forEach(item => {
+      const isMerged = item.status === 'Sáp nhập';
+      const tagClass = isMerged ? 'lk-status--danger' : 'lk-status--safe';
+      const tagText = isMerged ? 'Đã sáp nhập trước đó' : 'Hoạt động cũ';
+
+      html += `
+        <div class="lk-result-box" style="margin:0; padding:12px 16px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.01);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; width:100%;">
+            <span style="font-weight:700; font-size:14px; color:var(--text-primary); flex:1;">${item.province}</span>
+            <span class="lk-status-tag ${tagClass}" style="font-size:10px; padding:2px 6px; margin-left:10px; margin-bottom:0;">${tagText}</span>
+          </div>
+          <div style="display:flex; align-items:center; margin-bottom:6px;">
+            <span style="font-size:11px; color:var(--text-muted); width:70px; flex-shrink:0;">Mã số xe:</span>
+            <span style="font-size:14px; font-weight:800; color:var(--accent-blue);">${item.code}</span>
+          </div>
+          ${item.note ? `
+          <div style="font-size:11px; color:var(--text-muted); border-top: 1px solid rgba(255,255,255,0.05); padding-top:6px; margin-top:6px; line-height:1.4;">
+            <i>${item.note}</i>
+          </div>
+          ` : ''}
+        </div>
+      `;
+    });
+    html += `</div>`;
+    resultDiv.innerHTML = html;
+  }
+}
+
+// ─── GPS GEOLOCATION ──────────────────────────────────────────────────────────
+function handleGetGps() {
+  const loading = document.getElementById('gpsLoading');
+  const result = document.getElementById('gpsResult');
+  const latVal = document.getElementById('gps-lat-val');
+  const lonVal = document.getElementById('gps-lon-val');
+  const accVal = document.getElementById('gps-acc-val');
+  const timeVal = document.getElementById('gps-time-val');
+  const addressVal = document.getElementById('gps-address-val');
+  const gmapsLink = document.getElementById('btnGmapsLink');
+  const osmLink = document.getElementById('btnOsmLink');
+
+  if (!navigator.geolocation) {
+    alert('Trình duyệt của bạn không hỗ trợ định vị GPS.');
+    return;
+  }
+
+  if (loading) loading.style.display = 'block';
+  if (result) result.style.display = 'none';
+
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      const accuracy = position.coords.accuracy;
+      const timestamp = new Date(position.timestamp).toLocaleString('vi-VN');
+
+      if (latVal) latVal.innerText = lat.toFixed(6);
+      if (lonVal) lonVal.innerText = lon.toFixed(6);
+      if (accVal) accVal.innerText = `± ${Math.round(accuracy)} mét`;
+      if (timeVal) timeVal.innerText = timestamp;
+      if (addressVal) addressVal.innerText = 'Đang giải mã địa chỉ từ bản đồ...';
+
+      if (gmapsLink) gmapsLink.href = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+      if (osmLink) osmLink.href = `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=16/${lat}/${lon}`;
+
+      if (loading) loading.style.display = 'none';
+      if (result) result.style.display = 'block';
+
+      // Reverse geocoding using Nominatim (OpenStreetMap)
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`, {
+          headers: {
+            'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7'
+          }
+        });
+        if (res.ok) {
+          const geoData = await res.json();
+          if (addressVal) addressVal.innerText = geoData.display_name || 'Không tìm thấy địa chỉ cụ thể';
+        } else {
+          if (addressVal) addressVal.innerText = 'Không thể kết nối dịch vụ giải mã địa chỉ';
+        }
+      } catch (err) {
+        if (addressVal) addressVal.innerText = 'Không thể tải địa chỉ (Lỗi kết nối)';
+      }
+    },
+    (error) => {
+      if (loading) loading.style.display = 'none';
+      let msg = 'Không thể truy cập GPS.';
+      if (error.code === error.PERMISSION_DENIED) {
+        msg = 'Quyền truy cập vị trí bị từ chối. Vui lòng cấp quyền trong cài đặt trình duyệt.';
+      } else if (error.code === error.POSITION_UNAVAILABLE) {
+        msg = 'Thông tin vị trí không khả dụng.';
+      } else if (error.code === error.TIMEOUT) {
+        msg = 'Hết thời gian yêu cầu định vị.';
+      }
+      alert(msg);
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    }
+  );
 }

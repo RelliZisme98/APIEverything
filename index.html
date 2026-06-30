@@ -56,6 +56,7 @@
   <link rel="stylesheet" href="css/converter.css" />
   <link rel="stylesheet" href="css/iq-eq-test.css" />
   <link rel="stylesheet" href="css/typing-test.css" />
+  <link rel="stylesheet" href="css/hardware-test.css" />
   <link rel="stylesheet" href="css/mobile.css" />
 </head>
 
@@ -141,6 +142,10 @@
         <button class="sidebar-nav-item" data-section="typing-test" onclick="switchSection('typing-test')">
           <i class="nav-icon fas fa-keyboard"></i>
           <span class="nav-label">Luyện Gõ Phím</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="hardware-test" onclick="switchSection('hardware-test')">
+          <i class="nav-icon fas fa-tools"></i>
+          <span class="nav-label">Test Thiết Bị</span>
         </button>
         <button class="sidebar-nav-item" data-section="converter" onclick="switchSection('converter')">
           <i class="nav-icon fas fa-exchange-alt"></i>
@@ -315,6 +320,19 @@
             <div class="card-title">Đo WPM &amp; Độ Chính Xác</div>
           </div>
           <div id="typingTestContent">
+            <div class="skeleton skel-big"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: HARDWARE DEVICE TEST ════════ -->
+      <section class="content-section" id="section-hardware-test">
+        <div class="page-title">Kiểm Tra Thiết Bị Ngoại Vi</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Test Chuột · Bàn Phím · Tai Nghe · Sạc &amp; Pin · Tay Cầm</div>
+          </div>
+          <div id="hardwareTestContent">
             <div class="skeleton skel-big"></div>
           </div>
         </div>

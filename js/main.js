@@ -44,6 +44,7 @@ import { renderEmulatorSuite } from './components/emulator.js?v=1.1.0';
 import { renderTypingTest } from './components/typing-test.js';
 import { renderConverter, renderBMICalculator } from './components/converter.js';
 import { renderIQ, renderEQ } from './components/iq-eq.js';
+import { renderHardwareTest } from './components/hardware-test.js';
 
 // ── Render Components ──
 import { initAIAssistant }     from './components/ai-assistant.js?v=1.0.4';
@@ -482,7 +483,8 @@ const sectionToPathMap = {
   'football': '/football',
   'downloader': '/downloader',
   'media': '/media',
-  'focus': '/focus'
+  'focus': '/focus',
+  'hardware-test': '/hardware-test'
 };
 
 const pathToSectionMap = {
@@ -509,7 +511,8 @@ const pathToSectionMap = {
   '/football': 'football',
   '/downloader': 'downloader',
   '/media': 'media',
-  '/focus': 'focus'
+  '/focus': 'focus',
+  '/hardware-test': 'hardware-test'
 };
 
 function getPathnameClean() {
@@ -572,6 +575,7 @@ window.switchSection = (id, updateHistory = true) => {
     if (id === 'bmi')          renderBMICalculator();
     if (id === 'iq')           renderIQ();
     if (id === 'eq')           renderEQ();
+    if (id === 'hardware-test') renderHardwareTest();
   }
 
   // Push state to browser history if navigating via client click
