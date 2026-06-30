@@ -6,6 +6,7 @@ import { state } from '../store/state.js';
 
 let currentSource = 'vnexpress';
 let currentArticles = [];
+let visibleCount = 12;
 
 export async function renderNews(containerId = 'newsContent', isSilent = false) {
   const el = document.getElementById(containerId);
@@ -13,6 +14,7 @@ export async function renderNews(containerId = 'newsContent', isSilent = false) 
 
   if (!isSilent) {
     el.innerHTML = `<div class="news-loading">Đang tải tin tức...</div>`;
+    visibleCount = 12;
   }
 
   // Source tabs
@@ -25,7 +27,8 @@ export async function renderNews(containerId = 'newsContent', isSilent = false) 
   `).join('');
 
   try {
-    const articles = await fetchNews(currentSource, 12);
+    // Fetch a larger pool of articles (up to 48) to support pagination
+    const articles = await fetchNews(currentSource, 48);
     currentArticles = articles;
     state.newsArticles = articles.map(a => ({
       source: a.source,
@@ -38,11 +41,14 @@ export async function renderNews(containerId = 'newsContent', isSilent = false) 
     if (!articles.length) {
       el.innerHTML = `
         <div class="news-tabs">${tabs()}</div>
- <div class="error-msg">️ Không tải được tin tức. Vui lòng kiểm tra lại kết nối mạng hoặc thử lại sau.</div>`;
+        <div class="error-msg">⚠️ Không tải được tin tức. Vui lòng kiểm tra lại kết nối mạng hoặc thử lại sau.</div>`;
       return;
     }
 
-    const cards = articles.map((a, i) => `
+    // Only slice up to the visible count
+    const visibleArticles = articles.slice(0, visibleCount);
+
+    const cards = visibleArticles.map((a, i) => `
       <div class="news-card ${i === 0 ? 'news-card-featured' : ''}"
            role="button" tabindex="0"
            onclick="window.openNewsArticle(${i})"
@@ -59,9 +65,19 @@ export async function renderNews(containerId = 'newsContent', isSilent = false) 
       </div>
     `).join('');
 
+    const loadMoreButton = articles.length > visibleCount ? `
+      <div class="news-load-more-wrap">
+        <button class="news-load-more-btn" onclick="window.newsLoadMore()">
+          <span>Xem thêm tin tức</span>
+          <i class="fas fa-chevron-down" style="font-size: 11px;"></i>
+        </button>
+      </div>
+    ` : '';
+
     el.innerHTML = `
       <div class="news-tabs">${tabs()}</div>
       <div class="news-grid">${cards}</div>
+      ${loadMoreButton}
       <div class="news-footer">
         Nguồn: <strong>${feed.label}</strong>
         &nbsp;·&nbsp; Cập nhật lúc ${new Date().toLocaleTimeString('vi-VN')}
@@ -73,7 +89,7 @@ export async function renderNews(containerId = 'newsContent', isSilent = false) 
     _ensureReaderDOM();
 
   } catch (err) {
- el.innerHTML = `<div class="news-tabs">${tabs()}</div><div class="error-msg">️ ${err.message}</div>`;
+    el.innerHTML = `<div class="news-tabs">${tabs()}</div><div class="error-msg">⚠️ ${err.message}</div>`;
   }
 }
 
@@ -91,7 +107,7 @@ function _ensureReaderDOM() {
           <a id="nrOpenLink" href="#" target="_blank" rel="noopener" class="nr-open-btn" title="Mở trang gốc">
             ↗ Trang gốc
           </a>
- <button class="nr-close-btn" onclick="window.closeNewsReader()" title="Đóng"></button>
+          <button class="nr-close-btn" onclick="window.closeNewsReader()" title="Đóng"></button>
         </div>
       </div>
       <div class="nr-body">
@@ -166,4 +182,9 @@ document.addEventListener('keydown', e => {
 window.newsSelectSource = async (src) => {
   currentSource = src;
   await renderNews();
+};
+
+window.newsLoadMore = () => {
+  visibleCount += 12;
+  renderNews('newsContent', true);
 };

@@ -330,3 +330,39 @@
   color: var(--accent-blue);
   font-weight: 600;
 }
+
+/* ── Load More Button ── */
+.news-load-more-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 24px 0 16px;
+  width: 100%;
+}
+
+.news-load-more-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 10px 24px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s var(--ease-out);
+  box-shadow: var(--shadow-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-sans);
+}
+
+.news-load-more-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.news-load-more-btn:active {
+  transform: translateY(0);
+}
