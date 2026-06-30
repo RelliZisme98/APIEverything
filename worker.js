@@ -616,46 +616,62 @@ async function handleVietlott(request) {
     let nextJackpot = 0;
 
     if (game === 'keno') {
-      // Scrape Keno from xosodaiphat.com
-      const res = await fetch('https://xosodaiphat.com/keno-truc-tiep-xskeno.html', {
+      const res = await fetch('https://xskt.com.vn/xskeno', {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-          'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7',
         },
         signal: AbortSignal.timeout(8000),
       });
       if (!res.ok) throw new Error(`Failed to fetch Keno: ${res.status}`);
       const html = await res.text();
 
-      // Find base date from the title or default to today's date
-      let baseDate = new Date().toLocaleDateString('vi-VN');
-      const dateMatch = html.match(/ngày\s*(\d{2}\/\d{2}\/\d{4})/i);
-      if (dateMatch) {
-        baseDate = dateMatch[1];
-      }
-
-      // Find Keno result tables
-      const tableRegex = /<table[^>]*(?:id=box\d+|id="box\d+")[\s\S]*?<\/table>/gi;
-      const tables = html.match(tableRegex) || [];
+      // Find all tables on the page
+      const tables = html.match(/<table[^>]*>([\s\S]*?)<\/table>/gi) || [];
 
       for (const tableHtml of tables) {
+        // Extract draw code
         const codeMatch = tableHtml.match(/#(\d+)/);
-        const drawCode = codeMatch ? codeMatch[1] : '';
+        if (!codeMatch) continue;
+        const drawCode = codeMatch[1];
 
-        const timeMatch = tableHtml.match(/-\s*(\d{2}:\d{2})/);
-        const drawTime = timeMatch ? timeMatch[1] : '';
+        // Extract winning numbers: find 20 numbers
+        let numbers = [];
+        const tds = tableHtml.match(/<td[^>]*>([\s\S]*?)<\/td>/gi) || [];
+        for (const td of tds) {
+          const tdNumbers = td.replace(/<[^>]+>/g, ' ').match(/\b\d{2}\b/g) || [];
+          if (tdNumbers.length === 20) {
+            numbers = tdNumbers.map(Number);
+            break;
+          }
+        }
 
-        const cells = tableHtml.match(/<td[^>]*class=kn-number[^>]*>([\s\S]*?)<\/td>/gi) || [];
-        const numbers = cells
-          .map(c => c.replace(/<[^>]+>/g, '').trim())
-          .filter(val => val && val !== '...')
-          .map(Number);
+        // Fallback: if not in a single TD, search the whole table body (excluding headers)
+        if (numbers.length !== 20) {
+          const bodyHtml = tableHtml.replace(/<th[\s\S]*?<\/th>/gi, '');
+          const allNumbers = bodyHtml.replace(/<[^>]+>/g, ' ').match(/\b\d{2}\b/g) || [];
+          if (allNumbers.length >= 20) {
+            numbers = allNumbers.slice(-20).map(Number);
+          }
+        }
 
         if (numbers.length === 20) {
+          // Extract draw date / time
+          let drawDate = '';
+          const dateMatch = tableHtml.match(/ngay-(\d{1,2}-\d{1,2}-\d{4})/);
+          if (dateMatch) {
+            drawDate = dateMatch[1].replace(/-/g, '/');
+          } else {
+            const textDateMatch = tableHtml.replace(/<[^>]+>/g, ' ').match(/(\d{2}\/\d{2}\/\d{4})/);
+            if (textDateMatch) {
+              drawDate = textDateMatch[1];
+            } else {
+              drawDate = new Date().toLocaleDateString('vi-VN');
+            }
+          }
+
           history.push({
             drawCode,
-            drawDate: drawTime ? `${drawTime} ${baseDate}` : baseDate,
+            drawDate,
             numbers,
             jackpot: 2000000000,
           });
