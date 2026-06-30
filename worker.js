@@ -13,6 +13,7 @@ const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
 };
 
 function cors(body, status = 200, contentType = 'application/json') {
@@ -2195,11 +2196,12 @@ async function handleTaxLookup(request) {
               status: 'ĐANG HOẠT ĐỘNG'
             }]
           }));
-          }
-        } else {
-          // Match list page
-          const listRegex = /<a href="\/([0-9-]{10,14})-[^"]+"[^>]*>([^<]+)<\/a>/g;
-          const results = [];
+        }
+      }
+    } else {
+      // Match list page
+      const listRegex = /<a href="\/([0-9-]{10,14})-[^"]+"[^>]*>([^<]+)<\/a>/g;
+      const results = [];
         let m;
         while ((m = listRegex.exec(html)) !== null) {
           if (m[1] && m[2] && !m[2].includes('Mã số thuế') && !m[2].includes('Trang chủ')) {
