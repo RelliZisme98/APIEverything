@@ -2000,6 +2000,106 @@ async function handleTaxLookup(request) {
     } catch (err) {
       console.warn('VietQR API failed:', err);
     }
+
+    // 3. Try ThongTinDoanhNghiep API
+    try {
+      const res = await fetch(`https://thongtindoanhnghiep.co/api/company/${cleanMST}`, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.MaSoThue) {
+          return cors(JSON.stringify({
+            source: 'thongtindoanhnghiep',
+            results: [{
+              name: data.TenDoanhNghiep || data.TenPhongBan || 'Không rõ',
+              mst: data.MaSoThue,
+              representative: data.NguoiDaiDien || 'Không rõ',
+              address: data.DiaChi || 'Không rõ',
+              status: data.TrangThai || 'ĐANG HOẠT ĐỘNG'
+            }]
+          }));
+        }
+      }
+    } catch (err) {
+      console.warn('ThongTinDoanhNghiep API failed:', err);
+    }
+
+    // 4. Try scraping masothue.com
+    try {
+      const res = await fetch(`https://masothue.com/Search/?q=${cleanMST}`, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'vi,en-US;q=0.7,en;q=0.3',
+          'Referer': 'https://masothue.com/'
+        }
+      });
+      if (res.ok) {
+        const html = await res.text();
+        
+        // Match detail page
+        const nameMatch = html.match(/<span class="title-c">([^<]+)<\/span>/i) ||
+                          html.match(/<h1[^>]* itemprop="name">([^<]+)<\/h1>/i) ||
+                          html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
+        
+        const mstMatch = html.match(/itemprop="taxID"><b>([0-9-]{10,14})<\/b>/i) ||
+                         html.match(/Mã số thuế<\/td>\s*<td><b>([0-9-]{10,14})<\/b>/i) ||
+                         html.match(/class="copy">([0-9-]{10,14})<\/span>/i);
+
+        const addrMatch = html.match(/itemprop="address">([^<]+)<\/td>/i) ||
+                          html.match(/Địa chỉ<\/td>\s*<td>([^<]+)<\/td>/i);
+
+        const repMatch = html.match(/itemprop="alumniOf">([^<]+)<\/td>/i) ||
+                         html.match(/Người đại diện<\/td>\s*<td>\s*<a[^>]*>([^<]+)<\/a>/i) ||
+                         html.match(/Người đại diện<\/td>\s*<td>([^<]+)<\/td>/i);
+
+        if (nameMatch) {
+          const name = nameMatch[1].trim();
+          const mst = mstMatch ? mstMatch[1].trim() : cleanMST;
+          const address = addrMatch ? addrMatch[1].trim() : 'Không rõ';
+          const representative = repMatch ? repMatch[1].trim() : name;
+
+          return cors(JSON.stringify({
+            source: 'masothue',
+            results: [{
+              name,
+              mst,
+              representative,
+              address,
+              status: 'ĐANG HOẠT ĐỘNG'
+            }]
+          }));
+        }
+
+        // Match list page
+        const listRegex = /<a href="\/([0-9-]{10,14})-[^"]+"[^>]*>([^<]+)<\/a>/g;
+        const results = [];
+        let m;
+        while ((m = listRegex.exec(html)) !== null) {
+          if (m[1] && m[2] && !m[2].includes('Mã số thuế') && !m[2].includes('Trang chủ')) {
+            results.push({
+              name: m[2].trim(),
+              mst: m[1].trim(),
+              representative: m[2].trim(),
+              address: 'Xem chi tiết trên MaSoThue',
+              status: 'ĐANG HOẠT ĐỘNG'
+            });
+          }
+        }
+
+        if (results.length > 0) {
+          return cors(JSON.stringify({
+            source: 'masothue-list',
+            results
+          }));
+        }
+      }
+    } catch (err) {
+      console.warn('MasoThue scraper failed:', err);
+    }
   }
 
   // 3. Search by name/keyword using tratencongty.com
