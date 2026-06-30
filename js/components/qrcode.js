@@ -22,7 +22,7 @@ export function renderQRCodeSuite(containerId = 'qrcodeContent') {
       buildUI(container);
     };
     script.onerror = () => {
-      container.innerHTML = `<div class="error-msg">⚠️ Lỗi: Không thể tải thư viện QR Code Styling từ CDN.</div>`;
+ container.innerHTML = `<div class="error-msg">️ Lỗi: Không thể tải thư viện QR Code Styling từ CDN.</div>`;
     };
     document.head.appendChild(script);
   } else {
@@ -35,8 +35,8 @@ function buildUI(container) {
     <div class="qr-suite-wrap">
       <!-- Tabs -->
       <div class="vl-tab-bar" style="margin-bottom: 20px;">
-        <button class="vl-tab active" id="qrTab-generator" onclick="window.switchQRTab('generator')">🔗 Tạo QR Nghệ Thuật</button>
-        <button class="vl-tab" id="qrTab-shortener" onclick="window.switchQRTab('shortener')">⚡ Rút Gọn Link</button>
+ <button class="vl-tab active" id="qrTab-generator" onclick="window.switchQRTab('generator')">Tạo QR Nghệ Thuật</button>
+ <button class="vl-tab" id="qrTab-shortener" onclick="window.switchQRTab('shortener')">Rút Gọn Link</button>
       </div>
 
       <!-- TAB 1: GENERATOR -->
@@ -52,7 +52,7 @@ function buildUI(container) {
             <!-- Styles & Gradients -->
             <div class="qr-custom-accordion">
               <div class="qr-accordion-sec">
-                <div class="qr-accordion-title">🎨 Màu sắc & Gradient</div>
+ <div class="qr-accordion-title">Màu sắc & Gradient</div>
                 <div class="qr-accordion-body">
                   <div class="tax-row-2">
                     <div>
@@ -96,7 +96,7 @@ function buildUI(container) {
               </div>
 
               <div class="qr-accordion-sec">
-                <div class="qr-accordion-title">📐 Kiểu dáng các chấm (Shapes)</div>
+ <div class="qr-accordion-title">Kiểu dáng các chấm (Shapes)</div>
                 <div class="qr-accordion-body">
                   <div class="tax-row-2">
                     <div>
@@ -139,7 +139,7 @@ function buildUI(container) {
               </div>
 
               <div class="qr-accordion-sec">
-                <div class="qr-accordion-title">🖼️ Logo ở giữa (Center Brand)</div>
+ <div class="qr-accordion-title">️ Logo ở giữa (Center Brand)</div>
                 <div class="qr-accordion-body">
                   <div class="tax-row">
                     <label class="tax-label">Tải lên Logo của bạn (PNG / JPG / SVG)</label>
@@ -149,11 +149,11 @@ function buildUI(container) {
                     <label class="tax-label">Hoặc chọn Logo phổ biến sẵn có</label>
                     <div class="qr-logo-presets">
                       <button class="qr-preset-btn" data-logo="none">Không có</button>
-                      <button class="qr-preset-btn" data-logo="facebook">👤 FB</button>
-                      <button class="qr-preset-btn" data-logo="youtube">📺 YT</button>
-                      <button class="qr-preset-btn" data-logo="instagram">📸 IG</button>
-                      <button class="qr-preset-btn" data-logo="tiktok">🎵 TikTok</button>
-                      <button class="qr-preset-btn" data-logo="wifi">📶 WiFi</button>
+ <button class="qr-preset-btn" data-logo="facebook">FB</button>
+ <button class="qr-preset-btn" data-logo="youtube">YT</button>
+ <button class="qr-preset-btn" data-logo="instagram">IG</button>
+ <button class="qr-preset-btn" data-logo="tiktok">TikTok</button>
+ <button class="qr-preset-btn" data-logo="wifi">WiFi</button>
                     </div>
                   </div>
                   <div class="tax-row-2">
@@ -170,15 +170,15 @@ function buildUI(container) {
               </div>
             </div>
 
-            <button type="button" class="btn-primary" id="btnUpdateQR" style="width: 100%; margin-top: 14px;">🔄 Cập nhật QR Code</button>
+ <button type="button" class="btn-primary" id="btnUpdateQR" style="width: 100%; margin-top: 14px;">Cập nhật QR Code</button>
           </div>
 
           <!-- Preview & Download Panel -->
           <div class="qr-panel-preview">
             <div id="qrCanvasContainer"></div>
             <div class="qr-download-actions" style="margin-top: 20px; display: flex; gap: 10px; width: 100%;">
-              <button type="button" class="btn-primary" id="btnDownloadPNG" style="flex: 1; background: #2563eb;">📥 Tải file PNG</button>
-              <button type="button" class="btn-primary" id="btnDownloadSVG" style="flex: 1; background: #10b981;">🎨 Vector (SVG)</button>
+ <button type="button" class="btn-primary" id="btnDownloadPNG" style="flex: 1; background: #2563eb;">Tải file PNG</button>
+ <button type="button" class="btn-primary" id="btnDownloadSVG" style="flex: 1; background: #10b981;">Vector (SVG)</button>
             </div>
           </div>
         </div>
@@ -192,7 +192,7 @@ function buildUI(container) {
             <input type="url" id="shortenInputUrl" class="tax-input" placeholder="https://example.com/some/very/long/path/name/here" required />
           </div>
           
-          <button type="button" class="btn-primary" id="btnShortenLink" style="width: 100%; padding: 12px;">⚡ Rút Gọn Link</button>
+ <button type="button" class="btn-primary" id="btnShortenLink" style="width: 100%; padding: 12px;">Rút Gọn Link</button>
 
           <!-- Result -->
           <div id="shortenResult" style="display: none; margin-top: 18px; padding: 14px; background: rgba(52, 211, 153, 0.08); border: 1px solid rgba(52, 211, 153, 0.25); border-radius: 8px;">
@@ -202,14 +202,14 @@ function buildUI(container) {
               <button type="button" class="btn-primary" id="btnCopyShort" style="background: #10b981; padding: 8px 16px;">Copy</button>
             </div>
             <div style="margin-top: 10px; display: flex; justify-content: flex-end; gap: 8px;">
-              <button type="button" class="btn-primary" id="btnSendToQR" style="padding: 6px 12px; font-size: 11px; background: #3b82f6;">🎨 Tạo QR cho Link này</button>
+ <button type="button" class="btn-primary" id="btnSendToQR" style="padding: 6px 12px; font-size: 11px; background: #3b82f6;">Tạo QR cho Link này</button>
             </div>
           </div>
         </div>
 
         <!-- History -->
         <div class="qr-history-section" style="margin-top: 24px;">
-          <div class="hl-section-label">📜 Lịch sử rút gọn link của bạn</div>
+ <div class="hl-section-label">Lịch sử rút gọn link của bạn</div>
           <div style="overflow-x: auto;">
             <table class="br-table" id="shortHistoryTable" style="width: 100%; min-width: 500px;">
               <thead>
@@ -461,10 +461,10 @@ function setupShortener() {
         throw new Error('Phản hồi không hợp lệ từ máy chủ.');
       }
     } catch (err) {
-      alert(`⚠️ Lỗi: ${err.message}`);
+ alert(`️ Lỗi: ${err.message}`);
     } finally {
       btnShorten.disabled = false;
-      btnShorten.textContent = '⚡ Rút Gọn Link';
+ btnShorten.textContent = 'Rút Gọn Link';
     }
   });
 
@@ -559,8 +559,8 @@ function renderShortenHistory() {
           </a>
         </td>
         <td style="text-align: right; white-space: nowrap;">
-          <button type="button" class="btn-primary" onclick="window.loadUrlToQR('${item.shortUrl}')" style="padding: 4px 8px; font-size: 10px; background: #2563eb; margin-right: 6px;">🎨 QR</button>
-          <button type="button" class="btn-primary" onclick="window.deleteShortenHistory(${idx})" style="padding: 4px 8px; font-size: 10px; background: #ef4444;">✕</button>
+ <button type="button" class="btn-primary" onclick="window.loadUrlToQR('${item.shortUrl}')" style="padding: 4px 8px; font-size: 10px; background: #2563eb; margin-right: 6px;">QR</button>
+ <button type="button" class="btn-primary" onclick="window.deleteShortenHistory(${idx})" style="padding: 4px 8px; font-size: 10px; background: #ef4444;"></button>
         </td>
       </tr>
     `;

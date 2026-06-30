@@ -18,58 +18,58 @@ function getSvgThumbnail(emoji) {
 const HOMEBREW_GAMES = [
   {
     id: 'invaders',
-    name: '🛸 Invaders Must Die',
+ name: 'Invaders Must Die',
     desc: 'Trận chiến bắn phi thuyền bảo vệ Trái Đất phong cách Space Invaders.',
     url: 'https://raw.githubusercontent.com/retrobrews/nes-games/master/invaders.nes',
-    thumbnail: getSvgThumbnail('🛸'),
+ thumbnail: getSvgThumbnail(''),
     instructions: 'Bấm nút START (Enter) để bắt đầu. Dùng Trái/Phải để di chuyển, nút A (phím X / Space) để bắn phi thuyền.'
   },
   {
     id: 'lala',
-    name: '🧚 Lala The Magical',
+ name: 'Lala The Magical',
     desc: 'Game phiêu lưu cảnh nền đi tìm đá năng lượng của Mojon Twins.',
     url: 'https://raw.githubusercontent.com/retrobrews/nes-games/master/lala.nes',
-    thumbnail: getSvgThumbnail('🧚'),
+ thumbnail: getSvgThumbnail(''),
     instructions: 'Bấm nút START (Enter) để vào game. Trái/Phải để chạy, nút A (X / Space) để nhảy, nút B (Z) để lấy đá.'
   },
   {
     id: 'driar',
-    name: '🏃 Driar Platformer',
+ name: 'Driar Platformer',
     desc: 'Tựa game đi cảnh 38 màn chơi thu thập sao cực kỳ hấp dẫn và thử thách.',
     url: 'https://raw.githubusercontent.com/retrobrews/nes-games/master/driar.nes',
-    thumbnail: getSvgThumbnail('🏃'),
+ thumbnail: getSvgThumbnail(''),
     instructions: 'Bấm nút START (Enter) để bắt đầu. Trái/Phải để di chuyển, nút A (X / Space) để nhảy qua chướng ngại vật.'
   },
   {
     id: 'supertilt',
-    name: '🥊 Super Tilt Bro.',
+ name: 'Super Tilt Bro.',
     desc: 'Bản demake đấu võ đài kiểu Smash Bros có thể chơi hai người cạnh tranh.',
     url: 'https://raw.githubusercontent.com/retrobrews/nes-games/master/super-tilt-bro.nes',
-    thumbnail: getSvgThumbnail('🥊'),
+ thumbnail: getSvgThumbnail(''),
     instructions: 'Bấm nút START (Enter) để vào game. Trái/Phải để di chuyển, nút A (X / Space) để tấn công, nút B (Z) để nhảy.'
   },
   {
     id: 'snailmaze',
-    name: '🐌 Snail Maze',
+ name: 'Snail Maze',
     desc: 'Dẫn dắt chú ốc sên đi qua 12 mê cung phức tạp để giành chiến thắng.',
     url: 'https://raw.githubusercontent.com/retrobrews/nes-games/master/snailmaze.nes',
-    thumbnail: getSvgThumbnail('🐌'),
+ thumbnail: getSvgThumbnail(''),
     instructions: 'Dùng các nút di chuyển (phím Mũi Tên) để hướng dẫn ốc sên chạy thoát khỏi mê cung.'
   },
   {
     id: 'pong1k',
-    name: '🏓 Pong 1K',
+ name: 'Pong 1K',
     desc: 'Trò chơi đánh bóng bàn cổ điển đơn giản nhưng lôi cuốn.',
     url: 'https://raw.githubusercontent.com/retrobrews/nes-games/master/pong1k.nes',
-    thumbnail: getSvgThumbnail('🏓'),
+ thumbnail: getSvgThumbnail(''),
     instructions: 'Dùng phím Mũi Tên Lên/Xuống để điều khiển thanh vợt đánh bóng lại đối thủ.'
   },
   {
     id: 'gsm',
-    name: '🚀 Space Magellan',
+ name: 'Space Magellan',
     desc: 'Điều khiển tàu ngầm tránh chướng ngại vật cực kỳ kịch tính.',
     url: 'https://raw.githubusercontent.com/retrobrews/nes-games/master/gsm.nes',
-    thumbnail: getSvgThumbnail('🚀'),
+ thumbnail: getSvgThumbnail(''),
     instructions: 'Bấm nút START (Enter) để bắt đầu. Dùng các phím Mũi Tên để điều khiển phi thuyền tránh các bức tường.'
   }
 ];
@@ -86,7 +86,7 @@ export function renderEmulatorSuite(containerId = 'emulatorContent') {
       buildUI(container);
     };
     script.onerror = () => {
-      container.innerHTML = `<div class="error-msg">⚠️ Lỗi: Không thể tải thư viện JSNES Emulator từ CDN.</div>`;
+ container.innerHTML = `<div class="error-msg">️ Lỗi: Không thể tải thư viện JSNES Emulator từ CDN.</div>`;
     };
     document.head.appendChild(script);
   } else {
@@ -105,7 +105,7 @@ function buildUI(container) {
             <div class="emu-screen-bezel">
               <div class="emu-tv-header">
                 <div class="emu-power-led" id="emuPowerLed"></div>
-                <div class="emu-tv-brand">🕹️ RELLIA RETRO ENGINE</div>
+ <div class="emu-tv-brand">️ RELLIA RETRO ENGINE</div>
                 <div class="emu-tv-status" id="emuStatus">No Game Loaded</div>
               </div>
               <div class="emu-screen-wrapper">
@@ -114,7 +114,7 @@ function buildUI(container) {
                 <!-- CRT Standby Screen -->
                 <div class="emu-screen-standby" id="emuScreenStandby">
                   <div class="emu-standby-inner">
-                    <div class="emu-standby-logo">🕹️ RELLIA RETRO</div>
+ <div class="emu-standby-logo">️ RELLIA RETRO</div>
                     <div class="emu-standby-text">Chọn một game từ danh sách bên phải hoặc tải lên file .nes để bắt đầu chơi</div>
                   </div>
                 </div>
@@ -122,7 +122,7 @@ function buildUI(container) {
                 <!-- CRT Start Prompt Overlay -->
                 <div class="emu-screen-start-prompt" id="emuScreenStartPrompt">
                   <div class="emu-prompt-inner">
-                    <div class="emu-prompt-icon">🎮</div>
+ <div class="emu-prompt-icon"></div>
                     <div class="emu-prompt-title" id="emuPromptTitle">Game Ready!</div>
                     <div class="emu-prompt-desc" id="emuPromptDesc">Bấm vào đây để bắt đầu chơi.</div>
                     <button class="emu-prompt-btn">BẮT ĐẦU CHƠI</button>
@@ -131,19 +131,19 @@ function buildUI(container) {
 
                 <!-- Floating HUD overlay buttons -->
                 <div class="emu-screen-hud" id="emuScreenHud">
-                  <button class="emu-hud-btn" id="emuHudReset" title="Chơi lại nhanh (Reset)">🔄 Reset</button>
-                  <button class="emu-hud-btn" id="emuHudSave" title="Lưu nhanh trạng thái">💾 Lưu</button>
-                  <button class="emu-hud-btn" id="emuHudLoad" title="Tải nhanh trạng thái">📂 Tải</button>
-                  <button class="emu-hud-btn btn-danger-hud" id="emuHudPower" title="Tắt game (Power Off)">🔌 Tắt</button>
+ <button class="emu-hud-btn" id="emuHudReset" title="Chơi lại nhanh (Reset)">Reset</button>
+ <button class="emu-hud-btn" id="emuHudSave" title="Lưu nhanh trạng thái">Lưu</button>
+ <button class="emu-hud-btn" id="emuHudLoad" title="Tải nhanh trạng thái">Tải</button>
+ <button class="emu-hud-btn btn-danger-hud" id="emuHudPower" title="Tắt game (Power Off)">Tắt</button>
                 </div>
               </div>
             </div>
             
             <!-- TV Bottom Grill & Control Buttons -->
             <div class="emu-tv-controls">
-              <button class="emu-btn-console" id="emuBtnPower" title="Power On/Off">🔌 POWER</button>
-              <button class="emu-btn-console" id="emuBtnReset" title="Reset Game" disabled>🔄 RESET</button>
-              <button class="emu-btn-console" id="emuBtnMute" title="Mute/Unmute Audio">🔊 MUTE</button>
+ <button class="emu-btn-console" id="emuBtnPower" title="Power On/Off">POWER</button>
+ <button class="emu-btn-console" id="emuBtnReset" title="Reset Game" disabled>RESET</button>
+ <button class="emu-btn-console" id="emuBtnMute" title="Mute/Unmute Audio">MUTE</button>
             </div>
           </div>
 
@@ -192,7 +192,7 @@ function buildUI(container) {
 
         <!-- Game Library Column -->
         <div class="emu-library-col">
-          <div class="hl-section-label">🎮 Thư viện Trò chơi</div>
+ <div class="hl-section-label">Thư viện Trò chơi</div>
           
           <div class="emu-game-list">
             ${HOMEBREW_GAMES.map(game => `
@@ -209,10 +209,10 @@ function buildUI(container) {
 
           <!-- Upload ROM -->
           <div class="emu-upload-box">
-            <div class="emu-upload-title">💾 Chơi Game của riêng bạn</div>
+ <div class="emu-upload-title">Chơi Game của riêng bạn</div>
             <p class="emu-upload-desc">Bạn có file ROM game NES riêng (.nes)? Hãy thả hoặc tải lên để chơi ngay lập tức!</p>
             <input type="file" id="emuFileLoader" accept=".nes" style="display: none;" />
-            <button class="btn-primary" onclick="document.getElementById('emuFileLoader').click()" style="width: 100%;">📁 Chọn File Game (.nes)</button>
+ <button class="btn-primary" onclick="document.getElementById('emuFileLoader').click()" style="width: 100%;">Chọn File Game (.nes)</button>
           </div>
         </div>
       </div>
@@ -281,7 +281,7 @@ function setupEmulator() {
       promptDesc.innerHTML = `
         ${instructions || 'Sử dụng gamepad ảo hoặc các phím tương ứng trên bàn phím để chơi.'}
         <br><br>
-        <span style="color:#60a5fa; font-weight:bold;">👉 Bấm vào đây hoặc nút BẮT ĐẦU CHƠI để vào game</span>
+ <span style="color:#60a5fa; font-weight:bold;">Bấm vào đây hoặc nút BẮT ĐẦU CHƠI để vào game</span>
       `;
     }
     promptEl.style.display = 'flex';
@@ -372,7 +372,7 @@ function setupEmulator() {
       
       isPoweredOn = true;
       led.classList.add('active');
-      statusEl.textContent = `🟢 Running: ${name}`;
+ statusEl.textContent = `Running: ${name}`;
       btnReset.disabled = false;
       updateScreenUIState();
 
@@ -384,7 +384,7 @@ function setupEmulator() {
       showStartPrompt(cleanName, instructions);
     } catch (e) {
       console.error(e);
-      statusEl.textContent = '⚠️ Lỗi tải ROM';
+ statusEl.textContent = '️ Lỗi tải ROM';
     }
   }
 
@@ -409,7 +409,7 @@ function setupEmulator() {
       led.classList.add('active');
       const localGameId = file.name.replace('.nes', '');
       activeGameId = localGameId;
-      statusEl.textContent = `🟢 Running: ${localGameId}`;
+ statusEl.textContent = `Running: ${localGameId}`;
       btnReset.disabled = false;
       updateScreenUIState();
 
@@ -446,11 +446,11 @@ function setupEmulator() {
         nesBrowser.loadROM(currentRomData);
         isPoweredOn = true;
         led.classList.add('active');
-        statusEl.textContent = '🟢 Resumed';
+ statusEl.textContent = 'Resumed';
         btnReset.disabled = false;
         updateScreenUIState();
       } else {
-        statusEl.textContent = '⚠️ Hãy chọn 1 game để chơi';
+ statusEl.textContent = '️ Hãy chọn 1 game để chơi';
       }
     }
   });
@@ -461,9 +461,9 @@ function setupEmulator() {
       if (autoCheckpointState) {
         try {
           nesBrowser.nes.fromJSON(autoCheckpointState);
-          statusEl.textContent = '⚡ Reset nhanh màn chơi!';
+ statusEl.textContent = 'Reset nhanh màn chơi!';
           setTimeout(() => {
-            if (isPoweredOn && activeGameId) statusEl.textContent = `🟢 Running: ${activeGameId}`;
+ if (isPoweredOn && activeGameId) statusEl.textContent = `Running: ${activeGameId}`;
           }, 1000);
           return;
         } catch (e) {
@@ -473,7 +473,7 @@ function setupEmulator() {
 
       // Full hardware reset fallback
       nesBrowser.nes.reloadROM();
-      statusEl.textContent = '🟢 Resetted';
+ statusEl.textContent = 'Resetted';
     }
   });
 
@@ -483,7 +483,7 @@ function setupEmulator() {
     if (isMuted) {
       // Unmute
       nesBrowser.nes.audio.writeSample = nesBrowser.nes.audio.originalWriteSample || nesBrowser.nes.audio.writeSample;
-      btnMute.textContent = '🔊 MUTE';
+ btnMute.textContent = 'MUTE';
       btnMute.style.background = '';
       isMuted = false;
     } else {
@@ -492,7 +492,7 @@ function setupEmulator() {
         nesBrowser.nes.audio.originalWriteSample = nesBrowser.nes.audio.writeSample;
       }
       nesBrowser.nes.audio.writeSample = () => {};
-      btnMute.textContent = '🔇 UNMUTE';
+ btnMute.textContent = 'UNMUTE';
       btnMute.style.background = '#f59e0b';
       isMuted = true;
     }
@@ -507,13 +507,13 @@ function setupEmulator() {
           if (activeGameId) {
             localStorage.setItem(`nes_save_${activeGameId}`, JSON.stringify(manualSaveState));
           }
-          statusEl.textContent = '💾 Đã lưu trạng thái!';
+ statusEl.textContent = 'Đã lưu trạng thái!';
           setTimeout(() => {
-            if (isPoweredOn && activeGameId) statusEl.textContent = `🟢 Running: ${activeGameId}`;
+ if (isPoweredOn && activeGameId) statusEl.textContent = `Running: ${activeGameId}`;
           }, 1500);
         } catch (e) {
           console.error(e);
-          statusEl.textContent = '⚠️ Lỗi lưu nhanh';
+ statusEl.textContent = '️ Lỗi lưu nhanh';
         }
       }
     });
@@ -535,18 +535,18 @@ function setupEmulator() {
         if (stateToLoad) {
           try {
             nesBrowser.nes.fromJSON(stateToLoad);
-            statusEl.textContent = '📂 Đã tải trạng thái!';
+ statusEl.textContent = 'Đã tải trạng thái!';
             setTimeout(() => {
-              if (isPoweredOn && activeGameId) statusEl.textContent = `🟢 Running: ${activeGameId}`;
+ if (isPoweredOn && activeGameId) statusEl.textContent = `Running: ${activeGameId}`;
             }, 1500);
           } catch (e) {
             console.error(e);
-            statusEl.textContent = '⚠️ Lỗi tải nhanh';
+ statusEl.textContent = '️ Lỗi tải nhanh';
           }
         } else {
-          statusEl.textContent = '⚠️ Chưa có file lưu!';
+ statusEl.textContent = '️ Chưa có file lưu!';
           setTimeout(() => {
-            if (isPoweredOn && activeGameId) statusEl.textContent = `🟢 Running: ${activeGameId}`;
+ if (isPoweredOn && activeGameId) statusEl.textContent = `Running: ${activeGameId}`;
           }, 1500);
         }
       }

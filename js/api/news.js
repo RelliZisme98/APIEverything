@@ -8,55 +8,55 @@ export const FEEDS = {
     label: 'VnExpress',
     url: 'https://vnexpress.net/rss/tin-moi-nhat.rss',
     color: '#3b82f6',
-    logo: '🔵',
+    logo: '',
   },
   tuoitre: {
     label: 'Tuổi Trẻ',
     url: 'https://tuoitre.vn/rss/tin-moi-nhat.rss',
     color: '#ef4444',
-    logo: '🔴',
+    logo: '',
   },
   dantri: {
     label: 'Dân Trí',
     url: 'https://dantri.com.vn/rss/home.rss',
     color: '#f59e0b',
-    logo: '🟡',
+    logo: '',
   },
   genk: {
     label: 'GenK',
     url: 'https://genk.vn/rss/home.rss',
     color: '#10b981',
-    logo: '💻',
+    logo: '',
   },
   thanhnien: {
     label: 'Thanh Niên',
     url: 'https://thanhnien.vn/rss/home.rss',
     color: '#2563eb',
-    logo: '📰',
+    logo: '',
   },
   vietnamnet: {
     label: 'VietnamNet',
     url: 'https://vietnamnet.vn/rss/thoi-su.rss',
     color: '#059669',
-    logo: '🌐',
+    logo: '',
   },
   vtv: {
     label: 'VTV News',
     url: 'https://vtv.vn/rss/home.rss',
     color: '#dc2626',
-    logo: '📺',
+    logo: '',
   },
   tinhte: {
     label: 'Tinh Tế',
     url: 'https://tinhte.vn/rss',
     color: '#06b6d4',
-    logo: '💡',
+    logo: '',
   },
   kenh14: {
     label: 'Kênh 14',
     url: 'https://kenh14.vn/rss/home.rss',
     color: '#db2777',
-    logo: '🌸',
+    logo: '',
   },
 };
 
@@ -70,19 +70,19 @@ export function relativeTime(dateStr) {
 }
 
 /** Fetch RSS via Cloudflare proxy */
-export async function fetchNews(sourceKey = 'vnexpress', limit = 12) {
+export async function fetchNews(sourceKey = 'vnexpress', categoryKey = 'all') {
   const feed = FEEDS[sourceKey];
   if (!feed) return [];
 
   try {
     const res = await fetch(
-      `/api/news?source=${encodeURIComponent(sourceKey)}`,
+      `/api/news?source=${encodeURIComponent(sourceKey)}&category=${encodeURIComponent(categoryKey)}`,
       { signal: AbortSignal.timeout(10000) }
     );
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const items = await res.json();
 
-    return items.slice(0, limit).map(item => ({
+    return items.map(item => ({
       title:   item.title || '',
       link:    item.link || '#',
       pubDate: item.pubDate || '',

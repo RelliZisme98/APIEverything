@@ -1,40 +1,58 @@
 /* ═══════════════════════════════════════════
-   DESIGN TOKENS – CSS Custom Properties
+   DESIGN TOKENS – CSS Custom Properties (Linear-Inspired Design)
    ═══════════════════════════════════════════ */
 
 :root {
-  /* Background */
-  --bg-primary:   #070b14;
-  --bg-secondary: #0d1424;
-  --bg-card:      rgba(255, 255, 255, 0.04);
-  --bg-card-hover:rgba(255, 255, 255, 0.07);
+  /* Fonts */
+  --font-sans:     'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading:  'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+  --font-mono:     'JetBrains Mono', monospace;
 
-  /* Borders */
-  --border:       rgba(255, 255, 255, 0.08);
-  --border-glow:  rgba(99, 179, 237, 0.3);
+  /* Backgrounds (Linear-inspired ultra dark) */
+  --bg-primary:    #010102; /* Deepest dark canvas */
+  --bg-secondary:  #08080a; /* Sidebar and sections background */
+  --bg-card:       #0f1011; /* Surface 1 - default card */
+  --bg-card-hover: #141516; /* Surface 2 - hovered card */
+  --bg-popover:    #18191a; /* Surface 3 - dropdowns, popovers */
 
-  /* Text */
-  --text-primary:   #e8f0fe;
-  --text-secondary: #8899aa;
-  --text-muted:     #556070;
+  /* Borders & Dividers (Hairline system) */
+  --border:        #23252a; /* Hairline */
+  --border-hover:  #34343a; /* Hairline Strong */
+  --border-glow:   rgba(94, 106, 210, 0.35); /* Lavender-blue glow */
 
-  /* Accent colors */
-  --accent-blue:   #60a5fa;
-  --accent-purple: #a78bfa;
-  --accent-cyan:   #22d3ee;
-  --accent-green:  #34d399;
-  --accent-red:    #f87171;
-  --accent-yellow: #fbbf24;
-  --accent-orange: #fb923c;
+  /* Typography Colors */
+  --text-primary:   #f7f8f8; /* Ink (pure off-white) */
+  --text-secondary: #d0d6e0; /* Ink Muted */
+  --text-muted:     #8a8f98; /* Ink Subtle */
+  --text-link:      #5e6ad2; /* Signature Lavender-Blue */
 
-  /* Shadows / Glows */
-  --glow-blue:   0 0 20px rgba(96, 165, 250, 0.15);
-  --glow-purple: 0 0 20px rgba(167, 139, 250, 0.15);
+  /* Premium Elegant Accents */
+  --accent-blue:    #5e6ad2; /* Linear Lavender-Blue */
+  --accent-purple:  #828fff; /* Lavender Hover */
+  --accent-cyan:    #4fc3f7; /* Soft Premium Cyan */
+  --accent-green:   #27a644; /* Success Green */
+  --accent-red:     #ef5350; /* Softer Premium Red */
+  --accent-yellow:  #ffca28; /* Premium Amber/Yellow */
+  --accent-orange:  #ff7043; /* Premium Orange */
 
-  /* Radii */
-  --radius:    16px;
-  --radius-sm: 10px;
+  /* Shadows / Glows (Linear stacked shadows + bevel) */
+  --shadow-sm:   0 1px 2px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --shadow-md:   0 4px 12px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --shadow-lg:   0 12px 24px rgba(0, 0, 0, 0.8), 0 0 0 1px var(--border-hover), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --shadow-glow: 0 0 24px rgba(94, 106, 210, 0.15);
+  
+  /* Easing curves */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1); /* Custom premium easing */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* Radii (Linear rounded scale) */
+  --radius:      12px; /* Card rounded lg */
+  --radius-md:   8px;  /* Button/input rounded md */
+  --radius-sm:   6px;  /* Small chips/tags rounded sm */
 
   /* Gradients */
-  --gradient-brand: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  --gradient-brand: linear-gradient(135deg, #5e6ad2, #828fff);
+  --gradient-glow:  linear-gradient(135deg, rgba(94, 106, 210, 0.15), rgba(130, 143, 255, 0.15));
 }
+
+

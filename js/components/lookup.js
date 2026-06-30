@@ -74,17 +74,17 @@ export function renderLookup() {
     <div class="lk-wrap">
       <!-- Tabs -->
       <div class="lk-tabs">
-        <button class="lk-tab-btn active" data-pane="spam">🛡️ Kiểm tra Spam</button>
-        <button class="lk-tab-btn" data-pane="tax">🏢 Mã số thuế</button>
-        <button class="lk-tab-btn" data-pane="postal">📮 Mã bưu chính</button>
+        <button class="lk-tab-btn active" data-pane="spam">⚠️ Kiểm tra Spam</button>
+        <button class="lk-tab-btn" data-pane="tax">Mã số thuế</button>
+        <button class="lk-tab-btn" data-pane="postal">Mã bưu chính</button>
         <button class="lk-tab-btn" data-pane="gov">🏛️ Dịch vụ công</button>
-        <button class="lk-tab-btn" data-pane="power">⚡ Lịch Cúp Điện</button>
-        <button class="lk-tab-btn" data-pane="traffic">🚔 Phạt Nguội</button>
+        <button class="lk-tab-btn" data-pane="power">Lịch Cúp Điện</button>
+        <button class="lk-tab-btn" data-pane="traffic">Phạt Nguội</button>
       </div>
 
       <!-- PANE 1: SPAM CHECK -->
       <div class="lk-pane active" id="pane-spam">
-        <div class="travel-title-sub">🛡️ Kiểm tra độ an toàn của Số điện thoại &amp; Email</div>
+        <div class="travel-title-sub">⚠️ Kiểm tra độ an toàn của Số điện thoại &amp; Email</div>
         <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">
           Phát hiện số điện thoại quảng cáo rác, lừa đảo, nhà mạng hoặc email bị lộ trong các vụ rò rỉ dữ liệu lớn.
         </div>
@@ -97,12 +97,12 @@ export function renderLookup() {
 
       <!-- PANE 2: TAX ID -->
       <div class="lk-pane" id="pane-tax">
-        <div class="travel-title-sub">🏢 Tra cứu Mã số thuế doanh nghiệp &amp; cá nhân</div>
+        <div class="travel-title-sub">Tra cứu Mã số thuế doanh nghiệp &amp; cá nhân</div>
         <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">
-          Tra cứu nhanh thông tin đại diện pháp luật, tên đăng ký, địa chỉ và trạng thái của doanh nghiệp bằng Mã số thuế hoặc Tên doanh nghiệp/Từ khóa.
+          Tra cứu nhanh thông tin bằng Mã số thuế, Số CCCD/CMND (đối với cá nhân) hoặc Tên doanh nghiệp/Từ khóa.
         </div>
         <div class="lk-search-box">
-          <input type="text" id="taxInput" class="field-input" placeholder="Nhập mã số thuế hoặc tên doanh nghiệp cần tra cứu..." />
+          <input type="text" id="taxInput" class="field-input" placeholder="Nhập mã số thuế, CCCD, CMND hoặc tên doanh nghiệp..." />
           <button id="btnCheckTax" class="btn-primary">Tra cứu</button>
         </div>
         <div id="taxLookupResult"></div>
@@ -110,7 +110,7 @@ export function renderLookup() {
 
       <!-- PANE 3: POSTAL CODE -->
       <div class="lk-pane" id="pane-postal">
-        <div class="travel-title-sub">📮 Tra cứu Mã bưu chính 63 Tỉnh thành Việt Nam</div>
+        <div class="travel-title-sub">Tra cứu Mã bưu chính 63 Tỉnh thành Việt Nam</div>
         <div class="postal-select-wrap">
           <label for="postalSelect">Chọn Tỉnh / Thành phố</label>
           <select id="postalSelect" class="field-input">
@@ -127,16 +127,16 @@ export function renderLookup() {
 
         <!-- Gov sub-tabs -->
         <div class="lk-gov-tabs">
-          <button class="lk-gov-tab active" data-gov="gplx">🚗 GPLX</button>
-          <button class="lk-gov-tab" data-gov="bhxh">🏥 BHXH / BHYT</button>
-          <button class="lk-gov-tab" data-gov="tax">💰 Thuế TNCN</button>
-          <button class="lk-gov-tab" data-gov="cccd">💳 CCCD / Cư trú</button>
+          <button class="lk-gov-tab active" data-gov="gplx">GPLX</button>
+          <button class="lk-gov-tab" data-gov="bhxh">BHXH / BHYT</button>
+          <button class="lk-gov-tab" data-gov="tax">Thuế TNCN</button>
+          <button class="lk-gov-tab" data-gov="cccd">CCCD / Cư trú</button>
         </div>
 
         <!-- GPLX -->
         <div class="lk-gov-pane active" id="gov-gplx">
           <div class="lk-gov-info-bar" style="border-color:rgba(96,165,250,0.3);background:rgba(96,165,250,0.06);">
-            <span>🚗</span>
+            <span></span>
             <div>
               <div style="font-weight:700;color:var(--accent-blue);">Kiểm tra Giấy Phép Lái Xe</div>
               <div style="font-size:11px;color:var(--text-muted);">Tra cứu hạng lái xe, ngày cấp, ngày hết hạn và vi phạm GPLX qua Cổng thông tin chính thức.</div>
@@ -156,7 +156,7 @@ export function renderLookup() {
         <!-- BHXH -->
         <div class="lk-gov-pane" id="gov-bhxh">
           <div class="lk-gov-info-bar" style="border-color:rgba(52,211,153,0.3);background:rgba(52,211,153,0.06);">
-            <span>🏥</span>
+            <span></span>
             <div>
               <div style="font-weight:700;color:var(--accent-green);">Bảo Hiểm Xã Hội & Y Tế</div>
               <div style="font-size:11px;color:var(--text-muted);">Tra cứu quá trình đóng BHXH, thẻ BHYT và mức hưởng.</div>
@@ -169,13 +169,13 @@ export function renderLookup() {
           <div id="bhxhResult" style="margin-top:10px;"></div>
           <div class="lk-gov-links-grid" style="margin-top:14px;">
             <a href="https://baohiemxahoi.gov.vn/tracuu/Pages/tra-cuu-thong-tin-dong-bao-hiem.aspx" target="_blank" rel="noopener" class="lk-gov-link-card" style="border-color:rgba(52,211,153,0.3);background:rgba(52,211,153,0.06);">
-              <span>📋</span><div><div style="font-weight:700;font-size:12px;">Quá trình đóng BHXH</div><div style="font-size:10px;color:var(--text-muted);">baohiemxahoi.gov.vn</div></div>
+              <span></span><div><div style="font-weight:700;font-size:12px;">Quá trình đóng BHXH</div><div style="font-size:10px;color:var(--text-muted);">baohiemxahoi.gov.vn</div></div>
             </a>
             <a href="https://baohiemxahoi.gov.vn/tracuu/Pages/tra-cuu-thong-tin-the-bhyt.aspx" target="_blank" rel="noopener" class="lk-gov-link-card" style="border-color:rgba(52,211,153,0.3);background:rgba(52,211,153,0.06);">
-              <span>💊</span><div><div style="font-weight:700;font-size:12px;">Thẻ BHYT</div><div style="font-size:10px;color:var(--text-muted);">Hạn sử dụng, nơi đăng ký KCB</div></div>
+              <span></span><div><div style="font-weight:700;font-size:12px;">Thẻ BHYT</div><div style="font-size:10px;color:var(--text-muted);">Hạn sử dụng, nơi đăng ký KCB</div></div>
             </a>
             <a href="https://ssid.baohiemxahoi.gov.vn/" target="_blank" rel="noopener" class="lk-gov-link-card" style="border-color:rgba(52,211,153,0.3);background:rgba(52,211,153,0.06);">
-              <span>📱</span><div><div style="font-weight:700;font-size:12px;">VssID – App BHXH</div><div style="font-size:10px;color:var(--text-muted);">Ứng dụng BHXH Việt Nam</div></div>
+              <span></span><div><div style="font-weight:700;font-size:12px;">VssID – App BHXH</div><div style="font-size:10px;color:var(--text-muted);">Ứng dụng BHXH Việt Nam</div></div>
             </a>
           </div>
         </div>
@@ -183,7 +183,7 @@ export function renderLookup() {
         <!-- Thuế TNCN -->
         <div class="lk-gov-pane" id="gov-tax">
           <div class="lk-gov-info-bar" style="border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.06);">
-            <span>💰</span>
+            <span></span>
             <div>
               <div style="font-weight:700;color:var(--accent-yellow);">Thuế Thu Nhập Cá Nhân</div>
               <div style="font-size:11px;color:var(--text-muted);">Tra cứu MST cá nhân, khai báo thuế và hoàn thuế TNCN.</div>
@@ -196,13 +196,13 @@ export function renderLookup() {
           <div id="taxPersonResult" style="margin-top:10px;"></div>
           <div class="lk-gov-links-grid" style="margin-top:14px;">
             <a href="https://canhan.gdt.gov.vn/" target="_blank" rel="noopener" class="lk-gov-link-card" style="border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.06);">
-              <span>🧾</span><div><div style="font-weight:700;font-size:12px;">Khai Báo Thuế TNCN</div><div style="font-size:10px;color:var(--text-muted);">canhan.gdt.gov.vn</div></div>
+              <span></span><div><div style="font-weight:700;font-size:12px;">Khai Báo Thuế TNCN</div><div style="font-size:10px;color:var(--text-muted);">canhan.gdt.gov.vn</div></div>
             </a>
             <a href="https://tracuunnt.gdt.gov.vn/tcnnt/mstcn.jsp" target="_blank" rel="noopener" class="lk-gov-link-card" style="border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.06);">
-              <span>🔍</span><div><div style="font-weight:700;font-size:12px;">Tra Cứu MST Cá Nhân</div><div style="font-size:10px;color:var(--text-muted);">Tổng Cục Thuế</div></div>
+              <span></span><div><div style="font-weight:700;font-size:12px;">Tra Cứu MST Cá Nhân</div><div style="font-size:10px;color:var(--text-muted);">Tổng Cục Thuế</div></div>
             </a>
             <a href="https://thuedientu.gdt.gov.vn/" target="_blank" rel="noopener" class="lk-gov-link-card" style="border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.06);">
-              <span>💳</span><div><div style="font-weight:700;font-size:12px;">Hoàn Thuế Online</div><div style="font-size:10px;color:var(--text-muted);">thuedientu.gdt.gov.vn</div></div>
+              <span></span><div><div style="font-weight:700;font-size:12px;">Hoàn Thuế Online</div><div style="font-size:10px;color:var(--text-muted);">thuedientu.gdt.gov.vn</div></div>
             </a>
           </div>
         </div>
@@ -210,7 +210,7 @@ export function renderLookup() {
         <!-- CCCD / Cư trú -->
         <div class="lk-gov-pane" id="gov-cccd">
           <div class="lk-gov-info-bar" style="border-color:rgba(167,139,250,0.3);background:rgba(167,139,250,0.06);">
-            <span>💳</span>
+            <span></span>
             <div>
               <div style="font-weight:700;color:var(--accent-purple);">CCCD & Đăng Ký Cư Trú</div>
               <div style="font-size:11px;color:var(--text-muted);">Tra cứu thông tin CCCD, tạm trú/tạm vắng và thủ tục hộ chiếu.</div>
@@ -218,27 +218,27 @@ export function renderLookup() {
           </div>
           <div class="lk-gov-links-grid" style="margin-top:12px;">
             <a href="https://dichvucong.bocongan.gov.vn/dctt/index.html#/home" target="_blank" rel="noopener" class="lk-gov-link-card" style="border-color:rgba(167,139,250,0.3);background:rgba(167,139,250,0.06);">
-              <span>💳</span><div><div style="font-weight:700;font-size:12px;">Cổng DVC Bộ Công An</div><div style="font-size:10px;color:var(--text-muted);">Đăng ký CCCD, hộ chiếu</div></div>
+              <span></span><div><div style="font-weight:700;font-size:12px;">Cổng DVC Bộ Công An</div><div style="font-size:10px;color:var(--text-muted);">Đăng ký CCCD, hộ chiếu</div></div>
             </a>
             <a href="https://dichvucong.bocongan.gov.vn/dctt/index.html#/dich-vu-cong/tam-tru" target="_blank" rel="noopener" class="lk-gov-link-card" style="border-color:rgba(167,139,250,0.3);background:rgba(167,139,250,0.06);">
-              <span>🏠</span><div><div style="font-weight:700;font-size:12px;">Đăng Ký Tạm Trú</div><div style="font-size:10px;color:var(--text-muted);">Online – không cần đến phường</div></div>
+              <span></span><div><div style="font-weight:700;font-size:12px;">Đăng Ký Tạm Trú</div><div style="font-size:10px;color:var(--text-muted);">Online – không cần đến phường</div></div>
             </a>
             <a href="https://tracuudancu.bocongan.gov.vn/" target="_blank" rel="noopener" class="lk-gov-link-card" style="border-color:rgba(167,139,250,0.3);background:rgba(167,139,250,0.06);">
-              <span>🔍</span><div><div style="font-weight:700;font-size:12px;">Tra Cứu Dân Cư</div><div style="font-size:10px;color:var(--text-muted);">tracuudancu.bocongan.gov.vn</div></div>
+              <span></span><div><div style="font-weight:700;font-size:12px;">Tra Cứu Dân Cư</div><div style="font-size:10px;color:var(--text-muted);">tracuudancu.bocongan.gov.vn</div></div>
             </a>
             <a href="https://www.vneid.vn/" target="_blank" rel="noopener" class="lk-gov-link-card" style="border-color:rgba(167,139,250,0.3);background:rgba(167,139,250,0.06);">
-              <span>📱</span><div><div style="font-weight:700;font-size:12px;">VNeID – Ứng dụng</div><div style="font-size:10px;color:var(--text-muted);">Định danh điện tử quốc gia</div></div>
+              <span></span><div><div style="font-weight:700;font-size:12px;">VNeID – Ứng dụng</div><div style="font-size:10px;color:var(--text-muted);">Định danh điện tử quốc gia</div></div>
             </a>
           </div>
           <div style="margin-top:14px;padding:12px;background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.2);border-radius:10px;font-size:11px;color:var(--text-muted);line-height:1.6;">
-            💡 <strong style="color:var(--text-secondary);">Lưu ý:</strong> Tra cứu CCCD yêu cầu đăng nhập tài khoản VNeID hoặc VnConnect. Tính năng tra cứu trực tiếp không khả dụng do chính sách bảo mật dữ liệu cá nhân của Bộ Công An.
+            <strong style="color:var(--text-secondary);">Lưu ý:</strong> Tra cứu CCCD yêu cầu đăng nhập tài khoản VNeID hoặc VnConnect. Tính năng tra cứu trực tiếp không khả dụng do chính sách bảo mật dữ liệu cá nhân của Bộ Công An.
           </div>
         </div>
       </div>
 
       <!-- PANE 5: POWER OUTAGES -->
       <div class="lk-pane" id="pane-power">
-        <div class="travel-title-sub">⚡ Tra Cứu Lịch Cúp Điện Toàn Quốc</div>
+        <div class="travel-title-sub">Tra Cứu Lịch Cúp Điện Toàn Quốc</div>
         <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">
           Bản đồ lịch ngừng giảm cung cấp điện chi tiết các khu vực của EVN trên toàn quốc.
         </div>
@@ -253,7 +253,7 @@ export function renderLookup() {
 
       <!-- PANE 6: TRAFFIC FINES -->
       <div class="lk-pane" id="pane-traffic">
-        <div class="travel-title-sub">🚔 Tra Cứu Phạt Nguội Giao Thông</div>
+        <div class="travel-title-sub">Tra Cứu Phạt Nguội Giao Thông</div>
         <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">
           Tra cứu trực tiếp vi phạm phạt nguội giao thông của xe ô tô, xe máy qua nguồn dữ liệu PhatNguoi.vn.
         </div>
@@ -298,10 +298,10 @@ export function renderLookup() {
     const el = document.getElementById('gplxResult');
     if (!q) { el.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Vui lòng nhập số CCCD hoặc số GPLX.</div>`; return; }
     el.innerHTML = `<div class="lk-result-box" style="padding:14px;">
-      <div style="font-size:13px;font-weight:700;margin-bottom:8px;">🚗 Tra cứu GPLX: <span style="color:var(--accent-blue);">${q}</span></div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px;">Tra cứu GPLX: <span style="color:var(--accent-blue);">${q}</span></div>
       <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Cổng GPLX chính thức yêu cầu xác thực OTP qua điện thoại. Vui lòng truy cập trực tiếp:</div>
       <a href="https://gplx.gov.vn/tracuu?cccd=${encodeURIComponent(q)}" target="_blank" rel="noopener" class="btn-primary" style="display:inline-block;text-decoration:none;padding:8px 18px;border-radius:8px;">
-        🔗 Tra cứu tại gplx.gov.vn ↗
+        Tra cứu tại gplx.gov.vn ↗
       </a>
     </div>`;
   });
@@ -312,14 +312,14 @@ export function renderLookup() {
     const el = document.getElementById('bhxhResult');
     if (!q) { el.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Vui lòng nhập số CCCD hoặc mã BHXH.</div>`; return; }
     el.innerHTML = `<div class="lk-result-box" style="padding:14px;">
-      <div style="font-size:13px;font-weight:700;margin-bottom:8px;">🏥 Tra cứu BHXH: <span style="color:var(--accent-green);">${q}</span></div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px;">Tra cứu BHXH: <span style="color:var(--accent-green);">${q}</span></div>
       <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Tra cứu BHXH yêu cầu xác thực OTP. Nhấn nút để truy cập cổng BHXH chính thức:</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <a href="https://baohiemxahoi.gov.vn/tracuu/Pages/tra-cuu-thong-tin-dong-bao-hiem.aspx" target="_blank" rel="noopener" class="btn-primary" style="display:inline-block;text-decoration:none;padding:6px 14px;border-radius:8px;font-size:12px;">
-          📋 Quá trình đóng BHXH ↗
+          Quá trình đóng BHXH ↗
         </a>
         <a href="https://baohiemxahoi.gov.vn/tracuu/Pages/tra-cuu-thong-tin-the-bhyt.aspx" target="_blank" rel="noopener" class="btn-primary" style="display:inline-block;text-decoration:none;padding:6px 14px;border-radius:8px;font-size:12px;">
-          💊 Thẻ BHYT ↗
+          Thẻ BHYT ↗
         </a>
       </div>
     </div>`;
@@ -331,10 +331,10 @@ export function renderLookup() {
     const el = document.getElementById('taxPersonResult');
     if (!q) { el.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Vui lòng nhập số CCCD/CMND.</div>`; return; }
     el.innerHTML = `<div class="lk-result-box" style="padding:14px;">
-      <div style="font-size:13px;font-weight:700;margin-bottom:8px;">💰 Tra MST cá nhân: <span style="color:var(--accent-yellow);">${q}</span></div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px;">Tra MST cá nhân: <span style="color:var(--accent-yellow);">${q}</span></div>
       <div style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Hệ thống GDT yêu cầu đăng nhập. Nhấn nút để truy cập trực tiếp trang tra cứu MST:</div>
       <a href="https://tracuunnt.gdt.gov.vn/tcnnt/mstcn.jsp" target="_blank" rel="noopener" class="btn-primary" style="display:inline-block;text-decoration:none;padding:8px 18px;border-radius:8px;">
-        🔍 Tra cứu MST tại GDT ↗
+        Tra cứu MST tại GDT ↗
       </a>
     </div>`;
   });
@@ -442,7 +442,7 @@ function handleSpamCheck() {
             if (data.safe) {
               resDiv.innerHTML = `
                 <div class="lk-result-box">
-                  <span class="lk-status-tag lk-status--safe">✅ AN TOÀN</span>
+                  <span class="lk-status-tag lk-status--safe">AN TOÀN</span>
                   <div style="font-weight:700;">Không tìm thấy dữ liệu rò rỉ!</div>
                   <div style="color: var(--text-muted); margin-top: 4px;">Địa chỉ email của bạn hiện không nằm trong cơ sở dữ liệu các vụ xâm nhập bảo mật được công bố công khai.</div>
                 </div>
@@ -463,7 +463,7 @@ function handleSpamCheck() {
             if (data.safe) {
               resDiv.innerHTML = `
                 <div class="lk-result-box">
-                  <span class="lk-status-tag lk-status--safe">✅ AN TOÀN</span>
+                  <span class="lk-status-tag lk-status--safe">AN TOÀN</span>
                   <table class="lk-details-table">
                     <tr><td>Nhà mạng</td><td>${data.carrier}</td></tr>
                     <tr><td>Đánh giá</td><td style="color:#34d399;">Số thuê bao sạch</td></tr>
@@ -475,7 +475,7 @@ function handleSpamCheck() {
             } else {
               resDiv.innerHTML = `
                 <div class="lk-result-box">
-                  <span class="lk-status-tag lk-status--danger">🚨 BÁO CÁO SPAM</span>
+                  <span class="lk-status-tag lk-status--danger">BÁO CÁO SPAM</span>
                   <table class="lk-details-table">
                     <tr><td>Nhà mạng</td><td>${data.carrier}</td></tr>
                     <tr><td>Đánh giá</td><td style="color:#f87171;">Số điện thoại quảng cáo / cuộc gọi rác</td></tr>
@@ -502,15 +502,15 @@ async function handleTaxCheck() {
   if (!resDiv) return;
 
   if (!input) {
-    resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Vui lòng nhập mã số thuế hoặc tên doanh nghiệp cần tra cứu.</div>`;
+    resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Vui lòng nhập mã số thuế, số CCCD/CMND hoặc tên doanh nghiệp cần tra cứu.</div>`;
     return;
   }
 
   const isNumericMST = /^[0-9]+[0-9-]*$/.test(input);
   if (isNumericMST) {
     const cleanMST = input.replace(/[^0-9]/g, '');
-    if (cleanMST.length !== 10 && cleanMST.length !== 13) {
-      resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Mã số thuế Việt Nam hợp lệ phải có đúng 10 chữ số (doanh nghiệp chính) hoặc 13 chữ số (chi nhánh).</div>`;
+    if (cleanMST.length !== 9 && cleanMST.length !== 10 && cleanMST.length !== 12 && cleanMST.length !== 13) {
+      resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Mã số thuế / CCCD / CMND hợp lệ phải có 9, 10, 12 hoặc 13 chữ số.</div>`;
       return;
     }
   } else {
@@ -526,13 +526,35 @@ async function handleTaxCheck() {
     const response = await fetch(`/api/tax-lookup?q=${encodeURIComponent(input)}`);
     if (!response.ok) {
       const errData = await response.json();
-      resDiv.innerHTML = `<div class="lk-result-box" style="color:#f87171;">⚠️ Lỗi: ${errData.error || 'Không tìm thấy kết quả phù hợp.'}</div>`;
+      resDiv.innerHTML = `
+        <div class="lk-result-box" style="color:#f87171;">
+          <div>⚠️ Lỗi: ${errData.error || 'Không tìm thấy thông tin doanh nghiệp khớp với mã số thuế hoặc từ khóa này.'}</div>
+          <div style="margin-top: 12px; font-size: 12px; color: var(--text-secondary); border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px; line-height: 1.4;">
+            💡 <strong>Mẹo tra cứu cá nhân:</strong> Một số mã số thuế cá nhân mới hoặc bảo mật cao không thể tra cứu tự động. Bạn có thể truy cập trực tiếp trang chính thức của Tổng cục Thuế:
+            <div style="margin-top: 6px; display: flex; gap: 8px; flex-wrap: wrap;">
+              <a href="https://canhan.gdt.gov.vn" target="_blank" class="lot-link" style="padding: 4px 12px; font-size:11px; display: inline-block;">canhan.gdt.gov.vn ↗</a>
+              <a href="https://masothue.com/Search/?q=${encodeURIComponent(input)}&type=auto" target="_blank" class="lot-link" style="padding: 4px 12px; font-size:11px; display: inline-block; background: rgba(245,158,11,0.15); color: #fbbf24; border-color: rgba(245,158,11,0.3);">Xem trên MaSoThue.com ↗</a>
+            </div>
+            hoặc tra cứu trên ứng dụng di động <strong>eTax Mobile</strong> của Ngành Thuế.
+          </div>
+        </div>`;
       return;
     }
 
     const data = await response.json();
     if (!data.results || data.results.length === 0) {
-      resDiv.innerHTML = `<div class="lk-result-box" style="color:#fbbf24;">⚠️ Không tìm thấy thông tin doanh nghiệp khớp với từ khóa của bạn.</div>`;
+      resDiv.innerHTML = `
+        <div class="lk-result-box" style="color:#fbbf24;">
+          <div>⚠️ Không tìm thấy thông tin khớp với từ khóa của bạn.</div>
+          <div style="margin-top: 12px; font-size: 12px; color: var(--text-secondary); border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px; line-height: 1.4;">
+            💡 <strong>Mẹo tra cứu cá nhân:</strong> Một số mã số thuế cá nhân mới hoặc bảo mật cao không thể tra cứu tự động. Bạn có thể truy cập trực tiếp trang chính thức của Tổng cục Thuế:
+            <div style="margin-top: 6px; display: flex; gap: 8px; flex-wrap: wrap;">
+              <a href="https://canhan.gdt.gov.vn" target="_blank" class="lot-link" style="padding: 4px 12px; font-size:11px; display: inline-block;">canhan.gdt.gov.vn ↗</a>
+              <a href="https://masothue.com/Search/?q=${encodeURIComponent(input)}&type=auto" target="_blank" class="lot-link" style="padding: 4px 12px; font-size:11px; display: inline-block; background: rgba(245,158,11,0.15); color: #fbbf24; border-color: rgba(245,158,11,0.3);">Xem trên MaSoThue.com ↗</a>
+            </div>
+            hoặc tra cứu trên ứng dụng di động <strong>eTax Mobile</strong> của Ngành Thuế.
+          </div>
+        </div>`;
       return;
     }
 
@@ -545,12 +567,12 @@ async function handleTaxCheck() {
       const detailLink = company.url 
         ? `<div style="margin-top: 10px; text-align: right;">
             <a href="${company.url}" target="_blank" class="lot-link" style="padding: 4px 12px; font-size:11px;">
-              Xem chi tiết đối tác ➔
+              Xem chi tiết đối tác 
             </a>
            </div>`
         : `<div style="margin-top: 10px; text-align: right;">
             <a href="https://masothue.com/Search/?q=${encodeURIComponent(company.mst || company.name)}" target="_blank" class="lot-link" style="padding: 4px 12px; font-size:11px;">
-              Xem đầy đủ trên MaSoThue.com ➔
+              Xem đầy đủ trên MaSoThue.com 
             </a>
            </div>`;
 
@@ -558,10 +580,10 @@ async function handleTaxCheck() {
         <div class="lk-result-box" style="margin-bottom:0;">
           <span class="lk-status-tag lk-status--safe" style="background:rgba(96,165,250,0.15);color:var(--accent-blue);">${company.status || 'ĐANG HOẠT ĐỘNG'}</span>
           <table class="lk-details-table">
-            <tr><td>Tên Doanh Nghiệp</td><td style="font-weight:700; color:var(--text-primary);">${company.name}</td></tr>
+            <tr><td>Tên doanh nghiệp / Cá nhân</td><td style="font-weight:700; color:var(--text-primary);">${company.name}</td></tr>
             <tr><td>Mã Số Thuế</td><td>${mstHTML}</td></tr>
-            <tr><td>Đại Diện Pháp Luật</td><td>${company.representative}</td></tr>
-            <tr><td>Địa Chỉ Trụ Sở</td><td>${company.address}</td></tr>
+            <tr><td>Đại diện / Chủ hộ</td><td>${company.representative}</td></tr>
+            <tr><td>Địa chỉ đăng ký</td><td>${company.address}</td></tr>
           </table>
           ${detailLink}
         </div>

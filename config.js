@@ -18,7 +18,7 @@ const APP_CONFIG = {
     : 'https://everything.rellia.org',
 
   // ── Tỷ giá USD/VND dự phòng ──────────────────────────────────────────────────
-  // ✅ Tỷ giá thực tế được tự động lấy từ open.er-api.com khi khởi động.
+ // Tỷ giá thực tế được tự động lấy từ open.er-api.com khi khởi động.
   // Giá trị này chỉ dùng làm DỰ PHÒNG nếu API không phản hồi được.
   USD_TO_VND: 25480,
 

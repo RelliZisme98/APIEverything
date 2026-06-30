@@ -138,8 +138,8 @@ export function renderMedia() {
     <div class="media-wrap">
       <!-- Tabs -->
       <div class="lk-tabs">
-        <button class="lk-tab-btn active" id="tabMediaMovies">🎬 Phim Chiếu Rạp</button>
-        <button class="lk-tab-btn" id="tabMediaGames">🎮 Trò Chơi Hot</button>
+ <button class="lk-tab-btn active" id="tabMediaMovies">Phim Chiếu Rạp</button>
+ <button class="lk-tab-btn" id="tabMediaGames">Trò Chơi Hot</button>
       </div>
 
       <!-- Movies Section -->
@@ -202,7 +202,7 @@ async function renderMoviesList() {
       <div class="media-card">
         <div class="media-poster-wrap">
           <img class="media-poster" src="${posterUrl}" alt="${movie.title}" loading="lazy" />
-          <span class="media-rating-badge">★ ${(movie.vote_average || 7.5).toFixed(1)}</span>
+ <span class="media-rating-badge">${(movie.vote_average || 7.5).toFixed(1)}</span>
         </div>
         <div class="media-body">
           <div>
@@ -239,7 +239,7 @@ function renderGamesList() {
       <div class="media-card">
         <div class="media-poster-wrap">
           <img class="media-poster" src="${game.image}" alt="${game.title}" loading="lazy" />
-          <span class="media-rating-badge" style="border-color:rgba(96,165,250,0.5); color:#60a5fa;">★ ${game.rating.toFixed(1)}</span>
+ <span class="media-rating-badge" style="border-color:rgba(96,165,250,0.5); color:#60a5fa;">${game.rating.toFixed(1)}</span>
         </div>
         <div class="media-body">
           <div>
@@ -278,7 +278,7 @@ function setupTrailerModal() {
       <div class="trailer-content">
         <div class="trailer-header">
           <div class="trailer-title">${title} - Official Trailer</div>
-          <button class="trailer-close" onclick="window.closeTrailerModal()">✕</button>
+ <button class="trailer-close" onclick="window.closeTrailerModal()"></button>
         </div>
         <div class="trailer-video-wrap">
           <iframe src="https://www.youtube.com/embed/${youtubeId}?autoplay=1" allow="autoplay; encrypted-media" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-presentation" allowfullscreen></iframe>

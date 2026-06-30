@@ -14,17 +14,17 @@ const OPENEX_URL      = '/api/exchange?from=USD'; // proxied to open.er-api.com
 
 /** Metadata for each currency: flag emoji + full name */
 export const FX_META = {
-  USD: { flag: '🇺🇸', name: 'Đô la Mỹ' },
-  EUR: { flag: '🇪🇺', name: 'Euro' },
-  JPY: { flag: '🇯🇵', name: 'Yên Nhật' },
-  CNY: { flag: '🇨🇳', name: 'Nhân dân tệ' },
-  GBP: { flag: '🇬🇧', name: 'Bảng Anh' },
-  KRW: { flag: '🇰🇷', name: 'Won Hàn Quốc' },
-  SGD: { flag: '🇸🇬', name: 'Đô Singapore' },
-  THB: { flag: '🇹🇭', name: 'Baht Thái' },
-  AUD: { flag: '🇦🇺', name: 'Đô Úc' },
-  HKD: { flag: '🇭🇰', name: 'Đô Hong Kong' },
-  VND: { flag: '🇻🇳', name: 'Đồng Việt Nam' }, // used internally for live rate
+ USD: { flag: '', name: 'Đô la Mỹ' },
+ EUR: { flag: '', name: 'Euro' },
+ JPY: { flag: '', name: 'Yên Nhật' },
+ CNY: { flag: '', name: 'Nhân dân tệ' },
+ GBP: { flag: '', name: 'Bảng Anh' },
+ KRW: { flag: '', name: 'Won Hàn Quốc' },
+ SGD: { flag: '', name: 'Đô Singapore' },
+ THB: { flag: '', name: 'Baht Thái' },
+ AUD: { flag: '', name: 'Đô Úc' },
+ HKD: { flag: '', name: 'Đô Hong Kong' },
+ VND: { flag: '', name: 'Đồng Việt Nam' }, // used internally for live rate
 };
 
 /**

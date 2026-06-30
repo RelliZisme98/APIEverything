@@ -89,19 +89,19 @@ function buildLinks(plate, vehicleType) {
   const encoded = encodeURIComponent(plate.replace(/[\s]/g, ''));
   return [
     {
-      name:  '🏛️ Cổng CSGT (Chính thức)',
+ name: '️ Cổng CSGT (Chính thức)',
       url:   'https://csgt.bocongan.gov.vn/tra-cuu-phat-nguoi',
       note:  'Trang chính thức của Cảnh sát giao thông (Yêu cầu VNeID)',
       badge: 'official',
     },
     {
-      name:  '🔍 PhatNguoi.vn',
+ name: 'PhatNguoi.vn',
       url:   `https://phatnguoi.vn/?bsx=${encoded}`,
       note:  'Tổng hợp dữ liệu phạt nguội toàn quốc',
       badge: 'third-party',
     },
     {
-      name:  '📱 iCSGT (App)',
+ name: 'iCSGT (App)',
       url:   'https://iCSGT.vn',
       note:  'Ứng dụng tra cứu chính thức của CSGT',
       badge: 'official',

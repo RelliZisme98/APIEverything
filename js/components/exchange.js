@@ -25,7 +25,7 @@ export function renderExchangeTable(rows, tbodyId = 'fxBody') {
       <tr>
         <td>
           <div class="fx-pair">
-            <span class="fx-flag">${meta.flag || '🏳️'}</span>
+ <span class="fx-flag">${meta.flag || '️'}</span>
             <div>
               <div class="fx-sym">${r.cur}</div>
               <div class="fx-name">${meta.name || r.cur}</div>
@@ -74,7 +74,7 @@ function initConverter(rows) {
       return currencies.map(cur => {
         const meta = FX_META[cur] || {};
         const isSel = cur === selectedVal ? 'selected' : '';
-        return `<option value="${cur}" ${isSel}>${meta.flag || '🏳️'} ${cur} - ${meta.name || cur}</option>`;
+ return `<option value="${cur}" ${isSel}>${meta.flag || '️'} ${cur} - ${meta.name || cur}</option>`;
       }).join('');
     };
 

@@ -21,7 +21,7 @@ function renderTrafficIframe(plate) {
   el.innerHTML = `
     <div class="traffic-embed-info">
       <div>
-        🌐 Đang hiển thị trang nhúng <strong>PhatNguoi.vn</strong>. Bạn có thể tra cứu trực tiếp dưới đây.
+ Đang hiển thị trang nhúng <strong>PhatNguoi.vn</strong>. Bạn có thể tra cứu trực tiếp dưới đây.
       </div>
       <div class="traffic-embed-links">
         <a class="traffic-embed-link" href="${embedUrl}" target="_blank" rel="noopener">

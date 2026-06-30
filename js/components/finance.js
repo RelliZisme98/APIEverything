@@ -72,7 +72,7 @@ function renderTabContent(container) {
         <div class="crypto-right-pane">
           <div class="card" id="cryptoDetailCard" style="display:none;margin-bottom:0;">
             <div class="card-header">
-              <div class="card-title"><span class="icon">📊</span> Chi tiết thị trường</div>
+              <div class="card-title">Chi tiết thị trường</div>
             </div>
             <div id="cryptoDetailContainer" class="crypto-detail-container" style="padding:16px;"></div>
           </div>
@@ -118,7 +118,7 @@ function renderTabContent(container) {
         </div>
         <div style="flex:0.8;min-width:300px;">
           <div class="card" style="margin-bottom:0;background:rgba(255,255,255,0.01);border:1px solid var(--border);">
-            <div class="card-header"><div class="card-title">💱 Công cụ quy đổi ngoại tệ</div></div>
+            <div class="card-header"><div class="card-title">Công cụ quy đổi ngoại tệ</div></div>
             <div style="padding:16px;">
               <div style="display:flex;gap:10px;margin-bottom:12px;">
                 <input type="number" id="convAmount" class="field-input" value="1" min="0" style="flex:1;" />
@@ -191,7 +191,7 @@ function renderOverview(container) {
       <!-- VN-INDEX Card -->
       <div class="finance-kpi-card" onclick="switchFinanceTab('vnindex')" style="cursor:pointer;background:rgba(96,165,250,0.03);border:1px solid rgba(96,165,250,0.15);border-radius:12px;padding:16px;transition:all 0.2s;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span style="font-size:12px;font-weight:700;color:#60a5fa;">📈 CHỨNG KHOÁN VN</span>
+          <span style="font-size:12px;font-weight:700;color:#60a5fa;">CHỨNG KHOÁN VN</span>
           <span style="font-size:10px;background:rgba(96,165,250,0.1);color:#60a5fa;padding:2px 6px;border-radius:4px;">HOSE</span>
         </div>
         <div style="font-size:24px;font-weight:800;color:var(--text-primary);margin-bottom:4px;">${vniPrice}</div>
@@ -203,7 +203,7 @@ function renderOverview(container) {
       <!-- BITCOIN Card -->
       <div class="finance-kpi-card" onclick="switchFinanceTab('crypto')" style="cursor:pointer;background:rgba(251,191,36,0.03);border:1px solid rgba(251,191,36,0.15);border-radius:12px;padding:16px;transition:all 0.2s;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span style="font-size:12px;font-weight:700;color:#fbbf24;">💎 TIỀN ĐIỆN TỬ</span>
+          <span style="font-size:12px;font-weight:700;color:#fbbf24;">TIỀN ĐIỆN TỬ</span>
           <span style="font-size:10px;background:rgba(251,191,36,0.1);color:#fbbf24;padding:2px 6px;border-radius:4px;">BTC/USD</span>
         </div>
         <div style="font-size:24px;font-weight:800;color:var(--text-primary);margin-bottom:4px;">${btcPrice}</div>
@@ -215,7 +215,7 @@ function renderOverview(container) {
       <!-- GOLD Card -->
       <div class="finance-kpi-card" onclick="switchFinanceTab('gold')" style="cursor:pointer;background:rgba(167,139,250,0.03);border:1px solid rgba(167,139,250,0.15);border-radius:12px;padding:16px;transition:all 0.2s;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span style="font-size:12px;font-weight:700;color:#a78bfa;">🏅 GIÁ VÀNG</span>
+          <span style="font-size:12px;font-weight:700;color:#a78bfa;">GIÁ VÀNG</span>
           <span style="font-size:10px;background:rgba(167,139,250,0.1);color:#a78bfa;padding:2px 6px;border-radius:4px;">${goldSource}</span>
         </div>
         <div style="font-size:24px;font-weight:800;color:var(--text-primary);margin-bottom:4px;">${goldPrice}</div>
@@ -225,7 +225,7 @@ function renderOverview(container) {
       <!-- FUEL Card -->
       <div class="finance-kpi-card" onclick="switchFinanceTab('gas')" style="cursor:pointer;background:rgba(52,211,153,0.03);border:1px solid rgba(52,211,153,0.15);border-radius:12px;padding:16px;transition:all 0.2s;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span style="font-size:12px;font-weight:700;color:#34d399;">⛽ XĂNG DẦU</span>
+          <span style="font-size:12px;font-weight:700;color:#34d399;">XĂNG DẦU</span>
           <span style="font-size:10px;background:rgba(52,211,153,0.1);color:#34d399;padding:2px 6px;border-radius:4px;">Petrolimex</span>
         </div>
         <div style="font-size:24px;font-weight:800;color:var(--text-primary);margin-bottom:4px;">${gasPrice}</div>
@@ -237,30 +237,30 @@ function renderOverview(container) {
     <!-- Secondary info table -->
     <div style="display:flex;gap:20px;flex-wrap:wrap;">
       <div style="flex:1.2;min-width:300px;">
-        <div class="vni-section-label" style="margin-top:0;">📊 Tóm Tắt Tỷ Giá & Chỉ Số Khác</div>
+        <div class="vni-section-label" style="margin-top:0;">Tóm Tắt Tỷ Giá & Chỉ Số Khác</div>
         <table class="fx-table" style="width:100%;font-size:13px;">
           <tbody>
             <tr>
-              <td>🇺🇸 USD / VND</td>
+ <td>USD / VND</td>
               <td style="text-align:right;font-weight:700;color:var(--accent-blue);">${usdRate}</td>
               <td style="text-align:right;font-size:11px;color:var(--text-muted);">Tỷ giá VCB</td>
             </tr>
             <tr>
-              <td>🇪🇺 EUR / VND</td>
+ <td>EUR / VND</td>
               <td style="text-align:right;font-weight:700;color:var(--accent-blue);">
                 ${state.fxData?.find(r => r.cur === 'EUR') ? Math.round(state.fxData.find(r => r.cur === 'EUR').rateToVnd).toLocaleString('vi-VN') + ' ₫' : '—'}
               </td>
               <td style="text-align:right;font-size:11px;color:var(--text-muted);">Tỷ giá VCB</td>
             </tr>
             <tr>
-              <td>🇯🇵 JPY / VND</td>
+ <td>JPY / VND</td>
               <td style="text-align:right;font-weight:700;color:var(--accent-blue);">
                 ${state.fxData?.find(r => r.cur === 'JPY') ? state.fxData.find(r => r.cur === 'JPY').rateToVnd.toFixed(2) + ' ₫' : '—'}
               </td>
               <td style="text-align:right;font-size:11px;color:var(--text-muted);">Tỷ giá VCB</td>
             </tr>
             <tr>
-              <td>🏆 SJC Gold (Bán)</td>
+ <td>SJC Gold (Bán)</td>
               <td style="text-align:right;font-weight:700;color:var(--accent-yellow);">
                 ${state.goldData?.vnPrices?.VNGSJC?.sell ? Math.round(state.goldData.vnPrices.VNGSJC.sell / 10).toLocaleString('vi-VN') + ' ₫' : '—'}
               </td>
@@ -271,10 +271,10 @@ function renderOverview(container) {
       </div>
 
       <div style="flex:0.8;min-width:250px;">
-        <div class="vni-section-label" style="margin-top:0;">💡 Khuyến Nghị Đầu Tư</div>
+        <div class="vni-section-label" style="margin-top:0;">Khuyến Nghị Đầu Tư</div>
         <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;padding:16px;font-size:12px;line-height:1.6;color:var(--text-secondary);">
-          📌 Dữ liệu thị trường tài chính được tổng hợp từ Yahoo Finance, VPS, CoinGecko, Vietcombank và Petrolimex.<br/><br/>
-          ⚠️ Mọi thông tin chỉ mang tính chất tham khảo, không phải lời khuyên đầu tư tài chính chính thức.
+          Dữ liệu thị trường tài chính được tổng hợp từ Yahoo Finance, VPS, CoinGecko, Vietcombank và Petrolimex.<br/><br/>
+          Mọi thông tin chỉ mang tính chất tham khảo, không phải lời khuyên đầu tư tài chính chính thức.
         </div>
       </div>
     </div>

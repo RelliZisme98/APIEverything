@@ -6,13 +6,14 @@
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 20px;
-  transition: background 0.3s, border-color 0.3s, transform 0.3s;
+  padding: 24px;
+  transition: all 0.25s var(--ease-out);
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
-/* Top shimmer line */
+/* Top hairline highlight (bevel effect) */
 .card::before {
   content: '';
   position: absolute;
@@ -20,13 +21,20 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.01), 
+    rgba(255, 255, 255, 0.06) 20%, 
+    rgba(255, 255, 255, 0.06) 80%, 
+    rgba(255, 255, 255, 0.01)
+  );
+  z-index: 1;
 }
 
 .card:hover {
   background: var(--bg-card-hover);
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: var(--border-hover);
   transform: translateY(-2px);
+  box-shadow: var(--shadow-lg), 0 0 24px rgba(94, 106, 210, 0.04);
 }
 
 /* ── Card Header ── */
@@ -34,34 +42,39 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .card-title {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  font-family: var(--font-heading);
+  font-size: 14.5px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-secondary);
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  text-transform: none;
 }
 
-.card-title .icon { font-size: 16px; }
+.card-title .icon {
+  display: none !important;
+}
 
 /* ── Badge variants ── */
 .card-badge {
   font-size: 10px;
   padding: 3px 8px;
-  border-radius: 20px;
+  border-radius: var(--radius-sm);
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
   display: inline-flex;
   align-items: center;
 }
 
-.badge-live   { background: rgba(52,211,153,0.15); color: var(--accent-green);  border: 1px solid rgba(52,211,153,0.25); }
-.badge-manual { background: rgba(251,191,36,0.15);  color: var(--accent-yellow); border: 1px solid rgba(251,191,36,0.25); }
-.badge-needkey{ background: rgba(248,113,113,0.15); color: var(--accent-red);    border: 1px solid rgba(248,113,113,0.25); }
+.badge-live   { background: rgba(39, 166, 68, 0.1); color: var(--accent-green);  border: 1px solid rgba(39, 166, 68, 0.15); }
+.badge-manual { background: rgba(255, 202, 40, 0.1);  color: var(--accent-yellow); border: 1px solid rgba(255, 202, 40, 0.15); }
+.badge-needkey{ background: rgba(239, 83, 80, 0.1); color: var(--accent-red);    border: 1px solid rgba(239, 83, 80, 0.15); }
+
+

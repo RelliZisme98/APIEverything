@@ -62,7 +62,7 @@ export async function renderAQI(containerId = 'aqiContent', isSilent = false) {
   if (!el) return;
 
   if (!isSilent) {
-    el.innerHTML = `<div class="aqi-loading">🌍 Đang tải dữ liệu chất lượng không khí...</div>`;
+ el.innerHTML = `<div class="aqi-loading">Đang tải dữ liệu chất lượng không khí...</div>`;
   }
 
   // Find current city config
@@ -82,7 +82,7 @@ export async function renderAQI(containerId = 'aqiContent', isSilent = false) {
 
   const selectorHtml = `
     <div class="aqi-selector-row">
-      <span class="aqi-selector-label">📍 Chọn thành phố:</span>
+ <span class="aqi-selector-label">Chọn thành phố:</span>
       <select class="aqi-city-dropdown" id="aqiCityDropdown" onchange="window.aqiSelectCity(this.value)">
         ${groupedOptions}
       </select>
@@ -105,7 +105,7 @@ export async function renderAQI(containerId = 'aqiContent', isSilent = false) {
     }
 
     if (!data) {
-      el.innerHTML = `${selectorHtml}<div class="error-msg">⚠️ Không lấy được dữ liệu AQI. Vui lòng thử lại sau.</div>`;
+ el.innerHTML = `${selectorHtml}<div class="error-msg">️ Không lấy được dữ liệu AQI. Vui lòng thử lại sau.</div>`;
       return;
     }
 
@@ -118,7 +118,7 @@ export async function renderAQI(containerId = 'aqiContent', isSilent = false) {
       }
       el.innerHTML = `
         ${selectorHtml}
-        <div class="error-msg">⚠️ Trạm đo không có dữ liệu (offline). Hãy thử thành phố khác.</div>`;
+ <div class="error-msg">️ Trạm đo không có dữ liệu (offline). Hãy thử thành phố khác.</div>`;
       return;
     }
 
@@ -158,7 +158,7 @@ export async function renderAQI(containerId = 'aqiContent', isSilent = false) {
           </div>
         </div>
         <div class="aqi-hero-right">
-          <div class="aqi-city">📍 ${city} <span class="aqi-badge real">Trạm thực tế</span></div>
+ <div class="aqi-city">${city} <span class="aqi-badge real">Trạm thực tế</span></div>
           <div class="aqi-scale">
             <div class="aqi-scale-bar">
               <div class="aqi-scale-fill" style="width:${Math.min(aqi/300*100,100)}%;background:${level.color};"></div>
@@ -169,7 +169,7 @@ export async function renderAQI(containerId = 'aqiContent', isSilent = false) {
               <span style="color:#9f1239">Nguy hiểm</span>
             </div>
           </div>
-          ${updated ? `<div class="aqi-updated">🕒 ${updated}</div>` : ''}
+ ${updated ? `<div class="aqi-updated">${updated}</div>` : ''}
         </div>
       </div>
       <div class="aqi-standard-note">
@@ -185,17 +185,17 @@ export async function renderAQI(containerId = 'aqiContent', isSilent = false) {
       </div>
     `;
   } catch (err) {
-    el.innerHTML = `${selectorHtml}<div class="error-msg">⚠️ ${err.message}</div>`;
+ el.innerHTML = `${selectorHtml}<div class="error-msg">️ ${err.message}</div>`;
   }
 }
 
 function aqiAdvice(aqi) {
-  if (aqi <= 50)  return '✅ <strong>Chất lượng tốt.</strong> Thích hợp cho mọi hoạt động ngoài trời.';
-  if (aqi <= 100) return '⚠️ <strong>Chấp nhận được.</strong> Người nhạy cảm nên hạn chế vận động mạnh ngoài trời.';
-  if (aqi <= 150) return '😷 <strong>Không tốt cho nhóm nhạy cảm.</strong> Trẻ em, người già, người bệnh hô hấp nên ở trong nhà.';
-  if (aqi <= 200) return '🚨 <strong>Có hại cho sức khỏe.</strong> Mọi người nên hạn chế ra ngoài, đeo khẩu trang N95.';
-  if (aqi <= 300) return '☠️ <strong>Rất có hại.</strong> Tránh ra ngoài. Đóng kín cửa sổ, dùng máy lọc không khí.';
-  return '☣️ <strong>Nguy hiểm khẩn cấp.</strong> Không ra ngoài, liên hệ cơ quan y tế nếu có triệu chứng.';
+ if (aqi <= 50) return '<strong>Chất lượng tốt.</strong> Thích hợp cho mọi hoạt động ngoài trời.';
+ if (aqi <= 100) return '️ <strong>Chấp nhận được.</strong> Người nhạy cảm nên hạn chế vận động mạnh ngoài trời.';
+ if (aqi <= 150) return '<strong>Không tốt cho nhóm nhạy cảm.</strong> Trẻ em, người già, người bệnh hô hấp nên ở trong nhà.';
+ if (aqi <= 200) return '<strong>Có hại cho sức khỏe.</strong> Mọi người nên hạn chế ra ngoài, đeo khẩu trang N95.';
+ if (aqi <= 300) return '️ <strong>Rất có hại.</strong> Tránh ra ngoài. Đóng kín cửa sổ, dùng máy lọc không khí.';
+ return '️ <strong>Nguy hiểm khẩn cấp.</strong> Không ra ngoài, liên hệ cơ quan y tế nếu có triệu chứng.';
 }
 
 window.aqiSelectCity = async (key) => {
@@ -241,12 +241,12 @@ function owmPm25ToAQI(pm25) {
 }
 
 function aqiLevelFn(aqi) {
-  if (aqi <= 50)  return { label: 'Tốt',               emoji: '😊', color: '#4ade80', bg: 'rgba(74,222,128,0.08)'  };
-  if (aqi <= 100) return { label: 'Chấp nhận',          emoji: '😐', color: '#facc15', bg: 'rgba(250,204,21,0.08)'  };
-  if (aqi <= 150) return { label: 'Không tốt (nhạy)',   emoji: '😷', color: '#fb923c', bg: 'rgba(251,146,60,0.08)' };
-  if (aqi <= 200) return { label: 'Có hại',             emoji: '🤢', color: '#f87171', bg: 'rgba(248,113,113,0.08)'};
-  if (aqi <= 300) return { label: 'Rất có hại',         emoji: '☠️', color: '#c084fc', bg: 'rgba(192,132,252,0.08)'};
-  return               { label: 'Nguy hiểm',            emoji: '☣️', color: '#9f1239', bg: 'rgba(159,18,57,0.1)'   };
+ if (aqi <= 50) return { label: 'Tốt', emoji: '', color: '#4ade80', bg: 'rgba(74,222,128,0.08)' };
+ if (aqi <= 100) return { label: 'Chấp nhận', emoji: '', color: '#facc15', bg: 'rgba(250,204,21,0.08)' };
+ if (aqi <= 150) return { label: 'Không tốt (nhạy)', emoji: '', color: '#fb923c', bg: 'rgba(251,146,60,0.08)' };
+ if (aqi <= 200) return { label: 'Có hại', emoji: '', color: '#f87171', bg: 'rgba(248,113,113,0.08)'};
+ if (aqi <= 300) return { label: 'Rất có hại', emoji: '️', color: '#c084fc', bg: 'rgba(192,132,252,0.08)'};
+ return { label: 'Nguy hiểm', emoji: '️', color: '#9f1239', bg: 'rgba(159,18,57,0.1)' };
 }
 
 function renderFromOWM(el, selectorHtml, owmData, cityConf) {
@@ -283,7 +283,7 @@ function renderFromOWM(el, selectorHtml, owmData, cityConf) {
         </div>
       </div>
       <div class="aqi-hero-right">
-        <div class="aqi-city">📍 ${cityConf.label} <span class="aqi-badge est">Dữ liệu mô phỏng</span></div>
+ <div class="aqi-city">${cityConf.label} <span class="aqi-badge est">Dữ liệu mô phỏng</span></div>
         <div class="aqi-scale">
           <div class="aqi-scale-bar"><div class="aqi-scale-fill" style="width:${Math.min(aqi/300*100,100)}%;background:${level.color};"></div></div>
           <div class="aqi-scale-labels">
@@ -293,7 +293,7 @@ function renderFromOWM(el, selectorHtml, owmData, cityConf) {
       </div>
     </div>
     <div class="aqi-standard-note">
-      📡 Nguồn: <strong>OpenWeatherMap Air Pollution</strong> · Tiêu chuẩn US AQI (EPA)
+ Nguồn: <strong>OpenWeatherMap Air Pollution</strong> · Tiêu chuẩn US AQI (EPA)
     </div>
     <div class="aqi-poll-label">Chỉ số ô nhiễm</div>
     <div class="aqi-poll-grid">${pollCards}</div>

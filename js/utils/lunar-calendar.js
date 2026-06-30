@@ -209,22 +209,22 @@ export function canChiDay(jd) {
 // ─── Vietnamese holidays (lunar dates) ───────────────────────────────────────
 
 export const HOLIDAYS_LUNAR = [
-  { month: 1,  day: 1,  name: '🎆 Tết Nguyên Đán (Mùng 1)' },
-  { month: 1,  day: 2,  name: '🎆 Tết Nguyên Đán (Mùng 2)' },
-  { month: 1,  day: 3,  name: '🎆 Tết Nguyên Đán (Mùng 3)' },
-  { month: 1,  day: 15, name: '🌕 Rằm tháng Giêng (Tết Nguyên Tiêu)' },
-  { month: 3,  day: 10, name: '🏔️ Giỗ Tổ Hùng Vương' },
-  { month: 4,  day: 15, name: '🕌 Lễ Phật Đản' },
-  { month: 7,  day: 15, name: '👻 Lễ Vu Lan (Rằm tháng 7)' },
-  { month: 8,  day: 15, name: '🥮 Tết Trung Thu' },
-  { month: 12, day: 23, name: '🐟 Ông Táo về trời' },
-  { month: 12, day: 30, name: '🎇 Tất Niên' },
+ { month: 1, day: 1, name: 'Tết Nguyên Đán (Mùng 1)' },
+ { month: 1, day: 2, name: 'Tết Nguyên Đán (Mùng 2)' },
+ { month: 1, day: 3, name: 'Tết Nguyên Đán (Mùng 3)' },
+ { month: 1, day: 15, name: 'Rằm tháng Giêng (Tết Nguyên Tiêu)' },
+ { month: 3, day: 10, name: '️ Giỗ Tổ Hùng Vương' },
+ { month: 4, day: 15, name: 'Lễ Phật Đản' },
+ { month: 7, day: 15, name: 'Lễ Vu Lan (Rằm tháng 7)' },
+ { month: 8, day: 15, name: 'Tết Trung Thu' },
+ { month: 12, day: 23, name: 'Ông Táo về trời' },
+ { month: 12, day: 30, name: 'Tất Niên' },
 ];
 
 /** Recurring monthly events */
 export function getMonthlyEvents(lunarDay) {
-  if (lunarDay === 1)  return '🌑 Mùng Một';
-  if (lunarDay === 15) return '🌕 Rằm';
+ if (lunarDay === 1) return 'Mùng Một';
+ if (lunarDay === 15) return 'Rằm';
   return null;
 }
 

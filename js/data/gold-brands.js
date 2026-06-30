@@ -30,7 +30,7 @@
  * SJC trades at a slightly higher premium due to government regulation.
  * Non-SJC brands (DOJI, PNJ, BTMC, Bảo Tín Việt) track closer to international.
  *
- * ⚠️  These premiums drift daily — check brand websites for exact prices.
+ * ️ These premiums drift daily — check brand websites for exact prices.
  */
 
 /** @type {GoldBrand[]} */
@@ -38,7 +38,7 @@ export const GOLD_BRANDS = [
   {
     id: 'sjc',
     name: 'SJC',
-    icon: '🏆',
+ icon: '',
     type: 'Vàng miếng 24K (999.9)',
     buyPremium: 0.030,  // mua vào ~3% above international
     sellPremium: 0.075,  // bán ra  ~7.5% above international
@@ -49,7 +49,7 @@ export const GOLD_BRANDS = [
   {
     id: 'doji',
     name: 'DOJI',
-    icon: '💎',
+ icon: '',
     type: 'Vàng nữ trang & miếng (999)',
     buyPremium: 0.022,  // ~2.2%
     sellPremium: 0.060,  // ~6.0%
@@ -60,7 +60,7 @@ export const GOLD_BRANDS = [
   {
     id: 'pnj',
     name: 'PNJ',
-    icon: '💍',
+ icon: '',
     type: 'Vàng nữ trang (610 – 750)',
     buyPremium: 0.020,  // ~2.0%
     sellPremium: 0.065,  // ~6.5%
@@ -82,7 +82,7 @@ export const GOLD_BRANDS = [
   {
     id: 'btmh',
     name: 'Bảo Tín Mạnh Hải',
-    icon: '🥇',
+ icon: '',
     type: 'Vàng miếng & nhẫn (999.9)',
     buyPremium: 0.022,  // ~2.2%
     sellPremium: 0.065,  // ~6.5%

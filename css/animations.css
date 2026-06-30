@@ -1,45 +1,127 @@
-/* ═══════════════════════════════════════════
-   KEYFRAME ANIMATIONS
-   ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   KEYFRAME ANIMATIONS — Rellia Dashboard
+   ═══════════════════════════════════════════════════════════════ */
 
+/* ── Skeleton loading ──────────────────────────────────────── */
 @keyframes shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
 
+/* ── Rotation ──────────────────────────────────────────────── */
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
+/* ── Status dots ───────────────────────────────────────────── */
 @keyframes pulse-green {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.45; }
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(39,166,68,0.6); }
+  50%       { opacity: 0.5; box-shadow: 0 0 12px rgba(39,166,68,0.3); }
 }
 
 @keyframes pulse-red {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.4; }
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(239,68,68,0.6); }
+  50%       { opacity: 0.45; box-shadow: 0 0 12px rgba(239,68,68,0.3); }
 }
 
+/* ── Ticker ─────────────────────────────────────────────────── */
 @keyframes ticker-scroll {
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
 
+/* ── Flash (number update) ──────────────────────────────────── */
 @keyframes flash {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.35; }
+  0%   { opacity: 1; }
+  25%  { opacity: 0.35; }
+  100% { opacity: 1; }
 }
 
+/* ── Fade in + slide up ─────────────────────────────────────── */
 @keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* ── Utility helpers ── */
-.animate-fade-in-up { animation: fade-in-up 0.4s ease both; }
-.num-flash          { animation: flash 0.4s ease; }
-
-.refresh-btn.spinning svg {
-  animation: spin 0.6s linear;
+/* ── Slide up (page section transition) ─────────────────────── */
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
+/* ── Subtle float (decorative) ──────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-4px); }
+}
+
+/* ── Glow pulse (accent elements) ──────────────────────────── */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(94,106,210,0.3); }
+  50%       { box-shadow: 0 0 20px rgba(94,106,210,0.6), 0 0 40px rgba(94,106,210,0.2); }
+}
+
+/* ── Gradient shift (animated badges) ──────────────────────── */
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ── Slide in from left (sidebar mobile) ───────────────────── */
+@keyframes slide-in-left {
+  from { transform: translateX(-100%); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+/* ── Scale pop (button press) ───────────────────────────────── */
+@keyframes scale-pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+/* ── Bounce in (modal, toast) ───────────────────────────────── */
+@keyframes bounce-in {
+  0%   { opacity: 0; transform: scale(0.9) translateY(10px); }
+  60%  { opacity: 1; transform: scale(1.02) translateY(-2px); }
+  100% { transform: scale(1) translateY(0); }
+}
+
+/* ── Live badge blink ───────────────────────────────────────── */
+@keyframes live-blink {
+  0%, 80%, 100% { opacity: 1; }
+  40%           { opacity: 0.3; }
+}
+
+/* ══ Utility Helper Classes ══════════════════════════════════ */
+.animate-fade-in-up  { animation: fade-in-up 0.4s var(--ease-out) both; }
+.animate-fade-in-up-fast { animation: fade-in-up 0.25s var(--ease-out) both; }
+.num-flash           { animation: flash 0.5s var(--ease-out); }
+.animate-bounce-in   { animation: bounce-in 0.5s var(--ease-spring) both; }
+.animate-float       { animation: float 4s ease-in-out infinite; }
+
+/* Spinner for refresh btn */
+.refresh-btn.spinning svg,
+.sidebar-refresh-btn.spinning svg {
+  animation: spin 0.7s linear;
+}
+
+/* Stagger helpers */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.10s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.20s; }
+.stagger-5 { animation-delay: 0.25s; }

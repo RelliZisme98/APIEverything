@@ -24,18 +24,18 @@ export function renderMarketStats(coins, containerId = 'marketStats') {
   const rawFear  = Math.round(50 + avgChg * 2);
   const fearVal  = Math.max(0, Math.min(100, rawFear));
   const fearLabel =
-    fearVal < 25 ? '😨 Sợ hãi cực độ' :
-    fearVal < 45 ? '😟 Sợ hãi' :
-    fearVal < 55 ? '😐 Trung lập' :
-    fearVal < 75 ? '😊 Tham lam' :
-                   '🤑 Tham lam cực độ';
+ fearVal < 25 ? 'Sợ hãi cực độ' :
+ fearVal < 45 ? 'Sợ hãi' :
+ fearVal < 55 ? 'Trung lập' :
+ fearVal < 75 ? 'Tham lam' :
+ 'Tham lam cực độ';
 
   const rows = [
-    { label: '🌐 Tổng Vốn Hóa Crypto',       val: fmtCap(totalCap) },
-    { label: '🟠 BTC Dominance',               val: btcDom + '%' },
-    { label: '🔷 ETH / BTC',                   val: ethBtc },
-    { label: '📊 Fear & Greed (ước tính)',      val: `${fearVal} · ${fearLabel}` },
-    { label: '🏆 Đang theo dõi',               val: `${coins.length} coin` },
+ { label: 'Tổng Vốn Hóa Crypto', val: fmtCap(totalCap) },
+ { label: 'BTC Dominance', val: btcDom + '%' },
+ { label: 'ETH / BTC', val: ethBtc },
+ { label: 'Fear & Greed (ước tính)', val: `${fearVal} · ${fearLabel}` },
+ { label: 'Đang theo dõi', val: `${coins.length} coin` },
     { label: '⏱️ Cập nhật lúc',                val: new Date().toLocaleTimeString('vi-VN') },
   ];
 

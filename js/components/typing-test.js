@@ -64,7 +64,7 @@ export function renderTypingTest(containerId = 'typingTestContent') {
         </div>
         <div class="tt-group">
           <span class="tt-label">Âm thanh:</span>
-          <button class="tt-btn ${playSound ? 'active' : ''}" id="tt-btn-sound">🔊 Click: ${playSound ? 'Bật' : 'Tắt'}</button>
+ <button class="tt-btn ${playSound ? 'active' : ''}" id="tt-btn-sound">Click: ${playSound ? 'Bật' : 'Tắt'}</button>
         </div>
       </div>
 
@@ -108,14 +108,14 @@ export function renderTypingTest(containerId = 'typingTestContent') {
       <!-- Footer action -->
       <div class="tt-actions">
         <button class="btn-primary tt-restart-btn" id="tt-btn-restart">
-          🔄 Luyện Lại (Esc)
+ Luyện Lại (Esc)
         </button>
       </div>
 
       <!-- Result Screen Overlay (Hidden by default) -->
       <div class="tt-result-screen" id="tt-result-screen" style="display: none;">
         <div class="tt-result-card">
-          <div class="tt-result-header">🎉 Kết Quả Của Bạn</div>
+ <div class="tt-result-header">Kết Quả Của Bạn</div>
           
           <div class="tt-result-grid">
             <div class="tt-r-item highlight">
@@ -140,7 +140,7 @@ export function renderTypingTest(containerId = 'typingTestContent') {
             Bạn đã gõ tổng cộng <strong id="tt-r-total-chars">0</strong> ký tự.
           </div>
 
-          <button class="btn-primary" id="tt-r-close-btn" style="width: 100%; margin-top: 16px;">🔄 Thử Lại Lần Nữa</button>
+ <button class="btn-primary" id="tt-r-close-btn" style="width: 100%; margin-top: 16px;">Thử Lại Lần Nữa</button>
         </div>
       </div>
     </div>
@@ -215,7 +215,7 @@ function setupTypingTest() {
   soundToggle.onclick = () => {
     playSound = !playSound;
     soundToggle.classList.toggle('active', playSound);
-    soundToggle.textContent = `🔊 Click: ${playSound ? 'Bật' : 'Tắt'}`;
+ soundToggle.textContent = `Click: ${playSound ? 'Bật' : 'Tắt'}`;
     hiddenInput.focus();
   };
 
@@ -538,10 +538,10 @@ function setupTypingTest() {
 
     const descEl = document.getElementById('tt-r-desc');
     let appraisal = '';
-    if (stats.wpm > 80) appraisal = '🔥 Tuyệt vời! Bạn gõ phím nhanh như một lập trình viên chuyên nghiệp!';
-    else if (stats.wpm > 50) appraisal = '⚡ Rất tốt! Tốc độ gõ phím của bạn ở mức khá cao.';
-    else if (stats.wpm > 30) appraisal = '👍 Khá ổn! Hãy tiếp tục luyện tập để đạt tốc độ cao hơn nhé.';
-    else appraisal = '🌱 Cố lên! Chăm chỉ gõ phím hàng ngày sẽ giúp bạn tăng tốc độ nhanh chóng.';
+ if (stats.wpm > 80) appraisal = 'Tuyệt vời! Bạn gõ phím nhanh như một lập trình viên chuyên nghiệp!';
+ else if (stats.wpm > 50) appraisal = 'Rất tốt! Tốc độ gõ phím của bạn ở mức khá cao.';
+ else if (stats.wpm > 30) appraisal = 'Khá ổn! Hãy tiếp tục luyện tập để đạt tốc độ cao hơn nhé.';
+ else appraisal = 'Cố lên! Chăm chỉ gõ phím hàng ngày sẽ giúp bạn tăng tốc độ nhanh chóng.';
     
     descEl.innerHTML = `
       ${appraisal}

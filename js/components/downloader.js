@@ -101,7 +101,7 @@ async function blobDownload(downloadUrl, suggestedFilename) {
     const prog = document.getElementById(pid);
     if (prog) prog.innerHTML = `
       <div style="display:flex;align-items:center;gap:8px;color:#4ade80;font-size:13px;">
-        ✅ Tải xong! <strong>${filename}</strong> · ${formatBytes(received)}
+ Tải xong! <strong>${filename}</strong> · ${formatBytes(received)}
       </div>`;
 
   } catch (err) {
@@ -109,8 +109,8 @@ async function blobDownload(downloadUrl, suggestedFilename) {
     const prog = document.getElementById(pid);
     if (prog) prog.innerHTML = `
       <div style="color:#f87171;font-size:12px;line-height:1.5;">
-        ❌ ${err.message}<br>
-        <a href="${downloadUrl}" target="_blank" style="color:var(--accent-blue);font-size:11px;">📎 Thử mở link trực tiếp ↗</a>
+ ${err.message}<br>
+ <a href="${downloadUrl}" target="_blank" style="color:var(--accent-blue);font-size:11px;">Thử mở link trực tiếp ↗</a>
       </div>`;
   }
 }
@@ -124,7 +124,7 @@ export function renderDownloader() {
   container.innerHTML = `
     <div class="dl-wrap">
       <div class="dl-box">
-        <div class="travel-title-sub">🔗 Dán link video hoặc nhạc cần tải</div>
+ <div class="travel-title-sub">Dán link video hoặc nhạc cần tải</div>
         <div class="dl-input-group">
           <input type="text" id="dlUrlInput" class="field-input" placeholder="Dán link Tiktok, Youtube, Facebook, Instagram, Soundcloud..." />
           <button id="btnFetchDl" class="btn-primary">Trích xuất</button>
@@ -133,23 +133,23 @@ export function renderDownloader() {
         <div class="travel-title-sub" style="margin-top: 20px;">Nền tảng hỗ trợ</div>
         <div class="dl-platforms">
           <div class="dl-platform-card">
-            <span class="dl-platform-icon">🎵</span>
+ <span class="dl-platform-icon"></span>
             <span>TikTok</span>
           </div>
           <div class="dl-platform-card">
-            <span class="dl-platform-icon">📺</span>
+ <span class="dl-platform-icon"></span>
             <span>YouTube</span>
           </div>
           <div class="dl-platform-card">
-            <span class="dl-platform-icon">📘</span>
+ <span class="dl-platform-icon"></span>
             <span>Facebook</span>
           </div>
           <div class="dl-platform-card">
-            <span class="dl-platform-icon">📸</span>
+ <span class="dl-platform-icon"></span>
             <span>Instagram</span>
           </div>
           <div class="dl-platform-card">
-            <span class="dl-platform-icon">☁️</span>
+ <span class="dl-platform-icon">️</span>
             <span>SoundCloud</span>
           </div>
         </div>
@@ -194,9 +194,9 @@ async function fetchMediaDownload(url) {
         Nếu đợi lâu, bạn có thể click tải trực tiếp qua các cổng phụ nhanh dưới đây:
       </div>
       <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:12px;">
-        <a class="dl-btn dl-btn--fallback" href="https://y2mate.is/analyze?url=${cleanUrl}" target="_blank" style="padding:6px 12px;font-size:11px;text-decoration:none;">📺 Y2Mate</a>
-        <a class="dl-btn dl-btn--fallback" href="https://9xbuddy.xyz/process?url=${cleanUrl}" target="_blank" style="padding:6px 12px;font-size:11px;text-decoration:none;">🚀 9XBuddy</a>
-        <a class="dl-btn dl-btn--fallback" href="https://savefrom.net/?url=${cleanUrl}" target="_blank" style="padding:6px 12px;font-size:11px;text-decoration:none;">🌐 SaveFrom</a>
+ <a class="dl-btn dl-btn--fallback" href="https://y2mate.is/analyze?url=${cleanUrl}" target="_blank" style="padding:6px 12px;font-size:11px;text-decoration:none;">Y2Mate</a>
+ <a class="dl-btn dl-btn--fallback" href="https://9xbuddy.xyz/process?url=${cleanUrl}" target="_blank" style="padding:6px 12px;font-size:11px;text-decoration:none;">9XBuddy</a>
+ <a class="dl-btn dl-btn--fallback" href="https://savefrom.net/?url=${cleanUrl}" target="_blank" style="padding:6px 12px;font-size:11px;text-decoration:none;">SaveFrom</a>
       </div>
     </div>
   `;
@@ -221,21 +221,21 @@ async function fetchMediaDownload(url) {
             <div class="dl-info">
               <div>
                 <div class="dl-title">${d.title || 'Video TikTok'}</div>
-                <div class="dl-author">👤 Kênh: @${d.author?.unique_id} (${d.author?.nickname})</div>
+ <div class="dl-author">Kênh: @${d.author?.unique_id} (${d.author?.nickname})</div>
               </div>
               <div class="dl-buttons" style="display:flex;gap:8px;flex-wrap:wrap;">
                 <button class="dl-btn dl-btn--video" onclick="window._dlBlob('${d.play}','${videoFilename}')">
-                  📥 Tải Video (Proxy)
+ Tải Video (Proxy)
                 </button>
                 <a class="dl-btn dl-btn--fallback" href="${d.play}" download="${videoFilename}" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;padding:10px 14px;font-size:13px;white-space:nowrap;">
-                  🌐 Tải trực tiếp
+ Tải trực tiếp
                 </a>
                 ${d.music ? `
                   <button class="dl-btn dl-btn--audio" onclick="window._dlBlob('${d.music}','${audioFilename}')">
-                    🎵 Tải Nhạc (Proxy)
+ Tải Nhạc (Proxy)
                   </button>
                   <a class="dl-btn dl-btn--fallback" href="${d.music}" download="${audioFilename}" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;padding:10px 14px;font-size:13px;white-space:nowrap;">
-                    🎵 Nhạc trực tiếp
+ Nhạc trực tiếp
                   </a>
                 ` : ''}
               </div>
@@ -274,10 +274,10 @@ async function fetchMediaDownload(url) {
           pickerHtml += `
             <div style="display:flex;gap:6px;align-items:center;margin-top:5px;width:100%;flex-wrap:wrap;">
               <button class="${btnClass}" onclick="window._dlBlob('${item.url}','${filename}')" style="font-size:11px;padding:6px 12px;white-space:nowrap;">
-                📥 Tải ${typeLabel} ${idx + 1} (Proxy)
+ Tải ${typeLabel} ${idx + 1} (Proxy)
               </button>
               <a class="dl-btn dl-btn--fallback" href="${item.url}" download="${filename}" target="_blank" style="font-size:11px;padding:6px 12px;text-decoration:none;display:inline-flex;align-items:center;white-space:nowrap;">
-                🌐 Tải trực tiếp
+ Tải trực tiếp
               </a>
             </div>
           `;
@@ -285,7 +285,7 @@ async function fetchMediaDownload(url) {
 
         resultDiv.innerHTML = `
           <div class="dl-result-card">
-            <div style="font-size: 32px; padding: 20px;">📦</div>
+ <div style="font-size: 32px; padding: 20px;"></div>
             <div class="dl-info">
               <div>
                 <div class="dl-title">${isYouTube ? 'YouTube Playlist / Album' : 'Danh sách tệp phương tiện'}</div>
@@ -308,18 +308,18 @@ async function fetchMediaDownload(url) {
 
         resultDiv.innerHTML = `
           <div class="dl-result-card">
-            <div style="font-size: 32px; padding: 20px;">📦</div>
+ <div style="font-size: 32px; padding: 20px;"></div>
             <div class="dl-info">
               <div>
                 <div class="dl-title">${title}</div>
-                <div class="dl-author" style="font-size:12px;opacity:0.7;">📄 ${filename}</div>
+ <div class="dl-author" style="font-size:12px;opacity:0.7;">${filename}</div>
               </div>
               <div class="dl-buttons" style="display:flex;gap:8px;flex-wrap:wrap;width:100%;">
                 <button class="dl-btn dl-btn--video" id="btnStartDownload" style="white-space:nowrap;">
-                  📥 Tải qua Máy chủ (Proxy)
+ Tải qua Máy chủ (Proxy)
                 </button>
                 <a class="dl-btn dl-btn--fallback" href="${downloadUrl}" download="${filename}" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;padding:10px 14px;font-size:13px;white-space:nowrap;">
-                  🌐 Tải trực tiếp (Trình duyệt)
+ Tải trực tiếp (Trình duyệt)
                 </a>
               </div>
             </div>
@@ -344,7 +344,7 @@ async function fetchMediaDownload(url) {
     console.warn('[Worker Downloader API failed]', err);
     resultDiv.innerHTML = `
       <div class="dl-result-card" style="border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.03);">
-        <div style="font-size: 32px; padding: 20px;">❌</div>
+ <div style="font-size: 32px; padding: 20px;"></div>
         <div class="dl-info">
           <div>
             <div class="dl-title" style="color: var(--accent-red); font-weight:700;">Không thể tự động giải mã liên kết</div>
@@ -352,13 +352,13 @@ async function fetchMediaDownload(url) {
           </div>
           <div class="dl-buttons" style="display:flex; gap:8px; flex-wrap:wrap; width:100%;">
             <a class="dl-btn dl-btn--fallback" href="https://y2mate.is/analyze?url=${cleanUrl}" target="_blank" style="text-decoration:none; padding:10px 14px; font-size:13px;">
-              📺 Tải qua Y2Mate
+ Tải qua Y2Mate
             </a>
             <a class="dl-btn dl-btn--fallback" href="https://9xbuddy.xyz/process?url=${cleanUrl}" target="_blank" style="text-decoration:none; padding:10px 14px; font-size:13px;">
-              🚀 Tải qua 9XBuddy
+ Tải qua 9XBuddy
             </a>
             <a class="dl-btn dl-btn--fallback" href="https://savefrom.net/?url=${cleanUrl}" target="_blank" style="text-decoration:none; padding:10px 14px; font-size:13px;">
-              🌐 Tải qua SaveFrom
+ Tải qua SaveFrom
             </a>
           </div>
         </div>
@@ -395,7 +395,7 @@ window.switchDownloaderTab = (tab) => {
     tabFiles.style.borderColor = '';
     tabFiles.style.color = '';
 
-    if (cardTitle) cardTitle.innerHTML = `<span class="icon">📥</span> Trích Xuất Link Tải Phương Tiện`;
+ if (cardTitle) cardTitle.innerHTML = `<span class="icon"></span> Trích Xuất Link Tải Phương Tiện`;
 
     contentMedia.style.display = 'block';
     contentFiles.style.display = 'none';
@@ -410,7 +410,7 @@ window.switchDownloaderTab = (tab) => {
     tabFiles.style.borderColor = 'rgba(52,211,153,0.4)';
     tabFiles.style.color = '#34d399';
 
-    if (cardTitle) cardTitle.innerHTML = `<span class="icon">⚙️</span> Chuyển Đổi, Nén Ảnh &amp; ZIP`;
+ if (cardTitle) cardTitle.innerHTML = `<span class="icon">️</span> Chuyển Đổi, Nén Ảnh &amp; ZIP`;
     
     // Add client-only badge
     if (cardHeader) {

@@ -5,14 +5,33 @@ import { fetchNews, fetchArticle, relativeTime, FEEDS } from '../api/news.js';
 import { state } from '../store/state.js';
 
 let currentSource = 'vnexpress';
+let currentCategory = 'all';
 let currentArticles = [];
+let visibleCount = 12;
+
+const CATEGORIES = {
+  all: 'Mới nhất',
+  thoisu: 'Thời sự',
+  thegioi: 'Thế giới',
+  kinhdoanh: 'Kinh doanh',
+  giaitri: 'Giải trí',
+  thethao: 'Thể thao',
+  congnghe: 'Công nghệ'
+};
+
+const SOURCE_CATEGORIES = {
+  genk: ['all', 'congnghe'],
+  tinhte: ['all', 'congnghe'],
+  kenh14: ['all', 'giaitri', 'thethao']
+};
 
 export async function renderNews(containerId = 'newsContent', isSilent = false) {
   const el = document.getElementById(containerId);
   if (!el) return;
 
   if (!isSilent) {
-    el.innerHTML = `<div class="news-loading">📰 Đang tải tin tức...</div>`;
+    el.innerHTML = `<div class="news-loading">Đang tải tin tức...</div>`;
+    visibleCount = 12;
   }
 
   // Source tabs
@@ -24,8 +43,28 @@ export async function renderNews(containerId = 'newsContent', isSilent = false) 
     </button>
   `).join('');
 
+  // Category tabs
+  const getAllowedCategories = () => {
+    return SOURCE_CATEGORIES[currentSource] || Object.keys(CATEGORIES);
+  };
+
+  const categoryTabs = () => {
+    const allowed = getAllowedCategories();
+    return `
+      <div class="news-category-tabs">
+        ${allowed.map(catKey => `
+          <button class="news-cat-tab ${catKey === currentCategory ? 'active' : ''}"
+                  onclick="window.newsSelectCategory('${catKey}')">
+            ${CATEGORIES[catKey]}
+          </button>
+        `).join('')}
+      </div>
+    `;
+  };
+
   try {
-    const articles = await fetchNews(currentSource, 12);
+    // Fetch all available articles to support complete pagination
+    const articles = await fetchNews(currentSource, currentCategory);
     currentArticles = articles;
     state.newsArticles = articles.map(a => ({
       source: a.source,
@@ -38,11 +77,15 @@ export async function renderNews(containerId = 'newsContent', isSilent = false) 
     if (!articles.length) {
       el.innerHTML = `
         <div class="news-tabs">${tabs()}</div>
+        ${categoryTabs()}
         <div class="error-msg">⚠️ Không tải được tin tức. Vui lòng kiểm tra lại kết nối mạng hoặc thử lại sau.</div>`;
       return;
     }
 
-    const cards = articles.map((a, i) => `
+    // Only slice up to the visible count
+    const visibleArticles = articles.slice(0, visibleCount);
+
+    const cards = visibleArticles.map((a, i) => `
       <div class="news-card ${i === 0 ? 'news-card-featured' : ''}"
            role="button" tabindex="0"
            onclick="window.openNewsArticle(${i})"
@@ -54,14 +97,25 @@ export async function renderNews(containerId = 'newsContent', isSilent = false) 
           </div>
           <div class="news-title">${a.title}</div>
           ${i === 0 && a.desc ? `<div class="news-desc">${a.desc}</div>` : ''}
-          <div class="news-meta">🕒 ${relativeTime(a.pubDate)}</div>
+          <div class="news-meta">${relativeTime(a.pubDate)}</div>
         </div>
       </div>
     `).join('');
 
+    const loadMoreButton = articles.length > visibleCount ? `
+      <div class="news-load-more-wrap">
+        <button class="news-load-more-btn" onclick="window.newsLoadMore()">
+          <span>Xem thêm tin tức</span>
+          <i class="fas fa-chevron-down" style="font-size: 11px;"></i>
+        </button>
+      </div>
+    ` : '';
+
     el.innerHTML = `
       <div class="news-tabs">${tabs()}</div>
+      ${categoryTabs()}
       <div class="news-grid">${cards}</div>
+      ${loadMoreButton}
       <div class="news-footer">
         Nguồn: <strong>${feed.label}</strong>
         &nbsp;·&nbsp; Cập nhật lúc ${new Date().toLocaleTimeString('vi-VN')}
@@ -73,7 +127,10 @@ export async function renderNews(containerId = 'newsContent', isSilent = false) 
     _ensureReaderDOM();
 
   } catch (err) {
-    el.innerHTML = `<div class="news-tabs">${tabs()}</div><div class="error-msg">⚠️ ${err.message}</div>`;
+    el.innerHTML = `
+      <div class="news-tabs">${tabs()}</div>
+      ${categoryTabs()}
+      <div class="error-msg">⚠️ ${err.message}</div>`;
   }
 }
 
@@ -91,7 +148,7 @@ function _ensureReaderDOM() {
           <a id="nrOpenLink" href="#" target="_blank" rel="noopener" class="nr-open-btn" title="Mở trang gốc">
             ↗ Trang gốc
           </a>
-          <button class="nr-close-btn" onclick="window.closeNewsReader()" title="Đóng">✕</button>
+          <button class="nr-close-btn" onclick="window.closeNewsReader()" title="Đóng"></button>
         </div>
       </div>
       <div class="nr-body">
@@ -118,7 +175,7 @@ window.openNewsArticle = async (idx) => {
   document.getElementById('nrMeta').textContent    = relativeTime(article.pubDate);
   document.getElementById('nrOpenLink').href       = article.link;
   document.getElementById('nrContent').innerHTML   =
-    `<div class="nr-loading">⏳ Đang tải nội dung bài viết...</div>`;
+    `<div class="nr-loading">Đang tải nội dung bài viết...</div>`;
 
   if (article.img) {
     document.getElementById('nrThumb').style.backgroundImage = `url('${article.img}')`;
@@ -165,5 +222,16 @@ document.addEventListener('keydown', e => {
 
 window.newsSelectSource = async (src) => {
   currentSource = src;
+  currentCategory = 'all';
   await renderNews();
+};
+
+window.newsSelectCategory = async (cat) => {
+  currentCategory = cat;
+  await renderNews();
+};
+
+window.newsLoadMore = () => {
+  visibleCount += 12;
+  renderNews('newsContent', true);
 };

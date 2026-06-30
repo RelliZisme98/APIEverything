@@ -111,14 +111,14 @@ export function renderTravel() {
 
       <!-- ── Tabs ── -->
       <div class="travel-tabs">
-        <button class="travel-tab active" data-tab="schedule">🗓️ Lịch Bay Theo Tuyến</button>
-        <button class="travel-tab" data-tab="tracker">🔍 Tra Cứu Chuyến Bay</button>
-        <button class="travel-tab" data-tab="estimate">💰 Ước Tính Hành Trình</button>
+ <button class="travel-tab active" data-tab="schedule">️ Lịch Bay Theo Tuyến</button>
+ <button class="travel-tab" data-tab="tracker">Tra Cứu Chuyến Bay</button>
+ <button class="travel-tab" data-tab="estimate">Ước Tính Hành Trình</button>
       </div>
 
       <!-- ── Tab 1: Schedule ── -->
       <div class="travel-pane active" id="pane-schedule">
-        <div class="travel-title-sub">🗓️ Lịch Bay Theo Tuyến – Các hãng hàng không Việt Nam</div>
+ <div class="travel-title-sub">️ Lịch Bay Theo Tuyến – Các hãng hàng không Việt Nam</div>
         <div class="travel-route-selector">
           <div class="travel-select-wrap">
             <label>Điểm khởi hành</label>
@@ -137,7 +137,7 @@ export function renderTravel() {
 
       <!-- ── Tab 2: Flight Tracker ── -->
       <div class="travel-pane" id="pane-tracker">
-        <div class="travel-title-sub">🔍 Tra Cứu Chuyến Bay Theo Số Hiệu</div>
+ <div class="travel-title-sub">Tra Cứu Chuyến Bay Theo Số Hiệu</div>
         <div class="flight-search-bar">
           <select id="airlineFilter" class="field-input" style="max-width:200px;">
             <option value="">Tất cả hãng</option>
@@ -165,7 +165,7 @@ export function renderTravel() {
 
       <!-- ── Tab 3: Estimate ── -->
       <div class="travel-pane" id="pane-estimate">
-        <div class="travel-title-sub">💰 Ước Tính Chi Phí & Thời Gian Hành Trình</div>
+ <div class="travel-title-sub">Ước Tính Chi Phí & Thời Gian Hành Trình</div>
         <div class="travel-route-selector">
           <div class="travel-select-wrap">
             <label>Từ</label>
@@ -283,7 +283,7 @@ function renderSchedule(fromKey, toKey) {
                   <span class="sched-arr">${arrStr}</span>
                 </div>
                 <div class="sched-status ${isPast ? 'sched-status--past' : 'sched-status--upcoming'}">
-                  ${isPast ? '✓ Đã khởi hành' : '🕐 Sắp khởi hành'}
+ ${isPast ? 'Đã khởi hành' : 'Sắp khởi hành'}
                 </div>
               </div>`;
           }).join('')}
@@ -336,7 +336,7 @@ function renderFlightTracker(code) {
             <span style="font-size:13px;color:var(--text-secondary);margin-left:8px;">${airline.name}</span>
           </div>
           <span class="flight-status-badge ${isLanded?'flight-status--landed':isFlying?'flight-status--active':''}">
-            ${isLanded ? '✅ Đã hạ cánh' : isFlying ? '🟢 Đang bay' : '⏳ Chưa khởi hành'}
+ ${isLanded ? 'Đã hạ cánh' : isFlying ? 'Đang bay' : '⏳ Chưa khởi hành'}
           </span>
         </div>
 
@@ -344,16 +344,16 @@ function renderFlightTracker(code) {
           <div class="flight-airport">
             <div class="airport-code">${fromAP.code}</div>
             <div class="airport-name">${fromAP.name}</div>
-            <div style="font-size:12px;color:var(--accent-blue);margin-top:4px;">🛫 ${fmtT(dep)}</div>
+ <div style="font-size:12px;color:var(--accent-blue);margin-top:4px;">${fmtT(dep)}</div>
           </div>
           <div class="flight-progress-line">
             <div class="flight-progress-fill" style="width:${progress}%;background:${airline.color};"></div>
-            <div class="flight-plane-icon" style="left:${progress}%;">✈️</div>
+ <div class="flight-plane-icon" style="left:${progress}%;">️</div>
           </div>
           <div class="flight-airport" style="text-align:right;">
             <div class="airport-code">${toAP.code}</div>
             <div class="airport-name">${toAP.name}</div>
-            <div style="font-size:12px;color:var(--accent-yellow);margin-top:4px;">🛬 ${fmtT(arr)}</div>
+ <div style="font-size:12px;color:var(--accent-yellow);margin-top:4px;">${fmtT(arr)}</div>
           </div>
         </div>
 
@@ -365,7 +365,7 @@ function renderFlightTracker(code) {
         </div>
 
         <div style="text-align:center;margin-top:8px;font-size:11px;color:var(--text-muted);">
-          ⚠️ Dữ liệu mang tính tham khảo. Kiểm tra chính xác tại website hãng.
+ ️ Dữ liệu mang tính tham khảo. Kiểm tra chính xác tại website hãng.
         </div>
       </div>`;
   }, 600);
@@ -390,19 +390,19 @@ function renderEstimate(fromKey, toKey) {
     <div class="travel-results-grid">
       ${dist > 150 ? `
       <div class="travel-mode-card">
-        <div class="travel-mode-header"><span class="travel-mode-title">✈️ Máy bay</span></div>
+ <div class="travel-mode-header"><span class="travel-mode-title">️ Máy bay</span></div>
         <div class="travel-mode-time">${fmtDur(planeMin)}</div>
         <div class="travel-mode-cost">${fmtVND(800000+dist*600)} – ${fmtVND(2500000+dist*900)}</div>
         <div class="travel-mode-speed">Bay thẳng ~720 km/h</div>
       </div>` : ''}
       <div class="travel-mode-card">
-        <div class="travel-mode-header"><span class="travel-mode-title">🚂 Tàu hoả</span></div>
+ <div class="travel-mode-header"><span class="travel-mode-title">Tàu hoả</span></div>
         <div class="travel-mode-time">${fmtDur(trainMin)}</div>
         <div class="travel-mode-cost">${fmtVND(150000+land*500)} – ${fmtVND(400000+land*900)}</div>
         <div class="travel-mode-speed">~55 km/h · Đường sắt Thống Nhất</div>
       </div>
       <div class="travel-mode-card">
-        <div class="travel-mode-header"><span class="travel-mode-title">🚌 Xe khách</span></div>
+ <div class="travel-mode-header"><span class="travel-mode-title">Xe khách</span></div>
         <div class="travel-mode-time">${fmtDur(busMin)}</div>
         <div class="travel-mode-cost">${fmtVND(100000+land*350)} – ${fmtVND(200000+land*500)}</div>
         <div class="travel-mode-speed">~60 km/h · Limousine / giường nằm</div>

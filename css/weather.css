@@ -38,7 +38,7 @@
   background: rgba(255,255,255,0.04);
   border: 1px solid var(--border);
   color: var(--text-secondary);
-  border-radius: 20px;
+  border-radius: var(--radius-sm);
   padding: 4px 10px;
   font-size: 11px;
   font-weight: 500;
@@ -48,9 +48,9 @@
 }
 
 .weather-city-chip:hover {
-  background: rgba(96,165,250,0.12);
-  border-color: rgba(96,165,250,0.3);
-  color: var(--accent-blue);
+  background: rgba(94, 106, 210, 0.1);
+  border-color: rgba(94, 106, 210, 0.35);
+  color: var(--accent-purple);
 }
 
 /* ── Hero display ── */
