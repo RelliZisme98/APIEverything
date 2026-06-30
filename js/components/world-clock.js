@@ -113,6 +113,7 @@ let _sw_interval    = null;
 let _sw_laps        = [];
 let _cd_target      = null;
 let _cd_interval    = null;
+let _cd_total_secs  = 0;
 
 // Load saved zones from localStorage
 function loadSavedZones() {
@@ -142,15 +143,18 @@ export function renderWorldClock(containerId = 'worldClockContent') {
 
   el.innerHTML = `
     <!-- World Clocks -->
- <div class="wc-section-label">Đồng Hồ Thế Giới</div>
-
-    <!-- Add clock control -->
-    <div class="wc-controls">
-      <select class="wc-add-dropdown" id="wcAddDropdown">
-        <option value="">+ Thêm múi giờ...</option>
-        ${groupedOpts}
-      </select>
-      <button class="wc-btn wc-btn--reset" onclick="window._wcReset()">↺ Đặt lại</button>
+    <div class="wc-section-header">
+      <div class="wc-section-label">Đồng Hồ Thế Giới</div>
+      <!-- Add clock control -->
+      <div class="wc-controls">
+        <select class="wc-add-dropdown" id="wcAddDropdown">
+          <option value="">+ Thêm múi giờ...</option>
+          ${groupedOpts}
+        </select>
+        <button class="wc-btn wc-btn--reset" onclick="window._wcReset()">
+          <span class="wc-btn-icon">↺</span> Đặt lại mặc định
+        </button>
+      </div>
     </div>
 
     <div class="wc-grid" id="wcGrid"></div>
@@ -159,11 +163,15 @@ export function renderWorldClock(containerId = 'worldClockContent') {
     <div class="wc-tools-row">
       <!-- Stopwatch -->
       <div class="wc-tool-card">
-        <div class="wc-tool-title">⏱️ Bấm Giờ</div>
-        <div class="sw-display" id="swDisplay">00:00.000</div>
+        <div class="wc-tool-header">
+          <div class="wc-tool-title">⏱️ Bấm Giờ</div>
+        </div>
+        <div class="sw-display-wrap">
+          <div class="sw-display" id="swDisplay">00:00<span class="sw-ms">.000</span></div>
+        </div>
         <div class="sw-btns">
           <button class="sw-btn sw-btn--start" id="swStartBtn" onclick="window.swToggle()">▶ Bắt đầu</button>
-          <button class="sw-btn sw-btn--lap"   id="swLapBtn"   onclick="window.swLap()"    disabled>⏺ Vòng</button>
+          <button class="sw-btn sw-btn--lap"   id="swLapBtn"   onclick="window.swLap()"    disabled>⏺ Ghi vòng</button>
           <button class="sw-btn sw-btn--reset"               onclick="window.swReset()">↺ Reset</button>
         </div>
         <div class="sw-laps" id="swLaps"></div>
@@ -171,8 +179,16 @@ export function renderWorldClock(containerId = 'worldClockContent') {
 
       <!-- Countdown -->
       <div class="wc-tool-card">
-        <div class="wc-tool-title">⏳ Đếm Ngược</div>
-        <div class="cd-display" id="cdDisplay">00:00:00</div>
+        <div class="wc-tool-header">
+          <div class="wc-tool-title">⏳ Đếm Ngược</div>
+        </div>
+        <div class="cd-display-wrap">
+          <div class="cd-display" id="cdDisplay">00:00:00</div>
+          <div class="cd-progress-container" id="cdProgressContainer" style="display:none;">
+            <div class="cd-progress-bar" id="cdProgressBar" style="width: 100%;"></div>
+          </div>
+        </div>
+        
         <div class="cd-form">
           <div class="cd-inputs">
             <div class="cd-inp-wrap">
@@ -190,21 +206,23 @@ export function renderWorldClock(containerId = 'worldClockContent') {
               <label>Giây</label>
             </div>
           </div>
-          <div style="text-align:center;margin-bottom:8px;font-size:11px;color:var(--text-muted);">— hoặc chọn thời điểm mục tiêu —</div>
-          <input type="datetime-local" id="cdDatetime" class="cd-input-date">
+          <div class="cd-divider">— hoặc chọn thời điểm mục tiêu —</div>
+          <div class="cd-date-picker-wrap">
+            <input type="datetime-local" id="cdDatetime" class="cd-input-date">
+          </div>
         </div>
+        
         <div class="sw-btns">
           <button class="sw-btn sw-btn--start" id="cdStartBtn" onclick="window.cdToggle()">▶ Bắt đầu</button>
           <button class="sw-btn sw-btn--reset"               onclick="window.cdReset()">↺ Reset</button>
         </div>
- <div class="cd-done" id="cdDone" style="display:none;">Xong rồi!</div>
+        <div class="cd-done" id="cdDone" style="display:none;">🎉 Xong rồi!</div>
       </div>
     </div>
 
     <!-- Timezone Converter -->
- <div class="wc-section-label" style="margin-top:24px;">Quy Đổi Múi Giờ</div>
+    <div class="wc-section-label" style="margin-top:28px;">Quy Đổi Múi Giờ</div>
     <div id="tzConverterContent"></div>`;
-
 
   // Add dropdown event
   document.getElementById('wcAddDropdown')?.addEventListener('change', (e) => {
@@ -231,7 +249,7 @@ export function renderWorldClock(containerId = 'worldClockContent') {
 }
 
 function getZoneInfo(zone) {
- return ALL_TIMEZONES.find(z => z.zone === zone) ?? { city: zone, flag: '', utc: '?' };
+  return ALL_TIMEZONES.find(z => z.zone === zone) ?? { city: zone, flag: '🌐', utc: '?' };
 }
 
 function getUtcOffset(zone) {
@@ -255,18 +273,21 @@ function updateClockGrid() {
     const t = now.toLocaleTimeString('vi-VN', { timeZone: zone, hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const d = now.toLocaleDateString('vi-VN', { timeZone: zone, weekday: 'short', day: '2-digit', month: '2-digit' });
     const h = parseInt(now.toLocaleTimeString('en-US', { timeZone: zone, hour: '2-digit', hour12: false }));
-    const isDay = h >= 6 && h < 20;
+    const isDay = h >= 6 && h < 18;
+    const dayNightIcon = isDay ? '☀️' : '🌙';
+    const dayNightClass = isDay ? 'wc-day' : 'wc-night';
     const utcStr = info.utc ? `UTC${info.utc}` : getUtcOffset(zone);
     return `
-      <div class="wc-card" title="${zone}">
+      <div class="wc-card ${dayNightClass}" title="${zone}">
         <div class="wc-card-top">
           <div class="wc-flag">${info.flag}</div>
- <button class="wc-remove-btn" onclick="window._wcRemove('${zone}')" title="Xóa"></button>
+          <span class="wc-status-badge">${dayNightIcon}</span>
+          <button class="wc-remove-btn" onclick="window._wcRemove('${zone}')" title="Xóa">✕</button>
         </div>
         <div class="wc-city">${info.city}</div>
         <div class="wc-utc">${utcStr}</div>
         <div class="wc-time">${t}</div>
- <div class="wc-date">${d} ${isDay ? '️' : ''}</div>
+        <div class="wc-date">${d}</div>
       </div>`;
   }).join('');
 }
@@ -290,7 +311,7 @@ function fmtSW(ms) {
   const mins = Math.floor(ms / 60000);
   const secs = Math.floor((ms % 60000) / 1000);
   const msec = ms % 1000;
-  return `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}.${String(msec).padStart(3,'0')}`;
+  return `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}<span class="sw-ms">.${String(msec).padStart(3,'0')}</span>`;
 }
 
 function setupStopwatch() {
@@ -303,13 +324,19 @@ function setupStopwatch() {
       _sw_interval = setInterval(() => {
         _sw_elapsed = Date.now() - _sw_start;
         const d = document.getElementById('swDisplay');
-        if (d) d.textContent = fmtSW(_sw_elapsed);
+        if (d) d.innerHTML = fmtSW(_sw_elapsed);
       }, 13);
-      if (btn) { btn.textContent = '⏸ Dừng'; btn.classList.add('sw-btn--running'); }
+      if (btn) { 
+        btn.innerHTML = '⏸ Dừng'; 
+        btn.classList.add('sw-btn--running'); 
+      }
       if (lap) lap.disabled = false;
     } else {
       clearInterval(_sw_interval);
-      if (btn) { btn.textContent = '▶ Tiếp tục'; btn.classList.remove('sw-btn--running'); }
+      if (btn) { 
+        btn.innerHTML = '▶ Tiếp tục'; 
+        btn.classList.remove('sw-btn--running'); 
+      }
     }
   };
 
@@ -319,7 +346,10 @@ function setupStopwatch() {
     const lapsEl = document.getElementById('swLaps');
     if (lapsEl) {
       lapsEl.innerHTML = _sw_laps.slice().reverse().map((t, i) =>
-        `<div class="sw-lap">Vòng ${_sw_laps.length - i}: ${fmtSW(t)}</div>`
+        `<div class="sw-lap">
+          <span class="sw-lap-num">Vòng ${_sw_laps.length - i}</span>
+          <span class="sw-lap-time">${fmtSW(t)}</span>
+        </div>`
       ).join('');
     }
   };
@@ -331,8 +361,8 @@ function setupStopwatch() {
     const btn = document.getElementById('swStartBtn');
     const lap = document.getElementById('swLapBtn');
     const lapsEl = document.getElementById('swLaps');
-    if (d) d.textContent = '00:00.000';
-    if (btn) { btn.textContent = '▶ Bắt đầu'; btn.classList.remove('sw-btn--running'); }
+    if (d) d.innerHTML = '00:00<span class="sw-ms">.000</span>';
+    if (btn) { btn.innerHTML = '▶ Bắt đầu'; btn.classList.remove('sw-btn--running'); }
     if (lap) lap.disabled = true;
     if (lapsEl) lapsEl.innerHTML = '';
   };
@@ -347,10 +377,13 @@ function fmtCD(secs) {
 
 function setupCountdown() {
   window.cdToggle = () => {
+    const progressContainer = document.getElementById('cdProgressContainer');
+    const progressBar = document.getElementById('cdProgressBar');
+    
     if (_cd_interval) {
       clearInterval(_cd_interval); _cd_interval = null;
       const btn = document.getElementById('cdStartBtn');
-      if (btn) { btn.textContent = '▶ Bắt đầu'; btn.classList.remove('sw-btn--running'); }
+      if (btn) { btn.innerHTML = '▶ Tiếp tục'; btn.classList.remove('sw-btn--running'); }
       return;
     }
 
@@ -367,21 +400,33 @@ function setupCountdown() {
       targetMs = Date.now() + totalSec * 1000;
     }
     _cd_target = targetMs;
+    _cd_total_secs = Math.max(1, Math.ceil((_cd_target - Date.now()) / 1000));
 
     const btn  = document.getElementById('cdStartBtn');
     const done = document.getElementById('cdDone');
-    if (btn)  { btn.textContent = '⏸ Dừng'; btn.classList.add('sw-btn--running'); }
+    if (btn)  { btn.innerHTML = '⏸ Dừng'; btn.classList.add('sw-btn--running'); }
     if (done) done.style.display = 'none';
+    if (progressContainer) progressContainer.style.display = 'block';
 
     _cd_interval = setInterval(() => {
       const rem = Math.max(0, Math.ceil((_cd_target - Date.now()) / 1000));
       const d   = document.getElementById('cdDisplay');
-      if (d) d.textContent = fmtCD(rem);
+      if (d) {
+        d.textContent = fmtCD(rem);
+        d.style.color = '';
+      }
+      
+      if (progressBar) {
+        const pct = (_cd_total_secs > 0) ? (rem / _cd_total_secs) * 100 : 0;
+        progressBar.style.width = `${pct}%`;
+      }
+      
       if (rem === 0) {
         clearInterval(_cd_interval); _cd_interval = null;
-        if (btn)  { btn.textContent = '▶ Bắt đầu'; btn.classList.remove('sw-btn--running'); }
+        if (btn)  { btn.innerHTML = '▶ Bắt đầu'; btn.classList.remove('sw-btn--running'); }
         if (done) done.style.display = 'block';
         if (d)    d.style.color = '#4ade80';
+        if (progressContainer) progressContainer.style.display = 'none';
         try { new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3').play().catch(() => {}); } catch {}
       }
     }, 1000);
@@ -392,9 +437,13 @@ function setupCountdown() {
     const d   = document.getElementById('cdDisplay');
     const btn = document.getElementById('cdStartBtn');
     const done = document.getElementById('cdDone');
+    const progressContainer = document.getElementById('cdProgressContainer');
+    const progressBar = document.getElementById('cdProgressBar');
     if (d)    { d.textContent = '00:00:00'; d.style.color = ''; }
-    if (btn)  { btn.textContent = '▶ Bắt đầu'; btn.classList.remove('sw-btn--running'); }
+    if (btn)  { btn.innerHTML = '▶ Bắt đầu'; btn.classList.remove('sw-btn--running'); }
     if (done) done.style.display = 'none';
+    if (progressContainer) progressContainer.style.display = 'none';
+    if (progressBar) progressBar.style.width = '100%';
   };
 }
 
