@@ -58,10 +58,14 @@ export function renderTicker() {
   // ── 2.5. Live Football Matches ──
   if (state.liveFootballMatches?.length) {
     for (const m of state.liveFootballMatches) {
+      let scoreText = `${m.homeScore} - ${m.awayScore}`;
+      if (m.homeShootout !== undefined && m.awayShootout !== undefined && m.homeShootout !== null && m.awayShootout !== null) {
+        scoreText = `${m.homeScore} - ${m.awayScore} (${m.homeShootout}-${m.awayShootout} pen)`;
+      }
       items.push(
         `<span class="ticker-item">` +
- `<span class="symbol" style="color:var(--accent-red);font-weight:700;">LIVE ${m.league}</span> ` +
-          `<span class="val">${m.home} ${m.homeScore} - ${m.awayScore} ${m.away}</span> ` +
+          `<span class="symbol" style="color:var(--accent-red);font-weight:700;">LIVE ${m.league}</span> ` +
+          `<span class="val">${m.home} ${scoreText} ${m.away}</span> ` +
           `<span style="color:var(--accent-green);font-weight:600;margin-left:4px;">(${m.time})</span>` +
         `</span>`
       );
