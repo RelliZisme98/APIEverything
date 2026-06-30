@@ -75,8 +75,17 @@ html, body {
   .sidebar-overlay {
     z-index: 9000 !important;
   }
-  .sidebar-overlay.visible { display: block; }
-  .sidebar-toggle { display: flex; }
+  .sidebar-toggle {
+    display: flex;
+    transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
+  }
+  body.sidebar-open .sidebar-toggle {
+    left: 274px;
+    background: rgba(15, 23, 42, 0.95);
+    border-color: rgba(94, 106, 210, 0.4);
+    color: #ffffff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(94, 106, 210, 0.2);
+  }
 
   /* Content: full width with better padding */
   .content-section {

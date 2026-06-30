@@ -611,93 +611,184 @@ async function handleVietlott(request) {
   const date = params.get('date') ?? '';
   const page = parseInt(params.get('page') ?? '0');
 
-  const GAME_MAP = {
-    power655: 'XS655', mega645: 'XS645', max4d: 'XS4D', keno: 'KENO',
-  };
-  const product = GAME_MAP[game];
-  if (!product) return cors(JSON.stringify({ error: 'Invalid game' }), 400);
-
-  const dateStr = date || new Date().toISOString().split('T')[0];
-
-  // Try the official JSON API
   try {
-    const r = await fetch('https://api.vietlott.vn/api/prize-winning/list', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0',
-        'Referer': 'https://www.vietlott.vn/',
-        'Origin': 'https://www.vietlott.vn',
-      },
-      body: JSON.stringify({ pageIndex: page, pageSize: 20, product, drawDate: page > 0 ? '' : dateStr }),
-      signal: AbortSignal.timeout(8000),
-    });
+    let history = [];
+    let nextJackpot = 0;
 
-    if (r.ok) {
-      const data = await r.json();
-      if (data && data.data && data.data.length) {
-        // If history mode (page requested), return full list
-        if (page > 0 || params.get('page') !== null) {
-          const history = data.data.map(d => ({
-            drawCode: d.drawCode || '',
-            drawDate: d.drawDate || '',
-            numbers: d.winningNumbers || d.numbers || [],
-            jackpot: d.jackpot1 || d.jackpot || 0,
-          }));
-          return new Response(JSON.stringify({ game, history }), {
-            headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=300' },
+    if (game === 'keno') {
+      // Scrape Keno from xosodaiphat.com
+      const res = await fetch('https://xosodaiphat.com/keno-truc-tiep-xskeno.html', {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7',
+        },
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) throw new Error(`Failed to fetch Keno: ${res.status}`);
+      const html = await res.text();
+
+      // Find base date from the title or default to today's date
+      let baseDate = new Date().toLocaleDateString('vi-VN');
+      const dateMatch = html.match(/ngày\s*(\d{2}\/\d{2}\/\d{4})/i);
+      if (dateMatch) {
+        baseDate = dateMatch[1];
+      }
+
+      // Find Keno result tables
+      const tableRegex = /<table[^>]*(?:id=box\d+|id="box\d+")[\s\S]*?<\/table>/gi;
+      const tables = html.match(tableRegex) || [];
+
+      for (const tableHtml of tables) {
+        const codeMatch = tableHtml.match(/#(\d+)/);
+        const drawCode = codeMatch ? codeMatch[1] : '';
+
+        const timeMatch = tableHtml.match(/-\s*(\d{2}:\d{2})/);
+        const drawTime = timeMatch ? timeMatch[1] : '';
+
+        const cells = tableHtml.match(/<td[^>]*class=kn-number[^>]*>([\s\S]*?)<\/td>/gi) || [];
+        const numbers = cells
+          .map(c => c.replace(/<[^>]+>/g, '').trim())
+          .filter(val => val && val !== '...')
+          .map(Number);
+
+        if (numbers.length === 20) {
+          history.push({
+            drawCode,
+            drawDate: drawTime ? `${drawTime} ${baseDate}` : baseDate,
+            numbers,
+            jackpot: 2000000000,
           });
         }
+      }
+    } else {
+      // Scrape Mega 6/45, Power 6/55, and Max 4D from xskt.com.vn
+      const urlMap = {
+        mega645: 'https://xskt.com.vn/xsmega645/30-ngay',
+        power655: 'https://xskt.com.vn/xspower/30-ngay',
+        max4d: 'https://xskt.com.vn/xsmax4d/30-ngay',
+      };
+      const url = urlMap[game];
+      if (!url) throw new Error('Invalid game type');
 
-        const latest = data.data[0];
-        return new Response(JSON.stringify({
-          game, product,
-          drawDate: latest.drawDate || dateStr,
-          drawCode: latest.drawCode || '',
-          numbers: latest.winningNumbers || latest.numbers || [],
-          jackpot: latest.jackpot1 || latest.jackpot || 0,
-          nextJackpot: latest.nextJackpot || 0,
-          history: data.data.slice(0, 10).map(d => ({
-            drawCode: d.drawCode || '',
-            drawDate: d.drawDate || '',
-            numbers: d.winningNumbers || d.numbers || [],
-            jackpot: d.jackpot1 || d.jackpot || 0,
-          })),
-        }), {
-          headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=300' },
-        });
+      const res = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7',
+        },
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) throw new Error(`Failed to fetch ${game}: ${res.status}`);
+      const html = await res.text();
+
+      // Scrape next estimated jackpot from top of the page if available
+      const nextJpMatch = html.match(/Jackpot [^<]*? hiện tại:\s*<strong>([\d,.]+)\s*vnđ<\/strong>/i);
+      if (nextJpMatch) {
+        nextJackpot = parseInt(nextJpMatch[1].replace(/[,.]/g, '')) || 0;
+      }
+
+      // Split by result tables to parse each draw
+      const parts = html.split(/<table[^>]*class="result"/gi);
+      for (let i = 1; i < parts.length; i++) {
+        const fullBlock = '<table class="result"' + parts[i];
+
+        // Parse draw date
+        let drawDate = '';
+        const dateMatch = fullBlock.match(/href="[^"]*?ngay-(\d{1,2}-\d{1,2}-\d{4})"/i);
+        if (dateMatch) {
+          const [d, m, y] = dateMatch[1].split('-');
+          drawDate = `${d.padStart(2, '0')}/${m.padStart(2, '0')}/${y}`;
+        } else {
+          const altDateMatch = fullBlock.match(/ngày\s*(\d{1,2})\/(\d{1,2})/i);
+          if (altDateMatch) {
+            drawDate = `${altDateMatch[1].padStart(2, '0')}/${altDateMatch[2].padStart(2, '0')}/${new Date().getFullYear()}`;
+          }
+        }
+
+        // Parse draw code
+        const codeMatch = fullBlock.match(/#(\d+)/);
+        const drawCode = codeMatch ? codeMatch[1] : '';
+
+        // Parse numbers
+        let numbers = [];
+        if (game === 'max4d') {
+          const matches = fullBlock.match(/\b\d{4}\b/g) || [];
+          numbers = matches.map(Number);
+        } else {
+          const resultMatch = fullBlock.match(/<td[^>]*class="megaresult"[^>]*>([\s\S]*?)<\/td>/i);
+          if (resultMatch) {
+            const txt = resultMatch[1].replace(/<[^>]+>/g, '').trim();
+            numbers = txt.split(/\s+/).map(Number).filter(n => !isNaN(n));
+          }
+
+          if (game === 'power655') {
+            const jp2Match = fullBlock.match(/<tr[^>]*class="jp2"[^>]*>[\s\S]*?<td[^>]*class="megaresult"[^>]*>([\s\S]*?)<\/td>/i);
+            if (jp2Match) {
+              const jp2Num = parseInt(jp2Match[1].replace(/<[^>]+>/g, '').trim());
+              if (!isNaN(jp2Num)) numbers.push(jp2Num);
+            }
+          }
+        }
+
+        // Parse jackpot value
+        let jackpot = 0;
+        if (game !== 'max4d') {
+          const jpRowMatch = fullBlock.match(/<tr>\s*<td>(?:J\.pot|Jackpot)<\/td>[\s\S]*?<\/tr>/i);
+          if (jpRowMatch) {
+            const cols = jpRowMatch[0].match(/<td[^>]*>([\s\S]*?)<\/td>/gi);
+            if (cols && cols.length > 0) {
+              const valText = cols[cols.length - 1].replace(/<[^>]+>/g, '').replace(/[,.]/g, '').trim();
+              jackpot = parseInt(valText) || 0;
+            }
+          }
+        } else {
+          jackpot = 15000000; // Fixed G1 prize for Max 4D
+        }
+
+        if (numbers.length > 0) {
+          history.push({
+            drawCode,
+            drawDate,
+            numbers,
+            jackpot,
+          });
+        }
       }
     }
-  } catch (e) {
-    console.warn('[Vietlott API failed, fallback]', e.message);
-  }
 
-  // Fallback: scrape vietlott.vn HTML
-  try {
-    const scrapUrl = `https://www.vietlott.vn/vi/trung-thuong/ket-qua-trung-thuong/${product.toLowerCase()}?${dateStr ? 'date=' + dateStr : ''}`;
-    const res = await fetch(scrapUrl, {
-      headers: { 'User-Agent': 'Mozilla/5.0', 'Referer': 'https://www.vietlott.vn/' }
-    });
-    const html = await res.text();
+    if (!history.length) {
+      throw new Error('No lottery data parsed from source');
+    }
 
-    // Extract numbers from the result balls
-    const numbersMatch = html.match(/class="box-number"[^>]*>.*?<span[^>]*>(\d+)<\/span>/gi);
-    const numbers = (numbersMatch || []).map(m => {
-      const n = m.match(/>(\d+)</);
-      return n ? parseInt(n[1]) : null;
-    }).filter(Boolean);
+    // Handle paginated history requests
+    if (page > 0 || params.get('page') !== null) {
+      const pageSize = 10;
+      const start = page * pageSize;
+      const slicedHistory = history.slice(start, start + pageSize);
 
-    const jackpotMatch = html.match(/Jackpot.*?(\d[\d,.]+)/i);
-    const jackpot = jackpotMatch ? jackpotMatch[1].replace(/[,.]/g, '') : '0';
+      return new Response(JSON.stringify({ game, history: slicedHistory }), {
+        headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=300' },
+      });
+    }
 
+    // Default: return the latest draw plus recent history (up to 10)
+    const latest = history[0];
     return new Response(JSON.stringify({
-      game, product, drawDate: dateStr, numbers,
-      jackpot: parseInt(jackpot) || 0,
-      source: 'scraped'
+      game,
+      product: game === 'power655' ? 'XS655' : game === 'mega645' ? 'XS645' : game === 'max4d' ? 'XS4D' : 'KENO',
+      drawDate: latest.drawDate,
+      drawCode: latest.drawCode,
+      numbers: latest.numbers,
+      jackpot: latest.jackpot,
+      nextJackpot,
+      history: history.slice(0, 10),
     }), {
       headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=300' },
     });
+
   } catch (err) {
+    console.error('[Vietlott Scraper Error]', err);
     return cors(JSON.stringify({ error: err.message }), 500);
   }
 }

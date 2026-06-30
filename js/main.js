@@ -536,8 +536,17 @@ window.switchSection = (id, updateHistory = true) => {
     document.querySelectorAll('.sidebar-nav-item').forEach(item =>
       item.classList.toggle('active', item.dataset.section === id)
     );
-    try { document.getElementById('sidebar').classList.remove('open'); } catch {}
-    try { document.getElementById('sidebarOverlay').classList.remove('visible'); } catch {}
+    try {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      const toggleBtn = document.getElementById('sidebarToggle');
+      const icon = toggleBtn ? toggleBtn.querySelector('i') : null;
+      if (sidebar) sidebar.classList.remove('open');
+      if (overlay) overlay.classList.remove('visible');
+      document.body.classList.remove('sidebar-open');
+      if (icon) icon.className = 'fas fa-bars';
+      if (toggleBtn) toggleBtn.setAttribute('title', 'Mở menu');
+    } catch {}
   }
   if (!_rendered.has(id)) {
     _rendered.add(id);
