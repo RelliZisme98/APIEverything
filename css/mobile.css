@@ -35,8 +35,10 @@ html, body {
   transition: all 0.2s var(--ease-out);
 }
 .sidebar-toggle:hover {
-  background: rgba(59, 130, 246, 0.12);
-  border-color: rgba(59, 130, 246, 0.3);
+  background: rgba(94, 106, 210, 0.15);
+  border-color: var(--border-glow);
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(94, 106, 210, 0.25);
 }
 .sidebar-toggle:active {
   transform: scale(0.92);
