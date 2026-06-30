@@ -531,8 +531,9 @@ async function handleTaxCheck() {
           <div>⚠️ Lỗi: ${errData.error || 'Không tìm thấy thông tin doanh nghiệp khớp với mã số thuế hoặc từ khóa này.'}</div>
           <div style="margin-top: 12px; font-size: 12px; color: var(--text-secondary); border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px; line-height: 1.4;">
             💡 <strong>Mẹo tra cứu cá nhân:</strong> Một số mã số thuế cá nhân mới hoặc bảo mật cao không thể tra cứu tự động. Bạn có thể truy cập trực tiếp trang chính thức của Tổng cục Thuế:
-            <div style="margin-top: 6px;">
+            <div style="margin-top: 6px; display: flex; gap: 8px; flex-wrap: wrap;">
               <a href="https://canhan.gdt.gov.vn" target="_blank" class="lot-link" style="padding: 4px 12px; font-size:11px; display: inline-block;">canhan.gdt.gov.vn ↗</a>
+              <a href="https://masothue.com/Search/?q=${encodeURIComponent(input)}&type=auto" target="_blank" class="lot-link" style="padding: 4px 12px; font-size:11px; display: inline-block; background: rgba(245,158,11,0.15); color: #fbbf24; border-color: rgba(245,158,11,0.3);">Xem trên MaSoThue.com ↗</a>
             </div>
             hoặc tra cứu trên ứng dụng di động <strong>eTax Mobile</strong> của Ngành Thuế.
           </div>
@@ -547,8 +548,9 @@ async function handleTaxCheck() {
           <div>⚠️ Không tìm thấy thông tin khớp với từ khóa của bạn.</div>
           <div style="margin-top: 12px; font-size: 12px; color: var(--text-secondary); border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px; line-height: 1.4;">
             💡 <strong>Mẹo tra cứu cá nhân:</strong> Một số mã số thuế cá nhân mới hoặc bảo mật cao không thể tra cứu tự động. Bạn có thể truy cập trực tiếp trang chính thức của Tổng cục Thuế:
-            <div style="margin-top: 6px;">
+            <div style="margin-top: 6px; display: flex; gap: 8px; flex-wrap: wrap;">
               <a href="https://canhan.gdt.gov.vn" target="_blank" class="lot-link" style="padding: 4px 12px; font-size:11px; display: inline-block;">canhan.gdt.gov.vn ↗</a>
+              <a href="https://masothue.com/Search/?q=${encodeURIComponent(input)}&type=auto" target="_blank" class="lot-link" style="padding: 4px 12px; font-size:11px; display: inline-block; background: rgba(245,158,11,0.15); color: #fbbf24; border-color: rgba(245,158,11,0.3);">Xem trên MaSoThue.com ↗</a>
             </div>
             hoặc tra cứu trên ứng dụng di động <strong>eTax Mobile</strong> của Ngành Thuế.
           </div>

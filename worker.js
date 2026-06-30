@@ -2144,10 +2144,12 @@ async function handleTaxLookup(request) {
         const finalUrl = res.url || '';
         const path = new URL(finalUrl).pathname;
         const isDetailPage = /^\/[0-9-]{10,14}/.test(path);
-        if (!isDetailPage) {
-          console.warn(`MasoThue scraper redirected to a non-detail URL: ${finalUrl}`);
-        } else {
-          const html = await res.text();
+        const html = await res.text();
+
+        if (isDetailPage) {
+          if (!html.includes(cleanMST)) {
+            console.warn(`MasoThue scraper redirected to a poisoned URL (query not found in page): ${finalUrl}`);
+          } else {
         
         // Match detail page
         const nameMatch = html.match(/itemprop="name"><span[^>]*>([^<]+)<\/span>/i) ||
@@ -2193,11 +2195,11 @@ async function handleTaxLookup(request) {
               status: 'ĐANG HOẠT ĐỘNG'
             }]
           }));
-        }
-
-        // Match list page
-        const listRegex = /<a href="\/([0-9-]{10,14})-[^"]+"[^>]*>([^<]+)<\/a>/g;
-        const results = [];
+          }
+        } else {
+          // Match list page
+          const listRegex = /<a href="\/([0-9-]{10,14})-[^"]+"[^>]*>([^<]+)<\/a>/g;
+          const results = [];
         let m;
         while ((m = listRegex.exec(html)) !== null) {
           if (m[1] && m[2] && !m[2].includes('Mã số thuế') && !m[2].includes('Trang chủ')) {
@@ -2217,7 +2219,7 @@ async function handleTaxLookup(request) {
             results
           }));
         }
-      }
+        }
       }
     } catch (err) {
       console.warn('MasoThue scraper failed:', err);
