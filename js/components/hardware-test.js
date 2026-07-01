@@ -1089,6 +1089,23 @@ async function toggleMicrophone() {
     return;
   }
 
+  const isHttps = window.location.protocol === 'https:' || 
+                  window.location.hostname === 'localhost' || 
+                  window.location.hostname === '127.0.0.1';
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    const errorText = document.createElement('div');
+    errorText.id = 'mic-error-msg';
+    errorText.style.cssText = 'color:#fbbf24; font-size:11px; margin-top:8px; text-align:left; line-height:1.4; border: 1px solid rgba(251,191,36,0.2); background: rgba(251,191,36,0.05); padding: 8px; border-radius: 8px;';
+    if (!isHttps) {
+      errorText.innerHTML = '<b>Lỗi bảo mật (HTTP):</b> Trình duyệt chỉ cho phép truy cập Microphone qua kết nối an toàn (HTTPS) hoặc localhost.';
+    } else {
+      errorText.innerHTML = '<b>Trình duyệt không hỗ trợ:</b> Trình duyệt hiện tại (như Zalo, Facebook, Telegram...) không hỗ trợ truy cập Microphone. Vui lòng bấm Menu chọn <b>"Mở bằng trình duyệt hệ thống"</b> (Chrome/Safari).';
+    }
+    btn.parentNode.appendChild(errorText);
+    return;
+  }
+
   try {
     initAudioContext();
     micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
@@ -1107,8 +1124,33 @@ async function toggleMicrophone() {
   } catch (err) {
     const errorText = document.createElement('div');
     errorText.id = 'mic-error-msg';
-    errorText.style.cssText = 'color:#f87171; font-size:11px; margin-top:8px; text-align:center;';
-    errorText.innerText = 'Lỗi: Không thể truy cập Microphone. Vui lòng kiểm tra quyền thiết bị.';
+    errorText.style.cssText = 'color:#f87171; font-size:11px; margin-top:8px; text-align:left; line-height:1.4; border: 1px solid rgba(248,113,113,0.2); background: rgba(248,113,113,0.05); padding: 8px; border-radius: 8px;';
+    
+    let helpMsg = 'Lỗi: Không thể truy cập Microphone. Vui lòng kiểm tra kết nối thiết bị.';
+    let isIframe = window.self !== window.top;
+
+    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError' || err.name === 'SecurityError') {
+      if (isIframe) {
+        helpMsg = '<b>Lỗi Iframe:</b> Trang web đang chạy trong khung nhúng (iframe) và không được trang cha cấp quyền sử dụng Microphone.';
+      } else {
+        helpMsg = `
+          <div style="font-weight:600; margin-bottom:4px; color:#f87171;">Quyền truy cập bị chặn!</div>
+          Trình duyệt hoặc hệ điều hành đang chặn Microphone. Để sửa đổi:
+          <ul style="margin: 4px 0 0 0; padding-left: 15px; display: flex; flex-direction: column; gap: 4px;">
+            <li><b>Chrome/Edge/Cốc Cốc:</b> Click biểu tượng Khóa <i class="fas fa-lock" style="font-size:9px;"></i> ở thanh địa chỉ &rarr; Đổi <b>Microphone</b> thành <b>Cho phép (Allow)</b> &rarr; Reload.</li>
+            <li><b>Firefox:</b> Click biểu tượng Mic ở thanh địa chỉ &rarr; Xóa chặn &rarr; Reload.</li>
+            <li><b>Safari:</b> Cài đặt &rarr; Trang web &rarr; Microphone &rarr; Chọn Cho phép.</li>
+            <li><b>Quyền hệ điều hành:</b> Đảm bảo bạn đã cho phép trình duyệt truy cập mic trong cài đặt Quyền riêng tư của Windows hoặc macOS.</li>
+          </ul>
+        `;
+      }
+    } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+      helpMsg = 'Không tìm thấy thiết bị Microphone trên máy của bạn.';
+    } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+      helpMsg = 'Microphone đang bị ứng dụng khác sử dụng.';
+    }
+    
+    errorText.innerHTML = helpMsg;
     btn.parentNode.appendChild(errorText);
     console.error('[Mic Test Error]', err);
   }
@@ -1296,6 +1338,35 @@ async function toggleCamera() {
     <span>Đang kết nối với Camera...</span>
   `;
 
+  const isHttps = window.location.protocol === 'https:' || 
+                  window.location.hostname === 'localhost' || 
+                  window.location.hostname === '127.0.0.1';
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    placeholder.style.display = 'block';
+    video.style.display = 'none';
+    if (!isHttps) {
+      placeholder.innerHTML = `
+        <i class="fas fa-shield-alt" style="font-size:48px; color:#fbbf24; margin-bottom:15px; display:block;"></i>
+        <span style="color:#fbbf24; font-weight:600;">Không có kết nối an toàn (HTTPS)</span><br>
+        <span style="font-size:12px; color:var(--text-muted); margin-top:6px; display:inline-block; padding: 0 20px; line-height:1.5;">
+          Trình duyệt chỉ cho phép truy cập Camera qua kết nối bảo mật (HTTPS) hoặc từ localhost.<br>
+          Vui lòng kiểm tra lại địa chỉ trang web của bạn.
+        </span>
+      `;
+    } else {
+      placeholder.innerHTML = `
+        <i class="fas fa-exclamation-circle" style="font-size:48px; color:#fbbf24; margin-bottom:15px; display:block;"></i>
+        <span style="color:#fbbf24; font-weight:600;">Trình duyệt/Ứng dụng không hỗ trợ Camera</span><br>
+        <span style="font-size:12px; color:var(--text-muted); margin-top:6px; display:inline-block; padding: 0 20px; line-height:1.5; text-align: left;">
+          Bạn đang sử dụng HTTPS, nhưng trình duyệt hoặc ứng dụng hiện tại (ví dụ: trình duyệt nhúng của <b>Zalo, Facebook, Telegram</b>...) không hỗ trợ truy cập Camera.<br><br>
+          <b>Cách khắc phục:</b> Hãy nhấn vào nút Menu (biểu tượng 3 dấu chấm ở góc trên) và chọn <b>"Mở bằng trình duyệt hệ thống"</b> (Chrome, Safari, Edge) để tiến hành kiểm tra.
+        </span>
+      `;
+    }
+    return;
+  }
+
   try {
     initAudioContext();
     cameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
@@ -1316,12 +1387,53 @@ async function toggleCamera() {
   } catch (err) {
     placeholder.style.display = 'block';
     video.style.display = 'none';
+    
+    let errorTitle = 'Không thể kết nối với Camera';
+    let errorDesc = 'Vui lòng đảm bảo thiết bị của bạn có Camera và hoạt động bình thường.';
+    let showPermissionGuide = false;
+    let isIframe = window.self !== window.top;
+
+    if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError' || err.name === 'SecurityError') {
+      if (isIframe) {
+        errorTitle = 'Lỗi bảo mật Iframe';
+        errorDesc = 'Trang web đang chạy trong khung nhúng (iframe) và không được trang cha cấp quyền sử dụng camera.';
+      } else {
+        errorTitle = 'Quyền truy cập Camera bị chặn';
+        errorDesc = 'Trình duyệt hoặc hệ điều hành đang chặn quyền truy cập camera cho trang web này.';
+        showPermissionGuide = true;
+      }
+    } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+      errorTitle = 'Không tìm thấy Camera';
+      errorDesc = 'Không phát hiện thấy thiết bị camera nào được kết nối với máy tính.';
+    } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+      errorTitle = 'Camera đang bị chiếm dụng';
+      errorDesc = 'Camera đang được sử dụng bởi một ứng dụng hoặc tab trình duyệt khác.';
+    }
+
+    let guideHtml = '';
+    if (showPermissionGuide) {
+      guideHtml = `
+        <div style="text-align: left; padding: 15px; margin-top: 15px; background: rgba(248,113,113,0.05); border: 1px solid rgba(248,113,113,0.2); border-radius: 10px; font-size: 12px; color: var(--text-secondary); max-width: 90%; line-height: 1.6;">
+          <div style="font-weight: 600; color: #f87171; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+            <i class="fas fa-lock-open"></i> Hướng dẫn cấp quyền truy cập Camera:
+          </div>
+          <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px;">
+            <li><b>Trên Chrome / Edge / Cốc Cốc:</b> Bấm vào biểu tượng <b>Khóa bảo mật</b> <i class="fas fa-lock" style="font-size:10px; margin: 0 2px;"></i> hoặc <b>Cài đặt trang web</b> ở bên trái thanh địa chỉ URL &rarr; Tìm mục <b>Camera</b> &rarr; Chọn <b>Cho phép (Allow)</b> &rarr; Tải lại trang.</li>
+            <li><b>Trên Firefox:</b> Bấm vào biểu tượng <b>Camera / Khóa</b> ở thanh địa chỉ &rarr; Xóa quyền chặn hiện tại &rarr; Tải lại trang và bấm "Cho phép" khi được hỏi.</li>
+            <li><b>Trên Safari:</b> Truy cập <b>Cài đặt (Preferences)</b> &rarr; <b>Trang web (Websites)</b> &rarr; <b>Camera</b> &rarr; Chọn <b>Cho phép (Allow)</b> cho trang web này.</li>
+            <li><b>Quyền trên Hệ điều hành:</b> Đảm bảo bạn đã cho phép trình duyệt truy cập camera trong cài đặt Quyền riêng tư (Privacy Settings) của Windows hoặc macOS.</li>
+          </ul>
+        </div>
+      `;
+    }
+
     placeholder.innerHTML = `
       <i class="fas fa-exclamation-triangle" style="font-size:48px; color:#f87171; margin-bottom:15px; display:block;"></i>
-      <span style="color:#f87171; font-weight:600;">Không thể kết nối với Camera</span><br>
+      <span style="color:#f87171; font-weight:600;">${errorTitle}</span><br>
       <span style="font-size:12px; color:var(--text-muted); margin-top:6px; display:inline-block; padding: 0 20px; line-height:1.5;">
-        Vui lòng đảm bảo thiết bị của bạn có Camera và bạn đã cấp quyền truy cập camera cho trình duyệt này.
+        ${errorDesc}
       </span>
+      ${guideHtml}
     `;
     console.error('[Camera Test Error]', err);
   }
