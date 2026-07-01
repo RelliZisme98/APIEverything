@@ -1,0 +1,287 @@
+/* ═══════════════════════════════════════════
+   ASTROLOGY & TAROT STYLING (COSMIC DARK)
+   ═══════════════════════════════════════════ */
+
+.astro-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  color: var(--text-primary);
+}
+
+.astro-card {
+  background: rgba(13, 11, 33, 0.4);
+  border: 1px solid rgba(139, 92, 246, 0.15);
+  border-radius: var(--radius);
+  padding: 28px;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.astro-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.05), rgba(139, 92, 246, 0.05), transparent 70%);
+  pointer-events: none;
+}
+
+/* Tabs */
+.astro-tabs {
+  display: flex;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.astro-tab-btn {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.astro-tab-btn:hover {
+  background: rgba(139, 92, 246, 0.08);
+  border-color: rgba(139, 92, 246, 0.3);
+  color: var(--text-primary);
+}
+
+.astro-tab-btn.active {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.2));
+  border-color: #8b5cf6;
+  color: #c084fc;
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.2);
+}
+
+/* Astrology Tables */
+.astro-table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin: 16px 0;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sm);
+}
+
+.astro-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.astro-table th, .astro-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.astro-table th {
+  background: rgba(255, 255, 255, 0.03);
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.astro-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.astro-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 10.5px;
+  font-weight: 700;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.astro-badge.vuong {
+  background: rgba(52, 211, 153, 0.12);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.2);
+}
+
+.astro-badge.dac {
+  background: rgba(96, 165, 250, 0.12);
+  color: #60a5fa;
+  border: 1px solid rgba(96, 165, 250, 0.2);
+}
+
+.astro-badge.tu {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.astro-badge.ham {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* Declination/Xích Vĩ Timeline */
+.declination-container {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  margin: 20px 0;
+}
+
+.declination-axis {
+  position: relative;
+  height: 80px;
+  border-top: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.15);
+  margin: 24px 0 10px;
+}
+
+.declination-axis::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.declination-label-left {
+  position: absolute;
+  left: -24px;
+  top: 10px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.declination-label-right {
+  position: absolute;
+  left: -24px;
+  bottom: 10px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.declination-node {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%);
+}
+
+.declination-node .node-line {
+  width: 1px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.declination-node .node-sym {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Aspect Grid Triangle HTML */
+.aspect-grid-wrapper {
+  margin: 20px 0;
+  display: flex;
+  justify-content: flex-start;
+  overflow-x: auto;
+}
+
+.aspect-grid-table {
+  border-collapse: collapse;
+}
+
+.aspect-grid-cell {
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.aspect-grid-cell.header {
+  background: rgba(255, 255, 255, 0.03);
+  color: #ffd700;
+}
+
+.aspect-grid-cell.empty {
+  border: none;
+  background: transparent;
+}
+
+/* Reading Layout */
+.reading-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.reading-card {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-sm);
+  padding: 20px;
+}
+
+.reading-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffd700;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-left: 3px solid #8b5cf6;
+  padding-left: 8px;
+}
+
+.reading-card-text {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* General Layout */
+.natal-container {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 24px;
+  margin-top: 16px;
+}
+
+@media (max-width: 900px) {
+  .natal-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-canvas-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+@keyframes astroFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

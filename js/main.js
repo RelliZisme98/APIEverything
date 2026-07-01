@@ -46,6 +46,10 @@ import { renderConverter, renderBMICalculator } from './components/converter.js'
 import { renderIQ, renderEQ } from './components/iq-eq.js';
 import { renderMBTI } from './components/mbti.js';
 import { renderHardwareTest } from './components/hardware-test.js';
+import { renderAstrology } from './components/astrology.js';
+import { renderDevDocs } from './components/devdocs.js';
+import { renderCVReviewer } from './components/cv-reviewer.js';
+import { renderBookmarks } from './components/bookmarks.js';
 
 // ── Render Components ──
 import { initAIAssistant }     from './components/ai-assistant.js?v=1.0.4';
@@ -486,7 +490,11 @@ const sectionToPathMap = {
   'downloader': '/downloader',
   'media': '/media',
   'focus': '/focus',
-  'hardware-test': '/hardware-test'
+  'hardware-test': '/hardware-test',
+  'astrology': '/astrology',
+  'devdocs': '/devdocs',
+  'cv-reviewer': '/cv-reviewer',
+  'bookmarks': '/bookmarks'
 };
 
 const pathToSectionMap = {
@@ -515,7 +523,11 @@ const pathToSectionMap = {
   '/downloader': 'downloader',
   '/media': 'media',
   '/focus': 'focus',
-  '/hardware-test': 'hardware-test'
+  '/hardware-test': 'hardware-test',
+  '/astrology': 'astrology',
+  '/devdocs': 'devdocs',
+  '/cv-reviewer': 'cv-reviewer',
+  '/bookmarks': 'bookmarks'
 };
 
 function getPathnameClean() {
@@ -580,6 +592,10 @@ window.switchSection = (id, updateHistory = true) => {
     if (id === 'eq')           renderEQ();
     if (id === 'mbti')         renderMBTI();
     if (id === 'hardware-test') renderHardwareTest();
+    if (id === 'astrology')     renderAstrology();
+    if (id === 'devdocs')       renderDevDocs();
+    if (id === 'cv-reviewer')   renderCVReviewer();
+    if (id === 'bookmarks')     renderBookmarks();
   }
 
   // Push state to browser history if navigating via client click
