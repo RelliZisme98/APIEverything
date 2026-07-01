@@ -1,692 +1,708 @@
 /**
  * components/devdocs.js
- * DevDocs Offline Viewer Component
- * - Cung cấp kho tài liệu lập trình offline với các thư mục theo ảnh mẫu.
- * - Cho phép lọc tìm kiếm nhanh chóng các chủ đề.
- * - Giao diện 2 cột: Cột trái cây thư mục collapsible, cột phải tài liệu hiển thị dạng tab.
+ * DevDocs Live & Offline Ebook Knowledge Hub
+ * - Hỗ trợ cả sách offline tự biên soạn và tải tài liệu trực tiếp từ CDN chính thức của DevDocs.io.
+ * - Sử dụng browser Cache Storage API để lưu trữ ngoại tuyến bộ tài liệu đầy đủ (index.json & db.json).
+ * - Hỗ trợ thanh tiến trình, nút điều hướng trang, tìm kiếm toàn văn và ghi chú cá nhân lưu LocalStorage.
  */
 
-// ── CƠ SỞ DỮ LIỆU TÀI LIỆU OFFLINE ────────────────────────────────────
-const DEVDOCS_DATABASE = [
-  {
-    folder: 'Dev',
-    icon: 'fas fa-laptop-code',
-    topics: [
-      {
-        id: 'git-cheatsheet',
-        title: 'Git Cheatsheet (Lệnh Cơ Bản)',
-        doc: `
-          <h3>Hệ thống lệnh Git cơ bản thường dùng</h3>
-          <p>Git là hệ thống quản lý phiên bản phân tán giúp theo dõi lịch sử mã nguồn.</p>
-          <ul class="devdocs-list">
-            <li><strong>git init:</strong> Khởi tạo một Git repository mới tại thư mục hiện tại.</li>
-            <li><strong>git clone &lt;url&gt;:</strong> Tải dự án từ server từ xa về máy cục bộ.</li>
-            <li><strong>git add &lt;file&gt;:</strong> Đưa tệp vào khu vực staging để chuẩn bị commit.</li>
-            <li><strong>git commit -m "mess":</strong> Lưu lại ảnh chụp trạng thái code kèm thông điệp giải thích.</li>
-            <li><strong>git status:</strong> Xem danh sách các file thay đổi chưa lưu.</li>
-          </ul>
-        `,
-        code: `// Quy trình Git hàng ngày
-git status
-git add .
-git commit -m "feat: thêm tính năng mới"
-git push origin main`,
-        notes: 'Luôn tạo nhánh mới trước khi thực hiện viết code tính năng mới.'
-      },
-      {
-        id: 'clean-code',
-        title: 'Clean Code Principles (Nguyên tắc Sạch)',
-        doc: `
-          <h3>Quy tắc viết code sạch dễ bảo trì</h3>
-          <p>Viết code sao cho người khác đọc vào hiểu ngay là mục tiêu cốt lõi của lập trình viên chuyên nghiệp.</p>
-          <ul class="devdocs-list">
-            <li><strong>Đặt tên có ý nghĩa:</strong> Tên biến, hàm phải phản ánh đúng chức năng, tránh đặt a, b, c vô nghĩa.</li>
-            <li><strong>Hàm đơn nhiệm (Single Responsibility):</strong> Mỗi hàm chỉ nên làm một việc duy nhất và làm thật tốt.</li>
-            <li><strong>Tránh lặp code (DRY - Don't Repeat Yourself):</strong> Trích xuất mã trùng lặp thành hàm dùng chung.</li>
-            <li><strong>Chú thích rõ ràng:</strong> Chỉ chú thích tại sao làm vậy, không nên giải thích code đang làm gì (vì code tự giải nghĩa).</li>
-          </ul>
-        `,
-        code: `// TỒI
-function calculate(d) {
-  return d * 1.1;
-}
-
-// TỐT
-const VAT_RATE = 1.1;
-function calculatePriceWithVat(basePrice) {
-  return basePrice * VAT_RATE;
-}`,
-        notes: 'Code chạy được là tốt, nhưng code sạch và dễ đọc còn tốt hơn nhiều.'
-      }
-    ]
-  },
-  {
-    folder: 'C#',
-    icon: 'fab fa-microsoft',
-    topics: [
-      {
-        id: 'csharp-linq',
-        title: 'C# LINQ (Language Integrated Query)',
-        doc: `
-          <h3>Tất tần tật về LINQ trong C#</h3>
-          <p>LINQ cho phép truy vấn dữ liệu trực tiếp trong C# từ mảng, List, XML hay Database.</p>
-          <ul class="devdocs-list">
-            <li><strong>Select:</strong> Chiếu hoặc chuyển đổi kiểu dữ liệu của các phần tử.</li>
-            <li><strong>Where:</strong> Lọc các phần tử theo điều kiện chỉ định.</li>
-            <li><strong>OrderBy:</strong> Sắp xếp tăng dần hoặc giảm dần (OrderByDescending).</li>
-            <li><strong>FirstOrDefault:</strong> Lấy phần tử đầu tiên thỏa mãn hoặc trả về null mặc định.</li>
-          </ul>
-        `,
-        code: `using System;
-using System.Linq;
-using System.Collections.Generic;
-
-var numbers = new List<int> { 1, 2, 3, 4, 5, 6 };
-var evenNumbers = numbers.Where(n => n % 2 == 0).ToList();
-
-foreach (var num in evenNumbers) {
-    Console.WriteLine(num); // 2, 4, 6
-}`,
-        notes: 'LINQ giúp code gọn hơn nhưng hãy cẩn thận hiệu năng khi truy vấn Database lớn.'
-      },
-      {
-        id: 'csharp-async',
-        title: 'Async / Await (Lập Trình Bất Đồng Bộ)',
-        doc: `
-          <h3>Xử lý đa luồng với Task Async/Await</h3>
-          <p>Giúp giải phóng UI Thread hoặc cải thiện thông lượng server bằng cách giải phóng luồng khi đợi I/O.</p>
-          <ul class="devdocs-list">
-            <li><strong>async:</strong> Khai báo hàm có khả năng chạy bất đồng bộ.</li>
-            <li><strong>await:</strong> Đợi tác vụ hoàn thành mà không khóa luồng hiện tại.</li>
-            <li><strong>Task:</strong> Đại diện cho một tiến trình đang chạy ngầm trả về kết quả.</li>
-          </ul>
-        `,
-        code: `public async Task<string> FetchDataAsync(string url) {
-    using var client = new HttpClient();
-    string result = await client.GetStringAsync(url);
-    return result;
-}`,
-        notes: 'Tránh dùng .Result hoặc .Wait() trên Task vì có thể gây deadlock cục bộ.'
-      }
-    ]
-  },
-  {
-    folder: 'Odoo',
-    icon: 'fas fa-cubes',
-    topics: [
-      {
-        id: 'odoo-models',
-        title: 'Odoo Model Definition (Định nghĩa Model)',
-        doc: `
-          <h3>Cơ cấu định nghĩa bảng dữ liệu (Model) trong Odoo</h3>
-          <p>Odoo sử dụng ORM để ánh xạ các Class Python thành các bảng tương ứng trong PostgreSQL.</p>
-          <ul class="devdocs-list">
-            <li><strong>_name:</strong> Tên định danh của model (tên bảng DB phân cách bằng dấu chấm).</li>
-            <li><strong>_description:</strong> Mô tả ngắn gọn về model.</li>
-            <li><strong>fields.Char / fields.Integer:</strong> Các kiểu trường dữ liệu thông dụng.</li>
-            <li><strong>Many2one / One2many:</strong> Khai báo các quan hệ liên kết bảng.</li>
-          </ul>
-        `,
-        code: `# -*- coding: utf-8 -*-
-from odoo import models, fields, api
-
-class SaleOrderExtension(models.Model):
-    _name = 'sale.order'
-    _inherit = 'sale.order'
-
-    packing_time = fields.Float(string="Thời gian đóng gói")
-    packing_user_id = fields.Many2one('res.users', string="Người đóng gói")`,
-        notes: 'Khi thêm trường mới trong Odoo, hãy nhớ phân quyền access rights trong file security/ir.model.access.csv.'
-      },
-      {
-        id: 'odoo-views',
-        title: 'Odoo XML Views (Giao Diện XML)',
-        doc: `
-          <h3>Cách cấu trúc Form và Tree View bằng XML</h3>
-          <p>Odoo dựng UI hoàn toàn bằng cách khai báo thẻ XML.</p>
-          <ul class="devdocs-list">
-            <li><strong>tree:</strong> Chế độ xem danh sách (dòng cột).</li>
-            <li><strong>form:</strong> Chế độ xem chi tiết bản ghi.</li>
-            <li><strong>xpath:</strong> Công cụ chèn thêm trường vào giao diện có sẵn qua cơ chế kế thừa view.</li>
-          </ul>
-        `,
-        code: `<!-- Kế thừa chèn trường vào Form View có sẵn -->
-<record id="view_order_form_inherit" model="ir.ui.view">
-    <field name="name">sale.order.form.inherit</field>
-    <field name="model">sale.order</field>
-    <field name="inherit_id" ref="sale.view_order_form"/>
-    <field name="arch" type="xml">
-        <xpath expr="//field[@name='payment_term_id']" position="after">
-            <field name="packing_time"/>
-        </xpath>
-    </field>
-</record>`,
-        notes: 'Khi sửa giao diện XML, bạn cần nâng cấp module (Upgrade) để thấy sự thay đổi.'
-      }
-    ]
-  },
-  {
-    folder: 'Encrypt',
-    icon: 'fas fa-user-shield',
-    topics: [
-      {
-        id: 'encrypt-aes',
-        title: 'AES (Symmetric Encryption)',
-        doc: `
-          <h3>Mã hóa đối xứng AES (Advanced Encryption Standard)</h3>
-          <p>AES sử dụng cùng một khóa bí mật để thực hiện cả quá trình mã hóa lẫn giải mã dữ liệu.</p>
-          <ul class="devdocs-list">
-            <li><strong>Tính bảo mật cực cao:</strong> Đang là tiêu chuẩn quốc tế mã hóa dữ liệu chính phủ.</li>
-            <li><strong>Độ dài khóa:</strong> Hỗ trợ khóa 128-bit, 192-bit hoặc 256-bit.</li>
-            <li><strong>Tốc độ nhanh:</strong> Phù hợp mã hóa khối lượng dữ liệu lớn trực tuyến.</li>
-          </ul>
-        `,
-        code: `// Ví dụ mã hóa AES bằng CryptoJS trong Javascript
-const CryptoJS = require("crypto-js");
-
-const secretKey = "MySecretKey123";
-const message = "Dữ liệu tuyệt mật";
-
-// Mã hóa
-const encrypted = CryptoJS.AES.encrypt(message, secretKey).toString();
-
-// Giải mã
-const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
-const decrypted = bytes.toString(CryptoJS.enc.Utf8);`,
-        notes: 'Cần bảo mật và quản lý khóa AES cẩn thận vì nếu lộ khóa, kẻ tấn công sẽ đọc được toàn bộ dữ liệu.'
-      },
-      {
-        id: 'encrypt-hashing',
-        title: 'Hashing vs Encryption (Băm vs Mã hóa)',
-        doc: `
-          <h3>Sự khác biệt giữa Băm (Hash) và Mã hóa (Encrypt)</h3>
-          <p>Rất nhiều lập trình viên nhầm lẫn giữa hai khái niệm an toàn thông tin cốt lõi này.</p>
-          <ul class="devdocs-list">
-            <li><strong>Mã hóa (Encryption):</strong> Là quy trình 2 chiều. Có thể mã hóa và dùng khóa giải mã về dữ liệu gốc.</li>
-            <li><strong>Băm (Hashing):</strong> Là quy trình 1 chiều. Không thể dịch ngược từ mã băm về dữ liệu gốc (Ví dụ: lưu mật khẩu bằng bcrypt, SHA-256).</li>
-            <li><strong>Tính duy nhất:</strong> Một dữ liệu đầu vào luôn cho ra một chuỗi băm có độ dài cố định.</li>
-          </ul>
-        `,
-        code: `# Băm SHA-256 bằng thư viện hashlib của Python
-import hashlib
-
-password = "admin_password123".encode()
-hashed = hashlib.sha256(password).hexdigest()
-print(hashed) # In chuỗi băm hệ hexa độ dài 64 kí tự`,
-        notes: 'Không bao giờ lưu mật khẩu ở dạng rõ (Plaintext) hoặc mã hóa giải mã được, hãy dùng mã băm (Hashing) kèm Salt.'
-      }
-    ]
-  },
-  {
-    folder: 'Sort',
-    icon: 'fas fa-sort-amount-down',
-    topics: [
-      {
-        id: 'sort-quicksort',
-        title: 'Quick Sort (Sắp xếp nhanh)',
-        doc: `
-          <h3>Thuật toán sắp xếp Quick Sort</h3>
-          <p>Quick Sort hoạt động theo nguyên lý "Chia để trị" (Divide and Conquer).</p>
-          <ul class="devdocs-list">
-            <li><strong>Pivot:</strong> Chọn một phần tử làm chốt xoay.</li>
-            <li><strong>Phân nhóm:</strong> Đưa các phần tử nhỏ hơn chốt về bên trái, lớn hơn về bên phải.</li>
-            <li><strong>Độ phức tạp:</strong> Trung bình là O(N log N), trường hợp tệ nhất là O(N²).</li>
-          </ul>
-        `,
-        code: `function quickSort(arr) {
-  if (arr.length <= 1) return arr;
-  const pivot = arr[arr.length - 1];
-  const left = [];
-  const right = [];
-  
-  for (let i = 0; i < arr.length - 1; i++) {
-    if (arr[i] < pivot) left.push(arr[i]);
-    else right.push(arr[i]);
-  }
-  return [...quickSort(left), pivot, ...quickSort(right)];
-}`,
-        notes: 'Quick Sort thường chạy nhanh hơn Merge Sort do tối ưu được bộ nhớ cache cache locality.'
-      }
-    ]
-  },
-  {
-    folder: 'Java',
-    icon: 'fab fa-java',
-    topics: [
-      {
-        id: 'java-streams',
-        title: 'Java Streams API (Java 8+)',
-        doc: `
-          <h3>Xử lý tập hợp tiện lợi với Stream</h3>
-          <p>Cho phép xử lý danh sách theo phong cách Functional Programming tinh giản.</p>
-          <ul class="devdocs-list">
-            <li><strong>filter:</strong> Lọc các phần tử theo điều kiện logic (Predicate).</li>
-            <li><strong>map:</strong> Ánh xạ đổi kiểu hoặc tính toán giá trị mới.</li>
-            <li><strong>collect:</strong> Thu gom kết quả ra List, Set hoặc Map.</li>
-          </ul>
-        `,
-        code: `import java.util.*;
-import java.util.stream.*;
-
-List<String> names = Arrays.asList("An", "Bình", "Cường", "Dũng");
-List<String> filtered = names.stream()
-    .filter(name -> name.startsWith("B"))
-    .map(String::toUpperCase)
-    .collect(Collectors.toList()); // [BÌNH]`,
-        notes: 'Streams không thay đổi dữ liệu gốc mà chỉ sinh ra stream kết quả mới.'
-      }
-    ]
-  },
-  {
-    folder: 'C++',
-    icon: 'fas fa-terminal',
-    topics: [
-      {
-        id: 'cpp-smartpointers',
-        title: 'Smart Pointers (Con trỏ thông minh)',
-        doc: `
-          <h3>Quản lý bộ nhớ an toàn với Smart Pointers</h3>
-          <p>Giúp giải phóng bộ nhớ heap tự động khi con trỏ ra khỏi phạm vi hoạt động, tránh lỗi memory leak.</p>
-          <ul class="devdocs-list">
-            <li><strong>std::unique_ptr:</strong> Con trỏ độc quyền sở hữu vùng nhớ, không thể sao chép.</li>
-            <li><strong>std::shared_ptr:</strong> Con trỏ chia sẻ quyền sở hữu vùng nhớ qua cơ chế đếm tham chiếu (Reference counting).</li>
-            <li><strong>std::weak_ptr:</strong> Trỏ đến bộ nhớ quản lý bởi shared_ptr nhưng không tăng bộ đếm để tránh vòng lặp tham chiếu chéo.</li>
-          </ul>
-        `,
-        code: `#include <iostream>
-#include <memory>
-
-class Resource {
-public:
-    Resource() { std::cout << "Res created\\n"; }
-    ~Resource() { std::cout << "Res destroyed\\n"; }
+// ── DANH SÁCH TÀI LIỆU DEVDOCS CHÍNH THỨC HỖ TRỢ ──────────────────────
+const LIVE_DOCS_REGISTRY = {
+  'git': { title: 'Git Version Control', size: '1.2 MB' },
+  'javascript': { title: 'JavaScript (MDN)', size: '14.3 MB' },
+  'css': { title: 'CSS Reference', size: '4.8 MB' },
+  'html': { title: 'HTML Reference', size: '2.1 MB' },
+  'python~3.10': { title: 'Python 3.10', size: '8.4 MB' },
+  'go': { title: 'Go Programming', size: '2.5 MB' },
+  'rust': { title: 'Rust Reference', size: '11.8 MB' },
+  'cpp': { title: 'C++ Language', size: '4.2 MB' },
+  'c': { title: 'C Standard Library', size: '1.8 MB' },
+  'nginx': { title: 'Nginx Web Server', size: '1.1 MB' },
+  'postgresql~14': { title: 'PostgreSQL 14', size: '6.7 MB' },
+  'docker': { title: 'Docker Documentation', size: '3.9 MB' }
 };
 
-int main() {
-    std::unique_ptr<Resource> ptr = std::make_unique<Resource>();
-    return 0; // Tự động xóa bộ nhớ Resource
-}`,
-        notes: 'Ưu tiên sử dụng unique_ptr trừ phi bạn thực sự cần chia sẻ sở hữu vùng nhớ đa luồng.'
+// ── SÁCH OFFLINE MẪU TỰ BIÊN SOẠN (FALLBACK LOCAL EBOOKS) ─────────────
+const LOCAL_EBOOKS = {
+  'local-gitflow': {
+    title: '[Nội bộ] Quy trình Git Flow & Branching',
+    accent: '#a78bfa',
+    chapters: [
+      {
+        name: 'Giới thiệu Git Flow',
+        path: 'ch1',
+        content: `
+          <h3>Quy trình phân nhánh Git Flow</h3>
+          <div class="ebook-callout note">
+            <strong>💡 Khái niệm:</strong> Git Flow cô lập mã nguồn phát hành (main) khỏi nhánh phát triển (develop) để đảm bảo chất lượng phần mềm.
+          </div>
+          <p>Mô hình này giúp các nhóm phát triển lớn cộng tác trơn tru thông qua các nhánh tính năng ngắn hạn (feature/*), phát hành (release/*) và sửa lỗi khẩn cấp (hotfix/*).</p>
+        `,
+        code: `git checkout develop\ngit checkout -b feature/login-screen`
       }
     ]
   },
-  {
-    folder: 'English',
-    icon: 'fas fa-language',
-    topics: [
+  'local-odoo': {
+    title: '[Nội bộ] Phát Triển Odoo ERP',
+    accent: '#a855f7',
+    chapters: [
       {
-        id: 'english-emails',
-        title: 'Professional Email Writing (Viết Mail)',
-        doc: `
-          <h3>Mẫu câu viết Email công việc chuẩn quốc tế</h3>
-          <p>Cách diễn đạt lịch sự thường dùng trong giao tiếp kỹ thuật.</p>
-          <ul class="devdocs-list">
-            <li><strong>Chào hỏi:</strong> Dear [Name], / Hi Team,</li>
-            <li><strong>Đề xuất giúp đỡ:</strong> Please let me know if you need any further clarification.</li>
-            <li><strong>Yêu cầu thông tin:</strong> Could you please provide us with more details about...?</li>
-            <li><strong>Kết thư:</strong> Best regards, / Sincerely,</li>
-          </ul>
+        name: 'Odoo ORM & Decorators',
+        path: 'ch1',
+        content: `
+          <h3>Các Decorators trong Odoo</h3>
+          <p>Odoo sử dụng các decorator như <code>@api.depends</code>, <code>@api.onchange</code> và <code>@api.constrains</code> để quản lý luồng dữ liệu tự động giữa client và database.</p>
         `,
-        code: `Subject: Request for API Documentation - Rellia Project
-
-Dear Support Team,
-
-I hope this email finds you well. 
-We are currently integrating your service into the Rellia Dashboard.
-Could you please provide the updated API documentation?
-
-Thank you for your assistance.
-
-Best regards,
-[Your Name]`,
-        notes: 'Hạn chế viết câu quá dài. Diễn đạt ngắn gọn, xúc tích luôn mang lại sự chuyên nghiệp.'
-      }
-    ]
-  },
-  {
-    folder: 'SQL',
-    icon: 'fas fa-database',
-    topics: [
-      {
-        id: 'sql-joins',
-        title: 'SQL Joins (Liên kết bảng)',
-        doc: `
-          <h3>Các kiểu truy vấn liên kết bảng JOINS</h3>
-          <p>Giúp truy xuất thông tin trải rộng trên nhiều bảng dữ liệu có quan hệ khoá.</p>
-          <ul class="devdocs-list">
-            <li><strong>INNER JOIN:</strong> Lấy các bản ghi trùng khớp giữa cả hai bảng.</li>
-            <li><strong>LEFT JOIN:</strong> Lấy toàn bộ dòng bảng trái và những dòng khớp bảng phải.</li>
-            <li><strong>RIGHT JOIN:</strong> Lấy toàn bộ dòng bảng phải và những dòng khớp bảng trái.</li>
-            <li><strong>FULL JOIN:</strong> Trả về tất cả các hàng khi có sự trùng khớp ở một trong hai bảng.</li>
-          </ul>
-        `,
-        code: `-- INNER JOIN lấy thông tin đơn hàng và khách hàng
-SELECT o.order_id, c.customer_name, o.order_date
-FROM orders o
-INNER JOIN customers c ON o.customer_id = c.customer_id;`,
-        notes: 'Hãy đảm bảo các trường dùng để liên kết khóa JOIN đã được đánh Index tốt.'
-      }
-    ]
-  },
-  {
-    folder: 'UML',
-    icon: 'fas fa-project-diagram',
-    topics: [
-      {
-        id: 'uml-class',
-        title: 'UML Class Diagram (Sơ đồ lớp)',
-        doc: `
-          <h3>Cách mô tả cấu trúc hệ thống bằng Sơ đồ lớp</h3>
-          <p>Mô hình hóa các thực thể lớp, thuộc tính, phương thức và quan hệ giữa chúng.</p>
-          <ul class="devdocs-list">
-            <li><strong>Kí hiệu phạm vi truy cập:</strong> + (Public), - (Private), # (Protected).</li>
-            <li><strong>Quan hệ Association:</strong> Đường liên kết thông thường nét liền.</li>
-            <li><strong>Quan hệ Inheritance/Generalization:</strong> Mũi tên tam giác rỗng hướng về lớp cha.</li>
-            <li><strong>Quan hệ Composition:</strong> Hình thoi đặc biểu thị quan hệ sở hữu trọn đời.</li>
-          </ul>
-        `,
-        code: `+-----------------------+
-|        Customer       |
-+-----------------------+
-| - id: int             |
-| - name: string        |
-+-----------------------+
-| + placeOrder(): void  |
-+-----------------------+
-           ^ (Inheritance)
-           |
-+-----------------------+
-|      VIPCustomer      |
-+-----------------------+`,
-        notes: 'Sơ đồ lớp giúp lập trình viên hình dung trước kiến trúc hệ thống trước khi bắt tay viết code.'
-      }
-    ]
-  },
-  {
-    folder: 'Python',
-    icon: 'fab fa-python',
-    topics: [
-      {
-        id: 'python-decorators',
-        title: 'Python Decorators (Bộ trang trí)',
-        doc: `
-          <h3>Decorators hoạt động như thế nào trong Python?</h3>
-          <p>Decorator cho phép bạn can thiệp, mở rộng logic của một hàm khác mà không cần sửa đổi code gốc của hàm đó.</p>
-          <ul class="devdocs-list">
-            <li><strong>Wrapper:</strong> Hàm bọc trung gian xử lý logic trước và sau khi hàm chính chạy.</li>
-            <li><strong>Cú pháp @:</strong> Sử dụng ký tự @ để gọi decorator lên đầu hàm cần bọc.</li>
-            <li><strong>Ứng dụng:</strong> Dùng để ghi log, phân quyền, tính toán thời gian chạy hàm.</li>
-          </ul>
-        `,
-        code: `def my_decorator(func):
-    def wrapper():
-        print("Trước khi chạy hàm...")
-        func()
-        print("Sau khi chạy hàm...")
-    return wrapper
-
-@my_decorator
-def say_hello():
-    print("Hello World!")
-
-say_hello()`,
-        notes: 'Khi viết decorator cho hàm có nhận tham số, hãy nhớ truyền các tham số *args và **kwargs vào wrapper.'
-      }
-    ]
-  },
-  {
-    folder: 'Logistics',
-    icon: 'fas fa-shipping-fast',
-    topics: [
-      {
-        id: 'logistics-incoterms',
-        title: 'Incoterms 2020 Cheat Sheet',
-        doc: `
-          <h3>Tóm tắt các điều khoản Incoterms 2020 thông dụng</h3>
-          <p>Điều khoản thương mại quốc tế quy định trách nhiệm và chuyển giao rủi ro giữa bên bán và bên mua hàng.</p>
-          <ul class="devdocs-list">
-            <li><strong>EXW (Ex Works):</strong> Người bán giao hàng tại xưởng, người mua chịu toàn bộ chi phí và rủi ro vận chuyển.</li>
-            <li><strong>FOB (Free On Board):</strong> Người bán chịu chi phí đưa hàng lên tàu tại cảng bốc, rủi ro chuyển giao khi hàng qua lan can tàu.</li>
-            <li><strong>CIF (Cost, Insurance & Freight):</strong> Người bán chịu tiền cước vận chuyển và bảo hiểm hàng hải đến cảng đích.</li>
-            <li><strong>DDP (Delivered Duty Paid):</strong> Người bán chịu toàn bộ chi phí (bao gồm thuế nhập khẩu) và giao hàng tận nơi cho người mua.</li>
-          </ul>
-        `,
-        code: `[BÊN BÁN] ---> (FOB: Rủi ro chuyển tại lan can tàu) ---> [TÀU VẬN CHUYỂN] ---> [BÊN MUA]`,
-        notes: 'Incoterms không quy định về chuyển giao quyền sở hữu tài sản mà chỉ quy định về chi phí và rủi ro vận hành.'
-      }
-    ]
-  },
-  {
-    folder: 'Server',
-    icon: 'fas fa-server',
-    topics: [
-      {
-        id: 'server-nginx',
-        title: 'Nginx Reverse Proxy Config',
-        doc: `
-          <h3>Cấu hình Nginx làm Proxy ngược</h3>
-          <p>Nginx nhận yêu cầu HTTP/HTTPS của client và chuyển tiếp (forward) về các ứng dụng backend chạy ngầm ở port khác.</p>
-          <ul class="devdocs-list">
-            <li><strong>proxy_pass:</strong> Địa chỉ đích backend cần chuyển hướng yêu cầu tới.</li>
-            <li><strong>proxy_set_header:</strong> Thiết lập thêm hoặc chỉnh sửa thông tin HTTP header gửi về backend.</li>
-            <li><strong>server_name:</strong> Định nghĩa domain lắng nghe yêu cầu.</li>
-          </ul>
-        `,
-        code: `server {
-    listen 80;
-    server_name example.com;
-
-    location / {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
-}`,
-        notes: 'Sau khi đổi cấu hình nginx, hãy chạy lệnh "nginx -t" để test syntax cấu hình trước khi restart.'
+        code: `@api.depends('price_unit', 'tax_ids')\ndef _compute_amount(self):\n    for rec in self:\n        rec.amount = rec.price_unit * 1.1`
       }
     ]
   }
-];
+};
 
-// Trạng thái cục bộ lưu trữ chủ đề đang được xem
-let activeDocTopic = DEVDOCS_DATABASE[0].topics[0];
-let activeDocTab = 'doc'; // doc, code, notes
+// Trạng thái hoạt động
+let activeSource = 'local-gitflow'; // Có thể là khóa của LOCAL_EBOOKS hoặc LIVE_DOCS_REGISTRY
+let activeEntryIndex = 0;
 let searchFilterQuery = '';
+let showingSearchResults = false;
+
+// Bộ nhớ đệm dữ liệu tải từ CDN
+let loadedIndexData = null; // Mảng các entry từ index.json
+let loadedDbData = null;    // Object nội dung từ db.json
+let isDownloading = false;
+let downloadProgress = '';
 
 export function renderDevDocs(containerId = 'devdocsContent') {
   const container = document.getElementById(containerId);
   if (!container) return;
 
   container.innerHTML = `
-    <div class="devdocs-layout">
-      <!-- Cột trái: Sidebar cây thư mục & Tìm kiếm -->
-      <div class="devdocs-sidebar">
+    <!-- Stylesheets nội bộ cho module DevDocs -->
+    <style>
+      .ebook-container {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 24px;
+        align-items: start;
+        margin-top: 12px;
+      }
+      @media (max-width: 950px) {
+        .ebook-container {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Book Sidebar */
+      .ebook-sidebar {
+        background: rgba(18, 16, 38, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: var(--radius);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        backdrop-filter: blur(16px);
+        max-height: 850px;
+        overflow-y: auto;
+      }
+
+      .ebook-book-selector {
+        width: 100%;
+        padding: 11px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
+        font-weight: 700;
+        outline: none;
+        cursor: pointer;
+        transition: all 0.25s ease;
+      }
+      .ebook-book-selector:focus {
+        border-color: #8b5cf6;
+      }
+
+      /* Navigation Table of Contents */
+      .ebook-toc-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 8px;
+        max-height: 350px;
+        overflow-y: auto;
+      }
+      .ebook-toc-item {
+        padding: 10px 14px;
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .ebook-toc-item:hover {
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-primary);
+      }
+      .ebook-toc-item.active {
+        background: rgba(139, 92, 246, 0.15);
+        color: #c084fc;
+        border-left: 3px solid #8b5cf6;
+      }
+
+      /* Reader Area */
+      .ebook-reader-card {
+        background: rgba(18, 16, 38, 0.25);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: var(--radius);
+        padding: 32px;
+        backdrop-filter: blur(16px);
+        position: relative;
+        min-height: 600px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      /* Reading Progress Bar */
+      .ebook-progress-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.05);
+      }
+      .ebook-progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+        width: 0%;
+        transition: width 0.3s ease;
+      }
+
+      .ebook-body {
+        font-size: 14.5px;
+        line-height: 1.8;
+        color: var(--text-secondary);
+        margin: 20px 0;
+      }
+      /* Căn chỉnh lại HTML thô từ DevDocs CDN */
+      .ebook-body h1, .ebook-body h2, .ebook-body h3 {
+        color: #ffd700;
+        margin: 24px 0 12px;
+        font-weight: 700;
+      }
+      .ebook-body p {
+        margin-bottom: 14px;
+      }
+      .ebook-body pre {
+        background: #090812;
+        padding: 16px;
+        border-radius: 6px;
+        overflow-x: auto;
+        font-family: monospace;
+        margin: 16px 0;
+      }
+      .ebook-body code {
+        color: #f43f5e;
+        background: rgba(244, 63, 94, 0.08);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 13.5px;
+      }
+      .ebook-body pre code {
+        color: #e2e8f0;
+        background: transparent;
+        padding: 0;
+      }
+
+      .ebook-callout {
+        padding: 16px;
+        border-radius: var(--radius-sm);
+        font-size: 13.5px;
+        margin: 16px 0;
+        border-left: 4px solid;
+      }
+      .ebook-callout.note {
+        background: rgba(139, 92, 246, 0.06);
+        border-left-color: #8b5cf6;
+        color: var(--text-secondary);
+      }
+
+      /* Pagination Footer */
+      .ebook-pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        padding-top: 18px;
+        margin-top: 30px;
+      }
+
+      /* Notepad sidebar */
+      .ebook-notepad-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: #ffd700;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+      .ebook-notepad-textarea {
+        width: 100%;
+        height: 100px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
+        font-size: 12px;
+        padding: 10px;
+        resize: none;
+        outline: none;
+      }
+      .ebook-notepad-textarea:focus {
+        border-color: #8b5cf6;
+      }
+
+      /* Download banner */
+      .download-banner {
+        background: rgba(139, 92, 246, 0.08);
+        border: 1px solid rgba(139, 92, 246, 0.25);
+        border-radius: var(--radius-sm);
+        padding: 12px;
+        font-size: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .download-btn {
+        background: #8b5cf6;
+        color: #fff;
+        border: none;
+        padding: 6px 12px;
+        font-weight: bold;
+        border-radius: 4px;
+        cursor: pointer;
+        text-align: center;
+      }
+      .download-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    </style>
+
+    <div class="ebook-container">
+      <!-- Cột trái: Kệ sách, Tìm kiếm & Mục lục -->
+      <div class="ebook-sidebar">
+        <!-- Lựa chọn cuốn sách -->
         <div>
-          <input type="text" class="devdocs-search-input" id="devdocs-search-bar" placeholder="Tìm kiếm tài liệu nhanh..." value="${searchFilterQuery}">
+          <label style="display:block; font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:6px; letter-spacing:0.05em;">Chọn Tài Liệu / Sách</label>
+          <select class="ebook-book-selector" id="ebook-select-book-dropdown">
+            <optgroup label="Tài liệu mẫu nội bộ">
+              ${Object.keys(LOCAL_EBOOKS).map(key => `
+                <option value="${key}" ${key === activeSource ? 'selected' : ''}>
+                  📓 ${LOCAL_EBOOKS[key].title}
+                </option>
+              `).join('')}
+            </optgroup>
+            <optgroup label="Thư viện DevDocs.io (Tải Live/Offline)">
+              ${Object.keys(LIVE_DOCS_REGISTRY).map(key => `
+                <option value="${key}" ${key === activeSource ? 'selected' : ''}>
+                  🌐 ${LIVE_DOCS_REGISTRY[key].title} (${LIVE_DOCS_REGISTRY[key].size})
+                </option>
+              `).join('')}
+            </optgroup>
+          </select>
         </div>
-        
-        <!-- Folder tree root -->
-        <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin: 8px 0 4px; padding-left: 12px; letter-spacing: 0.05em;">Thư mục tài liệu</div>
-        <div class="devdocs-tree" id="devdocs-tree-root"></div>
+
+        <!-- Trạng thái lưu trữ ngoại tuyến của tài liệu Live -->
+        <div id="ebook-offline-status-banner"></div>
+
+        <!-- Tìm kiếm sách -->
+        <div>
+          <input type="text" class="devdocs-search-input" id="ebook-search-bar" placeholder="Tìm nhanh tiêu đề..." value="${searchFilterQuery}">
+        </div>
+
+        <!-- Danh sách chương sách / Kết quả tìm kiếm -->
+        <div id="ebook-sidebar-dynamic-list"></div>
+
+        <!-- Notepad Cá Nhân -->
+        <div style="border-top:1px solid rgba(255,255,255,0.06); padding-top:14px; margin-top:8px;">
+          <div class="ebook-notepad-title"><i class="fas fa-sticky-note" style="margin-right:6px;"></i> Sổ tay học tập</div>
+          <textarea class="ebook-notepad-textarea" id="ebook-notepad-box" placeholder="Viết ghi chú nhanh cho tài liệu này..."></textarea>
+          <div style="text-align:right; margin-top:4px;">
+            <span style="font-size:10px; color:#34d399;" id="ebook-note-status">Đã lưu tự động</span>
+          </div>
+        </div>
       </div>
 
-      <!-- Cột phải: Khung hiển thị tài liệu -->
-      <div class="devdocs-content-area" id="devdocs-view-content-pane"></div>
+      <!-- Cột phải: Trình đọc ebook -->
+      <div class="ebook-reader-card" id="ebook-reader-card-pane"></div>
     </div>
   `;
 
-  // Render tree structure
-  buildTreeNodes();
+  // Gắn sự kiện chuyển tài liệu
+  const dropdown = document.getElementById('ebook-select-book-dropdown');
+  dropdown.onchange = async (e) => {
+    activeSource = e.target.value;
+    activeEntryIndex = 0;
+    showingSearchResults = false;
+    loadedIndexData = null;
+    loadedDbData = null;
+    await checkAndLoadSource();
+  };
 
-  // Load active content
-  loadActiveTopicContent();
-
-  // Search input handler
-  const searchInput = document.getElementById('devdocs-search-bar');
-  searchInput.oninput = (e) => {
+  // Tìm kiếm
+  const searchBar = document.getElementById('ebook-search-bar');
+  searchBar.oninput = (e) => {
     searchFilterQuery = e.target.value.toLowerCase().trim();
-    buildTreeNodes();
+    showingSearchResults = searchFilterQuery.length > 0;
+    renderSidebarAndReader();
   };
+
+  // Notepad
+  const notepad = document.getElementById('ebook-notepad-box');
+  notepad.oninput = (e) => {
+    const status = document.getElementById('ebook-note-status');
+    status.textContent = 'Đang lưu...';
+    localStorage.setItem(`rellia_devdocs_note_${activeSource}`, e.target.value);
+    setTimeout(() => {
+      status.textContent = 'Đã lưu tự động';
+    }, 500);
+  };
+
+  // Tải nguồn hiện tại
+  checkAndLoadSource();
 }
 
-function buildTreeNodes() {
-  const root = document.getElementById('devdocs-tree-root');
-  if (!root) return;
+// ── KIỂM TRA VÀ TẢI TÀI LIỆU (CACHE HOẶC ONLINE) ─────────────────────
+async function checkAndLoadSource() {
+  const banner = document.getElementById('ebook-offline-status-banner');
+  if (!banner) return;
 
-  root.innerHTML = '';
+  // Nếu là tài liệu mẫu local
+  if (LOCAL_EBOOKS[activeSource]) {
+    banner.innerHTML = `<span style="font-size:11px; color:#34d399; font-weight:700;"><i class="fas fa-check-circle"></i> Sẵn sàng ngoại tuyến (Tích hợp sẵn)</span>`;
+    loadedIndexData = LOCAL_EBOOKS[activeSource].chapters;
+    renderSidebarAndReader();
+    return;
+  }
 
-  DEVDOCS_DATABASE.forEach((cat, cIdx) => {
-    // Filter topics if search query exists
-    const matchingTopics = cat.topics.filter(t => 
-      t.title.toLowerCase().includes(searchFilterQuery) || 
-      t.doc.toLowerCase().includes(searchFilterQuery)
-    );
+  // Nếu là tài liệu từ DevDocs CDN
+  const slug = activeSource;
+  const isCached = await checkCacheStatus(slug);
 
-    // If query is present and no topics match in this folder, hide the folder
-    if (searchFilterQuery.length > 0 && matchingTopics.length === 0) {
-      return;
-    }
-
-    const folderNode = document.createElement('div');
-    folderNode.className = 'devdocs-tree-node';
-
-    // Auto-expand folder if searching
-    const isExpanded = searchFilterQuery.length > 0 ? true : false;
-
-    folderNode.innerHTML = `
-      <div class="devdocs-node-header" id="folder-header-${cIdx}">
-        <i class="fas fa-chevron-right devdocs-node-chevron ${isExpanded ? 'expanded' : ''}" id="folder-chevron-${cIdx}"></i>
-        <i class="${cat.icon} devdocs-node-icon"></i>
-        <span>${cat.folder}</span>
+  if (isCached) {
+    banner.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:11px; color:#34d399; font-weight:700;"><i class="fas fa-check-circle"></i> Đã tải ngoại tuyến</span>
+        <button class="download-btn" style="background:#ef4444; padding:2px 8px; font-size:10px;" id="ebook-clear-cache-btn">Xóa</button>
       </div>
-      <div class="devdocs-node-children ${isExpanded ? 'open' : ''}" id="folder-children-${cIdx}"></div>
     `;
-
-    root.appendChild(folderNode);
-
-    // Populate child documents
-    const childrenContainer = document.getElementById(`folder-children-${cIdx}`);
-    const topicsToRender = searchFilterQuery.length > 0 ? matchingTopics : cat.topics;
-
-    topicsToRender.forEach(topic => {
-      const docItem = document.createElement('div');
-      docItem.className = `devdocs-node-header ${activeDocTopic.id === topic.id ? 'active' : ''}`;
-      docItem.style.paddingLeft = '16px';
-      docItem.innerHTML = `
-        <i class="far fa-file-alt" style="font-size:12px;color:rgba(255,255,255,0.45);"></i>
-        <span style="font-size:12.5px;font-weight:normal;">${topic.title}</span>
-      `;
-      docItem.onclick = (e) => {
-        e.stopPropagation();
-        selectTopic(topic);
-      };
-      childrenContainer.appendChild(docItem);
-    });
-
-    // Toggle folder click
-    const header = document.getElementById(`folder-header-${cIdx}`);
-    header.onclick = () => {
-      const ch = document.getElementById(`folder-children-${cIdx}`);
-      const chev = document.getElementById(`folder-chevron-${cIdx}`);
-      const isOpen = ch.classList.contains('open');
-
-      ch.classList.toggle('open', !isOpen);
-      chev.classList.toggle('expanded', !isOpen);
+    document.getElementById('ebook-clear-cache-btn').onclick = async () => {
+      await deleteCache(slug);
+      checkAndLoadSource();
     };
-  });
+
+    // Load data from Cache API
+    await loadFromCache(slug);
+  } else {
+    // Chưa tải offline
+    banner.innerHTML = `
+      <div class="download-banner">
+        <div style="font-weight:700; color:#ffd700;">Tài liệu chưa được lưu ngoại tuyến.</div>
+        <div style="font-size:11px; color:var(--text-muted);">Bạn có thể đọc trực tiếp online hoặc tải xuống toàn bộ (${LIVE_DOCS_REGISTRY[slug].size}) để đọc khi không có mạng.</div>
+        <button class="download-btn" id="ebook-download-btn">${isDownloading ? downloadProgress : '⚡ Tải Ngoại Tuyến'}</button>
+      </div>
+    `;
+    const btn = document.getElementById('ebook-download-btn');
+    if (isDownloading) btn.disabled = true;
+    btn.onclick = () => downloadLiveDoc(slug);
+
+    // Thử load trực tiếp từ internet (Online mode)
+    await loadFromInternet(slug);
+  }
+
+  renderSidebarAndReader();
 }
 
-function selectTopic(topic) {
-  activeDocTopic = topic;
-  
-  // Highlight in sidebar
-  const items = document.querySelectorAll('.devdocs-node-children .devdocs-node-header');
-  items.forEach(el => el.classList.remove('active'));
-
-  // Re-render sidebar tree to capture active state highlighting correctly
-  buildTreeNodes();
-
-  loadActiveTopicContent();
+async function checkCacheStatus(slug) {
+  try {
+    const cache = await caches.open('rellia-devdocs-cdn');
+    const indexRes = await cache.match(`https://documents.devdocs.io/${slug}/index.json`);
+    const dbRes = await cache.match(`https://documents.devdocs.io/${slug}/db.json`);
+    return !!(indexRes && dbRes);
+  } catch (e) {
+    return false;
+  }
 }
 
-function loadActiveTopicContent() {
-  const pane = document.getElementById('devdocs-view-content-pane');
-  if (!pane) return;
+async function deleteCache(slug) {
+  try {
+    const cache = await caches.open('rellia-devdocs-cdn');
+    await cache.delete(`https://documents.devdocs.io/${slug}/index.json`);
+    await cache.delete(`https://documents.devdocs.io/${slug}/db.json`);
+  } catch (e) {
+    console.error(e);
+  }
+}
 
-  pane.innerHTML = `
-    <div class="devdocs-content-header">
-      <div class="devdocs-doc-title">${activeDocTopic.title}</div>
-      <div class="devdocs-doc-subtitle">Tài liệu tham khảo offline nhanh cho các lập trình viên</div>
+async function loadFromCache(slug) {
+  try {
+    const cache = await caches.open('rellia-devdocs-cdn');
+    const indexRes = await cache.match(`https://documents.devdocs.io/${slug}/index.json`);
+    const dbRes = await cache.match(`https://documents.devdocs.io/${slug}/db.json`);
+    if (indexRes && dbRes) {
+      const indexJson = await indexRes.json();
+      loadedIndexData = indexJson.entries;
+      loadedDbData = await dbRes.json();
+    }
+  } catch (e) {
+    console.error('Lỗi khi đọc Cache:', e);
+  }
+}
+
+async function loadFromInternet(slug) {
+  try {
+    // Lấy index trực tiếp
+    const res = await fetch(`https://documents.devdocs.io/${slug}/index.json`);
+    if (res.ok) {
+      const data = await res.json();
+      loadedIndexData = data.entries;
+    }
+  } catch (e) {
+    loadedIndexData = null;
+    console.warn('Không có kết nối mạng để đọc online');
+  }
+}
+
+async function downloadLiveDoc(slug) {
+  if (isDownloading) return;
+  isDownloading = true;
+  downloadProgress = 'Đang kết nối...';
+  checkAndLoadSource();
+
+  try {
+    const cache = await caches.open('rellia-devdocs-cdn');
+    
+    // 1. Tải index.json
+    downloadProgress = 'Tải Index (10%)...';
+    checkAndLoadSource();
+    const indexUrl = `https://documents.devdocs.io/${slug}/index.json`;
+    const indexRes = await fetch(indexUrl);
+    if (!indexRes.ok) throw new Error('Không thể tải index.json');
+    await cache.put(indexUrl, indexRes.clone());
+
+    // 2. Tải db.json
+    downloadProgress = 'Tải Database (50%)...';
+    checkAndLoadSource();
+    const dbUrl = `https://documents.devdocs.io/${slug}/db.json`;
+    const dbRes = await fetch(dbUrl);
+    if (!dbRes.ok) throw new Error('Không thể tải db.json');
+    await cache.put(dbUrl, dbRes.clone());
+
+    downloadProgress = 'Hoàn tất!';
+    checkAndLoadSource();
+  } catch (e) {
+    alert('Lỗi tải dữ liệu ngoại tuyến: ' + e.message);
+  } finally {
+    isDownloading = false;
+    await checkAndLoadSource();
+  }
+}
+
+// ── RENDER SIDEBAR VÀ READER ─────────────────────────────────────────
+function renderSidebarAndReader() {
+  const sidebarList = document.getElementById('ebook-sidebar-dynamic-list');
+  const notepad = document.getElementById('ebook-notepad-box');
+  if (!sidebarList) return;
+
+  // Load Note cho Book hiện tại
+  if (notepad) {
+    notepad.value = localStorage.getItem(`rellia_devdocs_note_${activeSource}`) || '';
+  }
+
+  // Nếu chưa tải xong index
+  if (!loadedIndexData) {
+    sidebarList.innerHTML = `<div style="font-size:12.5px; color:var(--text-muted); text-align:center; padding:20px 0;"><i class="fas fa-exclamation-triangle"></i> Yêu cầu kết nối mạng hoặc nhấn Tải ngoại tuyến để xem mục lục.</div>`;
+    renderReaderPaneContent();
+    return;
+  }
+
+  // Lọc tìm kiếm
+  let filteredEntries = loadedIndexData;
+  if (showingSearchResults && searchFilterQuery) {
+    filteredEntries = loadedIndexData.filter(entry => 
+      entry.name.toLowerCase().includes(searchFilterQuery)
+    );
+  }
+
+  // 1. Render Sidebar list
+  sidebarList.innerHTML = `
+    <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin: 4px 0 8px; letter-spacing: 0.05em;">
+      Mục Lục (${filteredEntries.length} mục)
     </div>
-
-    <!-- Sub-tabs -->
-    <div class="devdocs-doc-tabs">
-      <button class="devdocs-doc-tab-btn ${activeDocTab === 'doc' ? 'active' : ''}" id="doc-tab-btn-doc">
-        <i class="fas fa-book-open"></i> Hướng Dẫn Chi Tiết
-      </button>
-      <button class="devdocs-doc-tab-btn ${activeDocTab === 'code' ? 'active' : ''}" id="doc-tab-btn-code">
-        <i class="fas fa-code"></i> Code Mẫu
-      </button>
-      <button class="devdocs-doc-tab-btn ${activeDocTab === 'notes' ? 'active' : ''}" id="doc-tab-btn-notes">
-        <i class="fas fa-sticky-note"></i> Ghi Chú / Lưu Ý
-      </button>
-    </div>
-
-    <!-- Active Tab Screen Content -->
-    <div id="devdocs-doc-tab-body-pane" style="animation: devdocsFadeIn 0.3s ease;"></div>
+    <div class="ebook-toc-list" id="ebook-chapters-ul"></div>
   `;
 
-  // Attach tab events
-  const btns = {
-    doc: document.getElementById('doc-tab-btn-doc'),
-    code: document.getElementById('doc-tab-btn-code'),
-    notes: document.getElementById('doc-tab-btn-notes')
-  };
+  const ul = document.getElementById('ebook-chapters-ul');
+  filteredEntries.slice(0, 150).forEach((entry, fIdx) => {
+    // Tìm index gốc tương ứng trong loadedIndexData
+    const origIdx = loadedIndexData.findIndex(e => e.path === entry.path);
 
-  Object.keys(btns).forEach(tab => {
-    if (btns[tab]) {
-      btns[tab].onclick = () => {
-        activeDocTab = tab;
-        Object.keys(btns).forEach(t => btns[t].classList.toggle('active', t === tab));
-        loadActiveSubTabContent();
-      };
-    }
+    const item = document.createElement('div');
+    item.className = `ebook-toc-item ${origIdx === activeEntryIndex ? 'active' : ''}`;
+    item.innerHTML = `
+      <i class="far fa-file-alt"></i>
+      <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${entry.name}</span>
+    `;
+    item.onclick = () => {
+      activeEntryIndex = origIdx;
+      renderSidebarAndReader();
+    };
+    ul.appendChild(item);
   });
 
-  // Load initial subtab content
-  loadActiveSubTabContent();
+  if (filteredEntries.length > 150) {
+    const more = document.createElement('div');
+    more.style.cssText = 'font-size:11px; color:var(--text-muted); text-align:center; padding:6px;';
+    more.textContent = `...và ${filteredEntries.length - 150} tài liệu khác (hãy gõ tìm kiếm để lọc)`;
+    ul.appendChild(more);
+  }
+
+  // 2. Render nội dung trang đọc
+  renderReaderPaneContent();
 }
 
-function loadActiveSubTabContent() {
-  const body = document.getElementById('devdocs-doc-tab-body-pane');
-  if (!body) return;
+async function renderReaderPaneContent() {
+  const readerPane = document.getElementById('ebook-reader-card-pane');
+  if (!readerPane) return;
 
-  if (activeDocTab === 'doc') {
-    body.innerHTML = `
-      <div style="font-size: 14px; line-height: 1.7; color: var(--text-secondary);">
-        ${activeDocTopic.doc}
+  if (!loadedIndexData) {
+    readerPane.innerHTML = `
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; min-height:400px; gap:16px;">
+        <i class="fas fa-wifi" style="font-size:40px; color:rgba(255,255,255,0.2);"></i>
+        <div style="font-size:16px; font-weight:700; color:var(--text-muted);">Không có dữ liệu hiển thị</div>
       </div>
     `;
-  } else if (activeDocTab === 'code') {
-    // Escape HTML tags to prevent execution in code block
-    const escapedCode = activeDocTopic.code
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
+    return;
+  }
 
-    body.innerHTML = `
-      <div style="margin-bottom: 12px; font-size:13px; color:var(--text-muted);">Mã nguồn tham khảo:</div>
-      <pre class="devdocs-code-block" data-lang="Code"><code>${escapedCode}</code></pre>
-    `;
-  } else if (activeDocTab === 'notes') {
-    body.innerHTML = `
-      <div style="background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: var(--radius-sm); padding: 20px; font-size: 13.5px; line-height: 1.6; color: var(--text-secondary);">
-        <div style="font-weight:700; color:#ffd700; margin-bottom: 6px; display:flex; align-items:center; gap:8px;">
-          <i class="fas fa-exclamation-triangle"></i> Lưu ý đặc biệt từ chuyên gia
+  const currentEntry = loadedIndexData[activeEntryIndex];
+  if (!currentEntry) {
+    readerPane.innerHTML = `<div style="font-size:14px; color:var(--text-muted); text-align:center; margin-top:100px;">Không có tài liệu nào phù hợp.</div>`;
+    return;
+  }
+
+  // Tính tiến trình
+  const progressPct = ((activeEntryIndex + 1) / loadedIndexData.length) * 100;
+
+  // Lấy nội dung HTML
+  let htmlContent = '';
+  let codeSample = '';
+
+  if (LOCAL_EBOOKS[activeSource]) {
+    // Tài liệu local
+    htmlContent = currentEntry.content;
+    codeSample = currentEntry.code;
+  } else {
+    // Tài liệu live từ CDN
+    if (loadedDbData) {
+      htmlContent = loadedDbData[currentEntry.path] || `<h3>${currentEntry.name}</h3><p>Không tìm thấy nội dung của tài nguyên này trong cơ sở dữ liệu.</p>`;
+    } else {
+      // Đang đọc online không có db.json cached
+      htmlContent = `
+        <h3>${currentEntry.name}</h3>
+        <div class="ebook-callout note">
+          <strong>💡 Chế độ trực tuyến:</strong> Đang lấy nội dung từ internet... Hãy nhấn nút "Tải Ngoại Tuyến" để lưu toàn bộ tài liệu về máy.
         </div>
-        ${activeDocTopic.notes}
+      `;
+      // Fetch nội dung trực tiếp nếu online
+      fetchDocContentOnline(currentEntry.path).then(html => {
+        const bodyPane = document.getElementById('ebook-live-body-area');
+        if (bodyPane) bodyPane.innerHTML = html;
+      });
+    }
+  }
+
+  const titleString = currentEntry.name || currentEntry.title;
+
+  readerPane.innerHTML = `
+    <!-- Thanh tiến trình đọc -->
+    <div class="ebook-progress-container">
+      <div class="ebook-progress-bar" style="width: ${progressPct}%;"></div>
+    </div>
+
+    <!-- Nội dung chính -->
+    <div>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <span style="font-size:12px; font-weight:700; color:#8b5cf6; text-transform:uppercase; letter-spacing:0.1em;">
+          ${LIVE_DOCS_REGISTRY[activeSource]?.title || LOCAL_EBOOKS[activeSource]?.title}
+        </span>
+        <span style="font-size:11px; color:var(--text-muted); display:flex; align-items:center; gap:4px;">
+          <i class="far fa-clock"></i> Khớp nối Live API
+        </span>
       </div>
-    `;
+
+      <h2 style="font-size:22px; font-weight:800; color:#ffd700; margin-top:12px; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:14px; line-height:1.4;">
+        ${titleString}
+      </h2>
+
+      <div class="ebook-body" id="ebook-live-body-area">
+        ${htmlContent}
+      </div>
+
+      ${codeSample ? `
+        <div style="font-size: 13px; font-weight:700; color:#a78bfa; margin-top: 16px;"><i class="fas fa-code"></i> Ví dụ minh họa:</div>
+        <pre class="ebook-body pre"><code>${codeSample.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code></pre>
+      ` : ''}
+    </div>
+
+    <!-- Phân trang footer -->
+    <div class="ebook-pagination">
+      <button class="btn-secondary" id="ebook-btn-prev" style="padding: 8px 14px; font-size:13px; display:flex; align-items:center; gap:6px;" ${activeEntryIndex === 0 ? 'disabled style="opacity:0.3; cursor:not-allowed;"' : ''}>
+        <i class="fas fa-arrow-left"></i> Trang trước
+      </button>
+      
+      <span style="font-size:12.5px; color:var(--text-muted); font-family: monospace;">
+        Mục ${activeEntryIndex + 1} / ${loadedIndexData.length}
+      </span>
+
+      <button class="btn-primary" id="ebook-btn-next" style="padding: 8px 16px; font-size:13px; background:linear-gradient(135deg, #8b5cf6, #3b82f6); border:none; display:flex; align-items:center; gap:6px;" ${activeEntryIndex === loadedIndexData.length - 1 ? 'disabled style="opacity:0.3; cursor:not-allowed;"' : ''}>
+        Trang sau <i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+  `;
+
+  // Gắn sự kiện phân trang
+  const btnPrev = document.getElementById('ebook-btn-prev');
+  const btnNext = document.getElementById('ebook-btn-next');
+
+  if (btnPrev && activeEntryIndex > 0) {
+    btnPrev.onclick = () => {
+      activeEntryIndex--;
+      renderSidebarAndReader();
+    };
+  }
+
+  if (btnNext && activeEntryIndex < loadedIndexData.length - 1) {
+    btnNext.onclick = () => {
+      activeEntryIndex++;
+      renderSidebarAndReader();
+    };
+  }
+}
+
+// Lấy nội dung HTML đơn lẻ trực tuyến nếu chưa tải db.json
+async function fetchDocContentOnline(path) {
+  try {
+    const res = await fetch(`https://documents.devdocs.io/${activeSource}/db.json`);
+    if (res.ok) {
+      const db = await res.json();
+      return db[path] || `<p>Không tìm thấy nội dung của trang: ${path}</p>`;
+    }
+  } catch (e) {
+    return `<p style="color:#ef4444;">Không thể tải nội dung do mất kết nối mạng.</p>`;
   }
 }
