@@ -56,6 +56,7 @@
   <link rel="stylesheet" href="css/converter.css" />
   <link rel="stylesheet" href="css/iq-eq-test.css" />
   <link rel="stylesheet" href="css/mbti.css" />
+  <link rel="stylesheet" href="css/astrology.css" />
   <link rel="stylesheet" href="css/typing-test.css" />
   <link rel="stylesheet" href="css/hardware-test.css" />
   <link rel="stylesheet" href="css/mobile.css" />
@@ -167,6 +168,10 @@
         <button class="sidebar-nav-item" data-section="mbti" onclick="switchSection('mbti')">
           <i class="nav-icon fas fa-user-tag"></i>
           <span class="nav-label">Kiểm Tra MBTI</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="astrology" onclick="switchSection('astrology')">
+          <i class="nav-icon fas fa-star-and-crescent"></i>
+          <span class="nav-label">Bản Đồ Sao & Bói Toán</span>
         </button>
         <button class="sidebar-nav-item" data-section="lottery" onclick="switchSection('lottery')">
           <i class="nav-icon fas fa-ticket-alt"></i>
@@ -390,6 +395,14 @@
       <section class="content-section" id="section-mbti">
         <div class="page-title">Trắc Nghiệm Tính Cách MBTI</div>
         <div id="mbtiContent">
+          <div class="skeleton skel-big"></div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: ASTROLOGY ════════ -->
+      <section class="content-section" id="section-astrology">
+        <div class="page-title">Bản Đồ Sao & Bói Toán Chiêm Tinh</div>
+        <div id="astrologyContent">
           <div class="skeleton skel-big"></div>
         </div>
       </section>
