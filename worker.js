@@ -1675,6 +1675,183 @@ const SERVER_EQ_POOL = [
   { q: "Tôi tự hào về con người hiện tại của mình mà không cần ai phán xét.", type: "+", dim: "selfAwa" }
 ];
 
+// ── NGÂN HÀNG ĐỀ THI MBTI BẢO MẬT TRÊN SERVER (40 CÂU) ────────────────────────
+const SERVER_MBTI_POOL = [
+  // E vs I (Xu hướng Tương tác)
+  { q: "Bạn cảm thấy tràn đầy năng lượng sau khi dành thời gian giao lưu với một nhóm người.", type: "+", dim: "EI" },
+  { q: "Bạn thích dành những ngày nghỉ cuối tuần một mình để đọc sách, xem phim hoặc chơi game hơn là đi tiệc tùng.", type: "-", dim: "EI" },
+  { q: "Trong các cuộc họp hoặc làm việc nhóm, bạn thường là người chủ động phát biểu ý kiến trước.", type: "+", dim: "EI" },
+  { q: "Bạn cảm thấy kiệt sức nếu phải giao tiếp xã hội liên tục trong nhiều giờ.", type: "-", dim: "EI" },
+  { q: "Bạn thích có một vòng bạn bè rộng lớn với nhiều mối quan hệ xã giao hơn là chỉ vài người bạn cực kỳ thân thiết.", type: "+", dim: "EI" },
+  { q: "Bạn thường tránh gọi điện thoại trực tiếp mà thích nhắn tin hoặc gửi email hơn.", type: "-", dim: "EI" },
+  { q: "Tại các bữa tiệc, bạn thường là người chủ động bắt chuyện với những người mới quen.", type: "+", dim: "EI" },
+  { q: "Bạn thích làm việc độc lập trong không gian yên tĩnh hơn là làm việc nhóm náo nhiệt.", type: "-", dim: "EI" },
+  { q: "Bạn cảm thấy dễ dàng và thoải mái khi trở thành tâm điểm của sự chú ý.", type: "+", dim: "EI" },
+  { q: "Bạn có xu hướng suy nghĩ kỹ trong đầu trước khi nói, thay vì vừa nói vừa suy nghĩ.", type: "-", dim: "EI" },
+
+  // N vs S (Thu thập Thông tin)
+  { q: "Bạn thường quan tâm đến các ý tưởng lý thuyết trừu tượng và các khả năng trong tương lai hơn là những thực tế hiển nhiên trước mắt.", type: "+", dim: "NS" },
+  { q: "Bạn thích làm việc theo hướng dẫn và quy trình rõ ràng, có sẵn hơn là tự mày mò ra cách làm mới.", type: "-", dim: "NS" },
+  { q: "Bạn thường xuyên mơ mộng về những viễn cảnh tương lai và thích suy ngẫm về ý nghĩa sâu xa của cuộc sống.", type: "+", dim: "NS" },
+  { q: "Bạn tin cậy nhiều hơn vào kinh nghiệm thực tế của bản thân hơn là những giả thuyết hay trực giác mơ hồ.", type: "-", dim: "NS" },
+  { q: "Bạn thích thảo luận về nghệ thuật, triết học hoặc các chủ đề sáng tạo hơn là những chuyện thực tế hàng ngày.", type: "+", dim: "NS" },
+  { q: "Bạn thích sự tỉ mỉ, chi tiết cụ thể trong công việc hơn là nhìn nhận bức tranh tổng thể một cách khái quát.", type: "-", dim: "NS" },
+  { q: "Bạn thường bị thu hút bởi những ý tưởng độc đáo, mới lạ hơn là những phương pháp truyền thống đã được chứng minh hiệu quả.", type: "+", dim: "NS" },
+  { q: "Bạn coi trọng việc học những kiến thức có thể áp dụng ngay vào cuộc sống hơn là những lý thuyết hàn lâm.", type: "-", dim: "NS" },
+  { q: "Bạn thường dựa vào trực cảm (linh cảm) của mình để phán đoán hướng đi thay vì các số liệu thống kê.", type: "+", dim: "NS" },
+  { q: "Bạn thích giải quyết các vấn đề quen thuộc bằng những cách thông thường thay vì tìm kiếm những giải pháp đột phá.", type: "-", dim: "NS" },
+
+  // T vs F (Đưa ra Quyết định)
+  { q: "Khi đưa ra quyết định quan trọng, bạn coi trọng sự logic, tính khách quan và hiệu quả công việc hơn là cảm xúc của mọi người.", type: "+", dim: "TF" },
+  { q: "Bạn dễ dàng đồng cảm với nỗi đau của người khác và luôn cố gắng giữ gìn sự hòa hợp trong mối quan hệ.", type: "-", dim: "TF" },
+  { q: "Trong một cuộc tranh luận, bạn sẵn sàng chỉ ra lỗi sai của đối phương một cách thẳng thắn để tìm ra sự thật khách quan.", type: "+", dim: "TF" },
+  { q: "Bạn thường đưa ra quyết định dựa trên cảm xúc của con tim hơn là sự phân tích lạnh lùng của lý trí.", type: "-", dim: "TF" },
+  { q: "Bạn đánh giá cao việc một người luôn công bằng và tuân thủ quy tắc hơn là việc họ luôn nhân từ và vị tha.", type: "+", dim: "TF" },
+  { q: "Bạn cảm thấy khó chịu khi nhìn thấy người khác bị tổn thương, ngay cả khi đó là lỗi của họ.", type: "-", dim: "TF" },
+  { q: "Bạn tin rằng kết quả công việc và hiệu năng thực tế quan trọng hơn sự hài lòng hay tâm trạng của nhân viên.", type: "+", dim: "TF" },
+  { q: "Bạn thường ưu tiên việc giúp đỡ và động viên tinh thần người khác hơn là tranh luận đúng sai.", type: "-", dim: "TF" },
+  { q: "Bạn có xu hướng đánh giá mọi việc dựa trên các tiêu chí rõ ràng, khoa học hơn là những cảm nhận cá nhân chủ quan.", type: "+", dim: "TF" },
+  { q: "Khi ai đó tìm đến bạn tâm sự về rắc rối của họ, bạn thường tập trung vào việc an ủi cảm xúc trước thay vì vội vã đưa ra giải pháp logic.", type: "-", dim: "TF" },
+
+  // J vs P (Cách thức Hành động)
+  { q: "Bạn thích lập kế hoạch chi tiết cho các chuyến đi chơi hoặc công việc của mình và tuân thủ chặt chẽ kế hoạch đó.", type: "+", dim: "JP" },
+  { q: "Bạn cảm thấy thoải mái hơn khi làm việc dưới áp lực thời gian (sát nút) và thích sự linh hoạt tùy ứng hơn.", type: "-", dim: "JP" },
+  { q: "Bạn thích dọn dẹp không gian làm việc gọn gàng và hoàn thành công việc trước thời hạn để tránh căng thẳng.", type: "+", dim: "JP" },
+  { q: "Bạn thường giữ các lựa chọn của mình mở rộng cho đến phút cuối cùng thay vì chốt một quyết định sớm.", type: "-", dim: "JP" },
+  { q: "Bạn cảm thấy khó chịu khi tiến trình công việc bị thay đổi đột ngột hoặc không diễn ra theo đúng lịch trình đã định.", type: "+", dim: "JP" },
+  { q: "Bạn thích tự do hành động theo cảm hứng ngẫu hứng của thời điểm hiện tại hơn là làm việc theo thời khóa biểu cứng nhắc.", type: "-", dim: "JP" },
+  { q: "Trước khi bắt đầu một công việc lớn, bạn luôn lập danh sách các việc cần làm (to-do list) và phân chia thời gian cụ thể.", type: "+", dim: "JP" },
+  { q: "Bạn thích bắt tay vào làm việc ngay và giải quyết các phát sinh trên đường đi thay vì tốn quá nhiều thời gian lên kế hoạch.", type: "-", dim: "JP" },
+  { q: "Bạn cảm thấy hài lòng nhất khi một kế hoạch đã được hoàn thành trọn vẹn và đúng tiến độ đề ra.", type: "+", dim: "JP" },
+  { q: "Bạn coi việc trễ giờ hẹn là điều có thể chấp nhận được nếu có lý do linh hoạt hoặc do phát sinh đột xuất.", type: "-", dim: "JP" }
+];
+
+// ─── /api/mbti (Endpoint bảo mật: Lấy câu hỏi, Chấm điểm, và Đọc kết quả MBTI) ──────
+async function handleMBTI(request, env) {
+  if (request.method === 'OPTIONS') return preflight();
+
+  const url = env.SUPABASE_URL ? env.SUPABASE_URL.trim().replace(/^['\"]|['\"]$/g, '') : '';
+  const key = env.SUPABASE_KEY ? env.SUPABASE_KEY.trim().replace(/^['\"]|['\"]$/g, '') : '';
+  const hasDb = !!(url && key);
+
+  const supabaseHeaders = hasDb ? {
+    'apikey': key,
+    'Authorization': `Bearer ${key}`,
+    'Content-Type': 'application/json'
+  } : null;
+
+  const { searchParams } = new URL(request.url);
+  const action = searchParams.get('action') || 'list';
+
+  try {
+    if (request.method === 'GET' && action === 'questions') {
+      const safeQuestions = SERVER_MBTI_POOL.map((q, idx) => ({
+        qIdx: idx,
+        q: q.q,
+        dim: q.dim
+      }));
+      return cors(JSON.stringify(safeQuestions), 200);
+    }
+
+    if (request.method === 'POST' && action === 'submit') {
+      const { name, age, answers } = await request.json();
+
+      const scoresByDim = {
+        EI: { total: 0, maxPossible: 0 },
+        NS: { total: 0, maxPossible: 0 },
+        TF: { total: 0, maxPossible: 0 },
+        JP: { total: 0, maxPossible: 0 }
+      };
+
+      answers.forEach(item => {
+        const original = SERVER_MBTI_POOL[item.qIdx];
+        if (original) {
+          let score = item.selected;
+          if (original.type === '-') {
+            score = 4 - item.selected;
+          }
+          scoresByDim[original.dim].total += score;
+          scoresByDim[original.dim].maxPossible += 4;
+        }
+      });
+
+      const breakdown = {};
+      const pctEI = scoresByDim.EI.maxPossible > 0 ? (scoresByDim.EI.total / scoresByDim.EI.maxPossible) * 100 : 50;
+      const pctNS = scoresByDim.NS.maxPossible > 0 ? (scoresByDim.NS.total / scoresByDim.NS.maxPossible) * 100 : 50;
+      const pctTF = scoresByDim.TF.maxPossible > 0 ? (scoresByDim.TF.total / scoresByDim.TF.maxPossible) * 100 : 50;
+      const pctJP = scoresByDim.JP.maxPossible > 0 ? (scoresByDim.JP.total / scoresByDim.JP.maxPossible) * 100 : 50;
+
+      breakdown.E = Math.round(pctEI);
+      breakdown.I = 100 - breakdown.E;
+
+      breakdown.N = Math.round(pctNS);
+      breakdown.S = 100 - breakdown.N;
+
+      breakdown.T = Math.round(pctTF);
+      breakdown.F = 100 - breakdown.T;
+
+      breakdown.J = Math.round(pctJP);
+      breakdown.P = 100 - breakdown.J;
+
+      const type = (breakdown.E >= 50 ? 'E' : 'I') +
+                   (breakdown.N >= 50 ? 'N' : 'S') +
+                   (breakdown.T >= 50 ? 'T' : 'F') +
+                   (breakdown.J >= 50 ? 'J' : 'P');
+
+      const responsePayload = {
+        type,
+        breakdown
+      };
+
+      if (hasDb) {
+        const dbPayload = {
+          name: name || 'Ẩn danh',
+          age: age || 'Chưa rõ',
+          test_type: 'MBTI',
+          score: 100,
+          raw_correct: 0,
+          max_score: 100,
+          answers_json: JSON.stringify({ type, breakdown, answers }),
+          created_at: new Date().toISOString()
+        };
+
+        try {
+          await fetch(`${url}/rest/v1/iqeq_results`, {
+            method: 'POST',
+            headers: {
+              ...supabaseHeaders,
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify(dbPayload)
+          });
+        } catch (dbErr) {
+          console.error('Failed to save MBTI result to Supabase:', dbErr);
+        }
+      }
+
+      return cors(JSON.stringify(responsePayload), 200);
+    }
+
+    if (request.method === 'GET' && action === 'list') {
+      if (!hasDb) {
+        return cors(JSON.stringify([]), 200);
+      }
+      const res = await fetch(`${url}/rest/v1/iqeq_results?test_type=eq.MBTI&select=*&order=created_at.desc`, {
+        headers: supabaseHeaders
+      });
+      const data = await res.text();
+      return new Response(data, {
+        status: res.status,
+        headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS }
+      });
+    }
+
+    return cors(JSON.stringify({ error: 'Action not allowed' }), 400);
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
 // ─── /api/iqeq (Endpoint bảo mật: Lấy câu hỏi, Chấm điểm, và Đọc kết quả) ──────
 async function handleIQEQ(request, env) {
   if (request.method === 'OPTIONS') return preflight();
@@ -3303,6 +3480,7 @@ export default {
     if (pathname === '/api/todos') return handleTodos(request, env);
     if (pathname === '/api/events') return handleEvents(request, env);
     if (pathname === '/api/iqeq') return handleIQEQ(request, env);
+    if (pathname === '/api/mbti') return handleMBTI(request, env);
     if (pathname === '/api/news') return handleApiNews(request);
 
     if (pathname === '/api/spam-check') return handleSpamCheck(request);
