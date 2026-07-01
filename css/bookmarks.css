@@ -38,6 +38,24 @@
   flex-direction: column;
   gap: 4px;
   margin-top: 8px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* Custom Scrollbar for Category List */
+.category-list::-webkit-scrollbar {
+  width: 4px;
+}
+.category-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.category-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+.category-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.4);
 }
 
 .category-item {
@@ -293,3 +311,47 @@
 .bookmark-modal-overlay.open .bookmark-modal {
   transform: scale(1);
 }
+
+/* List View Styling Extensions */
+.bookmarks-grid.list-view {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bookmarks-grid.list-view .bookmark-card {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  height: auto;
+  min-height: 60px;
+  padding: 10px 16px;
+}
+
+.bookmarks-grid.list-view .bookmark-card::before {
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+}
+
+.bookmarks-grid.list-view .bookmark-card:hover {
+  transform: translateX(4px);
+}
+
+.bookmarks-grid.list-view .bookmark-card-top {
+  align-items: center;
+  min-width: 0;
+  flex: 1;
+}
+
+.bookmarks-grid.list-view .bookmark-card-bottom {
+  margin-top: 0;
+  border-top: none;
+  padding-top: 0;
+  flex-shrink: 0;
+  gap: 16px;
+  display: flex;
+  align-items: center;
+}
+

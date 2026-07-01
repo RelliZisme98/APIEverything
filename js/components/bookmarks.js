@@ -23,6 +23,7 @@ let bookmarks = [];
 let selectedCategory = 'Tất cả';
 let searchQuery = '';
 let currentEditId = null;
+let viewMode = localStorage.getItem('rellia_bookmarks_view_mode') || 'grid';
 
 // Phục hồi dữ liệu từ localStorage
 function loadBookmarks() {
@@ -95,6 +96,17 @@ export function renderBookmarks(containerId = 'bookmarksContent') {
               <i class="fas fa-search"></i>
               <input type="text" id="bm-search-input" placeholder="Tìm kiếm theo tiêu đề hoặc liên kết..." value="${searchQuery}" />
             </div>
+            
+            <!-- Chuyển đổi giao diện hiển thị -->
+            <div style="display:flex; gap:6px; background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:var(--radius-sm); padding:4px;">
+              <button class="btn-secondary ${viewMode === 'grid' ? 'active' : ''}" id="bm-btn-view-grid" style="padding:6px 12px; font-size:12px; border:none; display:flex; align-items:center; gap:4px; margin:0;" title="Hiển thị dạng lưới">
+                <i class="fas fa-th-large"></i> Lưới
+              </button>
+              <button class="btn-secondary ${viewMode === 'list' ? 'active' : ''}" id="bm-btn-view-list" style="padding:6px 12px; font-size:12px; border:none; display:flex; align-items:center; gap:4px; margin:0;" title="Hiển thị dạng danh sách">
+                <i class="fas fa-list"></i> Danh sách
+              </button>
+            </div>
+            
             <button class="btn-primary" id="bm-btn-add-new" style="padding:10px 20px; font-size:13px; font-weight:700; background:linear-gradient(135deg, #8b5cf6, #3b82f6); border:none; display:flex; align-items:center; gap:6px;">
               <i class="fas fa-plus"></i> Thêm Liên Kết
             </button>
@@ -192,6 +204,26 @@ export function renderBookmarks(containerId = 'bookmarksContent') {
   // Thiết lập Import/Export
   setupImportExport();
 
+  // Lắng nghe đổi chế độ hiển thị
+  const btnGrid = document.getElementById('bm-btn-view-grid');
+  const btnList = document.getElementById('bm-btn-view-list');
+  if (btnGrid && btnList) {
+    btnGrid.onclick = () => {
+      viewMode = 'grid';
+      localStorage.setItem('rellia_bookmarks_view_mode', 'grid');
+      btnGrid.classList.add('active');
+      btnList.classList.remove('active');
+      renderGrids();
+    };
+    btnList.onclick = () => {
+      viewMode = 'list';
+      localStorage.setItem('rellia_bookmarks_view_mode', 'list');
+      btnList.classList.add('active');
+      btnGrid.classList.remove('active');
+      renderGrids();
+    };
+  }
+
   // Render danh sách thư mục & links
   renderSidebar();
   renderGrids();
@@ -238,6 +270,15 @@ function renderGrids() {
   const mostVisitedGrid = document.getElementById('bm-most-visited-grid');
 
   if (!mainGrid) return;
+
+  // Cập nhật cấu hình class viewMode
+  if (viewMode === 'list') {
+    mainGrid.classList.add('list-view');
+    if (mostVisitedGrid) mostVisitedGrid.classList.add('list-view');
+  } else {
+    mainGrid.classList.remove('list-view');
+    if (mostVisitedGrid) mostVisitedGrid.classList.remove('list-view');
+  }
 
   // 1. Lọc dữ liệu theo Danh mục & Từ khóa tìm kiếm
   let filtered = bookmarks;
