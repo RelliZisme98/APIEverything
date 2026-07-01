@@ -514,6 +514,7 @@ function displayQuestion() {
   const chosenVal = mbtiState.selectedAnswers[mbtiState.currIdx];
 
   buttons.forEach(btn => {
+    btn.disabled = false;
     btn.classList.remove('selected');
     const val = parseInt(btn.getAttribute('data-value'));
     if (val === chosenVal) {
@@ -571,7 +572,11 @@ function selectLikertValue(val) {
       isTransitioning = false;
     }, 200);
   } else {
-    displayQuestion();
+    isTransitioning = true;
+    setTimeout(() => {
+      finishMBTITest();
+      isTransitioning = false;
+    }, 200);
   }
 }
 
