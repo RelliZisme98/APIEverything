@@ -59,6 +59,7 @@
   <link rel="stylesheet" href="css/astrology.css" />
   <link rel="stylesheet" href="css/devdocs.css" />
   <link rel="stylesheet" href="css/cv-reviewer.css" />
+  <link rel="stylesheet" href="css/bookmarks.css" />
   <link rel="stylesheet" href="css/typing-test.css" />
   <link rel="stylesheet" href="css/hardware-test.css" />
   <link rel="stylesheet" href="css/mobile.css" />
@@ -182,6 +183,10 @@
         <button class="sidebar-nav-item" data-section="cv-reviewer" onclick="switchSection('cv-reviewer')">
           <i class="nav-icon fas fa-file-invoice"></i>
           <span class="nav-label">Review CV bằng AI</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="bookmarks" onclick="switchSection('bookmarks')">
+          <i class="nav-icon fas fa-bookmark"></i>
+          <span class="nav-label">Quản Lý Bookmark</span>
         </button>
         <button class="sidebar-nav-item" data-section="lottery" onclick="switchSection('lottery')">
           <i class="nav-icon fas fa-ticket-alt"></i>
@@ -429,6 +434,14 @@
       <section class="content-section" id="section-cv-reviewer">
         <div class="page-title">AI CV Reviewer: Đánh Giá & Tối Ưu Hóa CV</div>
         <div id="cvReviewerContent">
+          <div class="skeleton skel-big"></div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: BOOKMARKS ════════ -->
+      <section class="content-section" id="section-bookmarks">
+        <div class="page-title">Trình Quản Lý Bookmark & Liên Kết</div>
+        <div id="bookmarksContent">
           <div class="skeleton skel-big"></div>
         </div>
       </section>
