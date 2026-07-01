@@ -1,0 +1,371 @@
+/* ═══════════════════════════════════════════
+   MBTI PERSONALITY TEST STYLING
+   ═══════════════════════════════════════════ */
+
+.mbti-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mbti-screen {
+  display: none;
+  flex-direction: column;
+  gap: 24px;
+  animation: mbtiFadeIn 0.4s ease forwards;
+}
+
+.mbti-screen.active {
+  display: flex;
+}
+
+@keyframes mbtiFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Intro and Card Styles */
+.mbti-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  position: relative;
+  overflow: hidden;
+}
+
+.mbti-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(139, 92, 246, 0.04), transparent 60%);
+  pointer-events: none;
+}
+
+.mbti-disclaimer {
+  background: rgba(245, 158, 11, 0.05);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  margin-top: 10px;
+}
+
+.mbti-disclaimer-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-yellow);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mbti-disclaimer-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Test Grid and Progress */
+.mbti-progress-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 12px 0;
+}
+
+.mbti-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+  border-radius: 3px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mbti-layout {
+  display: grid;
+  grid-template-columns: 3fr 1.2fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .mbti-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mbti-q-grid-panel {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  height: fit-content;
+}
+
+.mbti-q-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.mbti-grid-item {
+  aspect-ratio: 1;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mbti-grid-item:hover {
+  border-color: #8b5cf6;
+  color: var(--text-primary);
+  background: rgba(139, 92, 246, 0.05);
+}
+
+.mbti-grid-item.active {
+  border-color: #8b5cf6;
+  color: #a78bfa;
+  background: rgba(139, 92, 246, 0.1);
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.25);
+}
+
+.mbti-grid-item.answered {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #60a5fa;
+}
+
+/* Likert Options */
+.mbti-likert-scale {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 32px 0 16px;
+  flex-wrap: wrap;
+}
+
+.mbti-likert-btn {
+  flex: 1;
+  min-width: 100px;
+  padding: 14px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+/* Color Coding Likert Choices (Agree vs Disagree) */
+.mbti-likert-btn[data-value="4"] { /* Rất đồng ý */
+  border-color: rgba(16, 185, 129, 0.2);
+}
+.mbti-likert-btn[data-value="4"]:hover {
+  background: rgba(16, 185, 129, 0.06);
+  border-color: rgb(16, 185, 129);
+  color: rgb(52, 211, 153);
+}
+.mbti-likert-btn[data-value="4"].selected {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgb(16, 185, 129);
+  color: rgb(52, 211, 153);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.15);
+}
+
+.mbti-likert-btn[data-value="3"] { /* Đồng ý */
+  border-color: rgba(52, 211, 153, 0.2);
+}
+.mbti-likert-btn[data-value="3"]:hover {
+  background: rgba(52, 211, 153, 0.04);
+  border-color: rgb(52, 211, 153);
+  color: rgb(110, 231, 183);
+}
+.mbti-likert-btn[data-value="3"].selected {
+  background: rgba(52, 211, 153, 0.1);
+  border-color: rgb(52, 211, 153);
+  color: rgb(110, 231, 183);
+}
+
+.mbti-likert-btn[data-value="2"] { /* Neutral */
+  border-color: rgba(255, 255, 255, 0.05);
+}
+.mbti-likert-btn[data-value="2"]:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: var(--text-primary);
+}
+.mbti-likert-btn[data-value="2"].selected {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: var(--text-primary);
+}
+
+.mbti-likert-btn[data-value="1"] { /* Không đồng ý */
+  border-color: rgba(248, 113, 113, 0.2);
+}
+.mbti-likert-btn[data-value="1"]:hover {
+  background: rgba(248, 113, 113, 0.04);
+  border-color: rgb(248, 113, 113);
+  color: rgb(252, 165, 165);
+}
+.mbti-likert-btn[data-value="1"].selected {
+  background: rgba(248, 113, 113, 0.1);
+  border-color: rgb(248, 113, 113);
+  color: rgb(252, 165, 165);
+}
+
+.mbti-likert-btn[data-value="0"] { /* Rất không đồng ý */
+  border-color: rgba(239, 68, 68, 0.2);
+}
+.mbti-likert-btn[data-value="0"]:hover {
+  background: rgba(239, 68, 68, 0.06);
+  border-color: rgb(239, 68, 68);
+  color: rgb(248, 113, 113);
+}
+.mbti-likert-btn[data-value="0"].selected {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgb(239, 68, 68);
+  color: rgb(248, 113, 113);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.15);
+}
+
+@media (max-width: 576px) {
+  .mbti-likert-scale {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+}
+
+/* Visual Dimension Breakdown Card */
+.mbti-dimension-card {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mbti-dim-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.mbti-dim-bar-container {
+  height: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+}
+
+.mbti-dim-bar-left {
+  height: 100%;
+  background: var(--left-color);
+  transition: width 1s ease;
+}
+
+.mbti-dim-bar-right {
+  height: 100%;
+  background: var(--right-color);
+  transition: width 1s ease;
+}
+
+.mbti-dim-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.mbti-dim-labels span strong {
+  color: var(--text-primary);
+}
+
+/* MBTI Profiles Results Style */
+.mbti-result-badge {
+  font-size: 42px;
+  font-weight: 850;
+  font-family: 'JetBrains Mono', monospace;
+  background: linear-gradient(135deg, #a78bfa, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 10px;
+  letter-spacing: 0.05em;
+}
+
+.mbti-detailed-report {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.mbti-report-section {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-sm);
+  padding: 20px;
+}
+
+.mbti-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-left: 3px solid #8b5cf6;
+  padding-left: 8px;
+}
+
+.mbti-section-content {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.mbti-famous-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.mbti-famous-item {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.mbti-famous-name {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.mbti-famous-role {
+  font-size: 11px;
+  color: var(--text-muted);
+}

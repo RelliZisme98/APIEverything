@@ -44,6 +44,7 @@ import { renderEmulatorSuite } from './components/emulator.js?v=1.1.0';
 import { renderTypingTest } from './components/typing-test.js';
 import { renderConverter, renderBMICalculator } from './components/converter.js';
 import { renderIQ, renderEQ } from './components/iq-eq.js';
+import { renderMBTI } from './components/mbti.js';
 import { renderHardwareTest } from './components/hardware-test.js';
 
 // ── Render Components ──
@@ -478,6 +479,7 @@ const sectionToPathMap = {
   'bmi': '/bmi',
   'iq': '/iq',
   'eq': '/eq',
+  'mbti': '/mbti',
   'lottery': '/lottery',
   'world-clock': '/clock',
   'football': '/football',
@@ -505,6 +507,7 @@ const pathToSectionMap = {
   '/bmi': 'bmi',
   '/iq': 'iq',
   '/eq': 'eq',
+  '/mbti': 'mbti',
   '/lottery': 'lottery',
   '/clock': 'world-clock',
   '/world-clock': 'world-clock',
@@ -575,6 +578,7 @@ window.switchSection = (id, updateHistory = true) => {
     if (id === 'bmi')          renderBMICalculator();
     if (id === 'iq')           renderIQ();
     if (id === 'eq')           renderEQ();
+    if (id === 'mbti')         renderMBTI();
     if (id === 'hardware-test') renderHardwareTest();
   }
 

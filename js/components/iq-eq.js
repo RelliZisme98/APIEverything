@@ -423,15 +423,23 @@ function loadIQQuestion() {
     }
     btn.innerHTML = `<span class="iqeq-option-key">${String.fromCharCode(65 + idx)}</span> <span>${optText}</span>`;
     btn.onclick = () => {
+      // Disable all buttons to prevent double click
+      document.querySelectorAll('#iq-options-wrap .iqeq-option-btn').forEach(b => {
+        b.disabled = true;
+        b.classList.remove('selected');
+      });
+      btn.classList.add('selected');
+
       // Lưu lại câu trả lời
       activeState.selectedAnswers[activeState.currIdx] = idx;
 
-      // Cập nhật giao diện lựa chọn
-      document.querySelectorAll('#iq-options-wrap .iqeq-option-btn').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-
       // Cập nhật trạng thái lưới bản đồ câu hỏi
       updateQuestionGridStatus();
+
+      // Tự động chuyển câu tiếp theo sau 200ms
+      setTimeout(() => {
+        navigateIQ(1);
+      }, 200);
     };
     wrap.appendChild(btn);
   });
