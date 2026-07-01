@@ -210,6 +210,8 @@ let mbtiState = {
   userAge: ''
 };
 
+let isTransitioning = false;
+
 // ── UTILS RENDER LOADING/ERROR ──────────────────────────────────────
 function showMBTILoading(container, text) {
   container.innerHTML = `
@@ -243,6 +245,7 @@ function showMBTIError(container, text, retryFn) {
 
 // ── RENDER MBTI INTERFACE ───────────────────────────────────────────
 export function renderMBTI(containerId = 'mbtiContent') {
+  isTransitioning = false;
   const container = document.getElementById(containerId);
   if (!container) return;
 
@@ -534,20 +537,47 @@ function displayQuestion() {
 
 // ── XỬ LÝ CLICK LIKERT ──────────────────────────────────────────────
 function selectLikertValue(val) {
+  if (isTransitioning) return;
+
   mbtiState.selectedAnswers[mbtiState.currIdx] = val;
-  displayQuestion();
+
+  // Visual feedback: disable all buttons and select current
+  const container = document.getElementById('mbti-likert-container');
+  if (container) {
+    const buttons = container.querySelectorAll('.mbti-likert-btn');
+    buttons.forEach(btn => {
+      btn.disabled = true;
+      const btnVal = parseInt(btn.getAttribute('data-value'));
+      if (btnVal === val) {
+        btn.classList.add('selected');
+      } else {
+        btn.classList.remove('selected');
+      }
+    });
+  }
+
+  // Highlight answered question in grid shortcut
+  const gridItem = document.getElementById(`mbti-grid-item-${mbtiState.currIdx}`);
+  if (gridItem) {
+    gridItem.classList.add('answered');
+  }
 
   // Auto next if not on the last question
   if (mbtiState.currIdx < mbtiState.questions.length - 1) {
+    isTransitioning = true;
     setTimeout(() => {
       mbtiState.currIdx++;
       displayQuestion();
-    }, 180);
+      isTransitioning = false;
+    }, 200);
+  } else {
+    displayQuestion();
   }
 }
 
 // ── ĐIỀU HƯỚNG ────────────────────────────────────────────────────────
 function prevQuestion() {
+  if (isTransitioning) return;
   if (mbtiState.currIdx > 0) {
     mbtiState.currIdx--;
     displayQuestion();
@@ -555,6 +585,7 @@ function prevQuestion() {
 }
 
 function nextQuestion() {
+  if (isTransitioning) return;
   if (mbtiState.currIdx < mbtiState.questions.length - 1) {
     mbtiState.currIdx++;
     displayQuestion();
@@ -565,6 +596,7 @@ function nextQuestion() {
 }
 
 function jumpToQuestion(idx) {
+  if (isTransitioning) return;
   mbtiState.currIdx = idx;
   displayQuestion();
 }
