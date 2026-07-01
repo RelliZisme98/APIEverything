@@ -48,6 +48,7 @@ import { renderMBTI } from './components/mbti.js';
 import { renderHardwareTest } from './components/hardware-test.js';
 import { renderAstrology } from './components/astrology.js';
 import { renderDevDocs } from './components/devdocs.js';
+import { renderCVReviewer } from './components/cv-reviewer.js';
 
 // ── Render Components ──
 import { initAIAssistant }     from './components/ai-assistant.js?v=1.0.4';
@@ -490,7 +491,8 @@ const sectionToPathMap = {
   'focus': '/focus',
   'hardware-test': '/hardware-test',
   'astrology': '/astrology',
-  'devdocs': '/devdocs'
+  'devdocs': '/devdocs',
+  'cv-reviewer': '/cv-reviewer'
 };
 
 const pathToSectionMap = {
@@ -521,7 +523,8 @@ const pathToSectionMap = {
   '/focus': 'focus',
   '/hardware-test': 'hardware-test',
   '/astrology': 'astrology',
-  '/devdocs': 'devdocs'
+  '/devdocs': 'devdocs',
+  '/cv-reviewer': 'cv-reviewer'
 };
 
 function getPathnameClean() {
@@ -588,6 +591,7 @@ window.switchSection = (id, updateHistory = true) => {
     if (id === 'hardware-test') renderHardwareTest();
     if (id === 'astrology')     renderAstrology();
     if (id === 'devdocs')       renderDevDocs();
+    if (id === 'cv-reviewer')   renderCVReviewer();
   }
 
   // Push state to browser history if navigating via client click

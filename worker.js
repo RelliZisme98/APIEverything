@@ -3190,6 +3190,83 @@ async function handleCrypto(request, env) {
 
   return cors(JSON.stringify({ error: 'Failed to fetch fresh or cached crypto data' }), 502);
 }
+
+async function handleCVReviewer(request, env) {
+  if (request.method === 'OPTIONS') return preflight();
+  if (request.method !== 'POST') {
+    return cors(JSON.stringify({ error: 'POST method required' }), 405);
+  }
+
+  if (!env.AI) {
+    return cors(JSON.stringify({ error: 'Workers AI is not configured. Please add the AI binding in wrangler.toml.' }), 503);
+  }
+
+  try {
+    const { cvText, jobPosition, jobDescription, tone } = await request.json();
+
+    if (!cvText) {
+      return cors(JSON.stringify({ error: 'Nội dung CV là bắt buộc để phân tích.' }), 400);
+    }
+
+    const persona = tone === 'cto' 
+      ? 'Giám đốc Công nghệ (CTO)' 
+      : (tone === 'recruiter' ? 'Trưởng phòng Nhân sự (HR Manager)' : 'Chuyên gia Đánh giá CV cấp cao');
+
+    const systemPrompt = `Bạn là một ${persona} xuất sắc, chuyên đánh giá và tối ưu hóa CV. 
+Nhiệm vụ của bạn là đánh giá, chấm điểm và góp ý chi tiết cho CV của ứng viên dựa trên Vị trí ứng tuyển mục tiêu: "${jobPosition || 'Chưa rõ'}" và Bản mô tả công việc (JD): "${jobDescription || 'Chưa cung cấp'}".
+
+BẮT BUỘC chỉ trả về một chuỗi JSON duy nhất hợp lệ, không bọc trong ký tự markdown \`\`\` hay viết thêm bất kỳ lời dẫn nào. JSON phải theo cấu trúc chính xác sau:
+{
+  "score": 75, // Điểm số đánh giá từ 0 đến 100
+  "grade": "Xuất sắc" | "Tốt" | "Khá" | "Trung bình" | "Cần sửa đổi nhiều",
+  "overview": "Đánh giá tổng quan ngắn gọn 3-4 câu về CV...",
+  "strengths": [
+    "Điểm mạnh 1 (ghi rõ phần nào và lý do tốt)...",
+    "Điểm mạnh 2..."
+  ],
+  "weaknesses": [
+    "Điểm yếu 1 (ghi rõ phần nào cần khắc phục)...",
+    "Điểm yếu 2..."
+  ],
+  "improvements": [
+    "Đề xuất cải thiện cụ thể 1...",
+    "Đề xuất cải thiện cụ thể 2..."
+  ],
+  "ats_feedback": "Đánh giá chi tiết về độ tương thích ATS (Ví dụ: Định dạng, mật độ từ khóa chuyên ngành, thông tin liên lạc, liên kết portfolio...)",
+  "rewrites": [
+    {
+      "before": "Cách viết cũ kém thu hút trong CV...",
+      "after": "Cách viết mới đề xuất (Chuyên nghiệp hơn, dùng động từ hành động mạnh và chỉ số lượng hóa kết quả nếu có)...",
+      "reason": "Giải thích tại sao cách viết này lại giúp tăng cơ hội đỗ..."
+    }
+  ]
+}
+
+Hãy viết toàn bộ đánh giá bằng Tiếng Việt chuẩn. Đảm bảo các góp ý mang tính thực tế, sắc sảo và mang lại giá trị thực tế cho ứng viên.`;
+
+    const userPrompt = `Nội dung CV của ứng viên:
+${cvText}`;
+
+    const result = await env.AI.run('@cf/meta/llama-3.1-8b-instruct-fast', {
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
+      temperature: 0.3,
+      max_tokens: 2048
+    });
+
+    let rawText = result.response || '';
+    rawText = rawText.replace(/^(assistant\s*)+/ig, '').trim();
+
+    return new Response(JSON.stringify({ response: rawText }), {
+      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS },
+    });
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
 async function handleAI(request, env) {
   if (request.method === 'OPTIONS') return preflight();
   if (request.method !== 'POST') {
@@ -3492,6 +3569,7 @@ export default {
     if (pathname === '/api/crypto') return handleCrypto(request, env);
     if (pathname === '/vietlott') return handleVietlott(request);
     if (pathname === '/api/ai')  return handleAI(request, env);
+    if (pathname === '/api/cv-reviewer') return handleCVReviewer(request, env);
     if (pathname === '/api/tts')  return handleTTS(request);
     if (pathname === '/api/shorten') return handleShorten(request, env);
 

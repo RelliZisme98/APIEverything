@@ -58,6 +58,7 @@
   <link rel="stylesheet" href="css/mbti.css" />
   <link rel="stylesheet" href="css/astrology.css" />
   <link rel="stylesheet" href="css/devdocs.css" />
+  <link rel="stylesheet" href="css/cv-reviewer.css" />
   <link rel="stylesheet" href="css/typing-test.css" />
   <link rel="stylesheet" href="css/hardware-test.css" />
   <link rel="stylesheet" href="css/mobile.css" />
@@ -177,6 +178,10 @@
         <button class="sidebar-nav-item" data-section="devdocs" onclick="switchSection('devdocs')">
           <i class="nav-icon fas fa-book-reader"></i>
           <span class="nav-label">Tài Liệu DevDocs</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="cv-reviewer" onclick="switchSection('cv-reviewer')">
+          <i class="nav-icon fas fa-file-invoice"></i>
+          <span class="nav-label">Review CV bằng AI</span>
         </button>
         <button class="sidebar-nav-item" data-section="lottery" onclick="switchSection('lottery')">
           <i class="nav-icon fas fa-ticket-alt"></i>
@@ -416,6 +421,14 @@
       <section class="content-section" id="section-devdocs">
         <div class="page-title">DevDocs: Kho Tài Liệu Offline Cho Lập Trình Viên</div>
         <div id="devdocsContent">
+          <div class="skeleton skel-big"></div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: CV REVIEWER ════════ -->
+      <section class="content-section" id="section-cv-reviewer">
+        <div class="page-title">AI CV Reviewer: Đánh Giá & Tối Ưu Hóa CV</div>
+        <div id="cvReviewerContent">
           <div class="skeleton skel-big"></div>
         </div>
       </section>
