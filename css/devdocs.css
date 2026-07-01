@@ -1,0 +1,227 @@
+/* ═══════════════════════════════════════════
+   DEVDOCS COMPONENT STYLING
+   ═══════════════════════════════════════════ */
+
+.devdocs-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 20px;
+  min-height: 600px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .devdocs-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Sidebar and Tree View */
+.devdocs-sidebar {
+  background: rgba(20, 18, 45, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  max-height: 700px;
+  overflow-y: auto;
+}
+
+.devdocs-search-input {
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.devdocs-search-input:focus {
+  border-color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.05);
+}
+
+.devdocs-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Folder and File Nodes */
+.devdocs-tree-node {
+  display: flex;
+  flex-direction: column;
+}
+
+.devdocs-node-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.devdocs-node-header:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+}
+
+.devdocs-node-header.active {
+  background: rgba(139, 92, 246, 0.15);
+  color: #c084fc;
+  border-left: 2px solid #8b5cf6;
+}
+
+.devdocs-node-chevron {
+  font-size: 10px;
+  width: 12px;
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+}
+
+.devdocs-node-chevron.expanded {
+  transform: rotate(90deg);
+}
+
+.devdocs-node-icon {
+  font-size: 14px;
+  color: #a78bfa;
+}
+
+.devdocs-node-children {
+  display: none;
+  flex-direction: column;
+  padding-left: 24px;
+  margin-top: 2px;
+  gap: 2px;
+  border-left: 1px dashed rgba(255, 255, 255, 0.06);
+  margin-left: 16px;
+}
+
+.devdocs-node-children.open {
+  display: flex;
+}
+
+/* Document View Area */
+.devdocs-content-area {
+  background: rgba(20, 18, 45, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius);
+  padding: 28px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  min-height: 600px;
+  animation: devdocsFadeIn 0.35s ease;
+}
+
+.devdocs-content-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+.devdocs-doc-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #ffd700;
+  margin-bottom: 6px;
+}
+
+.devdocs-doc-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Tabs inside Document Reader */
+.devdocs-doc-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 8px;
+}
+
+.devdocs-doc-tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.devdocs-doc-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+}
+
+.devdocs-doc-tab-btn.active {
+  background: rgba(139, 92, 246, 0.12);
+  color: #c084fc;
+}
+
+/* Code block styles */
+.devdocs-code-block {
+  background: #0d0c1d;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: #e2e8f0;
+  margin: 12px 0;
+  position: relative;
+}
+
+.devdocs-code-block::before {
+  content: attr(data-lang);
+  position: absolute;
+  top: 6px;
+  right: 12px;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.devdocs-list {
+  padding-left: 20px;
+  margin: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.devdocs-list li {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.devdocs-list li strong {
+  color: var(--text-primary);
+}
+
+@keyframes devdocsFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

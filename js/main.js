@@ -47,6 +47,7 @@ import { renderIQ, renderEQ } from './components/iq-eq.js';
 import { renderMBTI } from './components/mbti.js';
 import { renderHardwareTest } from './components/hardware-test.js';
 import { renderAstrology } from './components/astrology.js';
+import { renderDevDocs } from './components/devdocs.js';
 
 // ── Render Components ──
 import { initAIAssistant }     from './components/ai-assistant.js?v=1.0.4';
@@ -488,7 +489,8 @@ const sectionToPathMap = {
   'media': '/media',
   'focus': '/focus',
   'hardware-test': '/hardware-test',
-  'astrology': '/astrology'
+  'astrology': '/astrology',
+  'devdocs': '/devdocs'
 };
 
 const pathToSectionMap = {
@@ -518,7 +520,8 @@ const pathToSectionMap = {
   '/media': 'media',
   '/focus': 'focus',
   '/hardware-test': 'hardware-test',
-  '/astrology': 'astrology'
+  '/astrology': 'astrology',
+  '/devdocs': 'devdocs'
 };
 
 function getPathnameClean() {
@@ -584,6 +587,7 @@ window.switchSection = (id, updateHistory = true) => {
     if (id === 'mbti')         renderMBTI();
     if (id === 'hardware-test') renderHardwareTest();
     if (id === 'astrology')     renderAstrology();
+    if (id === 'devdocs')       renderDevDocs();
   }
 
   // Push state to browser history if navigating via client click
