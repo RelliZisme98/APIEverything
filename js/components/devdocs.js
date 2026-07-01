@@ -2,27 +2,13 @@
  * components/devdocs.js
  * DevDocs Live & Offline Ebook Knowledge Hub
  * - Hỗ trợ cả sách offline tự biên soạn và tải tài liệu trực tiếp từ CDN chính thức của DevDocs.io.
- * - Sử dụng browser Cache Storage API để lưu trữ ngoại tuyến bộ tài liệu đầy đủ (index.json & db.json).
- * - Hỗ trợ thanh tiến trình, nút điều hướng trang, tìm kiếm toàn văn và ghi chú cá nhân lưu LocalStorage.
+ * - Tự động nạp danh sách 100+ bộ tài liệu lập trình thế giới từ DevDocs.io (docs.json).
+ * - Tải chỉ mục nhanh (index.json) và tự động đồng bộ nền cơ sở dữ liệu nội dung (db.json).
+ * - Sử dụng browser Cache Storage API để lưu ngoại tuyến và truy cập không cần internet.
+ * - Tối ưu hóa UI/UX: Hiệu ứng loading mượt mà, phân trang, thanh tiến trình đọc, ghi chú học tập.
  */
 
-// ── DANH SÁCH TÀI LIỆU DEVDOCS CHÍNH THỨC HỖ TRỢ ──────────────────────
-const LIVE_DOCS_REGISTRY = {
-  'git': { title: 'Git Version Control', size: '1.2 MB' },
-  'javascript': { title: 'JavaScript (MDN)', size: '14.3 MB' },
-  'css': { title: 'CSS Reference', size: '4.8 MB' },
-  'html': { title: 'HTML Reference', size: '2.1 MB' },
-  'python~3.10': { title: 'Python 3.10', size: '8.4 MB' },
-  'go': { title: 'Go Programming', size: '2.5 MB' },
-  'rust': { title: 'Rust Reference', size: '11.8 MB' },
-  'cpp': { title: 'C++ Language', size: '4.2 MB' },
-  'c': { title: 'C Standard Library', size: '1.8 MB' },
-  'nginx': { title: 'Nginx Web Server', size: '1.1 MB' },
-  'postgresql~14': { title: 'PostgreSQL 14', size: '6.7 MB' },
-  'docker': { title: 'Docker Documentation', size: '3.9 MB' }
-};
-
-// ── SÁCH OFFLINE MẪU TỰ BIÊN SOẠN (FALLBACK LOCAL EBOOKS) ─────────────
+// ── SÁCH OFFLINE MẪU TỰ BIÊN SOẠN (LOCAL EBOOKS) ─────────────
 const LOCAL_EBOOKS = {
   'local-gitflow': {
     title: '[Nội bộ] Quy trình Git Flow & Branching',
@@ -59,24 +45,59 @@ const LOCAL_EBOOKS = {
   }
 };
 
-// Trạng thái hoạt động
-let activeSource = 'local-gitflow'; // Có thể là khóa của LOCAL_EBOOKS hoặc LIVE_DOCS_REGISTRY
+// Đăng ký danh sách tài liệu mặc định (sử dụng làm fallback trước khi tải docs.json)
+const FALLBACK_REGISTRY = [
+  { name: 'Git', slug: 'git', db_size: 1228800 },
+  { name: 'JavaScript', slug: 'javascript', db_size: 14994636 },
+  { name: 'CSS', slug: 'css', db_size: 5033164 },
+  { name: 'HTML', slug: 'html', db_size: 2202009 },
+  { name: 'Python', slug: 'python~3.10', db_size: 8808038 },
+  { name: 'Go', slug: 'go', db_size: 2621440 },
+  { name: 'Rust', slug: 'rust', db_size: 12373196 },
+  { name: 'C++', slug: 'cpp', db_size: 4404019 },
+  { name: 'C', slug: 'c', db_size: 1887436 },
+  { name: 'Nginx', slug: 'nginx', db_size: 1153433 },
+  { name: 'PostgreSQL 14', slug: 'postgresql~14', db_size: 7025459 },
+  { name: 'Docker', slug: 'docker', db_size: 4089446 }
+];
+
+// Trạng thái hoạt động toàn cục của Module
+let devdocsRegistry = []; // Chứa toàn bộ danh sách docs.json tải động từ CDN
+let activeSource = 'local-gitflow';
 let activeEntryIndex = 0;
 let searchFilterQuery = '';
 let showingSearchResults = false;
 
-// Bộ nhớ đệm dữ liệu tải từ CDN
-let loadedIndexData = null; // Mảng các entry từ index.json
-let loadedDbData = null;    // Object nội dung từ db.json
+// Trạng thái dữ liệu tải từ CDN cho tài liệu đang chọn
+let loadedIndexData = null;
+let loadedDbData = null;
 let isDownloading = false;
 let downloadProgress = '';
+let currentAbortController = null;
+
+// Khởi động danh mục tài liệu từ CDN
+async function initRegistry() {
+  if (devdocsRegistry.length > 0) return;
+  try {
+    const res = await fetch('https://documents.devdocs.io/docs.json');
+    if (res.ok) {
+      const data = await res.json();
+      devdocsRegistry = data.filter(d => d.slug && d.name);
+      devdocsRegistry.sort((a, b) => a.name.localeCompare(b.name));
+    } else {
+      devdocsRegistry = FALLBACK_REGISTRY;
+    }
+  } catch (e) {
+    console.warn('[DevDocs] Lỗi nạp danh mục CDN, sử dụng dữ liệu mặc định.');
+    devdocsRegistry = FALLBACK_REGISTRY;
+  }
+}
 
 export function renderDevDocs(containerId = 'devdocsContent') {
   const container = document.getElementById(containerId);
   if (!container) return;
 
   container.innerHTML = `
-    <!-- Stylesheets nội bộ cho module DevDocs -->
     <style>
       .ebook-container {
         display: grid;
@@ -127,9 +148,27 @@ export function renderDevDocs(containerId = 'devdocsContent') {
         flex-direction: column;
         gap: 6px;
         margin-top: 8px;
-        max-height: 350px;
+        max-height: 380px;
         overflow-y: auto;
+        padding-right: 4px;
       }
+      
+      /* Webkit Scrollbar Styling cho mục lục */
+      .ebook-toc-list::-webkit-scrollbar {
+        width: 5px;
+      }
+      .ebook-toc-list::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.01);
+        border-radius: 3px;
+      }
+      .ebook-toc-list::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 3px;
+      }
+      .ebook-toc-list::-webkit-scrollbar-thumb:hover {
+        background: rgba(139, 92, 246, 0.3);
+      }
+
       .ebook-toc-item {
         padding: 10px 14px;
         border-radius: var(--radius-sm);
@@ -188,8 +227,8 @@ export function renderDevDocs(containerId = 'devdocsContent') {
         color: var(--text-secondary);
         margin: 20px 0;
       }
-      /* Căn chỉnh lại HTML thô từ DevDocs CDN */
-      .ebook-body h1, .ebook-body h2, .ebook-body h3 {
+      /* Định dạng lại HTML kết xuất từ CDN DevDocs */
+      .ebook-body h1, .ebook-body h2, .ebook-body h3, .ebook-body h4 {
         color: #ffd700;
         margin: 24px 0 12px;
         font-weight: 700;
@@ -299,20 +338,9 @@ export function renderDevDocs(containerId = 'devdocsContent') {
         <div>
           <label style="display:block; font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:6px; letter-spacing:0.05em;">Chọn Tài Liệu / Sách</label>
           <select class="ebook-book-selector" id="ebook-select-book-dropdown">
-            <optgroup label="Tài liệu mẫu nội bộ">
-              ${Object.keys(LOCAL_EBOOKS).map(key => `
-                <option value="${key}" ${key === activeSource ? 'selected' : ''}>
-                  📓 ${LOCAL_EBOOKS[key].title}
-                </option>
-              `).join('')}
-            </optgroup>
-            <optgroup label="Thư viện DevDocs.io (Tải Live/Offline)">
-              ${Object.keys(LIVE_DOCS_REGISTRY).map(key => `
-                <option value="${key}" ${key === activeSource ? 'selected' : ''}>
-                  🌐 ${LIVE_DOCS_REGISTRY[key].title} (${LIVE_DOCS_REGISTRY[key].size})
-                </option>
-              `).join('')}
-            </optgroup>
+            <option value="local-gitflow">📓 [Nội bộ] Quy trình Git Flow & Branching</option>
+            <option value="local-odoo">📓 [Nội bộ] Phát Triển Odoo ERP</option>
+            <option disabled>─ Tải danh sách DevDocs.io... ─</option>
           </select>
         </div>
 
@@ -372,59 +400,154 @@ export function renderDevDocs(containerId = 'devdocsContent') {
     }, 500);
   };
 
-  // Tải nguồn hiện tại
-  checkAndLoadSource();
+  // Nạp danh mục đầy đủ từ DevDocs CDN và cập nhật dropdown
+  initRegistry().then(() => {
+    populateBookSelector();
+    checkAndLoadSource();
+  });
+}
+
+// ── CẬP NHẬT DANH SÁCH DROPDOWN TÀI LIỆU DYNAMIC ──────────────────────
+function populateBookSelector() {
+  const dropdown = document.getElementById('ebook-select-book-dropdown');
+  if (!dropdown) return;
+
+  const popularSlugs = ['git', 'javascript', 'css', 'html', 'python~3.10', 'go', 'rust', 'cpp', 'c', 'postgresql~14', 'nginx', 'docker'];
+  const popularDocs = devdocsRegistry.filter(d => popularSlugs.includes(d.slug));
+  const otherDocs = devdocsRegistry.filter(d => !popularSlugs.includes(d.slug));
+
+  let html = '';
+
+  // Nhóm 1: Sách local
+  html += `<optgroup label="Tài liệu mẫu nội bộ">`;
+  Object.keys(LOCAL_EBOOKS).forEach(key => {
+    html += `<option value="${key}" ${key === activeSource ? 'selected' : ''}>${LOCAL_EBOOKS[key].title}</option>`;
+  });
+  html += `</optgroup>`;
+
+  // Nhóm 2: Các tài liệu phổ biến
+  if (popularDocs.length > 0) {
+    html += `<optgroup label="Tài liệu phổ biến (DevDocs.io)">`;
+    popularDocs.forEach(d => {
+      const sizeMB = d.db_size ? ` (${(d.db_size / 1024 / 1024).toFixed(1)} MB)` : '';
+      html += `<option value="${d.slug}" ${d.slug === activeSource ? 'selected' : ''}>${d.name}${sizeMB}</option>`;
+    });
+    html += `</optgroup>`;
+  }
+
+  // Nhóm 3: Các tài liệu khác
+  if (otherDocs.length > 0) {
+    html += `<optgroup label="Tất cả tài liệu khác (Hơn 100+ thư viện)">`;
+    otherDocs.forEach(d => {
+      const sizeMB = d.db_size ? ` (${(d.db_size / 1024 / 1024).toFixed(1)} MB)` : '';
+      html += `<option value="${d.slug}" ${d.slug === activeSource ? 'selected' : ''}>${d.name}${sizeMB}</option>`;
+    });
+    html += `</optgroup>`;
+  }
+
+  dropdown.innerHTML = html;
 }
 
 // ── KIỂM TRA VÀ TẢI TÀI LIỆU (CACHE HOẶC ONLINE) ─────────────────────
 async function checkAndLoadSource() {
   const banner = document.getElementById('ebook-offline-status-banner');
-  if (!banner) return;
+  const sidebarList = document.getElementById('ebook-sidebar-dynamic-list');
+
+  if (currentAbortController) {
+    currentAbortController.abort();
+  }
+  currentAbortController = new AbortController();
+  const signal = currentAbortController.signal;
+
+  // Hiển thị trạng thái loading mượt mà
+  if (sidebarList) {
+    sidebarList.innerHTML = `
+      <div style="display:flex; justify-content:center; align-items:center; padding:40px 0; flex-direction:column; gap:12px;">
+        <i class="fas fa-circle-notch fa-spin" style="font-size:24px; color:#8b5cf6;"></i>
+        <span style="font-size:12.5px; color:var(--text-muted);">Đang nạp chỉ mục...</span>
+      </div>
+    `;
+  }
 
   // Nếu là tài liệu mẫu local
   if (LOCAL_EBOOKS[activeSource]) {
-    banner.innerHTML = `<span style="font-size:11px; color:#34d399; font-weight:700;"><i class="fas fa-check-circle"></i> Sẵn sàng ngoại tuyến (Tích hợp sẵn)</span>`;
+    if (banner) {
+      banner.innerHTML = `<span style="font-size:11px; color:#34d399; font-weight:700;"><i class="fas fa-check-circle"></i> Sẵn sàng ngoại tuyến (Tích hợp sẵn)</span>`;
+    }
     loadedIndexData = LOCAL_EBOOKS[activeSource].chapters;
+    loadedDbData = {};
     renderSidebarAndReader();
     return;
   }
 
-  // Nếu là tài liệu từ DevDocs CDN
   const slug = activeSource;
   const isCached = await checkCacheStatus(slug);
 
   if (isCached) {
-    banner.innerHTML = `
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-        <span style="font-size:11px; color:#34d399; font-weight:700;"><i class="fas fa-check-circle"></i> Đã tải ngoại tuyến</span>
-        <button class="download-btn" style="background:#ef4444; padding:2px 8px; font-size:10px;" id="ebook-clear-cache-btn">Xóa</button>
-      </div>
-    `;
-    document.getElementById('ebook-clear-cache-btn').onclick = async () => {
-      await deleteCache(slug);
-      checkAndLoadSource();
-    };
+    if (banner) {
+      banner.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:11px; color:#34d399; font-weight:700;"><i class="fas fa-check-circle"></i> Đã tải ngoại tuyến</span>
+          <button class="download-btn" style="background:#ef4444; padding:2px 8px; font-size:10px;" id="ebook-clear-cache-btn">Xóa</button>
+        </div>
+      `;
+      document.getElementById('ebook-clear-cache-btn').onclick = async () => {
+        await deleteCache(slug);
+        checkAndLoadSource();
+      };
+    }
 
-    // Load data from Cache API
+    // Nạp dữ liệu nhanh từ Cache Storage
     await loadFromCache(slug);
+    renderSidebarAndReader();
   } else {
     // Chưa tải offline
-    banner.innerHTML = `
-      <div class="download-banner">
-        <div style="font-weight:700; color:#ffd700;">Tài liệu chưa được lưu ngoại tuyến.</div>
-        <div style="font-size:11px; color:var(--text-muted);">Bạn có thể đọc trực tiếp online hoặc tải xuống toàn bộ (${LIVE_DOCS_REGISTRY[slug].size}) để đọc khi không có mạng.</div>
-        <button class="download-btn" id="ebook-download-btn">${isDownloading ? downloadProgress : '⚡ Tải Ngoại Tuyến'}</button>
-      </div>
-    `;
-    const btn = document.getElementById('ebook-download-btn');
-    if (isDownloading) btn.disabled = true;
-    btn.onclick = () => downloadLiveDoc(slug);
+    const docMeta = devdocsRegistry.find(d => d.slug === slug) || { name: slug, db_size: 5000000 };
+    const sizeStr = docMeta.db_size ? `(${(docMeta.db_size / 1024 / 1024).toFixed(1)} MB)` : '';
 
-    // Thử load trực tiếp từ internet (Online mode)
-    await loadFromInternet(slug);
+    if (banner) {
+      banner.innerHTML = `
+        <div class="download-banner">
+          <div style="font-weight:700; color:#ffd700; display:flex; justify-content:space-between; align-items:center;">
+            <span>Chưa lưu ngoại tuyến</span>
+            <button class="download-btn" style="font-size:11px; padding:3px 8px;" id="ebook-download-btn">${isDownloading ? downloadProgress : 'Tải Ngoại Tuyến'}</button>
+          </div>
+          <div style="font-size:10.5px; color:var(--text-muted); margin-top:2px;">Tải về ${sizeStr} để đọc mượt mà và offline.</div>
+        </div>
+      `;
+      const btn = document.getElementById('ebook-download-btn');
+      if (isDownloading) btn.disabled = true;
+      btn.onclick = () => downloadLiveDoc(slug);
+    }
+
+    // Nạp trước index.json online để hiển thị ngay mục lục cho người dùng đọc
+    try {
+      const res = await fetch(`https://documents.devdocs.io/${slug}/index.json`, { signal });
+      if (res.ok) {
+        const indexJson = await res.json();
+        loadedIndexData = indexJson.entries;
+        renderSidebarAndReader();
+      }
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+      loadedIndexData = null;
+      renderSidebarAndReader();
+      return;
+    }
+
+    // Tự động nạp db.json nền để tối ưu hóa tốc độ chuyển trang
+    try {
+      const dbRes = await fetch(`https://documents.devdocs.io/${slug}/db.json`, { signal });
+      if (dbRes.ok) {
+        loadedDbData = await dbRes.json();
+        // Cập nhật khi tải xong
+        renderSidebarAndReader();
+      }
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+      loadedDbData = null;
+    }
   }
-
-  renderSidebarAndReader();
 }
 
 async function checkCacheStatus(slug) {
@@ -463,31 +586,17 @@ async function loadFromCache(slug) {
   }
 }
 
-async function loadFromInternet(slug) {
-  try {
-    // Lấy index trực tiếp
-    const res = await fetch(`https://documents.devdocs.io/${slug}/index.json`);
-    if (res.ok) {
-      const data = await res.json();
-      loadedIndexData = data.entries;
-    }
-  } catch (e) {
-    loadedIndexData = null;
-    console.warn('Không có kết nối mạng để đọc online');
-  }
-}
-
 async function downloadLiveDoc(slug) {
   if (isDownloading) return;
   isDownloading = true;
-  downloadProgress = 'Đang kết nối...';
+  downloadProgress = 'Đang nạp...';
   checkAndLoadSource();
 
   try {
     const cache = await caches.open('rellia-devdocs-cdn');
-    
+
     // 1. Tải index.json
-    downloadProgress = 'Tải Index (10%)...';
+    downloadProgress = 'Index (15%)...';
     checkAndLoadSource();
     const indexUrl = `https://documents.devdocs.io/${slug}/index.json`;
     const indexRes = await fetch(indexUrl);
@@ -495,14 +604,14 @@ async function downloadLiveDoc(slug) {
     await cache.put(indexUrl, indexRes.clone());
 
     // 2. Tải db.json
-    downloadProgress = 'Tải Database (50%)...';
+    downloadProgress = 'Data (55%)...';
     checkAndLoadSource();
     const dbUrl = `https://documents.devdocs.io/${slug}/db.json`;
     const dbRes = await fetch(dbUrl);
     if (!dbRes.ok) throw new Error('Không thể tải db.json');
     await cache.put(dbUrl, dbRes.clone());
 
-    downloadProgress = 'Hoàn tất!';
+    downloadProgress = 'Đã lưu!';
     checkAndLoadSource();
   } catch (e) {
     alert('Lỗi tải dữ liệu ngoại tuyến: ' + e.message);
@@ -518,22 +627,27 @@ function renderSidebarAndReader() {
   const notepad = document.getElementById('ebook-notepad-box');
   if (!sidebarList) return;
 
-  // Load Note cho Book hiện tại
+  // Đồng bộ Note
   if (notepad) {
     notepad.value = localStorage.getItem(`rellia_devdocs_note_${activeSource}`) || '';
   }
 
-  // Nếu chưa tải xong index
+  // Nếu chỉ mục index chưa nạp xong
   if (!loadedIndexData) {
-    sidebarList.innerHTML = `<div style="font-size:12.5px; color:var(--text-muted); text-align:center; padding:20px 0;"><i class="fas fa-exclamation-triangle"></i> Yêu cầu kết nối mạng hoặc nhấn Tải ngoại tuyến để xem mục lục.</div>`;
+    sidebarList.innerHTML = `
+      <div style="font-size:12.5px; color:var(--text-muted); text-align:center; padding:20px 0; line-height:1.5;">
+        <i class="fas fa-wifi" style="font-size:20px; margin-bottom:8px; display:block;"></i>
+        Yêu cầu kết nối mạng để tải chỉ mục hoặc nhấn Tải ngoại tuyến.
+      </div>
+    `;
     renderReaderPaneContent();
     return;
   }
 
-  // Lọc tìm kiếm
+  // Tìm kiếm cục bộ
   let filteredEntries = loadedIndexData;
   if (showingSearchResults && searchFilterQuery) {
-    filteredEntries = loadedIndexData.filter(entry => 
+    filteredEntries = loadedIndexData.filter(entry =>
       entry.name.toLowerCase().includes(searchFilterQuery)
     );
   }
@@ -548,14 +662,13 @@ function renderSidebarAndReader() {
 
   const ul = document.getElementById('ebook-chapters-ul');
   filteredEntries.slice(0, 150).forEach((entry, fIdx) => {
-    // Tìm index gốc tương ứng trong loadedIndexData
     const origIdx = loadedIndexData.findIndex(e => e.path === entry.path);
 
     const item = document.createElement('div');
     item.className = `ebook-toc-item ${origIdx === activeEntryIndex ? 'active' : ''}`;
     item.innerHTML = `
       <i class="far fa-file-alt"></i>
-      <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${entry.name}</span>
+      <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display:block; width:100%;">${entry.name}</span>
     `;
     item.onclick = () => {
       activeEntryIndex = origIdx;
@@ -567,7 +680,7 @@ function renderSidebarAndReader() {
   if (filteredEntries.length > 150) {
     const more = document.createElement('div');
     more.style.cssText = 'font-size:11px; color:var(--text-muted); text-align:center; padding:6px;';
-    more.textContent = `...và ${filteredEntries.length - 150} tài liệu khác (hãy gõ tìm kiếm để lọc)`;
+    more.textContent = `...và ${filteredEntries.length - 150} tài liệu khác (gõ tìm kiếm để lọc)`;
     ul.appendChild(more);
   }
 
@@ -582,8 +695,8 @@ async function renderReaderPaneContent() {
   if (!loadedIndexData) {
     readerPane.innerHTML = `
       <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; min-height:400px; gap:16px;">
-        <i class="fas fa-wifi" style="font-size:40px; color:rgba(255,255,255,0.2);"></i>
-        <div style="font-size:16px; font-weight:700; color:var(--text-muted);">Không có dữ liệu hiển thị</div>
+        <i class="fas fa-book-open" style="font-size:40px; color:rgba(255,255,255,0.15);"></i>
+        <div style="font-size:15px; font-weight:700; color:var(--text-muted);">Hãy chọn một tài liệu để bắt đầu đọc</div>
       </div>
     `;
     return;
@@ -591,11 +704,11 @@ async function renderReaderPaneContent() {
 
   const currentEntry = loadedIndexData[activeEntryIndex];
   if (!currentEntry) {
-    readerPane.innerHTML = `<div style="font-size:14px; color:var(--text-muted); text-align:center; margin-top:100px;">Không có tài liệu nào phù hợp.</div>`;
+    readerPane.innerHTML = `<div style="font-size:14px; color:var(--text-muted); text-align:center; margin-top:100px;">Không tìm thấy trang tài liệu này.</div>`;
     return;
   }
 
-  // Tính tiến trình
+  // Tiến trình đọc sách
   const progressPct = ((activeEntryIndex + 1) / loadedIndexData.length) * 100;
 
   // Lấy nội dung HTML
@@ -609,24 +722,21 @@ async function renderReaderPaneContent() {
   } else {
     // Tài liệu live từ CDN
     if (loadedDbData) {
-      htmlContent = loadedDbData[currentEntry.path] || `<h3>${currentEntry.name}</h3><p>Không tìm thấy nội dung của tài nguyên này trong cơ sở dữ liệu.</p>`;
+      htmlContent = loadedDbData[currentEntry.path] || `<h3>${currentEntry.name}</h3><p>Không tìm thấy nội dung của trang này.</p>`;
     } else {
-      // Đang đọc online không có db.json cached
+      // Đang đồng bộ hóa nền
       htmlContent = `
-        <h3>${currentEntry.name}</h3>
-        <div class="ebook-callout note">
-          <strong>💡 Chế độ trực tuyến:</strong> Đang lấy nội dung từ internet... Hãy nhấn nút "Tải Ngoại Tuyến" để lưu toàn bộ tài liệu về máy.
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:80px 0; gap:16px;">
+          <i class="fas fa-spinner fa-spin" style="font-size:32px; color:#8b5cf6;"></i>
+          <div style="font-size:14.5px; font-weight:700; color:var(--text-primary);">Đang đồng bộ hóa nội dung chương...</div>
+          <div style="font-size:11.5px; color:var(--text-muted); text-align:center; max-width:320px;">Chúng tôi đang nạp cơ sở dữ liệu lớn ở nền để tối ưu hóa trải nghiệm lật trang mượt mà của bạn.</div>
         </div>
       `;
-      // Fetch nội dung trực tiếp nếu online
-      fetchDocContentOnline(currentEntry.path).then(html => {
-        const bodyPane = document.getElementById('ebook-live-body-area');
-        if (bodyPane) bodyPane.innerHTML = html;
-      });
     }
   }
 
   const titleString = currentEntry.name || currentEntry.title;
+  const currentTitleLabel = devdocsRegistry.find(d => d.slug === activeSource)?.name || LOCAL_EBOOKS[activeSource]?.title || activeSource;
 
   readerPane.innerHTML = `
     <!-- Thanh tiến trình đọc -->
@@ -638,7 +748,7 @@ async function renderReaderPaneContent() {
     <div>
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
         <span style="font-size:12px; font-weight:700; color:#8b5cf6; text-transform:uppercase; letter-spacing:0.1em;">
-          ${LIVE_DOCS_REGISTRY[activeSource]?.title || LOCAL_EBOOKS[activeSource]?.title}
+          ${currentTitleLabel}
         </span>
         <span style="font-size:11px; color:var(--text-muted); display:flex; align-items:center; gap:4px;">
           <i class="far fa-clock"></i> Khớp nối Live API
@@ -691,18 +801,5 @@ async function renderReaderPaneContent() {
       activeEntryIndex++;
       renderSidebarAndReader();
     };
-  }
-}
-
-// Lấy nội dung HTML đơn lẻ trực tuyến nếu chưa tải db.json
-async function fetchDocContentOnline(path) {
-  try {
-    const res = await fetch(`https://documents.devdocs.io/${activeSource}/db.json`);
-    if (res.ok) {
-      const db = await res.json();
-      return db[path] || `<p>Không tìm thấy nội dung của trang: ${path}</p>`;
-    }
-  } catch (e) {
-    return `<p style="color:#ef4444;">Không thể tải nội dung do mất kết nối mạng.</p>`;
   }
 }
