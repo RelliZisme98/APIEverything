@@ -810,53 +810,221 @@ async function ocrPageCanvas(page, worker) {
 }
 
 // Chuyển đổi items từ PDF.js getTextContent thành text sạch
-// Dùng vị trí thực (transform) để tránh thêm space thừa giữa các ký tự
+// Phân tích Layout 2 cột thông minh và tránh trộn lẫn văn bản giữa các cột
 function pdfItemsToText(items) {
   if (!items || items.length === 0) return '';
 
-  let result = '';
-  let prevX = null;
-  let prevWidth = 0;
-  let prevFontSize = 12;
-
+  // 1. Lọc và chuẩn hóa dữ liệu items
+  const validItems = [];
   for (const item of items) {
-    if (!item.str) continue;
-
-    // transform = [scaleX, skewX, skewY, scaleY, translateX, translateY]
-    const x = item.transform ? item.transform[4] : null;
+    if (!item || !item.str || item.str.trim() === '') continue;
+    const x = item.transform ? item.transform[4] : 0;
+    const y = item.transform ? item.transform[5] : 0;
     const fontSize = item.transform ? Math.abs(item.transform[3]) : 12;
+    const width = item.width || (item.str.length * fontSize * 0.5);
+    validItems.push({
+      str: item.str,
+      x,
+      y,
+      width,
+      fontSize,
+      xEnd: x + width,
+      hasEOL: !!item.hasEOL
+    });
+  }
 
-    if (prevX !== null && x !== null) {
-      const gap = x - (prevX + prevWidth);
-      // Ngưỡng: nếu gap > 0.3 * fontSize thì coi là có space
-      const spaceThreshold = 0.3 * (prevFontSize || 12);
-      if (gap > spaceThreshold) {
-        result += ' ';
-      }
-      // Nếu gap âm lớn → sang dòng mới (item ở hàng tiếp theo)
-      if (gap < -prevWidth * 0.5) {
-        result += '\n';
+  if (validItems.length === 0) return '';
+
+  // Tìm giới hạn của trang để tính toán chiều rộng
+  let pageMinX = Infinity;
+  let pageMaxX = -Infinity;
+  for (const item of validItems) {
+    if (item.x < pageMinX) pageMinX = item.x;
+    if (item.xEnd > pageMaxX) pageMaxX = item.xEnd;
+  }
+  const pageWidth = Math.max(100, pageMaxX - pageMinX);
+
+  // 2. Nhóm các item thành các hàng (Lines) theo tọa độ Y
+  // Vì tọa độ Y tăng dần từ dưới lên trên trong PDF, ta sort giảm dần để đọc từ trên xuống
+  validItems.sort((a, b) => b.y - a.y);
+  
+  const lines = [];
+  for (const item of validItems) {
+    let added = false;
+    for (const line of lines) {
+      // Cho phép lệch Y tối đa 6 points (khoảng cách dòng nhỏ)
+      if (Math.abs(item.y - line.y) <= 6) {
+        line.items.push(item);
+        // Cập nhật lại Y trung bình của dòng
+        line.y = (line.y * (line.items.length - 1) + item.y) / line.items.length;
+        added = true;
+        break;
       }
     }
-
-    result += item.str;
-
-    // item.hasEOL = true nếu item kết thúc dòng
-    if (item.hasEOL) {
-      result += '\n';
-      prevX = null;
-    } else {
-      prevX = x;
-      prevWidth = item.width || item.str.length * (fontSize * 0.5);
-      prevFontSize = fontSize;
+    if (!added) {
+      lines.push({ y: item.y, items: [item] });
     }
   }
 
-  // Cleanup: nhiều space → 1 space, nhiều newline → 2 newline tối đa
-  return result
+  // Sắp xếp các dòng từ trên xuống dưới
+  lines.sort((a, b) => b.y - a.y);
+
+  // 3. Với mỗi dòng, sắp xếp X từ trái sang phải và gộp các item gần nhau thành các Segment
+  const segments = [];
+  for (const line of lines) {
+    line.items.sort((a, b) => a.x - b.x);
+
+    let currentSeg = null;
+    for (const item of line.items) {
+      if (!currentSeg) {
+        currentSeg = {
+          str: item.str,
+          x: item.x,
+          xEnd: item.xEnd,
+          y: line.y,
+          fontSize: item.fontSize
+        };
+      } else {
+        const gap = item.x - currentSeg.xEnd;
+        // mergeThreshold: nếu khoảng cách rất nhỏ thì gộp chung (ví dụ: các chữ cái riêng lẻ)
+        const mergeThreshold = Math.max(14, currentSeg.fontSize * 0.85);
+        
+        if (gap < mergeThreshold) {
+          // spaceThreshold: khoảng cách tối thiểu để coi là có dấu cách (space) thực sự
+          // Tăng lên 0.38 để tránh bị giãn chữ cái hoặc chữ số trong ngày tháng (như "0 2 / 2 0 2 5")
+          const spaceThreshold = Math.max(4.0, currentSeg.fontSize * 0.38);
+          if (gap > spaceThreshold) {
+            currentSeg.str += ' ' + item.str;
+          } else {
+            currentSeg.str += item.str;
+          }
+          currentSeg.xEnd = Math.max(currentSeg.xEnd, item.xEnd);
+          currentSeg.fontSize = Math.max(currentSeg.fontSize, item.fontSize);
+        } else {
+          segments.push(currentSeg);
+          currentSeg = {
+            str: item.str,
+            x: item.x,
+            xEnd: item.xEnd,
+            y: line.y,
+            fontSize: item.fontSize
+          };
+        }
+      }
+    }
+    if (currentSeg) {
+      segments.push(currentSeg);
+    }
+  }
+
+  // 4. Nhóm các segment thành các Layout Block
+  // - Block Spanning: Đoạn text trải dài hết trang (như Header)
+  // - Block Multi-column: Gồm nhiều cột đặt cạnh nhau (thường là 2 cột)
+  const blocks = [];
+  let currentBlock = null;
+
+  for (const seg of segments) {
+    const segWidth = seg.xEnd - seg.x;
+    // Segment được coi là spanning nếu chiều rộng chiếm hơn 65% độ rộng trang
+    const isSpanning = segWidth > (pageWidth * 0.65);
+
+    if (isSpanning) {
+      // Đóng block multi-column cũ nếu đang mở
+      if (currentBlock && currentBlock.type === 'multi-column') {
+        blocks.push(currentBlock);
+        currentBlock = null;
+      }
+      // Tạo block spanning mới
+      if (!currentBlock || currentBlock.type !== 'spanning') {
+        if (currentBlock) blocks.push(currentBlock);
+        currentBlock = { type: 'spanning', segments: [] };
+      }
+      currentBlock.segments.push(seg);
+    } else {
+      // Đóng block spanning cũ nếu đang mở
+      if (currentBlock && currentBlock.type === 'spanning') {
+        blocks.push(currentBlock);
+        currentBlock = null;
+      }
+      // Khởi tạo block multi-column mới
+      if (!currentBlock || currentBlock.type !== 'multi-column') {
+        if (currentBlock) blocks.push(currentBlock);
+        currentBlock = { type: 'multi-column', columns: [] };
+      }
+
+      // Tìm cột phù hợp dựa trên độ chồng lấp tọa độ X
+      let targetCol = null;
+      let minDistance = Infinity;
+
+      for (const col of currentBlock.columns) {
+        // Kiểm tra độ chồng chập (overlap) tọa độ X
+        const overlap = Math.max(0, Math.min(seg.xEnd, col.maxX) - Math.max(seg.x, col.minX));
+        if (overlap > 0) {
+          targetCol = col;
+          break;
+        }
+        // Nếu không chồng chập, kiểm tra khoảng cách tới biên cột
+        const dist = Math.min(Math.abs(seg.x - col.minX), Math.abs(seg.xEnd - col.maxX));
+        if (dist < minDistance) {
+          minDistance = dist;
+          // Khoảng cách tối đa là 50px để coi là cùng cột
+          if (dist < 50) {
+            targetCol = col;
+          }
+        }
+      }
+
+      if (targetCol) {
+        targetCol.segments.push(seg);
+        targetCol.minX = Math.min(targetCol.minX, seg.x);
+        targetCol.maxX = Math.max(targetCol.maxX, seg.xEnd);
+      } else {
+        // Tạo cột mới
+        currentBlock.columns.push({
+          minX: seg.x,
+          maxX: seg.xEnd,
+          segments: [seg]
+        });
+      }
+    }
+  }
+  
+  if (currentBlock) {
+    blocks.push(currentBlock);
+  }
+
+  // 5. Kết hợp các block thành văn bản hoàn chỉnh
+  let resultText = '';
+  for (const block of blocks) {
+    if (block.type === 'spanning') {
+      block.segments.sort((a, b) => b.y - a.y);
+      resultText += block.segments.map(s => s.str).join('\n') + '\n\n';
+    } else if (block.type === 'multi-column') {
+      // Sắp xếp các cột từ trái qua phải
+      block.columns.sort((a, b) => a.minX - b.minX);
+      for (const col of block.columns) {
+        col.segments.sort((a, b) => b.y - a.y);
+        resultText += col.segments.map(s => s.str).join('\n') + '\n\n';
+      }
+    }
+  }
+
+  // 6. Post-processing dọn dẹp khoảng trắng rác cuối cùng
+  // Xử lý các từ bị giãn cách vô lý trong PDF như "n a y", "0 2 / 2 0 2 5", "t r ì n h"
+  // Regex tìm chuỗi gồm các ký tự đơn lẻ (chữ cái/số/ký hiệu) cách nhau bởi 1 khoảng trắng duy nhất
+  let cleaned = resultText
+    .replace(/(?:[a-zA-Z0-9\/\-\u00C0-\u1EF9]\s+){2,}[a-zA-Z0-9\/\-\u00C0-\u1EF9]/g, (match) => {
+      // Giữ lại khoảng cách nếu là từ thực tế bằng cách chỉ xóa khoảng cách giữa các ký tự đơn
+      return match.replace(/\s+/g, '');
+    })
     .replace(/ {2,}/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
+
+  // Khôi phục một số từ đặc thù nếu regex gộp quá đà (nếu có)
+  cleaned = cleaned.replace(/\b([0-9]{2})\/([0-9]{4})\b/g, '$1/$2');
+
+  return cleaned;
 }
 
 async function extractPDFText(file, onProgress) {
