@@ -619,3 +619,23 @@ export function getTodosByDate(dateStr) {
 
 // Expose for calendar component
 window._getTodosByDate = getTodosByDate;
+
+// Expose for AI Assistant
+window.addNewTodoFromAI = function(title, desc = '', dueDate = '', priority = 'normal') {
+  const newTask = {
+    id:        'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+    title,
+    desc,
+    category:  'work',
+    status:    'todo',
+    dueDate,
+    priority,
+    createdAt: new Date().toISOString(),
+  };
+  tasks.unshift(newTask);
+  saveTasksLocally();
+  if (document.getElementById('todoContent')) {
+    renderTaskView();
+  }
+  uploadTaskToProxy(newTask);
+};

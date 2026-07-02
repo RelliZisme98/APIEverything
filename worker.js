@@ -3244,6 +3244,7 @@ JSON SCHEMA (fill every field with REAL analysis from the CV, not placeholders):
 {
   "score": <integer 0-100 based on: completeness 25pts + experience quality 25pts + ATS keywords 25pts + formatting 25pts>,
   "grade": <"Xuất sắc"|"Tốt"|"Khá"|"Trung bình"|"Cần sửa đổi nhiều">,
+  "jd_match_score": <integer 0-100 based on how well the CV fits the target jobDescription, or null if no jobDescription provided>,
   "overview": <2-3 sentences: overall impression, years/level of experience, strongest qualification, and biggest gap vs target role>,
   "strengths": [
     <EXACTLY 5 items. Each: "Phần [X]: [specific quote or observation from CV] — [why it's a strength for this role]">
@@ -3255,9 +3256,16 @@ JSON SCHEMA (fill every field with REAL analysis from the CV, not placeholders):
     <EXACTLY 5 items. Each: "Mục [X]: [concrete action step, e.g. 'Thêm số liệu định lượng vào dòng Y', 'Bổ sung từ khóa Z vào mục Kỹ năng']">
   ],
   "ats_feedback": <2-3 sentences: specific ATS issues — missing keywords for target role, formatting problems that confuse parsers, section names that should be standardized, contact info completeness>,
+  "missing_keywords": [
+    <EXACTLY 4-6 specific key skills, technologies, or keywords from the jobDescription that are missing or weak in the CV. If no jobDescription, list general industry standard skills missing for this jobPosition>
+  ],
   "rewrites": [
     <EXACTLY 4 items. Each item MUST quote directly from the CV text in "before", then improve it in "after">
     {"before": <exact sentence/phrase from CV>, "after": <improved version with action verb + metric/result>, "reason": <specific reason why the rewrite improves ATS/impact>}
+  ],
+  "interview_prep": [
+    <EXACTLY 3-4 items, each targeting specific CV details vs position requirements>
+    {"question": <likely tough interview question targeted to candidate's background>, "answer_guideline": <strategic recommendation on how to answer effectively using achievements>}
   ]
 }
 
@@ -3268,7 +3276,7 @@ Rules:
 
     const userPrompt = `CV content:\n${safeCvText}`;
 
-    const result = await env.AI.run('@cf/meta/llama-3.1-8b-instruct-fast', {
+    const result = await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
@@ -3327,19 +3335,21 @@ Rules:
     if (!validatedJson) {
       console.error('[CV Reviewer] Could not parse AI JSON. result keys:', result ? Object.keys(result) : 'null');
       return cors(JSON.stringify({ error: 'AI không trả về JSON hợp lệ sau nhiều lần thử. Vui lòng thử lại.' }), 502);
-
     }
 
     // Đảm bảo các field bắt buộc tồn tại
     const safe = {
       score: Number(validatedJson.score) || 50,
       grade: validatedJson.grade || 'Khá',
+      jd_match_score: validatedJson.jd_match_score !== undefined ? (validatedJson.jd_match_score === null ? null : (Number(validatedJson.jd_match_score) || null)) : null,
       overview: validatedJson.overview || '',
       strengths: Array.isArray(validatedJson.strengths) ? validatedJson.strengths : [],
       weaknesses: Array.isArray(validatedJson.weaknesses) ? validatedJson.weaknesses : [],
       improvements: Array.isArray(validatedJson.improvements) ? validatedJson.improvements : [],
       ats_feedback: validatedJson.ats_feedback || '',
+      missing_keywords: Array.isArray(validatedJson.missing_keywords) ? validatedJson.missing_keywords : [],
       rewrites: Array.isArray(validatedJson.rewrites) ? validatedJson.rewrites : [],
+      interview_prep: Array.isArray(validatedJson.interview_prep) ? validatedJson.interview_prep : []
     };
 
     return new Response(JSON.stringify({ response: JSON.stringify(safe) }), {
@@ -3347,6 +3357,72 @@ Rules:
     });
   } catch (err) {
     console.error('[CV Reviewer] Error:', err.message);
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
+async function handleCVCoverLetter(request, env) {
+  if (request.method === 'OPTIONS') return preflight();
+  if (request.method !== 'POST') {
+    return cors(JSON.stringify({ error: 'POST method required' }), 405);
+  }
+  if (!env.AI) {
+    return cors(JSON.stringify({ error: 'Workers AI is not configured.' }), 503);
+  }
+
+  try {
+    const { cvText, jobPosition, jobDescription, tone } = await request.json();
+
+    if (!cvText) {
+      return cors(JSON.stringify({ error: 'Nội dung CV là bắt buộc.' }), 400);
+    }
+
+    const persona = tone === 'cto'
+      ? 'CTO (Giám đốc Công nghệ)'
+      : (tone === 'recruiter' ? 'HR Manager (Trưởng phòng Nhân sự)' : 'Senior CV Expert');
+
+    const systemPrompt = `You are a professional hiring manager writing a highly persuasive, tailored Cover Letter (Thư xin việc) in Vietnamese based on the candidate's CV and the target job description.
+Target position: "${jobPosition || 'Not specified'}"
+Job description: "${jobDescription ? jobDescription.substring(0, 400) : 'Not provided'}"
+
+Instructions:
+- Write the cover letter in professional, natural Vietnamese.
+- Use a polite, confident, and professional tone.
+- Directly connect the candidate's achievements and skills from their CV to the key requirements of the target position.
+- Do not use placeholders (like [Name], [Company], etc.) where possible, or use standard professional formatting like "[Tên công ty ứng tuyển]" so the candidate knows to fill it.
+- Keep the length around 300-400 words, structured into clean paragraphs: Greeting, Introduction/Targeting, Key value proposition (achievements), and a polite closing/call to action.
+- Do not include any introductory comments, notes, or markdown formatting outside the letter itself. Just output the letter text directly.`;
+
+    const userPrompt = `Candidate CV content:\n${cvText.substring(0, 5000)}`;
+
+    const result = await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
+      temperature: 0.6,
+      max_tokens: 1500
+    });
+
+    let coverLetterText = '';
+    if (typeof result === 'string') {
+      coverLetterText = result;
+    } else if (result && typeof result.response === 'string') {
+      coverLetterText = result.response;
+    } else if (result && typeof result.result === 'string') {
+      coverLetterText = result.result;
+    } else {
+      coverLetterText = JSON.stringify(result ?? '');
+    }
+
+    // Clean up LLM artifacts
+    coverLetterText = coverLetterText.replace(/^(assistant\s*)+/ig, '').trim();
+
+    return new Response(JSON.stringify({ coverLetter: coverLetterText }), {
+      headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS },
+    });
+  } catch (err) {
+    console.error('[CV CoverLetter] Error:', err.message);
     return cors(JSON.stringify({ error: err.message }), 500);
   }
 }
@@ -3453,6 +3529,17 @@ Sử dụng các thông tin thực tế từ Dashboard ở dưới để trả l
 - Lịch bay & Di chuyển: Dashboard có tab "Lịch Bay & Di Chuyển" giúp tra cứu lịch bay các chặng nội địa (HAN-SGN, DAD-SGN...), tra cứu số hiệu chuyến bay (VN201, VJ100...) và ước tính chi phí di chuyển bằng máy bay, tàu hỏa, xe khách.
 Thêm biểu tượng cảm xúc (emoji) phù hợp để câu trả lời sinh động hơn.
 
+LƯU Ý VỀ HÀNH ĐỘNG TRÊN DASHBOARD (QUAN TRỌNG):
+Nếu người dùng muốn chuyển trang/tab, xem tiện ích khác, thêm công việc mới vào Todo, hoặc tìm kiếm thời tiết ở một địa phương cụ thể, bạn CÓ THỂ tự động kích hoạt hành động đó bằng cách đính kèm mã hành động tương ứng ở CUỐI CÙNG câu trả lời của bạn (và không chèn bất cứ nội dung gì sau đó).
+Cú pháp mã hành động (chọn duy nhất một mã phù hợp nhất nếu cần):
+1. Chuyển tab/phần: [ACTION: switch_section=<section_id>]
+   Các <section_id> hợp lệ: finance (Tài chính), weather (Thời tiết), news (Tin tức), calendar (Lịch), travel (Di chuyển), todo (Ghi chú & Todo), lookup (Dịch vụ công/Phạt nguội), qrcode (QR & Rút gọn link), emulator (Giả lập game), tax-calc (Tính thuế TNCN), typing-test (Gõ phím), hardware-test (Test thiết bị), converter (Chuyển đổi đơn vị), bmi (Chỉ số BMI), iq (IQ), eq (EQ), mbti (MBTI), astrology (Bản đồ sao), devdocs (Tài liệu dev), cv-reviewer (AI CV Reviewer), bookmarks (Bookmark), lottery (Xổ số), world-clock (Đồng hồ), football (Bóng đá), downloader (Tải & Công cụ file), media (Phim & Trò chơi), focus (Tập trung & Âm nhạc).
+   Ví dụ: "Tôi sẽ chuyển bạn sang tab Tính thuế TNCN ngay. [ACTION: switch_section=tax-calc]"
+2. Thêm công việc (Todo): [ACTION: add_todo=<nội dung công việc>]
+   Ví dụ: "Đã thêm công việc 'mua sữa' vào danh sách cần làm của bạn. [ACTION: add_todo=mua sữa]"
+3. Tra cứu thời tiết thành phố: [ACTION: search_weather=<tên thành phố tiếng Anh hoặc không dấu>]
+   Ví dụ: "Để tôi tìm kiếm thời tiết của thành phố Đà Nẵng nhé. [ACTION: search_weather=Da Nang]"
+
 Bối cảnh Dashboard:
 ${contextStr}`;
 
@@ -3466,7 +3553,7 @@ ${contextStr}`;
 
     messages.push({ role: 'user', content: prompt });
 
-    const result = await env.AI.run('@cf/meta/llama-3.1-8b-instruct-fast', {
+    const result = await env.AI.run('@cf/meta/llama-3.2-3b-instruct', {
       messages,
       temperature: 0.6,
       max_tokens: 1024
@@ -3655,6 +3742,7 @@ export default {
     if (pathname === '/vietlott') return handleVietlott(request);
     if (pathname === '/api/ai') return handleAI(request, env);
     if (pathname === '/api/cv-reviewer') return handleCVReviewer(request, env);
+    if (pathname === '/api/cv-coverletter') return handleCVCoverLetter(request, env);
     if (pathname === '/api/tts') return handleTTS(request);
     if (pathname === '/api/shorten') return handleShorten(request, env);
 
