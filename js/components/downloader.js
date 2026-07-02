@@ -245,55 +245,63 @@ export function renderDownloader() {
       let hdUrl = null;
       let sdUrl = null;
 
-      // Extract patterns
-      const hdMatch = source.match(/"playable_url_quality_hd"\s*:\s*"([^"]+)"/) || 
-                      source.match(/playable_url_quality_hd\s*:\s*"([^"]+)"/);
-      const sdMatch = source.match(/"playable_url"\s*:\s*"([^"]+)"/) || 
-                      source.match(/playable_url\s*:\s*"([^"]+)"/);
-
-      const cleanJsonUrl = (escapedUrl) => {
-        let cleaned = escapedUrl.replace(/\\/g, '');
+      const cleanFbUrl = (urlStr) => {
+        if (!urlStr) return '';
+        let cleaned = urlStr.replace(/\\/g, '');
         try {
-          cleaned = JSON.parse(`"${escapedUrl}"`);
-        } catch (e) {
-          cleaned = escapedUrl.replace(/\\\//g, '/').replace(/\\u0025/g, '%');
-        }
+          const parser = new DOMParser();
+          const dom = parser.parseFromString(cleaned, 'text/html');
+          cleaned = dom.body.textContent || cleaned;
+        } catch (e) {}
         return cleaned;
       };
 
-      if (hdMatch) hdUrl = cleanJsonUrl(hdMatch[1]);
-      if (sdMatch) sdUrl = cleanJsonUrl(sdMatch[1]);
+      const extractUrlByKey = (src, key) => {
+        const regex = new RegExp(`["\\\\]*${key}["\\\\]*\\s*:\\s*["\\\\]*(https?:[^"\\s]+)`, 'i');
+        const match = src.match(regex);
+        if (match) {
+          let rawUrl = match[1];
+          rawUrl = rawUrl.replace(/["\\\\]+$/, '');
+          return cleanFbUrl(rawUrl);
+        }
+        return null;
+      };
 
-      if (!hdUrl && !sdUrl) {
-        const hdSrcMatch = source.match(/"hd_src"\s*:\s*"([^"]+)"/) || source.match(/hd_src\s*:\s*"([^"]+)"/);
-        const sdSrcMatch = source.match(/"sd_src"\s*:\s*"([^"]+)"/) || source.match(/sd_src\s*:\s*"([^"]+)"/);
-        if (hdSrcMatch) hdUrl = cleanJsonUrl(hdSrcMatch[1]);
-        if (sdSrcMatch) sdUrl = cleanJsonUrl(sdSrcMatch[1]);
+      const hdKeys = ['playable_url_quality_hd', 'browser_native_hd_url', 'hd_src'];
+      const sdKeys = ['playable_url', 'browser_native_sd_url', 'sd_src', 'videoURL'];
+
+      for (const key of hdKeys) {
+        const found = extractUrlByKey(source, key);
+        if (found) {
+          hdUrl = found;
+          break;
+        }
       }
 
-      if (!hdUrl && !sdUrl) {
-        const videoUrlMatch = source.match(/"videoURL"\s*:\s*"([^"]+)"/) || source.match(/videoURL\s*:\s*"([^"]+)"/);
-        if (videoUrlMatch) sdUrl = cleanJsonUrl(videoUrlMatch[1]);
+      for (const key of sdKeys) {
+        const found = extractUrlByKey(source, key);
+        if (found) {
+          sdUrl = found;
+          break;
+        }
       }
 
+      // If still not found, search for all fbcdn.net .mp4 URLs in the HTML source code
       if (!hdUrl && !sdUrl) {
-        const hdNativeMatch = source.match(/"browser_native_hd_url"\s*:\s*"([^"]+)"/) || source.match(/browser_native_hd_url\s*:\s*"([^"]+)"/);
-        const sdNativeMatch = source.match(/"browser_native_sd_url"\s*:\s*"([^"]+)"/) || source.match(/browser_native_sd_url\s*:\s*"([^"]+)"/);
-        if (hdNativeMatch) hdUrl = cleanJsonUrl(hdNativeMatch[1]);
-        if (sdNativeMatch) sdUrl = cleanJsonUrl(sdNativeMatch[1]);
-      }
-
-      if (!hdUrl && !sdUrl) {
-        const mp4Matches = source.match(/https?:\\\/\\\/[^\s"'\\]+?\.fbcdn\.net[^\s"'\\]+?\.mp4[^\s"'\\]*/g) ||
-                           source.match(/https?:\/\/[^\s"'\\]+?\.fbcdn\.net[^\s"'\\]+?\.mp4[^\s"'\\]*/g);
-        if (mp4Matches && mp4Matches.length > 0) {
-          const cleanUrls = mp4Matches.map(url => cleanJsonUrl(url));
-          const uniqueMp4s = Array.from(new Set(cleanUrls));
-          if (uniqueMp4s.length > 0) {
-            sdUrl = uniqueMp4s[0];
-            if (uniqueMp4s.length > 1) {
-              hdUrl = uniqueMp4s[1];
-            }
+        const mp4Regex = /https?:(?:\\\/\\\/|\/\/)[^\s"']+\.fbcdn\.net[^\s"']+\.mp4[^\s"']*/gi;
+        const matches = source.match(mp4Regex) || [];
+        const cleanedUrls = [];
+        for (const m of matches) {
+          let clean = m.replace(/["\\\\]+$/, '');
+          clean = cleanFbUrl(clean);
+          if (clean.includes('fbcdn.net') && !cleanedUrls.includes(clean)) {
+            cleanedUrls.push(clean);
+          }
+        }
+        if (cleanedUrls.length > 0) {
+          sdUrl = cleanedUrls[0];
+          if (cleanedUrls.length > 1) {
+            hdUrl = cleanedUrls[1];
           }
         }
       }
