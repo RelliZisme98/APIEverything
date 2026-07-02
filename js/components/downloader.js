@@ -159,6 +159,23 @@ export function renderDownloader() {
           <button id="btnFetchDl" class="btn-primary">Trích xuất</button>
         </div>
 
+        <div style="margin-top: 10px; font-size: 13px;">
+          <a href="#" id="togglePrivateFb" style="color: var(--accent-cyan); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
+            <i class="fab fa-facebook"></i> Tải video Facebook riêng tư (Private)?
+          </a>
+        </div>
+        <div id="privateFbContainer" style="display: none; margin-top: 15px; padding: 15px; background: rgba(255, 255, 255, 0.02); border: 1px dashed rgba(255, 255, 255, 0.1); border-radius: 8px;">
+          <div style="font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-secondary);">Hướng dẫn tải video Facebook riêng tư:</div>
+          <ol style="font-size: 12px; color: var(--text-muted); padding-left: 20px; line-height: 1.6; margin-bottom: 12px; margin-top: 0;">
+            <li>Mở tab mới, truy cập vào link video Facebook riêng tư cần tải.</li>
+            <li>Nhấn phím <strong>Ctrl + U</strong> (hoặc nhấn chuột phải và chọn <strong>Xem nguồn trang / View page source</strong>).</li>
+            <li>Nhấn <strong>Ctrl + A</strong> để chọn tất cả, sau đó nhấn <strong>Ctrl + C</strong> để copy toàn bộ mã nguồn.</li>
+            <li>Dán mã nguồn đã copy vào khung bên dưới và nhấn nút <strong>Trích xuất link tải</strong>.</li>
+          </ol>
+          <textarea id="fbSourceInput" class="field-input" placeholder="Dán toàn bộ mã nguồn HTML (Ctrl + V) vào đây..." style="width: 100%; height: 120px; font-family: monospace; font-size: 11px; resize: vertical; margin-bottom: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 4px; padding: 8px; color: var(--text-primary); box-sizing: border-box;"></textarea>
+          <button id="btnExtractPrivateFb" class="btn-primary" style="width: 100%;">Trích xuất link tải</button>
+        </div>
+
         <div class="travel-title-sub" style="margin-top: 20px;">Nền tảng hỗ trợ</div>
         <div class="dl-platforms">
           <div class="dl-platform-card">
@@ -202,6 +219,141 @@ export function renderDownloader() {
       if (url) fetchMediaDownload(url);
     }
   });
+
+  const togglePrivate = document.getElementById('togglePrivateFb');
+  const privateContainer = document.getElementById('privateFbContainer');
+  if (togglePrivate && privateContainer) {
+    togglePrivate.addEventListener('click', (e) => {
+      e.preventDefault();
+      const isHidden = privateContainer.style.display === 'none';
+      privateContainer.style.display = isHidden ? 'block' : 'none';
+      if (isHidden) {
+        document.getElementById('fbSourceInput').focus();
+      }
+    });
+  }
+
+  const btnExtract = document.getElementById('btnExtractPrivateFb');
+  if (btnExtract) {
+    btnExtract.addEventListener('click', () => {
+      const source = document.getElementById('fbSourceInput').value;
+      if (!source.trim()) {
+        alert('Vui lòng dán mã nguồn HTML!');
+        return;
+      }
+      
+      let hdUrl = null;
+      let sdUrl = null;
+
+      // Extract patterns
+      const hdMatch = source.match(/"playable_url_quality_hd"\s*:\s*"([^"]+)"/) || 
+                      source.match(/playable_url_quality_hd\s*:\s*"([^"]+)"/);
+      const sdMatch = source.match(/"playable_url"\s*:\s*"([^"]+)"/) || 
+                      source.match(/playable_url\s*:\s*"([^"]+)"/);
+
+      const cleanJsonUrl = (escapedUrl) => {
+        let cleaned = escapedUrl.replace(/\\/g, '');
+        try {
+          cleaned = JSON.parse(`"${escapedUrl}"`);
+        } catch (e) {
+          cleaned = escapedUrl.replace(/\\\//g, '/').replace(/\\u0025/g, '%');
+        }
+        return cleaned;
+      };
+
+      if (hdMatch) hdUrl = cleanJsonUrl(hdMatch[1]);
+      if (sdMatch) sdUrl = cleanJsonUrl(sdMatch[1]);
+
+      if (!hdUrl && !sdUrl) {
+        const hdSrcMatch = source.match(/"hd_src"\s*:\s*"([^"]+)"/) || source.match(/hd_src\s*:\s*"([^"]+)"/);
+        const sdSrcMatch = source.match(/"sd_src"\s*:\s*"([^"]+)"/) || source.match(/sd_src\s*:\s*"([^"]+)"/);
+        if (hdSrcMatch) hdUrl = cleanJsonUrl(hdSrcMatch[1]);
+        if (sdSrcMatch) sdUrl = cleanJsonUrl(sdSrcMatch[1]);
+      }
+
+      if (!hdUrl && !sdUrl) {
+        const videoUrlMatch = source.match(/"videoURL"\s*:\s*"([^"]+)"/) || source.match(/videoURL\s*:\s*"([^"]+)"/);
+        if (videoUrlMatch) sdUrl = cleanJsonUrl(videoUrlMatch[1]);
+      }
+
+      if (!hdUrl && !sdUrl) {
+        const hdNativeMatch = source.match(/"browser_native_hd_url"\s*:\s*"([^"]+)"/) || source.match(/browser_native_hd_url\s*:\s*"([^"]+)"/);
+        const sdNativeMatch = source.match(/"browser_native_sd_url"\s*:\s*"([^"]+)"/) || source.match(/browser_native_sd_url\s*:\s*"([^"]+)"/);
+        if (hdNativeMatch) hdUrl = cleanJsonUrl(hdNativeMatch[1]);
+        if (sdNativeMatch) sdUrl = cleanJsonUrl(sdNativeMatch[1]);
+      }
+
+      if (!hdUrl && !sdUrl) {
+        const mp4Matches = source.match(/https?:\\\/\\\/[^\s"'\\]+?\.fbcdn\.net[^\s"'\\]+?\.mp4[^\s"'\\]*/g) ||
+                           source.match(/https?:\/\/[^\s"'\\]+?\.fbcdn\.net[^\s"'\\]+?\.mp4[^\s"'\\]*/g);
+        if (mp4Matches && mp4Matches.length > 0) {
+          const cleanUrls = mp4Matches.map(url => cleanJsonUrl(url));
+          const uniqueMp4s = Array.from(new Set(cleanUrls));
+          if (uniqueMp4s.length > 0) {
+            sdUrl = uniqueMp4s[0];
+            if (uniqueMp4s.length > 1) {
+              hdUrl = uniqueMp4s[1];
+            }
+          }
+        }
+      }
+
+      const resultDiv = document.getElementById('dlResultContainer');
+      if (!resultDiv) return;
+
+      if (hdUrl || sdUrl) {
+        const videoFilename = `facebook_private_${Date.now()}.mp4`;
+        resultDiv.innerHTML = `
+          <div class="dl-result-card">
+            <div style="font-size: 40px; padding: 20px; display:flex; align-items:center; justify-content:center; color: var(--accent-blue);">
+              <i class="fab fa-facebook"></i>
+            </div>
+            <div class="dl-info">
+              <div>
+                <div class="dl-title" style="color:var(--text-primary); font-weight:700;">Tìm thấy video Facebook riêng tư</div>
+                <div class="dl-author" style="font-size:12px; opacity:0.7;">Định dạng MP4</div>
+              </div>
+              <div class="dl-buttons" style="display:flex; gap:8px; flex-wrap:wrap; width:100%;">
+                ${hdUrl ? `
+                  <button class="dl-btn dl-btn--video" onclick="window._dlBlob('${hdUrl}','${videoFilename}')">
+                    <i class="fas fa-download"></i> Tải chất lượng HD (Proxy)
+                  </button>
+                  <a class="dl-btn dl-btn--fallback" href="${hdUrl}" download="${videoFilename}" target="_blank" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center; padding:10px 14px; font-size:13px; white-space:nowrap;">
+                    <i class="fas fa-external-link-alt"></i> Tải HD trực tiếp
+                  </a>
+                ` : ''}
+                ${sdUrl ? `
+                  <button class="dl-btn dl-btn--video" onclick="window._dlBlob('${sdUrl}','${videoFilename}')" style="${!hdUrl ? '' : 'background: rgba(255,255,255,0.05); border-color: var(--border);'}">
+                    <i class="fas fa-download"></i> Tải chất lượng SD (Proxy)
+                  </button>
+                  <a class="dl-btn dl-btn--fallback" href="${sdUrl}" download="${videoFilename}" target="_blank" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center; padding:10px 14px; font-size:13px; white-space:nowrap;">
+                    <i class="fas fa-external-link-alt"></i> Tải SD trực tiếp
+                  </a>
+                ` : ''}
+              </div>
+              <div class="dl-status-area" style="margin-top: 12px; width: 100%; display: none;"></div>
+            </div>
+          </div>
+        `;
+      } else {
+        resultDiv.innerHTML = `
+          <div class="dl-result-card" style="border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.03);">
+            <div style="font-size: 32px; padding: 20px; color: var(--accent-red); display:flex; align-items:center; justify-content:center;">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="dl-info">
+              <div>
+                <div class="dl-title" style="color: var(--accent-red); font-weight:700;">Không tìm thấy liên kết video</div>
+                <div class="dl-author" style="font-size:12px; opacity:0.8; margin-bottom:10px;">
+                  Mã nguồn trang bạn dán không chứa liên kết video nào hoặc định dạng trang đã thay đổi. Hãy chắc chắn bạn đã copy đúng toàn bộ mã nguồn bằng Ctrl+A.
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    });
+  }
 }
 
 async function fetchMediaDownload(url) {
@@ -386,9 +538,16 @@ async function fetchMediaDownload(url) {
     }
   } catch (err) {
     console.warn('[Worker Downloader API failed]', err);
+    const isFb = url.includes('facebook.com') || url.includes('fb.watch') || url.includes('fb.gg');
+    const fbTip = isFb ? `
+      <div style="margin-top: 10px; padding: 10px 12px; background: rgba(96, 165, 250, 0.08); border-left: 3px solid var(--accent-blue); border-radius: 4px; font-size: 12px; color: var(--text-secondary); line-height: 1.5; text-align: left; box-sizing: border-box; width: 100%;">
+        <strong>💡 Mẹo:</strong> Nếu đây là video từ <strong>Nhóm riêng tư (Private Group)</strong> hoặc Trang cá nhân riêng tư, máy chủ bên ngoài không có quyền truy cập trực tiếp. Bạn vui lòng bấm dòng chữ <strong>"Tải video Facebook riêng tư (Private)?"</strong> ở phía trên để làm theo hướng dẫn dán mã nguồn trang.
+      </div>
+    ` : '';
+
     resultDiv.innerHTML = `
       <div class="dl-result-card" style="border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.03);">
- <div style="font-size: 32px; padding: 20px;"></div>
+        <div style="font-size: 32px; padding: 20px;"></div>
         <div class="dl-info">
           <div>
             <div class="dl-title" style="color: var(--accent-red); font-weight:700;">Không thể tự động giải mã liên kết</div>
@@ -396,15 +555,16 @@ async function fetchMediaDownload(url) {
           </div>
           <div class="dl-buttons" style="display:flex; gap:8px; flex-wrap:wrap; width:100%;">
             <a class="dl-btn dl-btn--fallback" href="https://y2mate.is/analyze?url=${cleanUrl}" target="_blank" style="text-decoration:none; padding:10px 14px; font-size:13px;">
- Tải qua Y2Mate
+              Tải qua Y2Mate
             </a>
             <a class="dl-btn dl-btn--fallback" href="https://9xbuddy.xyz/process?url=${cleanUrl}" target="_blank" style="text-decoration:none; padding:10px 14px; font-size:13px;">
- Tải qua 9XBuddy
+              Tải qua 9XBuddy
             </a>
             <a class="dl-btn dl-btn--fallback" href="https://savefrom.net/?url=${cleanUrl}" target="_blank" style="text-decoration:none; padding:10px 14px; font-size:13px;">
  Tải qua SaveFrom
             </a>
           </div>
+          ${fbTip}
         </div>
       </div>
     `;

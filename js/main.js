@@ -352,24 +352,6 @@ async function loadPowerOutages() {
     console.warn('[Power Outages SPC Background Load]', err);
   }
 
-  // 2. EVNCPC (Miền Trung)
-  try {
-    const resCPC = await fetch('/power-outage?evn=cpc&action=today');
-    if (resCPC.ok) {
-      const json = await resCPC.json();
-      const items = json.content || json.data || [];
-      const formatted = items.slice(0, 10).map(it => ({
-        region: 'Miền Trung',
-        area: it.khuVuc || it.tenDonVi || '',
-        time: it.khoangThoiGian || '',
-        reason: it.reason || it.noiDung || ''
-      }));
-      state.powerOutageData.push(...formatted);
-    }
-  } catch (err) {
-    console.warn('[Power Outages CPC Background Load]', err);
-  }
-
   // 3. EVNHANOI (Hà Nội)
   try {
     const resHanoi = await fetch('/power-outage?evn=hanoi&action=today');
@@ -386,41 +368,6 @@ async function loadPowerOutages() {
     }
   } catch (err) {
     console.warn('[Power Outages Hanoi Background Load]', err);
-  }
-
-  // 4. EVNNPC (Miền Bắc)
-  try {
-    const resNPC = await fetch('/power-outage?evn=npc&action=today');
-    if (resNPC.ok) {
-      const text = await resNPC.text();
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(text, 'text/html');
-      const rows = doc.querySelectorAll('tr');
-      const items = [];
-      if (rows.length > 1) {
-        const headers = [...rows[0].querySelectorAll('th, td')].map(c => c.textContent.trim());
-        for (let i = 1; i < rows.length; i++) {
-          const cells = [...rows[i].querySelectorAll('td')];
-          if (!cells.length) continue;
-          const obj = { _raw: cells.map(c => c.textContent.trim()) };
-          cells.forEach((td, idx) => {
-            const header = headers[idx] || `col${idx}`;
-            obj[header] = td.textContent.trim();
-          });
-          items.push(obj);
-        }
-      }
-      const formatted = items.slice(0, 10).map(item => ({
-        region: 'Miền Bắc',
-        area: item._raw?.[0] || Object.values(item)[0] || '',
-        time: item._raw?.[1] || Object.values(item)[1] || '',
-        district: item._raw?.[3] || Object.values(item)[3] || '',
-        reason: item._raw?.[4] || Object.values(item)[4] || ''
-      }));
-      state.powerOutageData.push(...formatted);
-    }
-  } catch (err) {
-    console.warn('[Power Outages NPC Background Load]', err);
   }
 }
 
