@@ -809,6 +809,56 @@ async function ocrPageCanvas(page, worker) {
   return text.trim();
 }
 
+// Chuyển đổi items từ PDF.js getTextContent thành text sạch
+// Dùng vị trí thực (transform) để tránh thêm space thừa giữa các ký tự
+function pdfItemsToText(items) {
+  if (!items || items.length === 0) return '';
+
+  let result = '';
+  let prevX = null;
+  let prevWidth = 0;
+  let prevFontSize = 12;
+
+  for (const item of items) {
+    if (!item.str) continue;
+
+    // transform = [scaleX, skewX, skewY, scaleY, translateX, translateY]
+    const x = item.transform ? item.transform[4] : null;
+    const fontSize = item.transform ? Math.abs(item.transform[3]) : 12;
+
+    if (prevX !== null && x !== null) {
+      const gap = x - (prevX + prevWidth);
+      // Ngưỡng: nếu gap > 0.3 * fontSize thì coi là có space
+      const spaceThreshold = 0.3 * (prevFontSize || 12);
+      if (gap > spaceThreshold) {
+        result += ' ';
+      }
+      // Nếu gap âm lớn → sang dòng mới (item ở hàng tiếp theo)
+      if (gap < -prevWidth * 0.5) {
+        result += '\n';
+      }
+    }
+
+    result += item.str;
+
+    // item.hasEOL = true nếu item kết thúc dòng
+    if (item.hasEOL) {
+      result += '\n';
+      prevX = null;
+    } else {
+      prevX = x;
+      prevWidth = item.width || item.str.length * (fontSize * 0.5);
+      prevFontSize = fontSize;
+    }
+  }
+
+  // Cleanup: nhiều space → 1 space, nhiều newline → 2 newline tối đa
+  return result
+    .replace(/ {2,}/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 async function extractPDFText(file, onProgress) {
   const notify = onProgress || (() => {});
   notify('Đang tải PDF...');
@@ -828,8 +878,8 @@ async function extractPDFText(file, onProgress) {
   const needsOCR = [];
   for (let p = 1; p <= totalPages; p++) {
     const page = await pdf.getPage(p);
-    const content = await page.getTextContent();
-    const layerText = content.items.map(i => i.str).join(' ').replace(/ {2,}/g, ' ').trim();
+    const content = await page.getTextContent({ includeMarkedContent: false });
+    const layerText = pdfItemsToText(content.items);
     if (layerText.length >= 50) {
       pageTexts[p - 1] = { type: 'text', value: layerText, page };
     } else {

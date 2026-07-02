@@ -3257,7 +3257,7 @@ JSON SCHEMA (fill every field with REAL analysis from the CV, not placeholders):
   "ats_feedback": <2-3 sentences: specific ATS issues — missing keywords for target role, formatting problems that confuse parsers, section names that should be standardized, contact info completeness>,
   "rewrites": [
     <EXACTLY 4 items. Each item MUST quote directly from the CV text in "before", then improve it in "after">
-    {"before": <exact sentence/phrase from CV>, "after": <improved version with action verb + metric/result>, "reason": <specific reason why the rewrite improves ATS/impact>}Score	Tùy model	Công thức rõ: completeness 25pt + experience 25pt + ATS keyword
+    {"before": <exact sentence/phrase from CV>, "after": <improved version with action verb + metric/result>, "reason": <specific reason why the rewrite improves ATS/impact>}
   ]
 }
 
