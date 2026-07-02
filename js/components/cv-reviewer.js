@@ -1,7 +1,8 @@
 /**
  * components/cv-reviewer.js
  * AI CV Reviewer Module
- * - Hỗ trợ kéo thả/tải tệp (.txt, .md) hoặc dán trực tiếp CV.
+ * - Hỗ trợ kéo thả/tải tệp (.txt, .md, .pdf, .docx) hoặc dán trực tiếp CV.
+ * - PDF scan được OCR tự động (Tesseract.js), .docx qua mammoth.js.
  * - Nhập vị trí ứng tuyển mục tiêu & Bản mô tả công việc (JD) để đánh giá chính xác.
  * - Chọn vai trò người đánh giá (CTO, Trưởng phòng Nhân sự - HR, Chuyên gia cao cấp).
  * - Kết nối Workers AI (Llama 3.1) để trả về phân tích chấm điểm cấu trúc JSON.
@@ -13,6 +14,8 @@
 
 let lastReviewedData = null;
 let isReviewing = false;
+const CV_MAX_CHARS = 12000; // giới hạn token an toàn gửi AI
+const CV_MIN_WORDS = 80;    // CV quá ngắn → cảnh báo
 
 // Tải kết quả lưu trữ trước đó từ localStorage nếu có
 function loadSavedReview() {
@@ -76,18 +79,22 @@ export function renderCVReviewer(containerId = 'cvReviewerContent') {
           <!-- Cột tải lên & Nhập nội dung CV -->
           <div style="display:flex; flex-direction:column; gap:16px;">
             <div class="cv-form-group">
-              <label class="cv-form-label">Tải tệp CV (.txt, .md)</label>
+              <label class="cv-form-label">Tải tệp CV (.pdf, .docx, .txt, .md)</label>
               <div class="cv-drop-zone" id="cv-drop-area">
                 <i class="fas fa-cloud-upload-alt cv-drop-icon"></i>
                 <div style="font-size:13.5px; font-weight:700; color:var(--text-primary);">Kéo thả file CV vào đây hoặc click để chọn</div>
-                <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Chấp nhận file .txt, .md. Đối với PDF/Word, vui lòng sao chép văn bản bên dưới.</div>
-                <input type="file" id="cv-file-input" accept=".txt,.md" style="display:none;" />
+                <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Hỗ trợ .pdf (kể cả scan), .docx, .txt, .md — tự động đọc nội dung.</div>
+                <input type="file" id="cv-file-input" accept=".pdf,.docx,.txt,.md" style="display:none;" />
               </div>
             </div>
 
             <div class="cv-form-group">
-              <label class="cv-form-label">Nội dung CV của bạn (Dán dạng văn bản)</label>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <label class="cv-form-label" style="margin-bottom:0;">Nội dung CV của bạn (Dán dạng văn bản)</label>
+                <span id="cv-word-counter" style="font-size:11px; color:var(--text-muted); font-family:monospace;">0 từ</span>
+              </div>
               <textarea class="cv-input-text cv-textarea" id="cv-text-content" placeholder="Dán toàn bộ nội dung chữ trong CV của bạn vào đây (Thông tin cá nhân, Kinh nghiệm, Dự án, Kỹ năng...)"></textarea>
+              <div id="cv-text-warning" style="display:none; font-size:11.5px; margin-top:5px; padding:6px 10px; border-radius:5px;"></div>
             </div>
           </div>
 
@@ -119,6 +126,9 @@ export function renderCVReviewer(containerId = 'cvReviewerContent') {
   // Thiết lập Drag and Drop file
   setupFileUploader();
 
+  // Live word counter trên textarea
+  setupWordCounter();
+
   // Nhấn nút phân tích
   document.getElementById('cv-start-review-btn').onclick = startReviewFlow;
 
@@ -126,6 +136,44 @@ export function renderCVReviewer(containerId = 'cvReviewerContent') {
   if (lastReviewedData) {
     bindResultButtons();
   }
+}
+
+// ── LIVE WORD COUNTER ────────────────────────────────────────────────
+function setupWordCounter() {
+  const textarea = document.getElementById('cv-text-content');
+  const counter = document.getElementById('cv-word-counter');
+  const warning = document.getElementById('cv-text-warning');
+  if (!textarea || !counter) return;
+
+  const update = () => {
+    const text = textarea.value.trim();
+    const words = text ? text.split(/\s+/).length : 0;
+    const chars = text.length;
+
+    counter.textContent = `${words.toLocaleString('vi-VN')} từ · ${chars.toLocaleString('vi-VN')} ký tự`;
+
+    // Cảnh báo ngưỡng
+    if (chars > CV_MAX_CHARS) {
+      counter.style.color = '#f59e0b';
+      warning.style.display = 'block';
+      warning.style.background = 'rgba(245,158,11,0.08)';
+      warning.style.color = '#f59e0b';
+      warning.style.border = '1px solid rgba(245,158,11,0.2)';
+      warning.innerHTML = `<i class="fas fa-exclamation-triangle" style="margin-right:5px;"></i>CV quá dài (${chars.toLocaleString('vi-VN')}/${CV_MAX_CHARS.toLocaleString('vi-VN')} ký tự) — AI sẽ tự động cắt bớt phần cuối để phân tích.`;
+    } else if (words < CV_MIN_WORDS && words > 0) {
+      counter.style.color = '#ef4444';
+      warning.style.display = 'block';
+      warning.style.background = 'rgba(239,68,68,0.08)';
+      warning.style.color = '#ef4444';
+      warning.style.border = '1px solid rgba(239,68,68,0.2)';
+      warning.innerHTML = `<i class="fas fa-info-circle" style="margin-right:5px;"></i>CV có vẻ quá ngắn (${words} từ). Hãy đảm bảo dán đầy đủ nội dung để AI phân tích chính xác.`;
+    } else {
+      counter.style.color = words > 0 ? '#10b981' : 'var(--text-muted)';
+      warning.style.display = 'none';
+    }
+  };
+
+  textarea.addEventListener('input', update);
 }
 
 // ── XỬ LÝ KÉO THẢ & NẠP FILE TÀI LIỆU ─────────────────────────────────
@@ -163,14 +211,62 @@ function setupFileUploader() {
   };
 
   function handleUploadedFile(file) {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      textarea.value = event.target.result;
-      dropArea.querySelector('div').textContent = `Đã nạp file: ${file.name}`;
-      dropArea.style.borderColor = '#10b981';
-      dropArea.style.background = 'rgba(16, 185, 129, 0.03)';
-    };
-    reader.readAsText(file);
+    const name = file.name.toLowerCase();
+    const isPDF = file.type === 'application/pdf' || name.endsWith('.pdf');
+    const isDOCX = name.endsWith('.docx') || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
+    if (isPDF) {
+      // Hiển thị trạng thái đang xử lý
+      dropArea.style.borderColor = '#8b5cf6';
+      dropArea.style.background = 'rgba(139, 92, 246, 0.04)';
+      const statusDiv = dropArea.querySelector('div');
+      statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i>Đang đọc PDF...';
+
+      const onProgress = (msg) => { statusDiv.innerHTML = `<i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i>${msg}`; };
+
+      extractPDFText(file, onProgress).then(text => {
+        textarea.value = text;
+        updateDropZoneSuccess(dropArea, file.name, text);
+      }).catch(err => {
+        console.error('[CV Reviewer] Lỗi đọc PDF:', err);
+        alert('Không thể đọc file PDF này. Vui lòng thử file khác hoặc sao chép nội dung thủ công.');
+        dropArea.style.borderColor = '#ef4444';
+        statusDiv.textContent = 'Lỗi đọc file — thử lại hoặc dán thủ công';
+      });
+    } else if (isDOCX) {
+      // Đọc .docx bằng mammoth.js
+      dropArea.style.borderColor = '#8b5cf6';
+      dropArea.style.background = 'rgba(139, 92, 246, 0.04)';
+      const statusDiv2 = dropArea.querySelector('div');
+      statusDiv2.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i>Đang đọc file Word...';
+      extractDOCXText(file).then(text => {
+        textarea.value = text;
+        updateDropZoneSuccess(dropArea, file.name, text);
+        // Trigger word counter
+        textarea.dispatchEvent(new Event('input'));
+      }).catch(err => {
+        console.error('[CV Reviewer] Lỗi đọc DOCX:', err);
+        alert('Không thể đọc file .docx này. Vui lòng thử xuất sang PDF hoặc sao chép nội dung thủ công.');
+        dropArea.style.borderColor = '#ef4444';
+        statusDiv2.textContent = 'Lỗi đọc file Word — thử định dạng khác';
+      });
+    } else {
+      // Đọc file text bình thường
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        textarea.value = event.target.result;
+        updateDropZoneSuccess(dropArea, file.name, event.target.result);
+        textarea.dispatchEvent(new Event('input'));
+      };
+      reader.readAsText(file);
+    }
+  }
+
+  function updateDropZoneSuccess(zone, fileName, text) {
+    const words = text.trim().split(/\s+/).length;
+    zone.querySelector('div').textContent = `✓ Đã nạp: ${fileName} (~${words.toLocaleString('vi-VN')} từ)`;
+    zone.style.borderColor = '#10b981';
+    zone.style.background = 'rgba(16, 185, 129, 0.03)';
   }
 }
 
@@ -185,6 +281,11 @@ async function startReviewFlow() {
     alert('Vui lòng dán nội dung chữ trong CV của bạn trước khi phân tích!');
     return;
   }
+
+  // Cắt bớt CV nếu quá dài để không vượt giới hạn token AI
+  const cvTextTrimmed = cvText.length > CV_MAX_CHARS
+    ? cvText.substring(0, CV_MAX_CHARS) + '\n[... Nội dung CV bị cắt bớt do giới hạn token ...]'
+    : cvText;
 
   // Chuyển sang màn hình loading
   const setupPanel = document.getElementById('cv-setup-panel');
@@ -221,24 +322,36 @@ async function startReviewFlow() {
     stepIdx = (stepIdx + 1) % loadingSteps.length;
   }, 3000);
 
-  try {
+  const callAI = async () => {
     const res = await fetch('/api/cv-reviewer', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        cvText,
+        cvText: cvTextTrimmed,
         jobPosition,
         jobDescription,
         tone
       })
     });
-
     if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || 'Server error');
+      const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+      throw new Error(err.error || `Server error ${res.status}`);
     }
+    return res.json();
+  };
 
-    const data = await res.json();
+  try {
+    let data;
+    try {
+      data = await callAI();
+    } catch (firstErr) {
+      // Auto-retry 1 lần sau 3 giây
+      console.warn('[CV Reviewer] Lần gọi đầu thất bại, thử lại...', firstErr.message);
+      titleEl.textContent = 'Đang thử lại kết nối...';
+      subEl.textContent = 'Lần gọi đầu thất bại. Tự động thử lại sau 3 giây...';
+      await new Promise(r => setTimeout(r, 3000));
+      data = await callAI();
+    }
 
     // Parse chuỗi kết quả JSON trả về từ AI
     const parsedResult = parseAIJson(data.response);
@@ -259,7 +372,7 @@ async function startReviewFlow() {
     bindResultButtons();
 
   } catch (err) {
-    alert('Lỗi phân tích CV: ' + err.message);
+    alert('Lỗi phân tích CV (đã thử lại 1 lần): ' + err.message);
     setupPanel.style.display = 'block';
   } finally {
     isReviewing = false;
@@ -599,4 +712,153 @@ function exportCVReport() {
     </html>
   `);
   printWindow.document.close();
+}
+
+// ── ĐỌC NỘI DUNG VĂN BẢN TỪ FILE PDF (PDF.js + OCR Tesseract.js) ─────
+const _pdfCache = { lib: null };
+
+async function getPDFLib() {
+  if (_pdfCache.lib) return _pdfCache.lib;
+  const pdfjsLib = await import('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs');
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
+  _pdfCache.lib = pdfjsLib;
+  return pdfjsLib;
+}
+
+async function loadTesseract() {
+  if (window.Tesseract) return window.Tesseract;
+  await new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  return window.Tesseract;
+}
+
+// Tăng độ tương phản canvas trước OCR để nhận dạng chữ scan chính xác hơn
+function preprocessCanvasForOCR(canvas, ctx) {
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const data = imageData.data;
+  for (let i = 0; i < data.length; i += 4) {
+    // Greyscale
+    const grey = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+    // Tăng contrast: đẩy màu sáng lên trắng, màu tối xuống đen
+    const contrast = 1.5;
+    const val = Math.min(255, Math.max(0, contrast * (grey - 128) + 160));
+    data[i] = data[i + 1] = data[i + 2] = val;
+  }
+  ctx.putImageData(imageData, 0, 0);
+}
+
+async function ocrPageCanvas(page, worker) {
+  const viewport = page.getViewport({ scale: 2.0 }); // scale 2x → ảnh rõ hơn
+  const canvas = document.createElement('canvas');
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  const ctx = canvas.getContext('2d');
+
+  await page.render({ canvasContext: ctx, viewport }).promise;
+
+  // Tiền xử lý ảnh để OCR chính xác hơn
+  preprocessCanvasForOCR(canvas, ctx);
+
+  const { data: { text } } = await worker.recognize(canvas);
+  return text.trim();
+}
+
+async function extractPDFText(file, onProgress) {
+  const notify = onProgress || (() => {});
+  notify('Đang tải PDF...');
+
+  const arrayBuffer = await file.arrayBuffer();
+  const pdfjsLib = await getPDFLib();
+
+  const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+  const pdf = await loadingTask.promise;
+
+  const totalPages = pdf.numPages;
+  const pageTexts = [];
+  let usedOCR = false;
+  let tesseractWorker = null; // Worker dùng chung cho tất cả pages
+
+  // Kiểm tra trước xem có page nào cần OCR không
+  const needsOCR = [];
+  for (let p = 1; p <= totalPages; p++) {
+    const page = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    const layerText = content.items.map(i => i.str).join(' ').replace(/ {2,}/g, ' ').trim();
+    if (layerText.length >= 50) {
+      pageTexts[p - 1] = { type: 'text', value: layerText, page };
+    } else {
+      pageTexts[p - 1] = { type: 'ocr', value: null, page };
+      needsOCR.push(p - 1);
+    }
+  }
+
+  // Nếu có page cần OCR → tạo 1 worker dùng chung
+  if (needsOCR.length > 0) {
+    usedOCR = true;
+    notify('Đang khởi động OCR engine...');
+    const Tesseract = await loadTesseract();
+    tesseractWorker = await Tesseract.createWorker('vie+eng', 1, {
+      logger: () => {} // tắt log verbose
+    });
+
+    for (const idx of needsOCR) {
+      const pageNum = idx + 1;
+      notify(`OCR trang ${pageNum}/${totalPages}... (${needsOCR.indexOf(idx) + 1}/${needsOCR.length})`);
+      try {
+        const ocrText = await ocrPageCanvas(pageTexts[idx].page, tesseractWorker);
+        pageTexts[idx].value = ocrText || '';
+      } catch (ocrErr) {
+        console.warn(`[CV Reviewer] OCR trang ${pageNum} thất bại:`, ocrErr);
+        pageTexts[idx].value = '';
+      }
+    }
+
+    // Giải phóng worker sau khi dùng xong
+    await tesseractWorker.terminate();
+  }
+
+  const result = pageTexts
+    .map(p => p.value || '')
+    .filter(t => t.trim().length > 0)
+    .join('\n\n');
+
+  if (result.trim().length === 0) {
+    throw new Error('Không trích xuất được văn bản từ PDF (kể cả sau OCR).');
+  }
+
+  notify(usedOCR
+    ? `✓ Hoàn tất! (${totalPages} trang — ${needsOCR.length} trang dùng OCR)`
+    : `✓ Hoàn tất! (${totalPages} trang — text layer)`);
+
+  return result;
+}
+
+// ── ĐỌC NỘI DUNG VĂN BẢN TỪ FILE .DOCX (mammoth.js) ─────────────────
+async function extractDOCXText(file) {
+  if (!window.mammoth) {
+    await new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js';
+      s.onload = resolve;
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+
+  const arrayBuffer = await file.arrayBuffer();
+  const result = await window.mammoth.extractRawText({ arrayBuffer });
+
+  if (result.messages && result.messages.length > 0) {
+    console.info('[CV Reviewer] mammoth warnings:', result.messages);
+  }
+
+  const text = result.value.trim();
+  if (!text) throw new Error('File .docx không có nội dung văn bản.');
+  return text;
 }
