@@ -3242,47 +3242,56 @@ Write all values in Vietnamese. Keep each array to 3-4 items max to fit in outpu
       response_format: { type: 'json_object' }
     });
 
-    // Extract raw text safely from any result shape
-    let rawText = '';
-    if (typeof result === 'string') {
-      rawText = result;
-    } else if (result && typeof result.response === 'string') {
-      rawText = result.response;
-    } else if (result && typeof result.result === 'string') {
-      rawText = result.result;
-    } else {
-      rawText = String(result?.response ?? result ?? '');
-    }
-    rawText = rawText.replace(/^(assistant\s*)+/ig, '').trim();
-
-    // Server-side JSON repair trước khi trả về client
+    // Workers AI với response_format json_object trả về result.response là object đã parsed
+    // Không phải string → phải xử lý cả 2 case
     let validatedJson = null;
-    try {
+
+    if (result && typeof result.response === 'object' && result.response !== null) {
+      // Case 1: response_format json_object → object trực tiếp (phổ biến nhất)
+      validatedJson = result.response;
+    } else {
+      // Case 2: response là string → extract + parse
+      let rawText = '';
+      if (typeof result === 'string') {
+        rawText = result;
+      } else if (result && typeof result.response === 'string') {
+        rawText = result.response;
+      } else if (result && typeof result.result === 'string') {
+        rawText = result.result;
+      } else {
+        rawText = JSON.stringify(result ?? '');
+      }
+      rawText = rawText.replace(/^(assistant\s*)+/ig, '').trim();
+      console.log('[CV Reviewer] rawText (500c):', rawText.substring(0, 500));
+
       // Thử parse thẳng
-      validatedJson = JSON.parse(rawText);
-    } catch (_) {
-      // Bóc tách khỏi markdown fences nếu có
-      const mdMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)```/i);
-      if (mdMatch) {
-        try { validatedJson = JSON.parse(mdMatch[1].trim()); } catch (_) {}
+      try { validatedJson = JSON.parse(rawText); } catch (_) {}
+
+      if (!validatedJson) {
+        // Bóc khỏi markdown fences
+        const mdMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)```/i);
+        if (mdMatch) {
+          try { validatedJson = JSON.parse(mdMatch[1].trim()); } catch (_) {}
+        }
       }
 
       if (!validatedJson) {
-        // Tìm JSON object trong text
+        // Tìm JSON object trong text (first { to last })
         const s = rawText.indexOf('{');
         const e = rawText.lastIndexOf('}');
         if (s !== -1 && e > s) {
-          let candidate = rawText.substring(s, e + 1)
-            .replace(/,\s*([}\]])/g, '$1')   // trailing comma
-            .replace(/([{,]\s*)'([^']+)'(\s*:)/g, '$1"$2"$3'); // single quotes
+          const candidate = rawText.substring(s, e + 1)
+            .replace(/,\s*([}\]])/g, '$1')
+            .replace(/([{,]\s*)'([^']+)'(\s*:)/g, '$1"$2"$3');
           try { validatedJson = JSON.parse(candidate); } catch (_) {}
         }
       }
     }
 
     if (!validatedJson) {
-      console.error('[CV Reviewer] Could not parse AI JSON. Raw:', rawText.substring(0, 500));
-      return cors(JSON.stringify({ error: `AI không trả về JSON hợp lệ. Raw: ${rawText.substring(0, 200)}` }), 502);
+      console.error('[CV Reviewer] Could not parse AI JSON. result keys:', result ? Object.keys(result) : 'null');
+      return cors(JSON.stringify({ error: 'AI không trả về JSON hợp lệ sau nhiều lần thử. Vui lòng thử lại.' }), 502);
+
     }
 
     // Đảm bảo các field bắt buộc tồn tại
