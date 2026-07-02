@@ -3256,7 +3256,21 @@ ${cvText}`;
       max_tokens: 2048
     });
 
-    let rawText = result.response || '';
+    // Log shape để debug nếu cần
+    console.log('[CV Reviewer] AI result type:', typeof result, '| keys:', result && typeof result === 'object' ? Object.keys(result).join(',') : 'N/A');
+
+    // Workers AI có thể trả về result.response (string), result (string), hoặc shape khác
+    // Dùng String() để ép kiểu an toàn, tránh lỗi "rawText.replace is not a function"
+    let rawText = '';
+    if (typeof result === 'string') {
+      rawText = result;
+    } else if (result && typeof result.response === 'string') {
+      rawText = result.response;
+    } else if (result && typeof result.result === 'string') {
+      rawText = result.result;
+    } else {
+      rawText = String(result?.response ?? result ?? '');
+    }
     rawText = rawText.replace(/^(assistant\s*)+/ig, '').trim();
 
     return new Response(JSON.stringify({ response: rawText }), {
