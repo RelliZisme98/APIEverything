@@ -83,7 +83,7 @@ export function renderCVReviewer(containerId = 'cvReviewerContent') {
               <div class="cv-drop-zone" id="cv-drop-area">
                 <i class="fas fa-cloud-upload-alt cv-drop-icon"></i>
                 <div style="font-size:13.5px; font-weight:700; color:var(--text-primary);">Kéo thả file CV vào đây hoặc click để chọn</div>
-                <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Hỗ trợ .pdf (kể cả scan), .docx, .txt, .md — tự động đọc nội dung.</div>
+                <div style="font-size:11.5px; color:#8b5cf6; font-weight:600; margin-top:4px; line-height:1.4;">Tải tệp CV lên sẽ tự động nhận diện nội dung & bắt đầu phân tích AI ngay!</div>
                 <input type="file" id="cv-file-input" accept=".pdf,.docx,.txt,.md" style="display:none;" />
               </div>
             </div>
@@ -227,6 +227,11 @@ function setupFileUploader() {
       extractPDFText(file, onProgress).then(text => {
         textarea.value = text;
         updateDropZoneSuccess(dropArea, file.name, text);
+        textarea.dispatchEvent(new Event('input'));
+        // Tự động kích hoạt phân tích sau 500ms để người dùng kịp quan sát trạng thái
+        setTimeout(() => {
+          startReviewFlow();
+        }, 500);
       }).catch(err => {
         console.error('[CV Reviewer] Lỗi đọc PDF:', err);
         alert('Không thể đọc file PDF này. Vui lòng thử file khác hoặc sao chép nội dung thủ công.');
@@ -242,8 +247,11 @@ function setupFileUploader() {
       extractDOCXText(file).then(text => {
         textarea.value = text;
         updateDropZoneSuccess(dropArea, file.name, text);
-        // Trigger word counter
         textarea.dispatchEvent(new Event('input'));
+        // Tự động kích hoạt phân tích sau 500ms
+        setTimeout(() => {
+          startReviewFlow();
+        }, 500);
       }).catch(err => {
         console.error('[CV Reviewer] Lỗi đọc DOCX:', err);
         alert('Không thể đọc file .docx này. Vui lòng thử xuất sang PDF hoặc sao chép nội dung thủ công.');
@@ -257,6 +265,10 @@ function setupFileUploader() {
         textarea.value = event.target.result;
         updateDropZoneSuccess(dropArea, file.name, event.target.result);
         textarea.dispatchEvent(new Event('input'));
+        // Tự động kích hoạt phân tích sau 500ms
+        setTimeout(() => {
+          startReviewFlow();
+        }, 500);
       };
       reader.readAsText(file);
     }
@@ -620,7 +632,9 @@ function bindResultButtons() {
       if (dropArea) {
         dropArea.style.borderColor = '';
         dropArea.style.background = '';
-        dropArea.querySelector('div').textContent = 'Kéo thả file CV vào đây hoặc click để chọn';
+        const divs = dropArea.querySelectorAll('div');
+        if (divs[0]) divs[0].textContent = 'Kéo thả file CV vào đây hoặc click để chọn';
+        if (divs[1]) divs[1].textContent = 'Tải tệp CV lên sẽ tự động nhận diện nội dung & bắt đầu phân tích AI ngay!';
       }
     };
   }
@@ -852,11 +866,10 @@ function pdfItemsToText(items) {
   for (const item of validItems) {
     let added = false;
     for (const line of lines) {
-      // Cho phép lệch Y tối đa 6 points (khoảng cách dòng nhỏ)
-      if (Math.abs(item.y - line.y) <= 6) {
+      // Giảm ngưỡng lệch Y xuống 3.0 points và giữ nguyên mốc Y ban đầu (không tính trung bình động)
+      // Điều này ngăn chặn triệt để hiệu ứng trôi dòng (average drift) làm gom các dòng kề nhau
+      if (Math.abs(item.y - line.y) <= 3.0) {
         line.items.push(item);
-        // Cập nhật lại Y trung bình của dòng
-        line.y = (line.y * (line.items.length - 1) + item.y) / line.items.length;
         added = true;
         break;
       }
@@ -1009,20 +1022,23 @@ function pdfItemsToText(items) {
     }
   }
 
-  // 6. Post-processing dọn dẹp khoảng trắng rác cuối cùng
-  // Xử lý các từ bị giãn cách vô lý trong PDF như "n a y", "0 2 / 2 0 2 5", "t r ì n h"
-  // Regex tìm chuỗi gồm các ký tự đơn lẻ (chữ cái/số/ký hiệu) cách nhau bởi 1 khoảng trắng duy nhất
+  // 6. Post-processing dọn dẹp khoảng trắng rác an toàn
+  // Chỉ sửa các lỗi giãn cách của chữ số (số điện thoại, ngày tháng) và chữ "nay"
   let cleaned = resultText
-    .replace(/(?:[a-zA-Z0-9\/\-\u00C0-\u1EF9]\s+){2,}[a-zA-Z0-9\/\-\u00C0-\u1EF9]/g, (match) => {
-      // Giữ lại khoảng cách nếu là từ thực tế bằng cách chỉ xóa khoảng cách giữa các ký tự đơn
-      return match.replace(/\s+/g, '');
-    })
     .replace(/ {2,}/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 
-  // Khôi phục một số từ đặc thù nếu regex gộp quá đà (nếu có)
-  cleaned = cleaned.replace(/\b([0-9]{2})\/([0-9]{4})\b/g, '$1/$2');
+  // Gộp các chữ số đơn lẻ đứng cạnh nhau (ví dụ: số điện thoại "0 8 6 7..." hoặc năm "2 0 2 5")
+  cleaned = cleaned.replace(/\b([0-9])\s+([0-9])\b/g, '$1$2');
+  cleaned = cleaned.replace(/\b([0-9])\s+([0-9])\b/g, '$1$2'); // chạy thêm lần nữa cho chuỗi số dài
+  
+  // Định dạng lại ngày tháng
+  cleaned = cleaned.replace(/\b([0-9]{2})\s*\/\s*([0-9]{4})\b/g, '$1/$2');
+  cleaned = cleaned.replace(/\b([0-9]{2})\s*-\s*([0-9]{4})\b/g, '$1-$2');
+  
+  // Sửa chữ "nay" bị giãn cách
+  cleaned = cleaned.replace(/\bn\s+a\s+y\b/gi, 'nay');
 
   return cleaned;
 }
