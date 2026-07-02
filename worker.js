@@ -1491,13 +1491,16 @@ const SERVER_IQ_POOL = [
   { q: "Nếu ngày hôm kia là thứ Hai, thì ngày mai là thứ mấy?", options: ["Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"], ans: 1 },
   { q: "Chữ cái tiếp theo trong chuỗi: B, D, G, K, ...", options: ["N", "O", "P", "Q"], ans: 2 },
   { q: "Nếu đảo ngược các chữ cái trong từ 'ROMA', bạn sẽ được một từ tiếng Latinh/Ý có nghĩa là tình yêu. Từ đó là gì?", options: ["AMOR", "MOAR", "RAMO", "ARMO"], ans: 0 },
-  { q: "Hãy chọn hình học hoàn chỉnh tiếp theo trong chuỗi tuần hoàn bên dưới:", options: ["Hình tròn màu đỏ", "Hình vuông màu đỏ", "Hình tròn màu xanh", "Hình vuông màu xanh"], ans: 2,
+  {
+    q: "Hãy chọn hình học hoàn chỉnh tiếp theo trong chuỗi tuần hoàn bên dưới:", options: ["Hình tròn màu đỏ", "Hình vuông màu đỏ", "Hình tròn màu xanh", "Hình vuông màu xanh"], ans: 2,
     svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 240 60"><circle cx="20" cy="30" r="12" fill="#f87171"/><rect x="50" y="18" width="24" height="24" fill="#60a5fa"/><circle cx="100" cy="30" r="12" fill="#f87171"/><rect x="130" y="18" width="24" height="24" fill="#60a5fa"/><text x="175" y="38" fill="#fff" font-size="20">?</text></svg>'
   },
-  { q: "Xác định góc tạo bởi hai kim đồng hồ khi đồng hồ chỉ đúng 6 giờ?", options: ["90 độ", "120 độ", "180 độ", "360 độ"], ans: 2,
+  {
+    q: "Xác định góc tạo bởi hai kim đồng hồ khi đồng hồ chỉ đúng 6 giờ?", options: ["90 độ", "120 độ", "180 độ", "360 độ"], ans: 2,
     svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 80 80" stroke="#34d399" stroke-width="2" fill="none"><circle cx="40" cy="40" r="30"/><line x1="40" y1="40" x2="40" y2="15"/><line x1="40" y1="40" x2="40" y2="65" stroke="#f87171"/></svg>'
   },
-  { q: "Hình hộp lập phương có bao nhiêu đỉnh tổng cộng?", options: ["6 đỉnh", "8 đỉnh", "12 đỉnh", "16 đỉnh"], ans: 1,
+  {
+    q: "Hình hộp lập phương có bao nhiêu đỉnh tổng cộng?", options: ["6 đỉnh", "8 đỉnh", "12 đỉnh", "16 đỉnh"], ans: 1,
     svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 80 80" stroke="#34d399" stroke-width="1.5" fill="none"><rect x="15" y="25" width="40" height="40"/><rect x="25" y="15" width="40" height="40"/><line x1="15" y1="25" x2="25" y2="15"/><line x1="55" y1="25" x2="65" y2="15"/><line x1="15" y1="65" x2="25" y2="55"/><line x1="55" y1="65" x2="65" y2="55"/></svg>'
   },
   { q: "Một cửa hàng bán cam. Lần một bán nửa số cam và 1 quả. Lần hai bán nửa số còn lại và 1 quả. Lúc này cửa hàng còn lại đúng 1 quả. Hỏi ban đầu cửa hàng có bao nhiêu quả cam?", options: ["8 quả", "10 quả", "12 quả", "14 quả"], ans: 1 },
@@ -1509,36 +1512,46 @@ const SERVER_IQ_POOL = [
   { q: "Một cái bể nước mất 6 giờ để đầy nếu chỉ dùng vòi A, mất 12 giờ nếu chỉ dùng vòi B. Hỏi nếu mở cả hai vòi cùng lúc thì mất bao lâu để đầy bể?", options: ["3 giờ", "4 giờ", "5 giờ", "6 giờ"], ans: 1 },
   { q: "Trong một hộp có 6 viên bi đỏ và 4 viên bi xanh. Cần lấy ngẫu nhiên ít nhất bao nhiêu viên bi để chắc chắn có ít nhất 2 viên bi màu xanh?", options: ["6 viên", "7 viên", "8 viên", "9 viên"], ans: 2 },
   { q: "Nếu ngày mai của ngày hôm qua là thứ Sáu, thì ngày kia của ngày hôm qua là thứ mấy?", options: ["Thứ Bảy", "Chủ Nhật", "Thứ Hai", "Thứ Ba"], ans: 0 },
-  { q: "Có tổng cộng bao nhiêu hình tam giác đơn và ghép trong hình vẽ dưới đây?", options: ["4", "5", "6", "8"], ans: 2,
+  {
+    q: "Có tổng cộng bao nhiêu hình tam giác đơn và ghép trong hình vẽ dưới đây?", options: ["4", "5", "6", "8"], ans: 2,
     svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 100 100"><polygon points="50,15 90,85 10,85" fill="none" stroke="#fbbf24" stroke-width="2"/><line x1="50" y1="15" x2="50" y2="85" stroke="#fbbf24" stroke-width="2"/><line x1="30" y1="50" x2="70" y2="50" stroke="#fbbf24" stroke-width="2"/></svg>'
   },
-  { q: "Xác định hướng xoay tiếp theo của kim mũi tên trong sơ đồ logic dưới đây:", options: ["Hướng bên Trái (Tây)", "Hướng đi Lên (Bắc)", "Hướng bên Phải (Đông)", "Hướng đi Xuống (Nam)"], ans: 0,
+  {
+    q: "Xác định hướng xoay tiếp theo của kim mũi tên trong sơ đồ logic dưới đây:", options: ["Hướng bên Trái (Tây)", "Hướng đi Lên (Bắc)", "Hướng bên Phải (Đông)", "Hướng đi Xuống (Nam)"], ans: 0,
     svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 200 60"><g stroke="#818cf8" stroke-width="2" fill="none"><line x1="25" y1="40" x2="25" y2="10" marker-end="url(#arrow)"/><line x1="75" y1="25" x2="95" y2="25"/><line x1="135" y1="10" x2="135" y2="40"/></g><text x="175" y="38" fill="#fbbf24" font-size="20">?</text></svg>'
   },
-  { q: "Xác định số lượng các ô vuông có trong lưới ô cờ 3x3 sau:", options: ["9", "10", "13", "14"], ans: 3,
+  {
+    q: "Xác định số lượng các ô vuông có trong lưới ô cờ 3x3 sau:", options: ["9", "10", "13", "14"], ans: 3,
     svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 90 90" stroke="#a7f3d0" stroke-width="2" fill="none"><rect x="15" y="15" width="60" height="60"/><line x1="35" y1="15" x2="35" y2="75"/><line x1="55" y1="15" x2="55" y2="75"/><line x1="15" y1="35" x2="75" y2="35"/><line x1="15" y1="55" x2="75" y2="55"/></svg>'
   },
-  { q: "Để hình vẽ đạt đối xứng trục dọc (giữa), phần nét đứt bên phải cần được thay thế bằng hình học nào?", options: ["Đường đi sang trái", "Góc nhọn hướng sang phải", "Đường thẳng đứng hoàn hảo", "Đường tròn khép kín"], ans: 1,
+  {
+    q: "Để hình vẽ đạt đối xứng trục dọc (giữa), phần nét đứt bên phải cần được thay thế bằng hình học nào?", options: ["Đường đi sang trái", "Góc nhọn hướng sang phải", "Đường thẳng đứng hoàn hảo", "Đường tròn khép kín"], ans: 1,
     svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 100 100"><line x1="50" y1="5" x2="50" y2="95" stroke="rgba(255,255,255,0.3)" stroke-dasharray="2,2"/><path d="M20,20 L40,50 L20,80" fill="none" stroke="#f472b6" stroke-width="2.5"/><path d="M50,50 L75,50" fill="none" stroke="#f472b6" stroke-width="2.5" stroke-dasharray="2,2"/><text x="70" y="40" fill="#fbbf24" font-size="14">?</text></svg>'
   },
   { q: "Mảng súng phủ kín mặt hồ sau 48 ngày. Biết mỗi ngày mảng súng tăng gấp đôi diện tích. Hỏi sau bao nhiêu ngày thì mảng súng phủ kín một nửa hồ?", options: ["24 ngày", "36 ngày", "47 ngày", "12 ngày"], ans: 2 },
-  { q: "Hãy xác định hình còn thiếu trong ô vuông ma trận logic 2x2 dưới đây:", options: ["Hình vuông nét đứt", "Hình tròn nét đứt", "Hình tam giác nét liền", "Hình vuông nét liền"], ans: 0,
+  {
+    q: "Hãy xác định hình còn thiếu trong ô vuông ma trận logic 2x2 dưới đây:", options: ["Hình vuông nét đứt", "Hình tròn nét đứt", "Hình tam giác nét liền", "Hình vuông nét liền"], ans: 0,
     svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 100 100"><line x1="50" y1="0" x2="50" y2="100" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/><line x1="0" y1="50" x2="100" y2="50" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/><circle cx="25" cy="25" r="12" fill="none" stroke="#34d399" stroke-width="2"/><circle cx="75" cy="25" r="12" fill="none" stroke="#34d399" stroke-dasharray="2,2" stroke-width="2"/><rect x="15" y="65" width="20" height="20" fill="none" stroke="#34d399" stroke-width="2"/><text x="70" y="80" fill="#60a5fa" font-size="14" font-weight="bold">?</text></svg>'
   },
-  { q: "Chọn hình biểu diễn mô tả góc nhìn từ trên xuống (top-down) của hình chóp tứ giác đều?", options: ["Hình vuông có 2 đường chéo", "Hình tròn có tâm", "Hình tam giác cân", "Hai hình chữ nhật ghép lại"], ans: 0,
+  {
+    q: "Chọn hình biểu diễn mô tả góc nhìn từ trên xuống (top-down) của hình chóp tứ giác đều?", options: ["Hình vuông có 2 đường chéo", "Hình tròn có tâm", "Hình tam giác cân", "Hai hình chữ nhật ghép lại"], ans: 0,
     svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 100 100" stroke="#818cf8" stroke-width="2" fill="none"><polygon points="50,15 85,75 15,75"/><line x1="50" y1="15" x2="50" y2="75" stroke-dasharray="2,2"/></svg>'
   },
-  { q: "Xác định chữ số thay thế dấu chấm hỏi trong dãy số xoắn ốc logic dưới đây:", options: ["12", "14", "15", "16"], ans: 1,
+  {
+    q: "Xác định chữ số thay thế dấu chấm hỏi trong dãy số xoắn ốc logic dưới đây:", options: ["12", "14", "15", "16"], ans: 1,
     svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 100 100" stroke="#fbbf24" stroke-width="1.5" fill="none"><rect x="10" y="10" width="80" height="80"/><line x1="50" y1="10" x2="50" y2="90"/><line x1="10" y1="50" x2="90" y2="50"/><text x="25" y="35" fill="#fff" font-size="12">2</text><text x="65" y="35" fill="#fff" font-size="12">5</text><text x="65" y="75" fill="#fff" font-size="12">9</text><text x="25" y="75" fill="#34d399" font-size="14" font-weight="bold">?</text></svg>'
   },
-  { q: "Chọn hình thể hiện mặt cắt ngang đi qua mặt phẳng nghiêng màu đỏ của hình trụ tròn dưới đây:", options: ["Hình tròn", "Hình bầu dục (Ellipse)", "Hình chữ nhật", "Hình tam giác"], ans: 1,
+  {
+    q: "Chọn hình thể hiện mặt cắt ngang đi qua mặt phẳng nghiêng màu đỏ của hình trụ tròn dưới đây:", options: ["Hình tròn", "Hình bầu dục (Ellipse)", "Hình chữ nhật", "Hình tam giác"], ans: 1,
     svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 100 100" stroke="#34d399" stroke-width="2" fill="none"><ellipse cx="50" cy="25" rx="20" ry="8"/><line x1="30" y1="25" x2="30" y2="75"/><line x1="70" y1="25" x2="70" y2="75"/><ellipse cx="50" cy="75" rx="20" ry="8" stroke-dasharray="2,2"/><line x1="20" y1="40" x2="80" y2="60" stroke="#f87171" stroke-width="1.5"/></svg>'
   },
-  { q: "Xác định phần tư còn thiếu để khôi phục cấu trúc hai đường tròn đồng tâm bên dưới:", options: ["Góc phần tư có nét vẽ ngược", "Góc phần tư có 2 cung tròn", "Góc phần tư trống rỗng", "Góc phần tư có 1 cung tròn"], ans: 1,
+  {
+    q: "Xác định phần tư còn thiếu để khôi phục cấu trúc hai đường tròn đồng tâm bên dưới:", options: ["Góc phần tư có nét vẽ ngược", "Góc phần tư có 2 cung tròn", "Góc phần tư trống rỗng", "Góc phần tư có 1 cung tròn"], ans: 1,
     svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 100 100" stroke="#818cf8" stroke-width="2" fill="none"><circle cx="50" cy="50" r="40" stroke-dasharray="10, 5"/><circle cx="50" cy="50" r="20"/><path d="M 50 10 A 40 40 0 0 1 90 50 L 50 50 Z" stroke="#34d399"/><rect x="50" y="50" width="40" height="40" stroke="rgba(255,255,255,0.2)" stroke-dasharray="2,2"/><text x="65" y="75" fill="#fbbf24" font-size="16">?</text></svg>'
   },
   { q: "Một khối lập phương gỗ lớn kích thước 3x3x3 được sơn toàn bộ bề mặt ngoài màu đỏ, sau đó cưa nhỏ thành 27 khối lập phương 1x1x1. Hỏi có bao nhiêu khối nhỏ không có mặt nào được sơn màu đỏ?", options: ["1 khối", "6 khối", "8 khối", "27 khối"], ans: 0 },
-  { q: "Trong các nhóm đường thẳng song song sau, đường nào có chiều dài thực tế ngắn nhất?", options: ["Đường A", "Đường B", "Đường C", "Tất cả bằng nhau"], ans: 3,
+  {
+    q: "Trong các nhóm đường thẳng song song sau, đường nào có chiều dài thực tế ngắn nhất?", options: ["Đường A", "Đường B", "Đường C", "Tất cả bằng nhau"], ans: 3,
     svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 200 80" stroke="#fff" stroke-width="2"><line x1="20" y1="20" x2="180" y2="20"/><line x1="20" y1="40" x2="180" y2="40"/><line x1="20" y1="60" x2="180" y2="60"/><path d="M 10 10 L 30 30 M 190 10 L 170 30" stroke="#f87171"/><path d="M 30 30 L 10 50 M 170 30 L 190 50" stroke="#f87171"/><path d="M 10 50 L 30 70 M 190 50 L 170 70" stroke="#f87171"/></svg>'
   },
 
@@ -1554,12 +1567,14 @@ const SERVER_IQ_POOL = [
   { q: "Một người nông dân muốn qua sông với một con sói, một con dê và một bắp cải. Thuyền chỉ chở được người và một vật. Nếu không có người, sói sẽ ăn dê, dê sẽ ăn bắp cải. Số chuyến đò tối thiểu để qua sông an toàn là?", options: ["5 chuyến", "7 chuyến", "9 chuyến", "11 chuyến"], ans: 1 },
   { q: "Xác định số tiếp theo trong ma trận logic 3x3 sau: Hàng 1 [2, 3, 5], Hàng 2 [7, 11, 13], Hàng 3 [17, 19, ?]", options: ["21", "23", "25", "29"], ans: 1 },
   { q: "Ba người A, B, C nói về nghề nghiệp của mình. Một người là bác sĩ, một người là giáo viên, một người là kỹ sư. A nói: 'C là kỹ sư'. B nói: 'Tôi không phải là kỹ sư'. C nói: 'Tôi là giáo viên'. Biết chỉ có giáo viên nói thật. Hỏi ai là bác sĩ?", options: ["Người A", "Người B", "Người C", "Không thể xác định"], ans: 0 },
-  { q: "Tìm hình tiếp theo trong chuỗi logic hình học bên dưới:", options: ["Hình lục giác màu vàng", "Hình vuông màu đỏ", "Hình tròn màu xanh", "Hình tam giác màu xanh"], ans: 0,
+  {
+    q: "Tìm hình tiếp theo trong chuỗi logic hình học bên dưới:", options: ["Hình lục giác màu vàng", "Hình vuông màu đỏ", "Hình tròn màu xanh", "Hình tam giác màu xanh"], ans: 0,
     svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 200 60"><polygon points="20,15 35,45 5,45" fill="#f87171"/><rect x="60" y="18" width="24" height="24" fill="#60a5fa"/><polygon points="110,15 122,25 118,45 102,45 98,25" fill="#34d399"/><text x="165" y="38" fill="#fff" font-size="20">?</text></svg>'
   },
   { q: "Một chiếc kim giờ của đồng hồ mất bao lâu để quay hết một góc 30 độ?", options: ["5 phút", "10 phút", "30 phút", "60 phút"], ans: 3 },
   { q: "Trong một cuộc chạy đua, nếu bạn vượt qua người thứ hai, bạn sẽ đứng ở vị trí thứ mấy?", options: ["Thứ nhất", "Thứ hai", "Thứ ba", "Cuối cùng"], ans: 1 },
-  { q: "Để hoàn thành bức tranh lập phương, góc khuất của hình hộp 3D bên dưới cần được ghép bởi bao nhiêu khối lập phương đơn lẻ nữa?", options: ["1 khối", "2 khối", "3 khối", "4 khối"], ans: 1,
+  {
+    q: "Để hoàn thành bức tranh lập phương, góc khuất của hình hộp 3D bên dưới cần được ghép bởi bao nhiêu khối lập phương đơn lẻ nữa?", options: ["1 khối", "2 khối", "3 khối", "4 khối"], ans: 1,
     svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 100 100" stroke="#fbbf24" stroke-width="1.5" fill="none"><rect x="20" y="20" width="40" height="40"/><rect x="40" y="40" width="40" height="40"/><line x1="20" y1="20" x2="40" y2="40"/><line x1="60" y1="20" x2="80" y2="40"/><line x1="20" y1="60" x2="40" y2="80"/><line x1="60" y1="60" x2="80" y2="80"/></svg>'
   }
 ];
@@ -1794,9 +1809,9 @@ async function handleMBTI(request, env) {
       breakdown.P = 100 - breakdown.J;
 
       const type = (breakdown.E >= 50 ? 'E' : 'I') +
-                   (breakdown.N >= 50 ? 'N' : 'S') +
-                   (breakdown.T >= 50 ? 'T' : 'F') +
-                   (breakdown.J >= 50 ? 'J' : 'P');
+        (breakdown.N >= 50 ? 'N' : 'S') +
+        (breakdown.T >= 50 ? 'T' : 'F') +
+        (breakdown.J >= 50 ? 'J' : 'P');
 
       const responsePayload = {
         type,
@@ -1891,7 +1906,7 @@ async function handleIQEQ(request, env) {
         const sel4 = pool4.sort(() => 0.5 - Math.random()).slice(0, 6);
 
         const indices = [...sel1, ...sel2, ...sel3, ...sel4].sort((a, b) => a - b);
-        
+
         const safeQuestions = indices.map(idx => {
           const original = SERVER_IQ_POOL[idx];
           return {
@@ -1921,7 +1936,7 @@ async function handleIQEQ(request, env) {
 
         // Gộp lại và sắp xếp theo index tăng dần
         const indices = [...selectedEmpathy, ...selectedSelfReg, ...selectedSocial, ...selectedSelfAwa].sort((a, b) => a - b);
-        
+
         const safeQuestions = indices.map(idx => {
           const original = SERVER_EQ_POOL[idx];
           return {
@@ -1937,7 +1952,7 @@ async function handleIQEQ(request, env) {
     // 2. NỘP BÀI CHẤM ĐIỂM BẢO MẬT & LƯU DB
     if (request.method === 'POST' && action === 'submit') {
       const { name, age, test_type, answers } = await request.json();
-      
+
       let finalScore = 0;
       let rawCorrect = 0;
       let responsePayload = {};
@@ -1959,25 +1974,25 @@ async function handleIQEQ(request, env) {
 
         let classification, desc;
         if (finalScore >= 140) {
- classification = 'Thiên Tài / Xuất Chúng (Top 0.1%)';
+          classification = 'Thiên Tài / Xuất Chúng (Top 0.1%)';
           desc = 'Chỉ số IQ cực kỳ vượt trội. Khả năng tư duy toán học lý thuyết, mật mã học, lý thuyết trò chơi và tư duy không gian đạt mức siêu việt.';
         } else if (finalScore >= 130) {
- classification = 'Trí Tuệ Vượt Trội (Top 2%)';
+          classification = 'Trí Tuệ Vượt Trội (Top 2%)';
           desc = 'Tư duy logic và phân tích sắc sảo. Giải quyết tốt hầu hết các câu đố lý thuyết đồ thị phức tạp và bài toán xác suất.';
         } else if (finalScore >= 120) {
- classification = 'Trí Tuệ Cao (Top 10%)';
+          classification = 'Trí Tuệ Cao (Top 10%)';
           desc = 'Khả năng tư duy logic và toán học rất tốt. Khả năng giải quyết vấn đề nhanh nhạy dưới áp lực.';
         } else if (finalScore >= 110) {
- classification = 'Trên Trung Bình (Top 25%)';
+          classification = 'Trên Trung Bình (Top 25%)';
           desc = 'Tư duy logic nhạy bén, hoàn thành tốt các câu hỏi hình học, dãy số và suy luận ở mức trung bình khá.';
         } else if (finalScore >= 95) {
- classification = 'Trung Bình Khá (Top 50%)';
+          classification = 'Trung Bình Khá (Top 50%)';
           desc = 'Năng lực tư duy ở mức trung bình khá. Khả năng giải quyết các tình huống thực tế và tính toán cơ bản ổn định.';
         } else if (finalScore >= 80) {
- classification = 'Trung Bình (Cần cải thiện)';
+          classification = 'Trung Bình (Cần cải thiện)';
           desc = 'Tư duy logic cơ bản tốt. Cần rèn luyện thêm khả năng phân tích chuỗi số phức tạp và hình học không gian.';
         } else {
- classification = 'Mới Bắt Đầu';
+          classification = 'Mới Bắt Đầu';
           desc = 'Hãy thường xuyên rèn luyện não bộ bằng các câu đố tư duy logic, toán đố cơ bản để nâng cao phản xạ.';
         }
 
@@ -2194,11 +2209,11 @@ async function handleApiNews(request) {
         },
         signal: AbortSignal.timeout(6000)
       })
-      .then(r => r.ok ? r.text() : '')
-      .catch(e => {
-        console.warn(`Failed to fetch feed ${url}:`, e.message);
-        return '';
-      })
+        .then(r => r.ok ? r.text() : '')
+        .catch(e => {
+          console.warn(`Failed to fetch feed ${url}:`, e.message);
+          return '';
+        })
     );
 
     const xmlTexts = await Promise.all(fetchPromises);
@@ -2270,10 +2285,10 @@ function parseRSS(xmlText) {
 
     // Clean description HTML tags
     let cleanDesc = rawDesc.replace(/<[^>]+>/g, '')
-                           .replace(/&nbsp;/g, ' ')
-                           .replace(/&amp;/g, '&')
-                           .replace(/&quot;/g, '"')
-                           .trim();
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .trim();
 
     items.push({
       title,
@@ -2538,76 +2553,76 @@ async function handleTaxLookup(request) {
           if (!html.includes(cleanMST)) {
             console.warn(`MasoThue scraper redirected to a poisoned URL (query not found in page): ${finalUrl}`);
           } else {
-        
-        // Match detail page
-        const nameMatch = html.match(/itemprop="name"><span[^>]*>([^<]+)<\/span>/i) ||
-                          html.match(/itemprop='name'><span[^>]*>([^<]+)<\/span>/i) ||
-                          html.match(/itemprop="name">([^<]+)/i) ||
-                          html.match(/itemprop='name'>([^<]+)/i);
-        
-        const mstMatch = html.match(/itemprop="taxID"><span[^>]*>([0-9-]+)<\/span>/i) ||
-                         html.match(/itemprop='taxID'><span[^>]*>([0-9-]+)<\/span>/i) ||
-                         html.match(/itemprop="taxID"><b>([0-9-]+)<\/b>/i) ||
-                         html.match(/itemprop='taxID'><b>([0-9-]+)<\/b>/i) ||
-                         html.match(/Mã số thuế<\/td>\s*<td><b>([0-9-]+)<\/b>/i) ||
-                         html.match(/Mã số thuế<\/td>\s*<td><span[^>]*>([0-9-]+)<\/span>/i);
 
-        const addrMatch = html.match(/Địa chỉ[^<]*<\/td>\s*<td>\s*<span[^>]*>([^<]+)<\/span>/i) ||
-                          html.match(/Địa chỉ[^<]*<\/td>\s*<td>\s*<span[^>]*>\s*<a[^>]*>([^<]+)<\/a>/i) ||
-                          html.match(/Địa chỉ[^<]*<\/td>\s*<td>([^<]+)<\/td>/i) ||
-                          html.match(/itemprop="address">([^<]+)<\/td>/i) ||
-                          html.match(/itemprop='address'>([^<]+)<\/td>/i);
+            // Match detail page
+            const nameMatch = html.match(/itemprop="name"><span[^>]*>([^<]+)<\/span>/i) ||
+              html.match(/itemprop='name'><span[^>]*>([^<]+)<\/span>/i) ||
+              html.match(/itemprop="name">([^<]+)/i) ||
+              html.match(/itemprop='name'>([^<]+)/i);
 
-        const repMatch = html.match(/Người đại diện<\/td>\s*<td>\s*<span[^>]*>\s*<a[^>]*>([^<]+)<\/a>/i) ||
-                         html.match(/Người đại diện<\/td>\s*<td>\s*<a[^>]*>([^<]+)<\/a>/i) ||
-                         html.match(/Người đại diện<\/td>\s*<td>([^<]+)<\/td>/i) ||
-                         html.match(/itemprop="alumniOf">([^<]+)<\/td>/i) ||
-                         html.match(/itemprop='alumniOf'>([^<]+)<\/td>/i);
+            const mstMatch = html.match(/itemprop="taxID"><span[^>]*>([0-9-]+)<\/span>/i) ||
+              html.match(/itemprop='taxID'><span[^>]*>([0-9-]+)<\/span>/i) ||
+              html.match(/itemprop="taxID"><b>([0-9-]+)<\/b>/i) ||
+              html.match(/itemprop='taxID'><b>([0-9-]+)<\/b>/i) ||
+              html.match(/Mã số thuế<\/td>\s*<td><b>([0-9-]+)<\/b>/i) ||
+              html.match(/Mã số thuế<\/td>\s*<td><span[^>]*>([0-9-]+)<\/span>/i);
 
-        const managedMatch = html.match(/Quản lý bởi<\/td>\s*<td>\s*<span[^>]*>([^<]+)<\/span>/i) ||
-                             html.match(/Quản lý bởi<\/td>\s*<td>([^<]+)<\/td>/i);
+            const addrMatch = html.match(/Địa chỉ[^<]*<\/td>\s*<td>\s*<span[^>]*>([^<]+)<\/span>/i) ||
+              html.match(/Địa chỉ[^<]*<\/td>\s*<td>\s*<span[^>]*>\s*<a[^>]*>([^<]+)<\/a>/i) ||
+              html.match(/Địa chỉ[^<]*<\/td>\s*<td>([^<]+)<\/td>/i) ||
+              html.match(/itemprop="address">([^<]+)<\/td>/i) ||
+              html.match(/itemprop='address'>([^<]+)<\/td>/i);
 
-        if (nameMatch) {
-          const name = nameMatch[1].trim();
-          const mst = mstMatch ? mstMatch[1].trim() : cleanMST;
-          const address = addrMatch ? addrMatch[1].trim() : (managedMatch ? `Quản lý bởi: ${managedMatch[1].trim()}` : 'Không rõ');
-          const representative = repMatch ? repMatch[1].trim() : name;
+            const repMatch = html.match(/Người đại diện<\/td>\s*<td>\s*<span[^>]*>\s*<a[^>]*>([^<]+)<\/a>/i) ||
+              html.match(/Người đại diện<\/td>\s*<td>\s*<a[^>]*>([^<]+)<\/a>/i) ||
+              html.match(/Người đại diện<\/td>\s*<td>([^<]+)<\/td>/i) ||
+              html.match(/itemprop="alumniOf">([^<]+)<\/td>/i) ||
+              html.match(/itemprop='alumniOf'>([^<]+)<\/td>/i);
 
-          return cors(JSON.stringify({
-            source: 'masothue',
-            results: [{
-              name,
-              mst,
-              representative,
-              address,
-              status: 'ĐANG HOẠT ĐỘNG'
-            }]
-          }));
-        }
-      }
-    } else {
-      // Match list page
-      const listRegex = /<a href="\/([0-9-]{10,14})-[^"]+"[^>]*>([^<]+)<\/a>/g;
-      const results = [];
-        let m;
-        while ((m = listRegex.exec(html)) !== null) {
-          if (m[1] && m[2] && !m[2].includes('Mã số thuế') && !m[2].includes('Trang chủ')) {
-            results.push({
-              name: m[2].trim(),
-              mst: m[1].trim(),
-              representative: m[2].trim(),
-              address: 'Xem chi tiết trên MaSoThue',
-              status: 'ĐANG HOẠT ĐỘNG'
-            });
+            const managedMatch = html.match(/Quản lý bởi<\/td>\s*<td>\s*<span[^>]*>([^<]+)<\/span>/i) ||
+              html.match(/Quản lý bởi<\/td>\s*<td>([^<]+)<\/td>/i);
+
+            if (nameMatch) {
+              const name = nameMatch[1].trim();
+              const mst = mstMatch ? mstMatch[1].trim() : cleanMST;
+              const address = addrMatch ? addrMatch[1].trim() : (managedMatch ? `Quản lý bởi: ${managedMatch[1].trim()}` : 'Không rõ');
+              const representative = repMatch ? repMatch[1].trim() : name;
+
+              return cors(JSON.stringify({
+                source: 'masothue',
+                results: [{
+                  name,
+                  mst,
+                  representative,
+                  address,
+                  status: 'ĐANG HOẠT ĐỘNG'
+                }]
+              }));
+            }
           }
-        }
+        } else {
+          // Match list page
+          const listRegex = /<a href="\/([0-9-]{10,14})-[^"]+"[^>]*>([^<]+)<\/a>/g;
+          const results = [];
+          let m;
+          while ((m = listRegex.exec(html)) !== null) {
+            if (m[1] && m[2] && !m[2].includes('Mã số thuế') && !m[2].includes('Trang chủ')) {
+              results.push({
+                name: m[2].trim(),
+                mst: m[1].trim(),
+                representative: m[2].trim(),
+                address: 'Xem chi tiết trên MaSoThue',
+                status: 'ĐANG HOẠT ĐỘNG'
+              });
+            }
+          }
 
-        if (results.length > 0) {
-          return cors(JSON.stringify({
-            source: 'masothue-list',
-            results
-          }));
-        }
+          if (results.length > 0) {
+            return cors(JSON.stringify({
+              source: 'masothue-list',
+              results
+            }));
+          }
         }
       }
     } catch (err) {
@@ -3198,7 +3213,7 @@ async function handleCVReviewer(request, env) {
   }
 
   if (!env.AI) {
-    return cors(JSON.stringify({ error: 'Workers AI is not configured. Please add the AI binding in wrangler.toml.' }), 503);
+    return cors(JSON.stringify({ error: 'Workers AI is not configured.' }), 503);
   }
 
   try {
@@ -3208,64 +3223,134 @@ async function handleCVReviewer(request, env) {
       return cors(JSON.stringify({ error: 'Nội dung CV là bắt buộc để phân tích.' }), 400);
     }
 
-    const persona = tone === 'cto' 
-      ? 'Giám đốc Công nghệ (CTO)' 
-      : (tone === 'recruiter' ? 'Trưởng phòng Nhân sự (HR Manager)' : 'Chuyên gia Đánh giá CV cấp cao');
+    // Giới hạn CV ở server để đảm bảo token budget cho JSON output
+    const MAX_CV_SERVER = 6000;
+    const safeCvText = cvText.length > MAX_CV_SERVER
+      ? cvText.substring(0, MAX_CV_SERVER) + '\n[... nội dung bị rút gọn ...]'
+      : cvText;
 
-    const systemPrompt = `Bạn là một ${persona} xuất sắc, chuyên đánh giá và tối ưu hóa CV. 
-Nhiệm vụ của bạn là đánh giá, chấm điểm và góp ý chi tiết cho CV của ứng viên dựa trên Vị trí ứng tuyển mục tiêu: "${jobPosition || 'Chưa rõ'}" và Bản mô tả công việc (JD): "${jobDescription || 'Chưa cung cấp'}".
+    const persona = tone === 'cto'
+      ? 'CTO (Giám đốc Công nghệ)'
+      : (tone === 'recruiter' ? 'HR Manager (Trưởng phòng Nhân sự)' : 'Senior CV Expert');
 
-BẮT BUỘC chỉ trả về một chuỗi JSON duy nhất hợp lệ, không bọc trong ký tự markdown \`\`\` hay viết thêm bất kỳ lời dẫn nào. JSON phải theo cấu trúc chính xác sau:
+    // Prompt chi tiết, hướng dẫn rõ từng field để đảm bảo output đầy đủ và nhất quán
+    const systemPrompt = `You are a ${persona} doing a DETAILED, STRUCTURED review of a Vietnamese CV.
+Target position: "${jobPosition || 'Not specified'}"
+Job description: "${jobDescription ? jobDescription.substring(0, 400) : 'Not provided'}"
+
+OUTPUT FORMAT: Respond ONLY with a single valid JSON object. Zero text outside JSON.
+
+JSON SCHEMA (fill every field with REAL analysis from the CV, not placeholders):
 {
-  "score": 75, // Điểm số đánh giá từ 0 đến 100
-  "grade": "Xuất sắc" | "Tốt" | "Khá" | "Trung bình" | "Cần sửa đổi nhiều",
-  "overview": "Đánh giá tổng quan ngắn gọn 3-4 câu về CV...",
+  "score": <integer 0-100 based on: completeness 25pts + experience quality 25pts + ATS keywords 25pts + formatting 25pts>,
+  "grade": <"Xuất sắc"|"Tốt"|"Khá"|"Trung bình"|"Cần sửa đổi nhiều">,
+  "overview": <2-3 sentences: overall impression, years/level of experience, strongest qualification, and biggest gap vs target role>,
   "strengths": [
-    "Điểm mạnh 1 (ghi rõ phần nào và lý do tốt)...",
-    "Điểm mạnh 2..."
+    <EXACTLY 5 items. Each: "Phần [X]: [specific quote or observation from CV] — [why it's a strength for this role]">
   ],
   "weaknesses": [
-    "Điểm yếu 1 (ghi rõ phần nào cần khắc phục)...",
-    "Điểm yếu 2..."
+    <EXACTLY 5 items. Each: "Phần [X]: [specific issue found in CV] — [why it hurts this application]">
   ],
   "improvements": [
-    "Đề xuất cải thiện cụ thể 1...",
-    "Đề xuất cải thiện cụ thể 2..."
+    <EXACTLY 5 items. Each: "Mục [X]: [concrete action step, e.g. 'Thêm số liệu định lượng vào dòng Y', 'Bổ sung từ khóa Z vào mục Kỹ năng']">
   ],
-  "ats_feedback": "Đánh giá chi tiết về độ tương thích ATS (Ví dụ: Định dạng, mật độ từ khóa chuyên ngành, thông tin liên lạc, liên kết portfolio...)",
+  "ats_feedback": <2-3 sentences: specific ATS issues — missing keywords for target role, formatting problems that confuse parsers, section names that should be standardized, contact info completeness>,
   "rewrites": [
-    {
-      "before": "Cách viết cũ kém thu hút trong CV...",
-      "after": "Cách viết mới đề xuất (Chuyên nghiệp hơn, dùng động từ hành động mạnh và chỉ số lượng hóa kết quả nếu có)...",
-      "reason": "Giải thích tại sao cách viết này lại giúp tăng cơ hội đỗ..."
-    }
+    <EXACTLY 4 items. Each item MUST quote directly from the CV text in "before", then improve it in "after">
+    {"before": <exact sentence/phrase from CV>, "after": <improved version with action verb + metric/result>, "reason": <specific reason why the rewrite improves ATS/impact>}
   ]
 }
 
-Hãy viết toàn bộ đánh giá bằng Tiếng Việt chuẩn. Đảm bảo các góp ý mang tính thực tế, sắc sảo và mang lại giá trị thực tế cho ứng viên.`;
+Rules:
+- score grade mapping: 85-100=Xuất sắc, 70-84=Tốt, 55-69=Khá, 40-54=Trung bình, 0-39=Cần sửa đổi nhiều
+- Write ALL field values in Vietnamese
+- Be critical and specific, never generic. Reference actual content from the CV.`;
 
-    const userPrompt = `Nội dung CV của ứng viên:
-${cvText}`;
+    const userPrompt = `CV content:\n${safeCvText}`;
 
     const result = await env.AI.run('@cf/meta/llama-3.1-8b-instruct-fast', {
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      temperature: 0.3,
-      max_tokens: 2048
+      temperature: 0.1,
+      max_tokens: 3000,
+      response_format: { type: 'json_object' }
     });
 
-    let rawText = result.response || '';
-    rawText = rawText.replace(/^(assistant\s*)+/ig, '').trim();
+    // Workers AI với response_format json_object trả về result.response là object đã parsed
+    // Không phải string → phải xử lý cả 2 case
+    let validatedJson = null;
 
-    return new Response(JSON.stringify({ response: rawText }), {
+    if (result && typeof result.response === 'object' && result.response !== null) {
+      // Case 1: response_format json_object → object trực tiếp (phổ biến nhất)
+      validatedJson = result.response;
+    } else {
+      // Case 2: response là string → extract + parse
+      let rawText = '';
+      if (typeof result === 'string') {
+        rawText = result;
+      } else if (result && typeof result.response === 'string') {
+        rawText = result.response;
+      } else if (result && typeof result.result === 'string') {
+        rawText = result.result;
+      } else {
+        rawText = JSON.stringify(result ?? '');
+      }
+      rawText = rawText.replace(/^(assistant\s*)+/ig, '').trim();
+      console.log('[CV Reviewer] rawText (500c):', rawText.substring(0, 500));
+
+      // Thử parse thẳng
+      try { validatedJson = JSON.parse(rawText); } catch (_) { }
+
+      if (!validatedJson) {
+        // Bóc khỏi markdown fences
+        const mdMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)```/i);
+        if (mdMatch) {
+          try { validatedJson = JSON.parse(mdMatch[1].trim()); } catch (_) { }
+        }
+      }
+
+      if (!validatedJson) {
+        // Tìm JSON object trong text (first { to last })
+        const s = rawText.indexOf('{');
+        const e = rawText.lastIndexOf('}');
+        if (s !== -1 && e > s) {
+          const candidate = rawText.substring(s, e + 1)
+            .replace(/,\s*([}\]])/g, '$1')
+            .replace(/([{,]\s*)'([^']+)'(\s*:)/g, '$1"$2"$3');
+          try { validatedJson = JSON.parse(candidate); } catch (_) { }
+        }
+      }
+    }
+
+    if (!validatedJson) {
+      console.error('[CV Reviewer] Could not parse AI JSON. result keys:', result ? Object.keys(result) : 'null');
+      return cors(JSON.stringify({ error: 'AI không trả về JSON hợp lệ sau nhiều lần thử. Vui lòng thử lại.' }), 502);
+
+    }
+
+    // Đảm bảo các field bắt buộc tồn tại
+    const safe = {
+      score: Number(validatedJson.score) || 50,
+      grade: validatedJson.grade || 'Khá',
+      overview: validatedJson.overview || '',
+      strengths: Array.isArray(validatedJson.strengths) ? validatedJson.strengths : [],
+      weaknesses: Array.isArray(validatedJson.weaknesses) ? validatedJson.weaknesses : [],
+      improvements: Array.isArray(validatedJson.improvements) ? validatedJson.improvements : [],
+      ats_feedback: validatedJson.ats_feedback || '',
+      rewrites: Array.isArray(validatedJson.rewrites) ? validatedJson.rewrites : [],
+    };
+
+    return new Response(JSON.stringify({ response: JSON.stringify(safe) }), {
       headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS },
     });
   } catch (err) {
+    console.error('[CV Reviewer] Error:', err.message);
     return cors(JSON.stringify({ error: err.message }), 500);
   }
 }
+
 
 async function handleAI(request, env) {
   if (request.method === 'OPTIONS') return preflight();
@@ -3568,9 +3653,9 @@ export default {
     if (pathname === '/api/exchange') return handleExchange(request);
     if (pathname === '/api/crypto') return handleCrypto(request, env);
     if (pathname === '/vietlott') return handleVietlott(request);
-    if (pathname === '/api/ai')  return handleAI(request, env);
+    if (pathname === '/api/ai') return handleAI(request, env);
     if (pathname === '/api/cv-reviewer') return handleCVReviewer(request, env);
-    if (pathname === '/api/tts')  return handleTTS(request);
+    if (pathname === '/api/tts') return handleTTS(request);
     if (pathname === '/api/shorten') return handleShorten(request, env);
 
 
