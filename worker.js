@@ -3198,7 +3198,7 @@ async function handleCVReviewer(request, env) {
   }
 
   if (!env.AI) {
-    return cors(JSON.stringify({ error: 'Workers AI is not configured. Please add the AI binding in wrangler.toml.' }), 503);
+    return cors(JSON.stringify({ error: 'Workers AI is not configured.' }), 503);
   }
 
   try {
@@ -3208,60 +3208,41 @@ async function handleCVReviewer(request, env) {
       return cors(JSON.stringify({ error: 'Nội dung CV là bắt buộc để phân tích.' }), 400);
     }
 
-    const persona = tone === 'cto' 
-      ? 'Giám đốc Công nghệ (CTO)' 
-      : (tone === 'recruiter' ? 'Trưởng phòng Nhân sự (HR Manager)' : 'Chuyên gia Đánh giá CV cấp cao');
+    // Giới hạn CV ở server để đảm bảo token budget cho JSON output
+    const MAX_CV_SERVER = 6000;
+    const safeCvText = cvText.length > MAX_CV_SERVER
+      ? cvText.substring(0, MAX_CV_SERVER) + '\n[... nội dung bị rút gọn ...]'
+      : cvText;
 
-    const systemPrompt = `Bạn là một ${persona} xuất sắc, chuyên đánh giá và tối ưu hóa CV. 
-Nhiệm vụ của bạn là đánh giá, chấm điểm và góp ý chi tiết cho CV của ứng viên dựa trên Vị trí ứng tuyển mục tiêu: "${jobPosition || 'Chưa rõ'}" và Bản mô tả công việc (JD): "${jobDescription || 'Chưa cung cấp'}".
+    const persona = tone === 'cto'
+      ? 'CTO (Giám đốc Công nghệ)'
+      : (tone === 'recruiter' ? 'HR Manager (Trưởng phòng Nhân sự)' : 'Senior CV Expert');
 
-BẮT BUỘC chỉ trả về một chuỗi JSON duy nhất hợp lệ, không bọc trong ký tự markdown \`\`\` hay viết thêm bất kỳ lời dẫn nào. JSON phải theo cấu trúc chính xác sau:
-{
-  "score": 75, // Điểm số đánh giá từ 0 đến 100
-  "grade": "Xuất sắc" | "Tốt" | "Khá" | "Trung bình" | "Cần sửa đổi nhiều",
-  "overview": "Đánh giá tổng quan ngắn gọn 3-4 câu về CV...",
-  "strengths": [
-    "Điểm mạnh 1 (ghi rõ phần nào và lý do tốt)...",
-    "Điểm mạnh 2..."
-  ],
-  "weaknesses": [
-    "Điểm yếu 1 (ghi rõ phần nào cần khắc phục)...",
-    "Điểm yếu 2..."
-  ],
-  "improvements": [
-    "Đề xuất cải thiện cụ thể 1...",
-    "Đề xuất cải thiện cụ thể 2..."
-  ],
-  "ats_feedback": "Đánh giá chi tiết về độ tương thích ATS (Ví dụ: Định dạng, mật độ từ khóa chuyên ngành, thông tin liên lạc, liên kết portfolio...)",
-  "rewrites": [
-    {
-      "before": "Cách viết cũ kém thu hút trong CV...",
-      "after": "Cách viết mới đề xuất (Chuyên nghiệp hơn, dùng động từ hành động mạnh và chỉ số lượng hóa kết quả nếu có)...",
-      "reason": "Giải thích tại sao cách viết này lại giúp tăng cơ hội đỗ..."
-    }
-  ]
-}
+    // Prompt ngắn gọn, không có comments trong JSON example để tránh confuse model
+    const systemPrompt = `You are a ${persona} reviewing a Vietnamese job application CV.
+Target position: "${jobPosition || 'Not specified'}"
+Job description: "${jobDescription ? jobDescription.substring(0, 300) : 'Not provided'}"
 
-Hãy viết toàn bộ đánh giá bằng Tiếng Việt chuẩn. Đảm bảo các góp ý mang tính thực tế, sắc sảo và mang lại giá trị thực tế cho ứng viên.`;
+Respond ONLY with a single valid JSON object. No markdown, no explanations, no text outside the JSON.
+Required JSON structure:
+{"score":75,"grade":"Khá","overview":"3-4 câu tổng quan...","strengths":["điểm mạnh 1","điểm mạnh 2","điểm mạnh 3"],"weaknesses":["điểm yếu 1","điểm yếu 2","điểm yếu 3"],"improvements":["cải thiện 1","cải thiện 2","cải thiện 3"],"ats_feedback":"nhận xét ATS...","rewrites":[{"before":"câu cũ","after":"câu mới","reason":"lý do"}]}
 
-    const userPrompt = `Nội dung CV của ứng viên:
-${cvText}`;
+grade must be one of: Xuất sắc, Tốt, Khá, Trung bình, Cần sửa đổi nhiều
+Write all values in Vietnamese. Keep each array to 3-4 items max to fit in output limit.`;
+
+    const userPrompt = `CV content:\n${safeCvText}`;
 
     const result = await env.AI.run('@cf/meta/llama-3.1-8b-instruct-fast', {
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
-      temperature: 0.3,
+      temperature: 0.2,
       max_tokens: 2048,
-      response_format: { type: 'json_object' } // ép model trả về JSON thuần
+      response_format: { type: 'json_object' }
     });
 
-    // Log shape để debug nếu cần
-    console.log('[CV Reviewer] AI result type:', typeof result, '| keys:', result && typeof result === 'object' ? Object.keys(result).join(',') : 'N/A');
-
-    // Workers AI có thể trả về result.response (string), result (string), hoặc shape khác
-    // Dùng String() để ép kiểu an toàn, tránh lỗi "rawText.replace is not a function"
+    // Extract raw text safely from any result shape
     let rawText = '';
     if (typeof result === 'string') {
       rawText = result;
@@ -3274,13 +3255,57 @@ ${cvText}`;
     }
     rawText = rawText.replace(/^(assistant\s*)+/ig, '').trim();
 
-    return new Response(JSON.stringify({ response: rawText }), {
+    // Server-side JSON repair trước khi trả về client
+    let validatedJson = null;
+    try {
+      // Thử parse thẳng
+      validatedJson = JSON.parse(rawText);
+    } catch (_) {
+      // Bóc tách khỏi markdown fences nếu có
+      const mdMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)```/i);
+      if (mdMatch) {
+        try { validatedJson = JSON.parse(mdMatch[1].trim()); } catch (_) {}
+      }
+
+      if (!validatedJson) {
+        // Tìm JSON object trong text
+        const s = rawText.indexOf('{');
+        const e = rawText.lastIndexOf('}');
+        if (s !== -1 && e > s) {
+          let candidate = rawText.substring(s, e + 1)
+            .replace(/,\s*([}\]])/g, '$1')   // trailing comma
+            .replace(/([{,]\s*)'([^']+)'(\s*:)/g, '$1"$2"$3'); // single quotes
+          try { validatedJson = JSON.parse(candidate); } catch (_) {}
+        }
+      }
+    }
+
+    if (!validatedJson) {
+      console.error('[CV Reviewer] Could not parse AI JSON. Raw:', rawText.substring(0, 500));
+      return cors(JSON.stringify({ error: `AI không trả về JSON hợp lệ. Raw: ${rawText.substring(0, 200)}` }), 502);
+    }
+
+    // Đảm bảo các field bắt buộc tồn tại
+    const safe = {
+      score: Number(validatedJson.score) || 50,
+      grade: validatedJson.grade || 'Khá',
+      overview: validatedJson.overview || '',
+      strengths: Array.isArray(validatedJson.strengths) ? validatedJson.strengths : [],
+      weaknesses: Array.isArray(validatedJson.weaknesses) ? validatedJson.weaknesses : [],
+      improvements: Array.isArray(validatedJson.improvements) ? validatedJson.improvements : [],
+      ats_feedback: validatedJson.ats_feedback || '',
+      rewrites: Array.isArray(validatedJson.rewrites) ? validatedJson.rewrites : [],
+    };
+
+    return new Response(JSON.stringify({ response: JSON.stringify(safe) }), {
       headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS },
     });
   } catch (err) {
+    console.error('[CV Reviewer] Error:', err.message);
     return cors(JSON.stringify({ error: err.message }), 500);
   }
 }
+
 
 async function handleAI(request, env) {
   if (request.method === 'OPTIONS') return preflight();
