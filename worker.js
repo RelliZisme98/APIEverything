@@ -3253,7 +3253,8 @@ ${cvText}`;
         { role: 'user', content: userPrompt }
       ],
       temperature: 0.3,
-      max_tokens: 2048
+      max_tokens: 2048,
+      response_format: { type: 'json_object' } // ép model trả về JSON thuần
     });
 
     // Log shape để debug nếu cần

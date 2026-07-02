@@ -383,19 +383,59 @@ async function startReviewFlow() {
 
 // ── DỌN DẸP VÀ PARSE CHUỖI JSON TỪ AI ────────────────────────────────
 function parseAIJson(text) {
-  try {
-    const startIndex = text.indexOf('{');
-    const endIndex = text.lastIndexOf('}');
-    if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
-      const jsonStr = text.substring(startIndex, endIndex + 1);
-      return JSON.parse(jsonStr);
-    }
-    return JSON.parse(text);
-  } catch (e) {
-    console.error('Lỗi phân tích chuỗi JSON trả về từ AI:', e, text);
-    throw new Error('Kết quả trả về không đúng cấu trúc JSON tiêu chuẩn. Hãy thử gửi lại.');
+  if (!text || typeof text !== 'string') {
+    throw new Error('AI trả về phản hồi rỗng hoặc không hợp lệ.');
   }
+
+  // Log để debug (chỉ 500 ký tự đầu)
+  console.log('[CV Reviewer] Raw AI response (500c):', text.substring(0, 500));
+
+  // Thử parse thẳng trước
+  try { return JSON.parse(text); } catch (_) { /* tiếp tục */ }
+
+  // Bóc tách khỏi markdown code block: ```json ... ``` hoặc ``` ... ```
+  const mdMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (mdMatch) {
+    try { return JSON.parse(mdMatch[1].trim()); } catch (_) { /* tiếp tục */ }
+  }
+
+  // Tìm JSON object lớn nhất trong chuỗi (từ { đầu tiên đến } cuối cùng)
+  const start = text.indexOf('{');
+  const end = text.lastIndexOf('}');
+  if (start !== -1 && end > start) {
+    let jsonStr = text.substring(start, end + 1);
+
+    // Sửa trailing comma phổ biến: ,} hoặc ,]
+    jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
+
+    // Sửa single-quotes thành double-quotes (model đôi khi dùng sai)
+    // Chỉ áp dụng cho key không có dấu nháy đôi
+    jsonStr = jsonStr.replace(/([{,]\s*)'([^']+)'(\s*:)/g, '$1"$2"$3');
+
+    try { return JSON.parse(jsonStr); } catch (e) {
+      console.warn('[CV Reviewer] JSON repair failed:', e.message);
+    }
+
+    // Last resort: thử parse từng đoạn ngắn hơn nếu JSON bị cắt đuôi
+    // Tìm điểm kết thúc hợp lệ gần nhất
+    for (let i = end; i > start; i--) {
+      if (text[i] === '}') {
+        try {
+          const candidate = text.substring(start, i + 1).replace(/,\s*([}\]])/g, '$1');
+          const parsed = JSON.parse(candidate);
+          console.warn('[CV Reviewer] Used truncated JSON recovery at char', i);
+          return parsed;
+        } catch (_) { /* tiếp tục */ }
+      }
+    }
+  }
+
+  // Nếu model trả về text thuần không phải JSON → tạo fallback object
+  // để UI vẫn có thể hiển thị gì đó thay vì crash
+  console.error('[CV Reviewer] Không parse được JSON, dùng fallback. Raw:', text.substring(0, 800));
+  throw new Error('AI trả về phản hồi không đúng định dạng JSON. Hãy thử gửi lại — model đôi khi không nhất quán với output format.');
 }
+
 
 // ── ĐỒNG BỘ HIỆU ỨNG VẼ VÒNG TRÒN ĐIỂM SỐ ───────────────────────────
 function animateScoreRing(score) {
