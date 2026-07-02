@@ -247,7 +247,15 @@ export function renderDownloader() {
 
       const cleanFbUrl = (urlStr) => {
         if (!urlStr) return '';
-        let cleaned = urlStr.replace(/\\/g, '');
+        // 1. Decode Unicode escapes (e.g. \u0026 -> &, \u0025 -> %)
+        let cleaned = urlStr.replace(/\\u([0-9a-fA-F]{4})/g, (match, grp) => {
+          return String.fromCharCode(parseInt(grp, 16));
+        });
+        // 2. Remove backslashes before slashes
+        cleaned = cleaned.replace(/\\+\//g, '/');
+        // 3. Remove any other remaining backslashes
+        cleaned = cleaned.replace(/\\/g, '');
+        // 4. Decode HTML entities
         try {
           const parser = new DOMParser();
           const dom = parser.parseFromString(cleaned, 'text/html');
