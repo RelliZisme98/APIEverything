@@ -1463,283 +1463,20 @@ async function handleEvents(request, env) {
   }
 }
 
-// ── NGÂN HÀNG ĐỀ THI IQ BẢO MẬT TRÊN SERVER (100 CÂU) ────────────────────────
-const SERVER_IQ_POOL = [
-  // --- NHÓM 1: DỄ (Easy) - 15 câu (0 - 14) ---
-  { q: "Số tiếp theo trong dãy: 2, 4, 8, 16, ...", options: ["24", "32", "30", "64"], ans: 1 },
-  { q: "Số tiếp theo trong dãy: 1, 1, 2, 3, 5, 8, 13, ...", options: ["15", "21", "25", "34"], ans: 1 },
-  { q: "Số tiếp theo trong dãy: 3, 5, 9, 17, ...", options: ["25", "33", "35", "41"], ans: 1 },
-  { q: "Số tiếp theo trong dãy: 1, 4, 9, 16, 25, ...", options: ["30", "35", "36", "49"], ans: 2 },
-  { q: "Sách đối với Đọc giống như Nhạc đối với...", options: ["Hát", "Nghe", "Đàn", "Viết"], ans: 1 },
-  { q: "Chân đối với Đi giống như Tay đối với...", options: ["Nhìn", "Cầm", "Nghe", "Ngửi"], ans: 1 },
-  { q: "Từ nào khác loại nhất với các từ còn lại?", options: ["Táo", "Cam", "Cà rốt", "Lê"], ans: 2 },
-  { q: "Từ nào khác loại nhất?", options: ["Sắt", "Đồng", "Nhôm", "Gỗ"], ans: 3 },
-  { q: "Từ nào viết đúng chính tả tiếng Việt?", options: ["Sản xuất", "Sản suất", "Sản sất", "Xản xuất"], ans: 0 },
-  { q: "Nếu tất cả A là B, tất cả B là C, thì tất cả A chắc chắn là C?", options: ["Đúng", "Sai", "Không xác định", "Chỉ đúng một nửa"], ans: 0 },
-  { q: "Chữ cái tiếp theo trong chuỗi: A, C, E, G, ...", options: ["H", "I", "J", "K"], ans: 1 },
-  { q: "Hình ngôi sao 5 cánh thông thường có bao nhiêu đỉnh nhọn?", options: ["4", "5", "6", "10"], ans: 1 },
-  { q: "Tìm số lớn nhất có 3 chữ số khác nhau?", options: ["999", "987", "986", "978"], ans: 1 },
-  { q: "Nước đối với Khát giống như Thức ăn đối với...", options: ["Mệt", "Đói", "No", "Thèm"], ans: 1 },
-  { q: "Số tiếp theo trong dãy: 100, 90, 81, 73, ...", options: ["65", "66", "67", "68"], ans: 1 },
-
-  // --- NHÓM 2: TRUNG BÌNH (Medium) - 15 câu (15 - 29) ---
-  { q: "Đồng hồ chỉ 3h15. Góc giữa kim giờ và kim phút là bao nhiêu độ?", options: ["0 độ", "7.5 độ", "15 độ", "30 độ"], ans: 1 },
-  { q: "Một nhóm người có 6 người bắt tay nhau đôi một. Hỏi có tổng cộng bao nhiêu cái bắt tay?", options: ["6", "12", "15", "18"], ans: 2 },
-  { q: "Bố của Mary có 5 người con gái: Nana, Nene, Nini, Nono. Người con thứ 5 tên gì?", options: ["Nunu", "Nyny", "Mary", "Nene"], ans: 2 },
-  { q: "5 chiếc máy dệt dệt được 5 tấm vải trong 5 phút. Hỏi 100 chiếc máy dệt dệt được 100 tấm vải trong bao lâu?", options: ["5 phút", "20 phút", "100 phút", "50 phút"], ans: 0 },
-  { q: "Tìm số tiếp theo trong chuỗi số: 2, 6, 12, 20, 30, ...", options: ["36", "40", "42", "48"], ans: 2 },
-  { q: "Nếu ngày hôm kia là thứ Hai, thì ngày mai là thứ mấy?", options: ["Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"], ans: 1 },
-  { q: "Chữ cái tiếp theo trong chuỗi: B, D, G, K, ...", options: ["N", "O", "P", "Q"], ans: 2 },
-  { q: "Nếu đảo ngược các chữ cái trong từ 'ROMA', bạn sẽ được một từ tiếng Latinh/Ý có nghĩa là tình yêu. Từ đó là gì?", options: ["AMOR", "MOAR", "RAMO", "ARMO"], ans: 0 },
-  {
-    q: "Hãy chọn hình học hoàn chỉnh tiếp theo trong chuỗi tuần hoàn bên dưới:", options: ["Hình tròn màu đỏ", "Hình vuông màu đỏ", "Hình tròn màu xanh", "Hình vuông màu xanh"], ans: 2,
-    svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 240 60"><circle cx="20" cy="30" r="12" fill="#f87171"/><rect x="50" y="18" width="24" height="24" fill="#60a5fa"/><circle cx="100" cy="30" r="12" fill="#f87171"/><rect x="130" y="18" width="24" height="24" fill="#60a5fa"/><text x="175" y="38" fill="#fff" font-size="20">?</text></svg>'
-  },
-  {
-    q: "Xác định góc tạo bởi hai kim đồng hồ khi đồng hồ chỉ đúng 6 giờ?", options: ["90 độ", "120 độ", "180 độ", "360 độ"], ans: 2,
-    svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 80 80" stroke="#34d399" stroke-width="2" fill="none"><circle cx="40" cy="40" r="30"/><line x1="40" y1="40" x2="40" y2="15"/><line x1="40" y1="40" x2="40" y2="65" stroke="#f87171"/></svg>'
-  },
-  {
-    q: "Hình hộp lập phương có bao nhiêu đỉnh tổng cộng?", options: ["6 đỉnh", "8 đỉnh", "12 đỉnh", "16 đỉnh"], ans: 1,
-    svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 80 80" stroke="#34d399" stroke-width="1.5" fill="none"><rect x="15" y="25" width="40" height="40"/><rect x="25" y="15" width="40" height="40"/><line x1="15" y1="25" x2="25" y2="15"/><line x1="55" y1="25" x2="65" y2="15"/><line x1="15" y1="65" x2="25" y2="55"/><line x1="55" y1="65" x2="65" y2="55"/></svg>'
-  },
-  { q: "Một cửa hàng bán cam. Lần một bán nửa số cam và 1 quả. Lần hai bán nửa số còn lại và 1 quả. Lúc này cửa hàng còn lại đúng 1 quả. Hỏi ban đầu cửa hàng có bao nhiêu quả cam?", options: ["8 quả", "10 quả", "12 quả", "14 quả"], ans: 1 },
-  { q: "Có bao nhiêu chữ số 9 trong dãy số từ 1 đến 100?", options: ["10", "11", "19", "20"], ans: 3 },
-  { q: "Tìm số tiếp theo của chuỗi số đảo chữ: 12, 21, 34, 43, 56, ...", options: ["65", "67", "76", "78"], ans: 0 },
-  { q: "Một đoàn tàu dài 100m đi qua cây cầu dài 100m với vận tốc 10m/s. Mất bao lâu để đoàn tàu đi qua hết hoàn toàn cây cầu?", options: ["10 giây", "20 giây", "30 giây", "15 giây"], ans: 1 },
-
-  // --- NHÓM 3: KHÓ (Hard) - 15 câu (30 - 44) ---
-  { q: "Một cái bể nước mất 6 giờ để đầy nếu chỉ dùng vòi A, mất 12 giờ nếu chỉ dùng vòi B. Hỏi nếu mở cả hai vòi cùng lúc thì mất bao lâu để đầy bể?", options: ["3 giờ", "4 giờ", "5 giờ", "6 giờ"], ans: 1 },
-  { q: "Trong một hộp có 6 viên bi đỏ và 4 viên bi xanh. Cần lấy ngẫu nhiên ít nhất bao nhiêu viên bi để chắc chắn có ít nhất 2 viên bi màu xanh?", options: ["6 viên", "7 viên", "8 viên", "9 viên"], ans: 2 },
-  { q: "Nếu ngày mai của ngày hôm qua là thứ Sáu, thì ngày kia của ngày hôm qua là thứ mấy?", options: ["Thứ Bảy", "Chủ Nhật", "Thứ Hai", "Thứ Ba"], ans: 0 },
-  {
-    q: "Có tổng cộng bao nhiêu hình tam giác đơn và ghép trong hình vẽ dưới đây?", options: ["4", "5", "6", "8"], ans: 2,
-    svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 100 100"><polygon points="50,15 90,85 10,85" fill="none" stroke="#fbbf24" stroke-width="2"/><line x1="50" y1="15" x2="50" y2="85" stroke="#fbbf24" stroke-width="2"/><line x1="30" y1="50" x2="70" y2="50" stroke="#fbbf24" stroke-width="2"/></svg>'
-  },
-  {
-    q: "Xác định hướng xoay tiếp theo của kim mũi tên trong sơ đồ logic dưới đây:", options: ["Hướng bên Trái (Tây)", "Hướng đi Lên (Bắc)", "Hướng bên Phải (Đông)", "Hướng đi Xuống (Nam)"], ans: 0,
-    svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 200 60"><g stroke="#818cf8" stroke-width="2" fill="none"><line x1="25" y1="40" x2="25" y2="10" marker-end="url(#arrow)"/><line x1="75" y1="25" x2="95" y2="25"/><line x1="135" y1="10" x2="135" y2="40"/></g><text x="175" y="38" fill="#fbbf24" font-size="20">?</text></svg>'
-  },
-  {
-    q: "Xác định số lượng các ô vuông có trong lưới ô cờ 3x3 sau:", options: ["9", "10", "13", "14"], ans: 3,
-    svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 90 90" stroke="#a7f3d0" stroke-width="2" fill="none"><rect x="15" y="15" width="60" height="60"/><line x1="35" y1="15" x2="35" y2="75"/><line x1="55" y1="15" x2="55" y2="75"/><line x1="15" y1="35" x2="75" y2="35"/><line x1="15" y1="55" x2="75" y2="55"/></svg>'
-  },
-  {
-    q: "Để hình vẽ đạt đối xứng trục dọc (giữa), phần nét đứt bên phải cần được thay thế bằng hình học nào?", options: ["Đường đi sang trái", "Góc nhọn hướng sang phải", "Đường thẳng đứng hoàn hảo", "Đường tròn khép kín"], ans: 1,
-    svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 100 100"><line x1="50" y1="5" x2="50" y2="95" stroke="rgba(255,255,255,0.3)" stroke-dasharray="2,2"/><path d="M20,20 L40,50 L20,80" fill="none" stroke="#f472b6" stroke-width="2.5"/><path d="M50,50 L75,50" fill="none" stroke="#f472b6" stroke-width="2.5" stroke-dasharray="2,2"/><text x="70" y="40" fill="#fbbf24" font-size="14">?</text></svg>'
-  },
-  { q: "Mảng súng phủ kín mặt hồ sau 48 ngày. Biết mỗi ngày mảng súng tăng gấp đôi diện tích. Hỏi sau bao nhiêu ngày thì mảng súng phủ kín một nửa hồ?", options: ["24 ngày", "36 ngày", "47 ngày", "12 ngày"], ans: 2 },
-  {
-    q: "Hãy xác định hình còn thiếu trong ô vuông ma trận logic 2x2 dưới đây:", options: ["Hình vuông nét đứt", "Hình tròn nét đứt", "Hình tam giác nét liền", "Hình vuông nét liền"], ans: 0,
-    svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 100 100"><line x1="50" y1="0" x2="50" y2="100" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/><line x1="0" y1="50" x2="100" y2="50" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/><circle cx="25" cy="25" r="12" fill="none" stroke="#34d399" stroke-width="2"/><circle cx="75" cy="25" r="12" fill="none" stroke="#34d399" stroke-dasharray="2,2" stroke-width="2"/><rect x="15" y="65" width="20" height="20" fill="none" stroke="#34d399" stroke-width="2"/><text x="70" y="80" fill="#60a5fa" font-size="14" font-weight="bold">?</text></svg>'
-  },
-  {
-    q: "Chọn hình biểu diễn mô tả góc nhìn từ trên xuống (top-down) của hình chóp tứ giác đều?", options: ["Hình vuông có 2 đường chéo", "Hình tròn có tâm", "Hình tam giác cân", "Hai hình chữ nhật ghép lại"], ans: 0,
-    svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 100 100" stroke="#818cf8" stroke-width="2" fill="none"><polygon points="50,15 85,75 15,75"/><line x1="50" y1="15" x2="50" y2="75" stroke-dasharray="2,2"/></svg>'
-  },
-  {
-    q: "Xác định chữ số thay thế dấu chấm hỏi trong dãy số xoắn ốc logic dưới đây:", options: ["12", "14", "15", "16"], ans: 1,
-    svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 100 100" stroke="#fbbf24" stroke-width="1.5" fill="none"><rect x="10" y="10" width="80" height="80"/><line x1="50" y1="10" x2="50" y2="90"/><line x1="10" y1="50" x2="90" y2="50"/><text x="25" y="35" fill="#fff" font-size="12">2</text><text x="65" y="35" fill="#fff" font-size="12">5</text><text x="65" y="75" fill="#fff" font-size="12">9</text><text x="25" y="75" fill="#34d399" font-size="14" font-weight="bold">?</text></svg>'
-  },
-  {
-    q: "Chọn hình thể hiện mặt cắt ngang đi qua mặt phẳng nghiêng màu đỏ của hình trụ tròn dưới đây:", options: ["Hình tròn", "Hình bầu dục (Ellipse)", "Hình chữ nhật", "Hình tam giác"], ans: 1,
-    svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 100 100" stroke="#34d399" stroke-width="2" fill="none"><ellipse cx="50" cy="25" rx="20" ry="8"/><line x1="30" y1="25" x2="30" y2="75"/><line x1="70" y1="25" x2="70" y2="75"/><ellipse cx="50" cy="75" rx="20" ry="8" stroke-dasharray="2,2"/><line x1="20" y1="40" x2="80" y2="60" stroke="#f87171" stroke-width="1.5"/></svg>'
-  },
-  {
-    q: "Xác định phần tư còn thiếu để khôi phục cấu trúc hai đường tròn đồng tâm bên dưới:", options: ["Góc phần tư có nét vẽ ngược", "Góc phần tư có 2 cung tròn", "Góc phần tư trống rỗng", "Góc phần tư có 1 cung tròn"], ans: 1,
-    svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 100 100" stroke="#818cf8" stroke-width="2" fill="none"><circle cx="50" cy="50" r="40" stroke-dasharray="10, 5"/><circle cx="50" cy="50" r="20"/><path d="M 50 10 A 40 40 0 0 1 90 50 L 50 50 Z" stroke="#34d399"/><rect x="50" y="50" width="40" height="40" stroke="rgba(255,255,255,0.2)" stroke-dasharray="2,2"/><text x="65" y="75" fill="#fbbf24" font-size="16">?</text></svg>'
-  },
-  { q: "Một khối lập phương gỗ lớn kích thước 3x3x3 được sơn toàn bộ bề mặt ngoài màu đỏ, sau đó cưa nhỏ thành 27 khối lập phương 1x1x1. Hỏi có bao nhiêu khối nhỏ không có mặt nào được sơn màu đỏ?", options: ["1 khối", "6 khối", "8 khối", "27 khối"], ans: 0 },
-  {
-    q: "Trong các nhóm đường thẳng song song sau, đường nào có chiều dài thực tế ngắn nhất?", options: ["Đường A", "Đường B", "Đường C", "Tất cả bằng nhau"], ans: 3,
-    svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 200 80" stroke="#fff" stroke-width="2"><line x1="20" y1="20" x2="180" y2="20"/><line x1="20" y1="40" x2="180" y2="40"/><line x1="20" y1="60" x2="180" y2="60"/><path d="M 10 10 L 30 30 M 190 10 L 170 30" stroke="#f87171"/><path d="M 30 30 L 10 50 M 170 30 L 190 50" stroke="#f87171"/><path d="M 10 50 L 30 70 M 190 50 L 170 70" stroke="#f87171"/></svg>'
-  },
-
-  // --- NHÓM 4: RẤT KHÓ / CỰC KHÓ (Very Hard) - 15 câu (45 - 59) ---
-  { q: "Số Ramsey R(3,3) — số người tối thiểu trong một bữa tiệc để đảm bảo chắc chắn có ít nhất 3 người quen nhau đôi một hoặc 3 người lạ nhau đôi một là bao nhiêu?", options: ["5 người", "6 người", "7 người", "8 người"], ans: 1 },
-  { q: "Một người đi xe máy từ A đến B với vận tốc 10 km/h và lập tức quay trở về A với vận tốc 15 km/h. Vận tốc trung bình của cả chuyến đi khứ hồi này là bao nhiêu?", options: ["12 km/h", "12.5 km/h", "13 km/h", "11 km/h"], ans: 0 },
-  { q: "Trò chơi Monty Hall: Có 3 cánh cửa (1 xe hơi, 2 con dê). Bạn chọn cửa số 1. MC mở cửa số 3 có con dê bên trong. MC hỏi bạn có muốn đổi sang cửa số 2 không. Lựa chọn tối ưu toán học là gì?", options: ["Giữ nguyên (Tỷ lệ thắng là 50/50)", "Nên đổi cửa (Tăng tỷ lệ thắng lên 2/3)", "Không ảnh hưởng gì", "Đổi hay giữ đều có tỷ lệ 1/3"], ans: 1 },
-  { q: "Nếu cắt một dải băng giấy Mobius dọc theo đường chạy chính giữa của nó, kết quả thu được sẽ là gì?", options: ["Hai dải băng Mobius nhỏ rời nhau", "Hai dải băng Mobius lồng vào nhau", "Một vòng băng lớn duy nhất có 2 lần xoắn", "Một dải băng phẳng bình thường không xoắn"], ans: 2 },
-  { q: "Bài toán hạt đậu: Một hạt đậu nằm trên đỉnh của một hình chóp tam giác đều. Mỗi giây, nó nhảy ngẫu nhiên sang một trong ba đỉnh còn lại. Hỏi xác suất để sau 3 giây nó quay lại đỉnh ban đầu là bao nhiêu?", options: ["2/9", "1/4", "3/16", "2/27"], ans: 0 },
-  { q: "Năm người bạn A, B, C, D, E xếp hàng ngang. A không muốn đứng cạnh B. C đứng ở đầu hàng bên trái. Hỏi có bao nhiêu cách xếp hàng thỏa mãn?", options: ["6 cách", "8 cách", "12 cách", "16 cách"], ans: 2 },
-  { q: "Cho dãy số: 1, 2, 5, 12, 29, 70, ... Số tiếp theo là bao nhiêu?", options: ["141", "169", "182", "225"], ans: 1 },
-  { q: "Trong một mật mã, 'HELLO' được viết là 'IFMMP', 'WORLD' được viết là 'XPSME'. Hỏi 'BRAIN' được viết là gì?", options: ["CSBJO", "BTCJO", "CSBKP", "BTCKP"], ans: 0 },
-  { q: "Một người nông dân muốn qua sông với một con sói, một con dê và một bắp cải. Thuyền chỉ chở được người và một vật. Nếu không có người, sói sẽ ăn dê, dê sẽ ăn bắp cải. Số chuyến đò tối thiểu để qua sông an toàn là?", options: ["5 chuyến", "7 chuyến", "9 chuyến", "11 chuyến"], ans: 1 },
-  { q: "Xác định số tiếp theo trong ma trận logic 3x3 sau: Hàng 1 [2, 3, 5], Hàng 2 [7, 11, 13], Hàng 3 [17, 19, ?]", options: ["21", "23", "25", "29"], ans: 1 },
-  { q: "Ba người A, B, C nói về nghề nghiệp của mình. Một người là bác sĩ, một người là giáo viên, một người là kỹ sư. A nói: 'C là kỹ sư'. B nói: 'Tôi không phải là kỹ sư'. C nói: 'Tôi là giáo viên'. Biết chỉ có giáo viên nói thật. Hỏi ai là bác sĩ?", options: ["Người A", "Người B", "Người C", "Không thể xác định"], ans: 0 },
-  {
-    q: "Tìm hình tiếp theo trong chuỗi logic hình học bên dưới:", options: ["Hình lục giác màu vàng", "Hình vuông màu đỏ", "Hình tròn màu xanh", "Hình tam giác màu xanh"], ans: 0,
-    svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 200 60"><polygon points="20,15 35,45 5,45" fill="#f87171"/><rect x="60" y="18" width="24" height="24" fill="#60a5fa"/><polygon points="110,15 122,25 118,45 102,45 98,25" fill="#34d399"/><text x="165" y="38" fill="#fff" font-size="20">?</text></svg>'
-  },
-  { q: "Một chiếc kim giờ của đồng hồ mất bao lâu để quay hết một góc 30 độ?", options: ["5 phút", "10 phút", "30 phút", "60 phút"], ans: 3 },
-  { q: "Trong một cuộc chạy đua, nếu bạn vượt qua người thứ hai, bạn sẽ đứng ở vị trí thứ mấy?", options: ["Thứ nhất", "Thứ hai", "Thứ ba", "Cuối cùng"], ans: 1 },
-  {
-    q: "Để hoàn thành bức tranh lập phương, góc khuất của hình hộp 3D bên dưới cần được ghép bởi bao nhiêu khối lập phương đơn lẻ nữa?", options: ["1 khối", "2 khối", "3 khối", "4 khối"], ans: 1,
-    svg: '<svg class="iqeq-svg-diagram" viewBox="0 0 100 100" stroke="#fbbf24" stroke-width="1.5" fill="none"><rect x="20" y="20" width="40" height="40"/><rect x="40" y="40" width="40" height="40"/><line x1="20" y1="20" x2="40" y2="40"/><line x1="60" y1="20" x2="80" y2="40"/><line x1="20" y1="60" x2="40" y2="80"/><line x1="60" y1="60" x2="80" y2="80"/></svg>'
+// ── HELPER: FETCH QUESTIONS FROM SUPABASE ───────────────────────────────────
+async function fetchQuestionsFromSupabase(tableName, url, key) {
+  const res = await fetch(`${url}/rest/v1/${tableName}?select=*&order=q_idx.asc`, {
+    headers: {
+      'apikey': key,
+      'Authorization': `Bearer ${key}`
+    }
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to fetch questions from Supabase table ${tableName}: ${res.statusText}`);
   }
-];
+  return await res.json();
+}
 
-// ── NGÂN HÀNG ĐỀ THI EQ BẢO MẬT TRÊN SERVER (100 CÂU) ────────────────────────
-const SERVER_EQ_POOL = [
-  // --- 1. Empathy - Thấu Cảm (25 Câu) ---
-  { q: "Tôi dễ nhận ra tâm trạng vui buồn của người bên cạnh dù họ cố giấu.", type: "+", dim: "empathy" },
-  { q: "Tôi thấy khó chia sẻ với nỗi buồn của người khác nếu tôi chưa từng rơi vào hoàn cảnh đó.", type: "-", dim: "empathy" },
-  { q: "Tôi thường lắng nghe chăm chú mà không ngắt lời khi người khác tâm sự.", type: "+", dim: "empathy" },
-  { q: "Khi người khác gặp khó khăn, tôi thường tự đặt mình vào vị trí của họ để thấu hiểu.", type: "+", dim: "empathy" },
-  { q: "Tôi cảm thấy bực mình khi phải nghe người khác than vãn về khó khăn của họ.", type: "-", dim: "empathy" },
-  { q: "Tôi dễ bị xúc động và rơi nước mắt khi xem các bộ phim cảm động.", type: "+", dim: "empathy" },
-  { q: "Tôi thường nhận ra sự thay đổi thái độ của đồng nghiệp hay bạn bè rất nhanh.", type: "+", dim: "empathy" },
-  { q: "Tôi nghĩ rằng việc thể hiện sự thương hại hay thông cảm quá mức là không cần thiết.", type: "-", dim: "empathy" },
-  { q: "Tôi rất quan tâm đến cảm xúc của mọi người xung quanh khi đưa ra quyết định tập thể.", type: "+", dim: "empathy" },
-  { q: "Tôi thường đoán trước được ai đó sẽ phản ứng ra sao trước một tin buồn.", type: "+", dim: "empathy" },
-  { q: "Tôi không mấy bận tâm đến việc lời nói của mình có thể làm người khác chạnh lòng.", type: "-", dim: "empathy" },
-  { q: "Tôi cảm nhận rõ niềm vui của bạn bè giống như niềm vui của chính mình.", type: "+", dim: "empathy" },
-  { q: "Tôi tôn trọng những quan điểm sống khác biệt hoàn toàn với niềm tin của tôi.", type: "+", dim: "empathy" },
-  { q: "Tôi có xu hướng bỏ qua cảm xúc của người khác nếu việc đó cản trở công việc.", type: "-", dim: "empathy" },
-  { q: "Tôi thường cảm thấy ấm lòng khi giúp đỡ người lạ gặp hoạn nạn trên đường.", type: "+", dim: "empathy" },
-  { q: "Tôi có khả năng nhận biết ai đó đang cười gượng gạo hay vui thực lòng.", type: "+", dim: "empathy" },
-  { q: "Tôi cảm thấy mệt mỏi khi phải lắng nghe tâm tư từ những người không thân thiết.", type: "-", dim: "empathy" },
-  { q: "Tôi luôn cố gắng an ủi bạn bè khi thấy họ mất phương hướng.", type: "+", dim: "empathy" },
-  { q: "Tôi thường chú ý đến ngôn ngữ cơ thể của đối phương trong lúc giao tiếp.", type: "+", dim: "empathy" },
-  { q: "Tôi cảm thấy bất an khi thấy người bên cạnh tỏ ra không thoải mái.", type: "+", dim: "empathy" },
-  { q: "Tôi thường phán xét hành động của người khác trước khi tìm hiểu lý do.", type: "-", dim: "empathy" },
-  { q: "Tôi dễ tha thứ cho những lỗi lầm vô ý của người khác.", type: "+", dim: "empathy" },
-  { q: "Tôi sẵn sàng hy sinh một chút quyền lợi riêng để giúp một người đang gặp bế tắc.", type: "+", dim: "empathy" },
-  { q: "Tôi cảm thấy khó chịu khi người khác khóc trước mặt tôi.", type: "-", dim: "empathy" },
-  { q: "Tôi luôn kiên nhẫn khi nói chuyện với những người có tốc độ phản xạ chậm hơn.", type: "+", dim: "empathy" },
-
-  // --- 2. Self-Regulation - Tự Điều Chỉnh (25 Câu) ---
-  { q: "Khi nổi giận, tôi nói ra những lời tổn thương mà sau đó thấy hối hận.", type: "-", dim: "selfReg" },
-  { q: "Tôi giữ được bình tĩnh và suy nghĩ thấu đáo dưới áp lực lớn.", type: "+", dim: "selfReg" },
-  { q: "Khi thất bại, tôi thường đổ lỗi cho hoàn cảnh thay vì nhìn nhận lỗi sai bản thân.", type: "-", dim: "selfReg" },
-  { q: "Tôi mất rất nhiều thời gian để nguôi giận sau một tranh cãi gay gắt.", type: "-", dim: "selfReg" },
-  { q: "Tôi có thể kìm nén cơn tức giận để tiếp tục làm việc một cách chuyên nghiệp.", type: "+", dim: "selfReg" },
-  { q: "Tôi dễ mất kiên nhẫn khi công việc không diễn ra đúng tiến độ dự kiến.", type: "-", dim: "selfReg" },
-  { q: "Tôi luôn cân nhắc kỹ hậu quả trước khi đưa ra quyết định quan trọng.", type: "+", dim: "selfReg" },
-  { q: "Tôi thường hành động theo cảm tính tức thời hơn là suy nghĩ logic.", type: "-", dim: "selfReg" },
-  { q: "Khi gặp tình huống bất ngờ, tôi biết cách tự trấn an và không hoảng loạn.", type: "+", dim: "selfReg" },
-  { q: "Tôi khó kiểm soát được thói quen mua sắm hay ăn uống khi tâm trạng đi xuống.", type: "-", dim: "selfReg" },
-  { q: "Tôi có thể dễ dàng tha thứ và bỏ qua những xích mích nhỏ trong ngày.", type: "+", dim: "selfReg" },
-  { q: "Tôi hay nổi cáu nếu ai đó làm gián đoạn lúc tôi đang tập trung làm việc.", type: "-", dim: "selfReg" },
-  { q: "Tôi thích nghi nhanh chóng với những thay đổi đột ngột trong kế hoạch.", type: "+", dim: "selfReg" },
-  { q: "Tôi dễ bị phân tâm bởi mạng xã hội hay các yếu tố giải trí xung quanh.", type: "-", dim: "selfReg" },
-  { q: "Tôi kiềm chế tốt ham muốn đáp trả gay gắt khi bị người khác chỉ trích vô căn cứ.", type: "+", dim: "selfReg" },
-  { q: "Tôi thường lo lắng thái quá về những việc chưa xảy ra.", type: "-", dim: "selfReg" },
-  { q: "Tôi có khả năng tự tạo động lực để hoàn thành công việc kể cả khi chán nản.", type: "+", dim: "selfReg" },
-  { q: "Tôi thường phản ứng ngay lập tức mà không cần thời gian suy nghĩ.", type: "-", dim: "selfReg" },
-  { q: "Tôi kiểm soát tốt cảm xúc cá nhân để không làm ảnh hưởng tới không khí chung.", type: "+", dim: "selfReg" },
-  { q: "Tôi dễ dàng thừa nhận sai sót của mình và tìm cách sửa chữa.", type: "+", dim: "selfReg" },
-  { q: "Tôi hay bị mất ngủ vì suy nghĩ quá nhiều về những lỗi lầm cũ.", type: "-", dim: "selfReg" },
-  { q: "Tôi có thể từ bỏ sở thích ngắn hạn để hướng tới mục tiêu dài hạn.", type: "+", dim: "selfReg" },
-  { q: "Tôi dễ nổi nóng khi tài xế phía trước di chuyển quá chậm.", type: "-", dim: "selfReg" },
-  { q: "Tôi giữ được sự kiên nhẫn khi hướng dẫn người khác làm một việc khó.", type: "+", dim: "selfReg" },
-  { q: "Tôi luôn duy trì thói quen sinh hoạt điều độ bất kể lịch trình bận rộn.", type: "+", dim: "selfReg" },
-
-  // --- 3. Social Skills - Kỹ Năng Xã Hội (25 Câu) ---
-  { q: "Tôi cảm thấy thoải mái khi bắt chuyện với người lạ tại các sự kiện.", type: "+", dim: "social" },
-  { q: "Tôi thường hay hiểu lầm hoặc cãi vã với đồng nghiệp và bạn bè.", type: "-", dim: "social" },
-  { q: "Mọi người thường tìm đến tôi làm cầu nối giải quyết xung đột.", type: "+", dim: "social" },
-  { q: "Tôi dễ thuyết phục và tạo được sự đồng thuận trong tập thể.", type: "+", dim: "social" },
-  { q: "Tôi thường cảm thấy lạc lõng và khó hòa nhập khi tham gia nhóm mới.", type: "-", dim: "social" },
-  { q: "Tôi có thể dễ dàng xoay chuyển câu chuyện khi thấy đối phương không thoải mái.", type: "+", dim: "social" },
-  { q: "Tôi biết khi nào cần nói lời từ chối mà không làm người khác tổn thương.", type: "+", dim: "social" },
-  { q: "Tôi cảm thấy căng thẳng khi phải trình bày ý kiến trước đám đông.", type: "-", dim: "social" },
-  { q: "Tôi có mạng lưới bạn bè và mối quan hệ xã hội đa dạng, tốt đẹp.", type: "+", dim: "social" },
-  { q: "Tôi khó khăn trong việc duy trì liên lạc lâu dài với bạn bè cũ.", type: "-", dim: "social" },
-  { q: "Tôi thích làm việc nhóm hơn là làm việc độc lập một mình.", type: "+", dim: "social" },
-  { q: "Tôi thường chủ động hòa giải khi thấy bạn bè có xích mích.", type: "+", dim: "social" },
-  { q: "Tôi thấy khó khăn khi phải giải thích suy nghĩ của mình cho người khác hiểu.", type: "-", dim: "social" },
-  { q: "Tôi biết cách khen ngợi người khác một cách chân thành và khéo léo.", type: "+", dim: "social" },
-  { q: "Tôi cảm thấy ngột ngạt khi ở những nơi quá đông người.", type: "-", dim: "social" },
-  { q: "Tôi có thể hợp tác tốt với cả những người có tính cách trái ngược.", type: "+", dim: "social" },
-  { q: "Tôi thường bị coi là người lạnh lùng hay khó gần gũi.", type: "-", dim: "social" },
-  { q: "Tôi biết cách khuấy động bầu không khí trong các buổi tụ tập.", type: "+", dim: "social" },
-  { q: "Tôi tôn trọng ý kiến của số đông ngay cả khi tôi có góc nhìn riêng biệt.", type: "+", dim: "social" },
-  { q: "Tôi thường tránh né việc tranh luận vì sợ làm mất lòng đối phương.", type: "-", dim: "social" },
-  { q: "Tôi rất tự tin trong các buổi phỏng vấn hoặc đàm phán.", type: "+", dim: "social" },
-  { q: "Tôi thấy khó chia sẻ công việc cho người khác vì sợ họ làm không tốt.", type: "-", dim: "social" },
-  { q: "Tôi luôn chào hỏi mọi người với thái độ thân thiện và cởi mở.", type: "+", dim: "social" },
-  { q: "Tôi cảm thấy thoải mái khi làm việc dưới sự dẫn dắt của người khác.", type: "+", dim: "social" },
-  { q: "Tôi có thể xoa dịu bầu không khí căng thẳng bằng một lời nói đùa đúng lúc.", type: "+", dim: "social" },
-
-  // --- 4. Self-Awareness - Tự Nhận Thức (25 Câu) ---
-  { q: "Tôi hiểu rất rõ điểm mạnh và giới hạn năng lực của chính mình.", type: "+", dim: "selfAwa" },
-  { q: "Tôi biết rõ nguyên nhân sâu xa của sự thay đổi cảm xúc của mình.", type: "+", dim: "selfAwa" },
-  { q: "Tôi có những phản ứng bộc phát mà chính tôi cũng không giải thích nổi nguyên nhân.", type: "-", dim: "selfAwa" },
-  { q: "Tôi nhận biết được cơ thể mình đang căng thẳng trước khi tâm trí tôi kịp nhận ra.", type: "+", dim: "selfAwa" },
-  { q: "Tôi hay nghi ngờ giá trị và khả năng của bản thân khi gặp thử thách nhỏ.", type: "-", dim: "selfAwa" },
-  { q: "Tôi biết rõ những giá trị cốt lõi nào định hình nên con người tôi.", type: "+", dim: "selfAwa" },
-  { q: "Tôi thường bối rối không biết cảm xúc thực sự của mình lúc này là gì.", type: "-", dim: "selfAwa" },
-  { q: "Tôi hiểu được cách hành xử của tôi ảnh hưởng thế nào đến mọi người.", type: "+", dim: "selfAwa" },
-  { q: "Tôi cần sự công nhận từ người khác để cảm thấy tự tin về bản thân.", type: "-", dim: "selfAwa" },
-  { q: "Tôi thường dành thời gian cuối ngày để tự kiểm điểm hành vi của mình.", type: "+", dim: "selfAwa" },
-  { q: "Tôi biết chính xác những yếu tố nào dễ khiến tôi mất bình tĩnh.", type: "+", dim: "selfAwa" },
-  { q: "Tôi cảm thấy mơ hồ về mục tiêu tương lai của bản thân.", type: "-", dim: "selfAwa" },
-  { q: "Tôi nhận ra ngay khi cái tôi của mình đang lấn át lý trí.", type: "+", dim: "selfAwa" },
-  { q: "Tôi thường so sánh bản thân với người khác một cách tiêu cực.", type: "-", dim: "selfAwa" },
-  { q: "Tôi biết cách tự khích lệ bản thân vượt qua giai đoạn khó khăn.", type: "+", dim: "selfAwa" },
-  { q: "Tôi khó nói rõ cảm xúc của mình thành lời cho người khác hiểu.", type: "-", dim: "selfAwa" },
-  { q: "Tôi hiểu rõ tại sao tôi lại thích hay ghét một ai đó ngay từ lần đầu gặp.", type: "+", dim: "selfAwa" },
-  { q: "Tôi thường hối hận về các quyết định mà tôi đưa ra lúc nóng giận.", type: "-", dim: "selfAwa" },
-  { q: "Tôi tin tưởng vào trực giác và tiếng nói bên trong của mình.", type: "+", dim: "selfAwa" },
-  { q: "Tôi chấp nhận những khuyết điểm của bản thân và cố gắng hoàn thiện.", type: "+", dim: "selfAwa" },
-  { q: "Tôi cảm thấy bị tổn thương sâu sắc trước những lời góp ý thẳng thắn.", type: "-", dim: "selfAwa" },
-  { q: "Tôi biết rõ việc gì sẽ mang lại niềm vui thực sự cho mình.", type: "+", dim: "selfAwa" },
-  { q: "Tôi luôn nhất quán giữa suy nghĩ bên trong và hành động bên ngoài.", type: "+", dim: "selfAwa" },
-  { q: "Tôi cảm thấy không chắc chắn về năng lực thực sự của bản thân.", type: "-", dim: "selfAwa" },
-  { q: "Tôi tự hào về con người hiện tại của mình mà không cần ai phán xét.", type: "+", dim: "selfAwa" }
-];
-
-// ── NGÂN HÀNG ĐỀ THI MBTI BẢO MẬT TRÊN SERVER (40 CÂU) ────────────────────────
-const SERVER_MBTI_POOL = [
-  // E vs I (Xu hướng Tương tác)
-  { q: "Bạn cảm thấy tràn đầy năng lượng sau khi dành thời gian giao lưu với một nhóm người.", type: "+", dim: "EI" },
-  { q: "Bạn thích dành những ngày nghỉ cuối tuần một mình để đọc sách, xem phim hoặc chơi game hơn là đi tiệc tùng.", type: "-", dim: "EI" },
-  { q: "Trong các cuộc họp hoặc làm việc nhóm, bạn thường là người chủ động phát biểu ý kiến trước.", type: "+", dim: "EI" },
-  { q: "Bạn cảm thấy kiệt sức nếu phải giao tiếp xã hội liên tục trong nhiều giờ.", type: "-", dim: "EI" },
-  { q: "Bạn thích có một vòng bạn bè rộng lớn với nhiều mối quan hệ xã giao hơn là chỉ vài người bạn cực kỳ thân thiết.", type: "+", dim: "EI" },
-  { q: "Bạn thường tránh gọi điện thoại trực tiếp mà thích nhắn tin hoặc gửi email hơn.", type: "-", dim: "EI" },
-  { q: "Tại các bữa tiệc, bạn thường là người chủ động bắt chuyện với những người mới quen.", type: "+", dim: "EI" },
-  { q: "Bạn thích làm việc độc lập trong không gian yên tĩnh hơn là làm việc nhóm náo nhiệt.", type: "-", dim: "EI" },
-  { q: "Bạn cảm thấy dễ dàng và thoải mái khi trở thành tâm điểm của sự chú ý.", type: "+", dim: "EI" },
-  { q: "Bạn có xu hướng suy nghĩ kỹ trong đầu trước khi nói, thay vì vừa nói vừa suy nghĩ.", type: "-", dim: "EI" },
-
-  // N vs S (Thu thập Thông tin)
-  { q: "Bạn thường quan tâm đến các ý tưởng lý thuyết trừu tượng và các khả năng trong tương lai hơn là những thực tế hiển nhiên trước mắt.", type: "+", dim: "NS" },
-  { q: "Bạn thích làm việc theo hướng dẫn và quy trình rõ ràng, có sẵn hơn là tự mày mò ra cách làm mới.", type: "-", dim: "NS" },
-  { q: "Bạn thường xuyên mơ mộng về những viễn cảnh tương lai và thích suy ngẫm về ý nghĩa sâu xa của cuộc sống.", type: "+", dim: "NS" },
-  { q: "Bạn tin cậy nhiều hơn vào kinh nghiệm thực tế của bản thân hơn là những giả thuyết hay trực giác mơ hồ.", type: "-", dim: "NS" },
-  { q: "Bạn thích thảo luận về nghệ thuật, triết học hoặc các chủ đề sáng tạo hơn là những chuyện thực tế hàng ngày.", type: "+", dim: "NS" },
-  { q: "Bạn thích sự tỉ mỉ, chi tiết cụ thể trong công việc hơn là nhìn nhận bức tranh tổng thể một cách khái quát.", type: "-", dim: "NS" },
-  { q: "Bạn thường bị thu hút bởi những ý tưởng độc đáo, mới lạ hơn là những phương pháp truyền thống đã được chứng minh hiệu quả.", type: "+", dim: "NS" },
-  { q: "Bạn coi trọng việc học những kiến thức có thể áp dụng ngay vào cuộc sống hơn là những lý thuyết hàn lâm.", type: "-", dim: "NS" },
-  { q: "Bạn thường dựa vào trực cảm (linh cảm) của mình để phán đoán hướng đi thay vì các số liệu thống kê.", type: "+", dim: "NS" },
-  { q: "Bạn thích giải quyết các vấn đề quen thuộc bằng những cách thông thường thay vì tìm kiếm những giải pháp đột phá.", type: "-", dim: "NS" },
-
-  // T vs F (Đưa ra Quyết định)
-  { q: "Khi đưa ra quyết định quan trọng, bạn coi trọng sự logic, tính khách quan và hiệu quả công việc hơn là cảm xúc của mọi người.", type: "+", dim: "TF" },
-  { q: "Bạn dễ dàng đồng cảm với nỗi đau của người khác và luôn cố gắng giữ gìn sự hòa hợp trong mối quan hệ.", type: "-", dim: "TF" },
-  { q: "Trong một cuộc tranh luận, bạn sẵn sàng chỉ ra lỗi sai của đối phương một cách thẳng thắn để tìm ra sự thật khách quan.", type: "+", dim: "TF" },
-  { q: "Bạn thường đưa ra quyết định dựa trên cảm xúc của con tim hơn là sự phân tích lạnh lùng của lý trí.", type: "-", dim: "TF" },
-  { q: "Bạn đánh giá cao việc một người luôn công bằng và tuân thủ quy tắc hơn là việc họ luôn nhân từ và vị tha.", type: "+", dim: "TF" },
-  { q: "Bạn cảm thấy khó chịu khi nhìn thấy người khác bị tổn thương, ngay cả khi đó là lỗi của họ.", type: "-", dim: "TF" },
-  { q: "Bạn tin rằng kết quả công việc và hiệu năng thực tế quan trọng hơn sự hài lòng hay tâm trạng của nhân viên.", type: "+", dim: "TF" },
-  { q: "Bạn thường ưu tiên việc giúp đỡ và động viên tinh thần người khác hơn là tranh luận đúng sai.", type: "-", dim: "TF" },
-  { q: "Bạn có xu hướng đánh giá mọi việc dựa trên các tiêu chí rõ ràng, khoa học hơn là những cảm nhận cá nhân chủ quan.", type: "+", dim: "TF" },
-  { q: "Khi ai đó tìm đến bạn tâm sự về rắc rối của họ, bạn thường tập trung vào việc an ủi cảm xúc trước thay vì vội vã đưa ra giải pháp logic.", type: "-", dim: "TF" },
-
-  // J vs P (Cách thức Hành động)
-  { q: "Bạn thích lập kế hoạch chi tiết cho các chuyến đi chơi hoặc công việc của mình và tuân thủ chặt chẽ kế hoạch đó.", type: "+", dim: "JP" },
-  { q: "Bạn cảm thấy thoải mái hơn khi làm việc dưới áp lực thời gian (sát nút) và thích sự linh hoạt tùy ứng hơn.", type: "-", dim: "JP" },
-  { q: "Bạn thích dọn dẹp không gian làm việc gọn gàng và hoàn thành công việc trước thời hạn để tránh căng thẳng.", type: "+", dim: "JP" },
-  { q: "Bạn thường giữ các lựa chọn của mình mở rộng cho đến phút cuối cùng thay vì chốt một quyết định sớm.", type: "-", dim: "JP" },
-  { q: "Bạn cảm thấy khó chịu khi tiến trình công việc bị thay đổi đột ngột hoặc không diễn ra theo đúng lịch trình đã định.", type: "+", dim: "JP" },
-  { q: "Bạn thích tự do hành động theo cảm hứng ngẫu hứng của thời điểm hiện tại hơn là làm việc theo thời khóa biểu cứng nhắc.", type: "-", dim: "JP" },
-  { q: "Trước khi bắt đầu một công việc lớn, bạn luôn lập danh sách các việc cần làm (to-do list) và phân chia thời gian cụ thể.", type: "+", dim: "JP" },
-  { q: "Bạn thích bắt tay vào làm việc ngay và giải quyết các phát sinh trên đường đi thay vì tốn quá nhiều thời gian lên kế hoạch.", type: "-", dim: "JP" },
-  { q: "Bạn cảm thấy hài lòng nhất khi một kế hoạch đã được hoàn thành trọn vẹn và đúng tiến độ đề ra.", type: "+", dim: "JP" },
-  { q: "Bạn coi việc trễ giờ hẹn là điều có thể chấp nhận được nếu có lý do linh hoạt hoặc do phát sinh đột xuất.", type: "-", dim: "JP" }
-];
 
 // ─── /api/mbti (Endpoint bảo mật: Lấy câu hỏi, Chấm điểm, và Đọc kết quả MBTI) ──────
 async function handleMBTI(request, env) {
@@ -1760,8 +1497,10 @@ async function handleMBTI(request, env) {
 
   try {
     if (request.method === 'GET' && action === 'questions') {
-      const safeQuestions = SERVER_MBTI_POOL.map((q, idx) => ({
-        qIdx: idx,
+      if (!hasDb) return cors(JSON.stringify({ error: 'Database is not configured' }), 500);
+      const pool = await fetchQuestionsFromSupabase('mbti_questions', url, key);
+      const safeQuestions = pool.map(q => ({
+        qIdx: q.q_idx,
         q: q.q,
         dim: q.dim
       }));
@@ -1769,6 +1508,8 @@ async function handleMBTI(request, env) {
     }
 
     if (request.method === 'POST' && action === 'submit') {
+      if (!hasDb) return cors(JSON.stringify({ error: 'Database is not configured' }), 500);
+      const pool = await fetchQuestionsFromSupabase('mbti_questions', url, key);
       const { name, age, answers } = await request.json();
 
       const scoresByDim = {
@@ -1779,7 +1520,7 @@ async function handleMBTI(request, env) {
       };
 
       answers.forEach(item => {
-        const original = SERVER_MBTI_POOL[item.qIdx];
+        const original = pool.find(p => p.q_idx === item.qIdx);
         if (original) {
           let score = item.selected;
           if (original.type === '-') {
@@ -1887,30 +1628,29 @@ async function handleIQEQ(request, env) {
   try {
     // 1. LẤY CÂU HỎI TRẮC NGHIỆM AN TOÀN (Ẩn đáp án 'ans')
     if (request.method === 'GET' && action === 'questions') {
+      if (!hasDb) return cors(JSON.stringify({ error: 'Database is not configured' }), 500);
       const type = searchParams.get('type') || 'IQ';
       if (type === 'IQ') {
-        // Phân nhóm 4 cấp độ từ 60 câu:
-        // Nhóm 1 - Dễ (0-14): 15 câu
-        const pool1 = Array.from({ length: 15 }, (_, i) => i);
-        // Nhóm 2 - Trung bình (15-29): 15 câu
-        const pool2 = Array.from({ length: 15 }, (_, i) => i + 15);
-        // Nhóm 3 - Khó (30-44): 15 câu
-        const pool3 = Array.from({ length: 15 }, (_, i) => i + 30);
-        // Nhóm 4 - Rất khó / Cực khó (45-59): 15 câu
-        const pool4 = Array.from({ length: 15 }, (_, i) => i + 45);
+        const pool = await fetchQuestionsFromSupabase('iq_questions', url, key);
+        
+        // Filter dynamically by difficulty column
+        const poolEasy = pool.filter(p => p.difficulty === 'easy');
+        const poolMedium = pool.filter(p => p.difficulty === 'medium');
+        const poolHard = pool.filter(p => p.difficulty === 'hard');
+        const poolVeryHard = pool.filter(p => p.difficulty === 'very_hard');
 
-        // Lấy ngẫu nhiên: 5 + 7 + 7 + 6 = 25 câu
-        const sel1 = pool1.sort(() => 0.5 - Math.random()).slice(0, 5);
-        const sel2 = pool2.sort(() => 0.5 - Math.random()).slice(0, 7);
-        const sel3 = pool3.sort(() => 0.5 - Math.random()).slice(0, 7);
-        const sel4 = pool4.sort(() => 0.5 - Math.random()).slice(0, 6);
+        // Select randomly: 5 Easy, 7 Medium, 7 Hard, 6 Very Hard (Total 25 questions)
+        const selEasy = poolEasy.sort(() => 0.5 - Math.random()).slice(0, 5);
+        const selMedium = poolMedium.sort(() => 0.5 - Math.random()).slice(0, 7);
+        const selHard = poolHard.sort(() => 0.5 - Math.random()).slice(0, 7);
+        const selVeryHard = poolVeryHard.sort(() => 0.5 - Math.random()).slice(0, 6);
 
-        const indices = [...sel1, ...sel2, ...sel3, ...sel4].sort((a, b) => a - b);
+        const selectedQuestions = [...selEasy, ...selMedium, ...selHard, ...selVeryHard];
+        selectedQuestions.sort((a, b) => a.q_idx - b.q_idx);
 
-        const safeQuestions = indices.map(idx => {
-          const original = SERVER_IQ_POOL[idx];
+        const safeQuestions = selectedQuestions.map(original => {
           return {
-            qIdx: idx,
+            qIdx: original.q_idx,
             q: original.q,
             options: original.options,
             svg: original.svg || null
@@ -1918,29 +1658,26 @@ async function handleIQEQ(request, env) {
         });
         return cors(JSON.stringify(safeQuestions), 200);
       } else {
-        // Phân nhóm câu hỏi EQ theo khía cạnh (mỗi khía cạnh có 25 câu):
-        // 1. Empathy (Thấu cảm): index 0 đến 24
-        const empathyPool = Array.from({ length: 25 }, (_, i) => i);
-        // 2. SelfReg (Tự điều chỉnh): index 25 đến 49
-        const selfRegPool = Array.from({ length: 25 }, (_, i) => i + 25);
-        // 3. Social (Kỹ năng xã hội): index 50 đến 74
-        const socialPool = Array.from({ length: 25 }, (_, i) => i + 50);
-        // 4. SelfAwa (Tự nhận thức): index 75 đến 99
-        const selfAwaPool = Array.from({ length: 25 }, (_, i) => i + 75);
+        const pool = await fetchQuestionsFromSupabase('eq_questions', url, key);
+        
+        // Filter dynamically by dimension column
+        const empathyPool = pool.filter(p => p.dim === 'empathy');
+        const selfRegPool = pool.filter(p => p.dim === 'selfReg');
+        const socialPool = pool.filter(p => p.dim === 'social');
+        const selfAwaPool = pool.filter(p => p.dim === 'selfAwa');
 
-        // Lấy ngẫu nhiên để tổng cộng được 25 câu (6 Empathy, 6 SelfReg, 6 Social, 7 SelfAwa)
+        // Select randomly: 6 Empathy, 6 SelfReg, 6 Social, 7 SelfAwa (Total 25 questions)
         const selectedEmpathy = empathyPool.sort(() => 0.5 - Math.random()).slice(0, 6);
         const selectedSelfReg = selfRegPool.sort(() => 0.5 - Math.random()).slice(0, 6);
         const selectedSocial = socialPool.sort(() => 0.5 - Math.random()).slice(0, 6);
         const selectedSelfAwa = selfAwaPool.sort(() => 0.5 - Math.random()).slice(0, 7);
 
-        // Gộp lại và sắp xếp theo index tăng dần
-        const indices = [...selectedEmpathy, ...selectedSelfReg, ...selectedSocial, ...selectedSelfAwa].sort((a, b) => a - b);
+        const selectedQuestions = [...selectedEmpathy, ...selectedSelfReg, ...selectedSocial, ...selectedSelfAwa];
+        selectedQuestions.sort((a, b) => a.q_idx - b.q_idx);
 
-        const safeQuestions = indices.map(idx => {
-          const original = SERVER_EQ_POOL[idx];
+        const safeQuestions = selectedQuestions.map(original => {
           return {
-            qIdx: idx,
+            qIdx: original.q_idx,
             q: original.q,
             dim: original.dim
           };
@@ -1951,6 +1688,7 @@ async function handleIQEQ(request, env) {
 
     // 2. NỘP BÀI CHẤM ĐIỂM BẢO MẬT & LƯU DB
     if (request.method === 'POST' && action === 'submit') {
+      if (!hasDb) return cors(JSON.stringify({ error: 'Database is not configured' }), 500);
       const { name, age, test_type, answers } = await request.json();
 
       let finalScore = 0;
@@ -1958,13 +1696,16 @@ async function handleIQEQ(request, env) {
       let responsePayload = {};
 
       if (test_type === 'IQ') {
+        const pool = await fetchQuestionsFromSupabase('iq_questions', url, key);
         // Chấm điểm có trọng số theo nhóm độ khó thực tế
         answers.forEach(item => {
-          const original = SERVER_IQ_POOL[item.qIdx];
+          const original = pool.find(p => p.q_idx === item.qIdx);
           if (original && item.selected === original.ans) {
-            const idx = item.qIdx;
-            // Nhóm 1 (0-14): 1.0đ, Nhóm 2 (15-29): 1.3đ, Nhóm 3 (30-44): 1.7đ, Nhóm 4 (45-59): 2.2đ
-            const weight = idx < 15 ? 1.0 : idx < 30 ? 1.3 : idx < 45 ? 1.7 : 2.2;
+            // Nhóm 1 (Dễ): 1.0đ, Nhóm 2 (Trung bình): 1.3đ, Nhóm 3 (Khó): 1.7đ, Nhóm 4 (Rất khó): 2.2đ
+            let weight = 1.0;
+            if (original.difficulty === 'medium') weight = 1.3;
+            else if (original.difficulty === 'hard') weight = 1.7;
+            else if (original.difficulty === 'very_hard') weight = 2.2;
             rawCorrect += weight;
           }
         });
@@ -2003,9 +1744,10 @@ async function handleIQEQ(request, env) {
           desc
         };
       } else {
+        const pool = await fetchQuestionsFromSupabase('eq_questions', url, key);
         const scoresByDim = { empathy: { total: 0, count: 0 }, selfReg: { total: 0, count: 0 }, social: { total: 0, count: 0 }, selfAwa: { total: 0, count: 0 } };
         answers.forEach(item => {
-          const original = SERVER_EQ_POOL[item.qIdx];
+          const original = pool.find(p => p.q_idx === item.qIdx);
           if (original) {
             let score = item.selected;
             if (original.type === '-') {
