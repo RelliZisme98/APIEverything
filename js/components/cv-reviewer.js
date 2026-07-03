@@ -14,6 +14,10 @@
 
 let lastReviewedData = null;
 let isReviewing = false;
+let activeCVText = '';
+let activeJobPosition = '';
+let activeJobDescription = '';
+let activeTone = '';
 const CV_MAX_CHARS = 12000; // giới hạn token an toàn gửi AI
 const CV_MIN_WORDS = 80;    // CV quá ngắn → cảnh báo
 
@@ -289,6 +293,11 @@ async function startReviewFlow() {
   const jobDescription = document.getElementById('cv-job-description').value.trim();
   const tone = document.getElementById('cv-reviewer-tone').value;
 
+  activeCVText = cvText;
+  activeJobPosition = jobPosition;
+  activeJobDescription = jobDescription;
+  activeTone = tone;
+
   if (!cvText) {
     alert('Vui lòng dán nội dung chữ trong CV của bạn trước khi phân tích!');
     return;
@@ -468,6 +477,9 @@ function renderResultsHTML(data) {
   const improvements = data.improvements || [];
   const atsFeedback = data.ats_feedback || '';
   const rewrites = data.rewrites || [];
+  const jdMatchScore = data.jd_match_score !== undefined ? data.jd_match_score : null;
+  const missingKeywords = data.missing_keywords || [];
+  const interviewPrep = data.interview_prep || [];
 
   // Tạo class màu sắc theo điểm
   let badgeStyle = 'background:rgba(16, 185, 129, 0.12); color:#10b981; border:1px solid rgba(16, 185, 129, 0.25);';
@@ -508,6 +520,13 @@ function renderResultsHTML(data) {
             <div class="cv-grade-badge" style="${badgeStyle}">
               Xếp loại: ${grade}
             </div>
+
+            ${jdMatchScore !== null ? `
+              <div class="cv-jd-match-panel" style="margin-top:16px; text-align:center; padding:12px; background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.2); border-radius:8px;">
+                <div style="font-size:10px; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;">Độ Tương Thích JD</div>
+                <div style="font-size:24px; font-weight:800; color:#60a5fa;">${jdMatchScore}%</div>
+              </div>
+            ` : ''}
           </div>
 
           <!-- Card Đánh Giá Chung -->
@@ -522,10 +541,11 @@ function renderResultsHTML(data) {
         <!-- Cột phải: Các Tab Đánh Giá Chi Tiết -->
         <div class="cv-reviewer-card">
           <!-- Thanh Tab Navigation -->
-          <div style="display:flex; gap:12px; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:14px; margin-bottom:20px;">
+          <div style="display:flex; gap:12px; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:14px; margin-bottom:20px; flex-wrap:wrap;">
             <button class="btn-secondary active cv-tab-btn" data-tab="tab-overview" style="padding:8px 16px; font-size:12.5px;">Tổng Quan & ATS</button>
             <button class="btn-secondary cv-tab-btn" data-tab="tab-improvements" style="padding:8px 16px; font-size:12.5px;">Điểm Cần Cải Thiện</button>
             <button class="btn-secondary cv-tab-btn" data-tab="tab-rewrites" style="padding:8px 16px; font-size:12.5px;">Mẫu Câu Sửa Đổi (${rewrites.length})</button>
+            <button class="btn-secondary cv-tab-btn" data-tab="tab-interview" style="padding:8px 16px; font-size:12.5px;">Phỏng Vấn Thử (${interviewPrep.length})</button>
           </div>
 
           <!-- Tab 1: Tổng Quan & ATS -->
@@ -556,12 +576,25 @@ function renderResultsHTML(data) {
               </ul>
             </div>
 
-            <div>
+            <div style="margin-bottom:20px;">
               <div class="cv-result-header" style="font-size:14px;"><i class="fas fa-robot"></i> Đánh Giá Bộ Lọc ATS</div>
               <p style="font-size:13.5px; color:var(--text-secondary); line-height:1.7; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.03); border-radius:6px; padding:12px; margin-top:8px;">
                 ${atsFeedback}
               </p>
             </div>
+
+            ${missingKeywords.length > 0 ? `
+            <div>
+              <div class="cv-result-header" style="font-size:14px;"><i class="fas fa-search-plus"></i> Kỹ Năng / Từ Khóa Thiếu (Nên Bổ Sung)</div>
+              <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;">
+                ${missingKeywords.map(k => `
+                  <span class="cv-keyword-badge" style="background:rgba(239,68,68,0.1); color:#f87171; border:1px solid rgba(239,68,68,0.2); padding:6px 12px; border-radius:100px; font-size:12px; font-weight:600; display:inline-flex; align-items:center; gap:6px;">
+                    <i class="fas fa-plus" style="font-size:10px;"></i> ${k}
+                  </span>
+                `).join('')}
+              </div>
+            </div>
+            ` : ''}
           </div>
 
           <!-- Tab 2: Điểm Cần Cải Thiện -->
@@ -604,14 +637,37 @@ function renderResultsHTML(data) {
             </div>
           </div>
 
+          <!-- Tab 4: Phỏng Vấn Thử -->
+          <div class="cv-tab-content" id="tab-interview" style="display:none;">
+            <div class="cv-result-header" style="font-size:14px; margin-bottom:14px;"><i class="fas fa-comments"></i> Câu Hỏi Phỏng Vấn Thử & Gợi Ý Trả Lời</div>
+            <div class="cv-interview-list" style="display:flex; flex-direction:column; gap:16px;">
+              ${interviewPrep.map((ip, idx) => `
+                <div class="cv-interview-box" style="background:rgba(255,255,255,0.015); border:1px solid rgba(255,255,255,0.04); border-radius:8px; padding:16px; display:flex; flex-direction:column; gap:8px;">
+                  <div style="font-weight:700; font-size:14px; color:#60a5fa; display:flex; gap:8px; align-items:flex-start;">
+                    <span style="background:rgba(96,165,250,0.15); color:#60a5fa; padding:2px 8px; border-radius:4px; font-size:11px; font-family:monospace; margin-top:2px;">Q${idx + 1}</span>
+                    <span>${ip.question}</span>
+                  </div>
+                  <div style="font-size:13px; color:var(--text-secondary); line-height:1.6; border-left:2px solid rgba(16,185,129,0.3); padding-left:12px; margin-left:4px;">
+                    <strong style="color:#10b981; font-size:12px; display:block; margin-bottom:4px;"><i class="fas fa-lightbulb"></i> Hướng dẫn trả lời:</strong>
+                    ${ip.answer_guideline}
+                  </div>
+                </div>
+              `).join('')}
+              ${interviewPrep.length === 0 ? '<p style="font-size:13px; color:var(--text-muted); text-align:center;">Không có câu hỏi gợi ý nào.</p>' : ''}
+            </div>
+          </div>
+
         </div>
 
       </div>
 
       <!-- Footer điều khiển dưới kết quả -->
-      <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid rgba(255,255,255,0.06); padding-top:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid rgba(255,255,255,0.06); padding-top:16px; gap:12px; flex-wrap:wrap;">
         <button class="btn-secondary" id="cv-btn-back-setup" style="padding:10px 18px; font-size:13px;"><i class="fas fa-arrow-left"></i> Quay lại / Đánh giá CV khác</button>
-        <button class="btn-primary" id="cv-btn-print" style="padding:10px 20px; font-size:13px; background:#10b981; border:none;"><i class="fas fa-print"></i> In / Xuất Báo Cáo</button>
+        <div style="display:flex; gap:12px;">
+          <button class="btn-primary" id="cv-btn-coverletter" style="padding:10px 20px; font-size:13px; background:#3b82f6; border:none;"><i class="fas fa-file-alt"></i> Soạn Thư Xin Việc (AI)</button>
+          <button class="btn-primary" id="cv-btn-print" style="padding:10px 20px; font-size:13px; background:#10b981; border:none;"><i class="fas fa-print"></i> In / Xuất Báo Cáo</button>
+        </div>
       </div>
 
     </div>
@@ -661,10 +717,94 @@ function bindResultButtons() {
     }, 150);
   }
 
-  // Sự kiện in báo cáo
+function showCoverLetterModal(coverLetterText) {
+  let modal = document.getElementById('cv-coverletter-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'cv-coverletter-modal';
+    modal.className = 'cal-modal-overlay'; // Re-use calendar modal styling
+    modal.style.zIndex = '2000';
+    document.body.appendChild(modal);
+  }
+  
+  modal.innerHTML = `
+    <div class="cal-modal-content" style="max-width: 650px; width: 90%;">
+      <div class="cal-modal-header" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.06); padding-bottom:12px; margin-bottom:16px;">
+        <h3 style="font-size:16px; font-weight:700; color:var(--text-primary); margin:0;"><i class="fas fa-file-alt" style="color:#3b82f6; margin-right:8px;"></i> Thư Xin Việc Từ AI (Cover Letter)</h3>
+        <button class="cal-modal-close" id="cv-coverletter-modal-close" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="cal-modal-body" style="max-height: 450px; overflow-y: auto; padding-right:6px;">
+        <div style="background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); padding:18px; border-radius:8px; font-size:14px; line-height:1.7; color:var(--text-secondary); white-space:pre-wrap; font-family:'Inter', sans-serif;">${coverLetterText}</div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px; border-top:1px solid rgba(255,255,255,0.06); padding-top:14px;">
+        <button class="btn-secondary" id="cv-coverletter-btn-copy" style="font-size:12.5px; padding:8px 16px;"><i class="fas fa-copy" style="margin-right:6px;"></i> Sao chép</button>
+        <button class="btn-primary" id="cv-coverletter-btn-close" style="font-size:12.5px; padding:8px 16px; background:var(--accent-blue); border:none;">Đóng</button>
+      </div>
+    </div>
+  `;
+  
+  modal.classList.add('open');
+  
+  // Bind close events
+  document.getElementById('cv-coverletter-modal-close').onclick = () => modal.classList.remove('open');
+  document.getElementById('cv-coverletter-btn-close').onclick = () => modal.classList.remove('open');
+  
+  // Bind copy event
+  const btnCopy = document.getElementById('cv-coverletter-btn-copy');
+  btnCopy.onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(coverLetterText);
+      btnCopy.innerHTML = '<i class="fas fa-check" style="margin-right:6px;"></i> Đã sao chép!';
+      btnCopy.style.color = '#10b981';
+      setTimeout(() => {
+        btnCopy.innerHTML = '<i class="fas fa-copy" style="margin-right:6px;"></i> Sao chép';
+        btnCopy.style.color = '';
+      }, 2000);
+    } catch (err) {
+      alert('Không thể sao chép văn bản.');
+    }
+  };
+}
+
+// Gắn sự kiện in báo cáo & tạo Cover Letter
   const btnPrint = document.getElementById('cv-btn-print');
   if (btnPrint) {
     btnPrint.onclick = exportCVReport;
+  }
+
+  // Sự kiện tạo thư xin việc (Cover Letter) từ AI
+  const btnCoverLetter = document.getElementById('cv-btn-coverletter');
+  if (btnCoverLetter) {
+    btnCoverLetter.onclick = async () => {
+      btnCoverLetter.disabled = true;
+      btnCoverLetter.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i> Đang soạn thư...';
+      
+      try {
+        const res = await fetch('/api/cv-coverletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cvText: activeCVText,
+            jobPosition: activeJobPosition,
+            jobDescription: activeJobDescription,
+            tone: activeTone
+          })
+        });
+        
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+          throw new Error(err.error || `Lỗi server ${res.status}`);
+        }
+        
+        const data = await res.json();
+        showCoverLetterModal(data.coverLetter);
+      } catch (err) {
+        alert('Lỗi khi tạo Cover Letter: ' + err.message);
+      } finally {
+        btnCoverLetter.disabled = false;
+        btnCoverLetter.innerHTML = '<i class="fas fa-file-alt" style="margin-right:6px;"></i> Soạn Thư Xin Việc (AI)';
+      }
+    };
   }
 }
 

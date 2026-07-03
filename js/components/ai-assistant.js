@@ -209,6 +209,44 @@ function toggleChat(forceState) {
   }
 }
 
+function processAIActions(responseText) {
+  let cleanText = responseText;
+  const actionRegex = /\[ACTION:\s*([a-zA-Z0-9_-]+)\s*=\s*([^\]]+)\]/g;
+  let match;
+  
+  while ((match = actionRegex.exec(responseText)) !== null) {
+    const actionType = match[1].trim();
+    const actionValue = match[2].trim();
+    
+    try {
+      if (actionType === 'switch_section') {
+        if (typeof window.switchSection === 'function') {
+          window.switchSection(actionValue);
+        }
+      } else if (actionType === 'add_todo') {
+        if (typeof window.addNewTodoFromAI === 'function') {
+          window.addNewTodoFromAI(actionValue);
+        }
+      } else if (actionType === 'search_weather') {
+        const cityInput = document.getElementById('cityInput');
+        if (cityInput) {
+          cityInput.value = actionValue;
+          if (typeof window.loadWeather === 'function') {
+            window.loadWeather();
+          } else {
+            const weatherSearchBtn = document.querySelector('#section-weather .btn-primary');
+            if (weatherSearchBtn) weatherSearchBtn.click();
+          }
+        }
+      }
+    } catch (e) {
+      console.error('[AI Assistant] Failed to execute action:', actionType, actionValue, e);
+    }
+  }
+  
+  return cleanText.replace(/\[ACTION:\s*[a-zA-Z0-9_-]+\s*=\s*[^\]]+\]/g, '').trim();
+}
+
 let isSending = false;
 async function handleSend(e) {
   stopAudio();
@@ -304,12 +342,13 @@ async function handleSend(e) {
     }
 
     const data = await res.json();
-    appendMessage(data.response, 'assistant');
-    speakText(data.response);
+    const cleanResponseText = processAIActions(data.response);
+    appendMessage(cleanResponseText, 'assistant');
+    speakText(cleanResponseText);
 
     // Update history
     chatHistory.push({ role: 'user', content: text });
-    chatHistory.push({ role: 'assistant', content: data.response });
+    chatHistory.push({ role: 'assistant', content: cleanResponseText });
 
     // Limit history length to save token budget
     if (chatHistory.length > 12) {
@@ -317,7 +356,7 @@ async function handleSend(e) {
     }
   } catch (err) {
     removeTypingIndicator(typingId);
- appendMessage(`️ Lỗi: Không thể kết nối với Trợ lý AI (${err.message})`, 'system');
+    appendMessage(`️ Lỗi: Không thể kết nối với Trợ lý AI (${err.message})`, 'system');
   } finally {
     isSending = false;
   }
