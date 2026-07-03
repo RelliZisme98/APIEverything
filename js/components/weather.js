@@ -205,24 +205,32 @@ export function renderWindyMap(lat, lon, containerId = 'weatherWindyMap') {
   const el = document.getElementById(containerId);
   if (!el) return;
 
+  // Strict validation with fallback
+  let cleanLat = parseFloat(lat);
+  let cleanLon = parseFloat(lon);
+  if (isNaN(cleanLat) || isNaN(cleanLon) || !isFinite(cleanLat) || !isFinite(cleanLon)) {
+    cleanLat = 10.823;
+    cleanLon = 106.6296;
+  }
+
   // Store coordinates and default overlay in dataset
-  el.dataset.lat = lat;
-  el.dataset.lon = lon;
+  el.dataset.lat = cleanLat;
+  el.dataset.lon = cleanLon;
   el.dataset.overlay = 'rain';
 
   const getIframeUrl = (overlay) => {
-    return `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lon}&zoom=6&level=surface&overlay=${overlay}&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1`;
+    return `https://embed.windy.com/embed2.html?lat=${cleanLat}&lon=${cleanLon}&zoom=6&level=surface&overlay=${overlay}&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=&metricWind=default&metricTemp=default&radarRange=-1`;
   };
 
   el.innerHTML = `
- <div class="wf-section-label" style="margin-bottom: 8px;">Bản đồ thời tiết Windy</div>
+    <div class="wf-section-label" style="margin-bottom: 8px;">Bản đồ thời tiết Windy</div>
     
     <div class="windy-controls" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
- <button class="windy-tab-btn active" data-overlay="rain" onclick="window.changeWindyOverlay('rain')">️ Mưa & Sét</button>
- <button class="windy-tab-btn" data-overlay="wind" onclick="window.changeWindyOverlay('wind')">Gió & Bão</button>
- <button class="windy-tab-btn" data-overlay="clouds" onclick="window.changeWindyOverlay('clouds')">️ Mây che phủ</button>
- <button class="windy-tab-btn" data-overlay="temp" onclick="window.changeWindyOverlay('temp')">️ Nhiệt độ</button>
- <button class="windy-tab-btn" data-overlay="radar" onclick="window.changeWindyOverlay('radar')">Radar thời tiết</button>
+      <button class="windy-tab-btn active" data-overlay="rain" onclick="window.changeWindyOverlay('rain')">️ Mưa & Sét</button>
+      <button class="windy-tab-btn" data-overlay="wind" onclick="window.changeWindyOverlay('wind')">Gió & Bão</button>
+      <button class="windy-tab-btn" data-overlay="clouds" onclick="window.changeWindyOverlay('clouds')">️ Mây che phủ</button>
+      <button class="windy-tab-btn" data-overlay="temp" onclick="window.changeWindyOverlay('temp')">️ Nhiệt độ</button>
+      <button class="windy-tab-btn" data-overlay="radar" onclick="window.changeWindyOverlay('radar')">Radar thời tiết</button>
     </div>
 
     <div class="windy-map-wrap" style="position:relative;width:100%;height:380px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid rgba(255,255,255,0.08);">
@@ -245,9 +253,9 @@ window.changeWindyOverlay = (overlay) => {
   const iframe = document.getElementById('windyIframe');
   if (!container || !iframe) return;
 
-  const lat = container.dataset.lat;
-  const lon = container.dataset.lon;
-  if (!lat || !lon) return;
+  const lat = parseFloat(container.dataset.lat);
+  const lon = parseFloat(container.dataset.lon);
+  if (isNaN(lat) || isNaN(lon) || !isFinite(lat) || !isFinite(lon)) return;
 
   // Update active state of control buttons
   const buttons = container.querySelectorAll('.windy-tab-btn');

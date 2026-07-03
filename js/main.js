@@ -148,16 +148,19 @@ async function loadWeather(cityOverride, isSilent = false) {
     ]);
     state.weatherForecast = forecast;
 
-    const lat = data.coord?.lat;
-    const lon = data.coord?.lon;
-    if (lat != null && lon != null) {
+    const rawLat = data.coord?.lat;
+    const rawLon = data.coord?.lon;
+    const lat = (rawLat != null && !isNaN(parseFloat(rawLat))) ? parseFloat(rawLat) : null;
+    const lon = (rawLon != null && !isNaN(parseFloat(rawLon))) ? parseFloat(rawLon) : null;
+
+    if (lat !== null && lon !== null) {
       await loadAQI(lat, lon);
     }
 
     renderWeather(data, forecast?.todayMinMax);
 
     // Fetch and render true hourly weather forecast (1-hour interval) from Open-Meteo
-    if (lat != null && lon != null) {
+    if (lat !== null && lon !== null) {
       const hourlyList = await fetchHourlyForecastFromOpenMeteo(lat, lon).catch(() => null);
       if (hourlyList && hourlyList.length) {
         renderHourly(hourlyList);
