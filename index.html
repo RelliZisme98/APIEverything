@@ -13,8 +13,10 @@
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="apple-touch-icon" href="favicon.png" />
 
-  <!-- Google Fonts -->
+  <!-- Google Fonts & Font Preconnects -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
   <link
     href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet" />
@@ -22,7 +24,7 @@
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-  <!-- ── CSS – load order matters ── -->
+  <!-- ── CSS – Critical Styles (Render-Blocking) ── -->
   <link rel="stylesheet" href="css/variables.css" />
   <link rel="stylesheet" href="css/finance.css" />
   <link rel="stylesheet" href="css/animations.css" />
@@ -31,36 +33,38 @@
   <link rel="stylesheet" href="css/layout.css" />
   <link rel="stylesheet" href="css/ticker.css" />
   <link rel="stylesheet" href="css/cards.css" />
-  <link rel="stylesheet" href="css/crypto.css" />
-  <link rel="stylesheet" href="css/weather.css" />
-  <link rel="stylesheet" href="css/gold.css" />
-  <link rel="stylesheet" href="css/gas.css" />
-  <link rel="stylesheet" href="css/exchange.css" />
-  <link rel="stylesheet" href="css/calendar.css" />
-  <link rel="stylesheet" href="css/power-outage.css" />
-  <link rel="stylesheet" href="css/aqi.css" />
-  <link rel="stylesheet" href="css/vnindex.css" />
-  <link rel="stylesheet" href="css/news.css" />
-  <link rel="stylesheet" href="css/new-features.css" />
-  <link rel="stylesheet" href="css/football.css" />
-  <link rel="stylesheet" href="css/travel.css" />
-  <link rel="stylesheet" href="css/todo.css" />
-  <link rel="stylesheet" href="css/downloader.css" />
-  <link rel="stylesheet" href="css/lookup.css" />
-  <link rel="stylesheet" href="css/media.css" />
-  <link rel="stylesheet" href="css/file-tools.css" />
-  <link rel="stylesheet" href="css/qrcode.css" />
-  <link rel="stylesheet" href="css/emulator.css" />
-  <link rel="stylesheet" href="css/converter.css" />
-  <link rel="stylesheet" href="css/iq-eq-test.css" />
-  <link rel="stylesheet" href="css/mbti.css" />
-  <link rel="stylesheet" href="css/astrology.css" />
-  <link rel="stylesheet" href="css/devdocs.css" />
-  <link rel="stylesheet" href="css/cv-reviewer.css" />
-  <link rel="stylesheet" href="css/bookmarks.css" />
-  <link rel="stylesheet" href="css/typing-test.css" />
-  <link rel="stylesheet" href="css/hardware-test.css" />
   <link rel="stylesheet" href="css/mobile.css" />
+
+  <!-- ── CSS – Non-Critical Styles (Asynchronous / Non-Blocking) ── -->
+  <link rel="stylesheet" href="css/crypto.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/weather.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/gold.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/gas.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/exchange.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/calendar.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/power-outage.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/aqi.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/vnindex.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/news.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/new-features.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/football.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/travel.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/todo.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/downloader.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/lookup.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/media.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/file-tools.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/qrcode.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/emulator.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/converter.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/iq-eq-test.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/mbti.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/astrology.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/devdocs.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/cv-reviewer.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/bookmarks.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/typing-test.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/hardware-test.css" media="print" onload="this.media='all'" />
 </head>
 
 <body>
@@ -245,7 +249,32 @@
       <!-- ════════ SECTION: FINANCE ════════ -->
       <section class="content-section active" id="section-finance">
         <div class="page-title">Thị Trường Tài Chính</div>
-        <div id="financeContent"></div>
+        <div id="financeContent">
+          <div class="finance-tabs">
+            <button class="finance-tab-btn active">Tổng quan</button>
+            <button class="finance-tab-btn">Chứng khoán</button>
+            <button class="finance-tab-btn">Tiền điện tử</button>
+            <button class="finance-tab-btn">Giá vàng</button>
+            <button class="finance-tab-btn">Ngoại tệ</button>
+            <button class="finance-tab-btn">Xăng dầu</button>
+          </div>
+          <div class="finance-sub-content" style="margin-top:16px;">
+            <div class="finance-overview-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px;">
+              <div class="skeleton skel-big" style="height:110px;"></div>
+              <div class="skeleton skel-big" style="height:110px;"></div>
+              <div class="skeleton skel-big" style="height:110px;"></div>
+              <div class="skeleton skel-big" style="height:110px;"></div>
+            </div>
+            <div style="display:flex;gap:20px;flex-wrap:wrap;">
+              <div style="flex:1.2;min-width:300px;">
+                <div class="skeleton skel-big" style="height:150px;"></div>
+              </div>
+              <div style="flex:0.8;min-width:250px;">
+                <div class="skeleton skel-big" style="height:150px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <!-- ════════ SECTION: WEATHER ════════ -->
