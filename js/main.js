@@ -23,7 +23,7 @@ import { fetchAQI }           from './api/aqi.js';
 // ── Feature Components ──
 // ── Feature Components ──
 import { renderCalendar }                       from './components/calendar.js';
-import { renderQuickCities }                    from './components/weather.js';
+import { renderQuickCities }                    from './components/weather.js?v=1.2.0';
 import { renderNews }                           from './components/news.js';
 // New feature components
 import { renderBankRates }   from './components/bank-rates.js';
