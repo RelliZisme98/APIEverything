@@ -1632,61 +1632,54 @@ async function handleIQEQ(request, env) {
       const type = searchParams.get('type') || 'IQ';
       if (type === 'IQ') {
         const pool = await fetchQuestionsFromSupabase('iq_questions', url, key);
-        // Phân nhóm 4 cấp độ từ 60 câu:
-        // Nhóm 1 - Dễ (0-14): 15 câu
-        const pool1 = Array.from({ length: 15 }, (_, i) => i);
-        // Nhóm 2 - Trung bình (15-29): 15 câu
-        const pool2 = Array.from({ length: 15 }, (_, i) => i + 15);
-        // Nhóm 3 - Khó (30-44): 15 câu
-        const pool3 = Array.from({ length: 15 }, (_, i) => i + 30);
-        // Nhóm 4 - Rất khó / Cực khó (45-59): 15 câu
-        const pool4 = Array.from({ length: 15 }, (_, i) => i + 45);
+        
+        // Filter dynamically by difficulty column
+        const poolEasy = pool.filter(p => p.difficulty === 'easy');
+        const poolMedium = pool.filter(p => p.difficulty === 'medium');
+        const poolHard = pool.filter(p => p.difficulty === 'hard');
+        const poolVeryHard = pool.filter(p => p.difficulty === 'very_hard');
 
-        // Lấy ngẫu nhiên: 5 + 7 + 7 + 6 = 25 câu
-        const sel1 = pool1.sort(() => 0.5 - Math.random()).slice(0, 5);
-        const sel2 = pool2.sort(() => 0.5 - Math.random()).slice(0, 7);
-        const sel3 = pool3.sort(() => 0.5 - Math.random()).slice(0, 7);
-        const sel4 = pool4.sort(() => 0.5 - Math.random()).slice(0, 6);
+        // Select randomly: 5 Easy, 7 Medium, 7 Hard, 6 Very Hard (Total 25 questions)
+        const selEasy = poolEasy.sort(() => 0.5 - Math.random()).slice(0, 5);
+        const selMedium = poolMedium.sort(() => 0.5 - Math.random()).slice(0, 7);
+        const selHard = poolHard.sort(() => 0.5 - Math.random()).slice(0, 7);
+        const selVeryHard = poolVeryHard.sort(() => 0.5 - Math.random()).slice(0, 6);
 
-        const indices = [...sel1, ...sel2, ...sel3, ...sel4].sort((a, b) => a - b);
+        const selectedQuestions = [...selEasy, ...selMedium, ...selHard, ...selVeryHard];
+        selectedQuestions.sort((a, b) => a.q_idx - b.q_idx);
 
-        const safeQuestions = indices.map(idx => {
-          const original = pool.find(p => p.q_idx === idx);
+        const safeQuestions = selectedQuestions.map(original => {
           return {
-            qIdx: idx,
-            q: original ? original.q : '',
-            options: original ? original.options : [],
-            svg: (original && original.svg) ? original.svg : null
+            qIdx: original.q_idx,
+            q: original.q,
+            options: original.options,
+            svg: original.svg || null
           };
         });
         return cors(JSON.stringify(safeQuestions), 200);
       } else {
         const pool = await fetchQuestionsFromSupabase('eq_questions', url, key);
-        // Phân nhóm câu hỏi EQ theo khía cạnh (mỗi khía cạnh có 25 câu):
-        // 1. Empathy (Thấu cảm): index 0 đến 24
-        const empathyPool = Array.from({ length: 25 }, (_, i) => i);
-        // 2. SelfReg (Tự điều chỉnh): index 25 đến 49
-        const selfRegPool = Array.from({ length: 25 }, (_, i) => i + 25);
-        // 3. Social (Kỹ năng xã hội): index 50 đến 74
-        const socialPool = Array.from({ length: 25 }, (_, i) => i + 50);
-        // 4. SelfAwa (Tự nhận thức): index 75 đến 99
-        const selfAwaPool = Array.from({ length: 25 }, (_, i) => i + 75);
+        
+        // Filter dynamically by dimension column
+        const empathyPool = pool.filter(p => p.dim === 'empathy');
+        const selfRegPool = pool.filter(p => p.dim === 'selfReg');
+        const socialPool = pool.filter(p => p.dim === 'social');
+        const selfAwaPool = pool.filter(p => p.dim === 'selfAwa');
 
-        // Lấy ngẫu nhiên để tổng cộng được 25 câu (6 Empathy, 6 SelfReg, 6 Social, 7 SelfAwa)
+        // Select randomly: 6 Empathy, 6 SelfReg, 6 Social, 7 SelfAwa (Total 25 questions)
         const selectedEmpathy = empathyPool.sort(() => 0.5 - Math.random()).slice(0, 6);
         const selectedSelfReg = selfRegPool.sort(() => 0.5 - Math.random()).slice(0, 6);
         const selectedSocial = socialPool.sort(() => 0.5 - Math.random()).slice(0, 6);
         const selectedSelfAwa = selfAwaPool.sort(() => 0.5 - Math.random()).slice(0, 7);
 
-        // Gộp lại và sắp xếp theo index tăng dần
-        const indices = [...selectedEmpathy, ...selectedSelfReg, ...selectedSocial, ...selectedSelfAwa].sort((a, b) => a - b);
+        const selectedQuestions = [...selectedEmpathy, ...selectedSelfReg, ...selectedSocial, ...selectedSelfAwa];
+        selectedQuestions.sort((a, b) => a.q_idx - b.q_idx);
 
-        const safeQuestions = indices.map(idx => {
-          const original = pool.find(p => p.q_idx === idx);
+        const safeQuestions = selectedQuestions.map(original => {
           return {
-            qIdx: idx,
-            q: original ? original.q : '',
-            dim: original ? original.dim : ''
+            qIdx: original.q_idx,
+            q: original.q,
+            dim: original.dim
           };
         });
         return cors(JSON.stringify(safeQuestions), 200);
@@ -1708,9 +1701,11 @@ async function handleIQEQ(request, env) {
         answers.forEach(item => {
           const original = pool.find(p => p.q_idx === item.qIdx);
           if (original && item.selected === original.ans) {
-            const idx = item.qIdx;
-            // Nhóm 1 (0-14): 1.0đ, Nhóm 2 (15-29): 1.3đ, Nhóm 3 (30-44): 1.7đ, Nhóm 4 (45-59): 2.2đ
-            const weight = idx < 15 ? 1.0 : idx < 30 ? 1.3 : idx < 45 ? 1.7 : 2.2;
+            // Nhóm 1 (Dễ): 1.0đ, Nhóm 2 (Trung bình): 1.3đ, Nhóm 3 (Khó): 1.7đ, Nhóm 4 (Rất khó): 2.2đ
+            let weight = 1.0;
+            if (original.difficulty === 'medium') weight = 1.3;
+            else if (original.difficulty === 'hard') weight = 1.7;
+            else if (original.difficulty === 'very_hard') weight = 2.2;
             rawCorrect += weight;
           }
         });
