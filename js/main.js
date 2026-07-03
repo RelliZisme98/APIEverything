@@ -207,7 +207,6 @@ async function refreshAll() {
     loadVNIndex(),
     loadNews(),
     loadLiveFootball(),
-    loadPowerOutages(),
     loadLotteryBackground(),
     loadMediaBackground(),
   ]);
@@ -313,63 +312,7 @@ async function loadLiveFootball() {
   }
 }
 
-// ── Background Power Outages load for AI ──
-async function loadPowerOutages() {
-  state.powerOutageData = [];
-  
-  // 1. EVNSPC (Miền Nam)
-  try {
-    const res = await fetch('/power-outage?evn=spc&action=today');
-    if (res.ok) {
-      const text = await res.text();
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(text, 'text/html');
-      const rows = doc.querySelectorAll('tr');
-      const items = [];
-      if (rows.length > 1) {
-        const headers = [...rows[0].querySelectorAll('th, td')].map(c => c.textContent.trim());
-        for (let i = 1; i < rows.length; i++) {
-          const cells = [...rows[i].querySelectorAll('td')];
-          if (!cells.length) continue;
-          const obj = { _raw: cells.map(c => c.textContent.trim()) };
-          cells.forEach((td, idx) => {
-            const header = headers[idx] || `col${idx}`;
-            obj[header] = td.textContent.trim();
-          });
-          items.push(obj);
-        }
-      }
-      const formatted = items.slice(0, 10).map(item => ({
-        region: 'Miền Nam',
-        area: item._raw?.[0] || Object.values(item)[0] || '',
-        time: item._raw?.[1] || Object.values(item)[1] || '',
-        district: item._raw?.[3] || Object.values(item)[3] || '',
-        reason: item._raw?.[4] || Object.values(item)[4] || ''
-      }));
-      state.powerOutageData.push(...formatted);
-    }
-  } catch (err) {
-    console.warn('[Power Outages SPC Background Load]', err);
-  }
 
-  // 3. EVNHANOI (Hà Nội)
-  try {
-    const resHanoi = await fetch('/power-outage?evn=hanoi&action=today');
-    if (resHanoi.ok) {
-      const json = await resHanoi.json();
-      const items = json.data?.listLichCatDienEvn || json.data || [];
-      const formatted = items.slice(0, 10).map(it => ({
-        region: 'Hà Nội',
-        area: it.tenDonVi || it.tenKhuVuc || '',
-        time: it.khoangThoiGian || (it.tuGio && it.denGio ? `${it.tuGio} - ${it.denGio}` : ''),
-        reason: it.noidung || it.lyDo || ''
-      }));
-      state.powerOutageData.push(...formatted);
-    }
-  } catch (err) {
-    console.warn('[Power Outages Hanoi Background Load]', err);
-  }
-}
 
 // ── Background Lottery load for AI ──
 async function loadLotteryBackground() {
@@ -592,7 +535,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadVNIndex(true);
     loadNews(true);
     loadLiveFootball();
-    loadPowerOutages();
     loadLotteryBackground();
     loadMediaBackground();
   }, 60_000);
