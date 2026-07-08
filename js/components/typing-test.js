@@ -89,7 +89,7 @@ export function renderTypingTest(containerId = 'typingTestContent') {
         <div class="tt-words-wrapper" id="tt-words-wrap">
           <!-- Rendered dynamically -->
         </div>
-        <input type="text" id="tt-hidden-input" autocomplete="off" autofocus class="tt-hidden-input" />
+        <input type="text" id="tt-hidden-input" autocomplete="off" class="tt-hidden-input" />
         <div class="tt-focus-prompt" id="tt-focus-prompt">
           <span class="pulse-icon">⌨️</span>
           <span>Nhấp chuột vào đây để kích hoạt gõ phím</span>
@@ -215,8 +215,8 @@ function setupTypingTest() {
   soundToggle.onclick = () => {
     playSound = !playSound;
     soundToggle.classList.toggle('active', playSound);
- soundToggle.textContent = `Click: ${playSound ? 'Bật' : 'Tắt'}`;
-    hiddenInput.focus();
+    soundToggle.textContent = `Click: ${playSound ? 'Bật' : 'Tắt'}`;
+    hiddenInput.focus({ preventScroll: true });
   };
 
   // Language selectors
@@ -255,7 +255,7 @@ function setupTypingTest() {
 
   // Handle focus behavior
   typingBox.onclick = () => {
-    hiddenInput.focus();
+    hiddenInput.focus({ preventScroll: true });
   };
   hiddenInput.onfocus = () => {
     focusPrompt.style.opacity = '0';
@@ -328,6 +328,7 @@ function setupTypingTest() {
     
     // Render words as span letters
     wordsWrap.innerHTML = '';
+    wordsWrap.scrollTop = 0;
     
     // Add custom caret element
     const caret = document.createElement('div');
@@ -391,8 +392,9 @@ function setupTypingTest() {
       previewEl.innerHTML = `<span style="color: rgba(255,255,255,0.25); font-style: italic;">Nhấp vào ô từ phía trên và bắt đầu gõ...</span>`;
     }
     resultScreen.style.display = 'none';
+    wordsWrap.scrollTop = 0;
     initWords();
-    hiddenInput.focus();
+    hiddenInput.focus({ preventScroll: true });
   }
 
   // Handle typing input
