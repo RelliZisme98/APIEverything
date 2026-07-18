@@ -27,7 +27,7 @@ import { renderQuickCities }                    from './components/weather.js?v=
 import { renderNews }                           from './components/news.js';
 // New feature components
 import { renderBankRates }   from './components/bank-rates.js';
-import { renderTaxCalc }     from './components/tax-calc.js';
+import { renderTaxCalc }     from './components/tax-calc.js?v=1.2.0';
 import { renderLottery }     from './components/lottery.js';
 import { renderWorldClock, destroyWorldClock } from './components/world-clock.js';
 import { renderFootball, fetchLiveScores }    from './components/football.js';
