@@ -2,6 +2,12 @@
 <html lang="vi">
 
 <head>
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rellia's Dashboard – Everything you need to know</title>
@@ -225,6 +231,10 @@
           </svg>
           Làm Mới Dữ Liệu
         </button>
+        <button class="sidebar-theme-btn" id="themeToggleBtn">
+          <i class="fas fa-sun" id="themeToggleIcon"></i>
+          <span id="themeToggleText">Chế độ sáng</span>
+        </button>
         <div class="sidebar-auto-refresh">
           <span class="status-dot dot-green"></span>
           Tự động làm mới mỗi 60 giây
@@ -243,6 +253,10 @@
           <span class="ticker-item"><span class="val">Đang tải dữ liệu...</span></span>
           <span class="ticker-item"><span class="val">Đang tải dữ liệu...</span></span>
           <span class="ticker-item"><span class="val">Đang tải dữ liệu...</span></span>
+        </div>
+        <div class="ticker-clock" id="tickerClock">
+          <span id="ticker-date">--/--/----</span>
+          <span id="ticker-time">00:00:00</span>
         </div>
       </div>
 

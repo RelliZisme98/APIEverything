@@ -275,3 +275,38 @@
   color: rgba(255, 255, 255, 0.3);
   margin-bottom: 12px;
 }
+
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .cv-reviewer-card {
+  background: var(--bg-secondary);
+}
+:root[data-theme="light"] .cv-input-text, 
+:root[data-theme="light"] .cv-select {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .cv-input-text:focus, 
+:root[data-theme="light"] .cv-select:focus {
+  background: var(--bg-card-hover);
+}
+:root[data-theme="light"] .cv-score-container {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .cv-score-bg {
+  stroke: rgba(0, 0, 0, 0.05);
+}
+:root[data-theme="light"] .cv-score-number {
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .cv-rewrite-box {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .cv-drop-zone {
+  border-color: var(--border);
+  background: var(--bg-secondary);
+}
+:root[data-theme="light"] .cv-drop-icon {
+  color: var(--text-muted);
+}

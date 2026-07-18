@@ -440,3 +440,130 @@
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
+
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .pomodoro-card {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+  box-shadow: var(--shadow-md);
+}
+:root[data-theme="light"] .pomodoro-modes {
+  background: rgba(0, 0, 0, 0.04);
+}
+:root[data-theme="light"] .pomodoro-mode-btn {
+  color: var(--text-secondary);
+}
+:root[data-theme="light"] .pomodoro-mode-btn.active {
+  background: rgba(99, 102, 241, 0.15);
+  color: #4f46e5;
+}
+:root[data-theme="light"] .pomodoro-mode-btn:hover:not(.active) {
+  background: rgba(0, 0, 0, 0.03);
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .pomodoro-ring-bg {
+  stroke: rgba(0, 0, 0, 0.05);
+}
+:root[data-theme="light"] .pomodoro-time {
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .pomodoro-label {
+  color: #4f46e5;
+}
+:root[data-theme="light"] .pomodoro-session-count {
+  color: var(--text-muted);
+}
+:root[data-theme="light"] .pomodoro-btn-secondary {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .pomodoro-btn-secondary:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .pomodoro-dot {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+:root[data-theme="light"] .pomodoro-custom label {
+  color: var(--text-muted);
+}
+:root[data-theme="light"] .pomodoro-custom input[type="number"] {
+  background: var(--bg-card);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .pomodoro-custom input[type="number"]:focus {
+  border-color: var(--accent-blue);
+}
+:root[data-theme="light"] .ambient-card {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+  box-shadow: var(--shadow-md);
+}
+:root[data-theme="light"] .ambient-title {
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .ambient-sound-btn {
+  background: var(--bg-card);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+:root[data-theme="light"] .ambient-sound-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+  background: var(--bg-card-hover);
+}
+:root[data-theme="light"] .ambient-sound-btn.playing {
+  border-color: #6366f1;
+  background: rgba(99, 102, 241, 0.12);
+  color: #4f46e5;
+}
+:root[data-theme="light"] .ambient-volume input[type="range"] {
+  background: rgba(0, 0, 0, 0.1);
+}
+:root[data-theme="light"] .focus-notify {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-lg);
+}
+:root[data-theme="light"] .focus-clock-card {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+:root[data-theme="light"] #focus-current-time {
+  color: #4f46e5 !important;
+  text-shadow: none !important;
+}
+:root[data-theme="light"] .focus-clock-card div[style*="color: rgba(165, 180, 252, 0.7)"] {
+  color: #4f46e5 !important;
+}
+:root[data-theme="light"] .pomodoro-custom span {
+  color: var(--text-muted) !important;
+}
+:root[data-theme="light"] .pomodoro-custom span[style*="color: rgba(255,255,255,0.6)"] {
+  color: var(--text-primary) !important;
+}
+:root[data-theme="light"] .pomodoro-custom input[type="number"] {
+  background: var(--bg-card) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+:root[data-theme="light"] .pomodoro-custom input[type="number"]:focus {
+  border-color: #6366f1 !important;
+}
+:root[data-theme="light"] #lofiPlayer {
+  background: var(--bg-card) !important;
+  border-color: var(--border) !important;
+}
+:root[data-theme="light"] #lofiTrackTitle {
+  color: #4f46e5 !important;
+}
+:root[data-theme="light"] .focus-tip {
+  background: rgba(99, 102, 241, 0.05) !important;
+  border-color: rgba(99, 102, 241, 0.2) !important;
+  color: #4f46e5 !important;
+}

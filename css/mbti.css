@@ -369,3 +369,29 @@
   font-size: 11px;
   color: var(--text-muted);
 }
+
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .mbti-card,
+:root[data-theme="light"] .mbti-q-grid-panel,
+:root[data-theme="light"] .mbti-dimension-card {
+  background: var(--bg-card);
+}
+:root[data-theme="light"] .mbti-grid-item,
+:root[data-theme="light"] .mbti-likert-btn,
+:root[data-theme="light"] .mbti-famous-item {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+}
+:root[data-theme="light"] .mbti-grid-item:hover,
+:root[data-theme="light"] .mbti-likert-btn:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .mbti-progress-bar,
+:root[data-theme="light"] .mbti-dim-bar-container {
+  background: rgba(0, 0, 0, 0.06);
+}
+:root[data-theme="light"] .mbti-report-section {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}

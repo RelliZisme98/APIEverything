@@ -513,3 +513,76 @@
   0% { opacity: 0.7; }
   100% { opacity: 1; }
 }
+
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .test-nav {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .test-nav-btn:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+:root[data-theme="light"] .test-content-area {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+  box-shadow: var(--shadow-md);
+}
+:root[data-theme="light"] .keyboard-wrapper {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .key-cap {
+  background: var(--bg-card);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .mouse-btn-indicator {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .mouse-wheel-box {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .mouse-canvas-area {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .mouse-canvas-info {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .audio-card {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .audio-btn {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .audio-btn:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+:root[data-theme="light"] .audio-mic-visualizer {
+  background: rgba(0, 0, 0, 0.04);
+}
+:root[data-theme="light"] .battery-stat-row {
+  border-bottom-color: var(--border);
+}
+:root[data-theme="light"] .gamepad-connect-status {
+  border-color: var(--border);
+  background: var(--bg-card);
+}
+:root[data-theme="light"] .gamepad-column {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .analog-stick-box {
+  border-color: var(--border);
+  background: rgba(0, 0, 0, 0.03);
+}
+:root[data-theme="light"] .gamepad-btn-indicator {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}

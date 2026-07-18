@@ -152,11 +152,11 @@ export function renderIQ(containerId = 'iqContent') {
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 16px;">
           <div>
             <label style="display:block; font-size:12px; margin-bottom:4px; color:var(--text-secondary);">Họ và tên của bạn</label>
-            <input type="text" id="iq-user-name" placeholder="Ví dụ: Nguyễn Văn A" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:6px; color:#fff;" />
+            <input type="text" id="iq-user-name" placeholder="Ví dụ: Nguyễn Văn A" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border); border-radius:6px; color:var(--text-primary);" />
           </div>
           <div>
             <label style="display:block; font-size:12px; margin-bottom:4px; color:var(--text-secondary);">Tuổi</label>
-            <input type="number" id="iq-user-age" placeholder="Ví dụ: 20" min="1" max="120" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:6px; color:#fff;" />
+            <input type="number" id="iq-user-age" placeholder="Ví dụ: 20" min="1" max="120" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border); border-radius:6px; color:var(--text-primary);" />
           </div>
         </div>
 
@@ -259,7 +259,7 @@ export function renderIQ(containerId = 'iqContent') {
             <div style="background: rgba(255,255,255,0.015); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); line-height: 1.5;">
  <strong style="color: #60a5fa;">Ý nghĩa kết quả IQ:</strong>
               <div style="margin-top: 6px; color: var(--text-secondary);">
-                Điểm số được tính toán dựa trên khả năng giải quyết 25 câu hỏi thuộc 3 mức độ khó tăng dần (Dễ, Trung bình, Khó) tương ứng với các kỹ năng logic, toán học và hình học không gian.
+                Điểm số được tính toán dựa trên khả năng giải quyết 25 câu hỏi thuộc 4 mức độ khó tăng dần (Dễ, Trung bình, Khó, Rất khó) tương ứng với các kỹ năng logic, toán học và hình học không gian.
               </div>
             </div>
           </div>
@@ -562,11 +562,11 @@ export function renderEQ(containerId = 'eqContent') {
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 16px;">
           <div>
             <label style="display:block; font-size:12px; margin-bottom:4px; color:var(--text-secondary);">Họ và tên của bạn</label>
-            <input type="text" id="eq-user-name" placeholder="Ví dụ: Nguyễn Văn A" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:6px; color:#fff;" />
+            <input type="text" id="eq-user-name" placeholder="Ví dụ: Nguyễn Văn A" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border); border-radius:6px; color:var(--text-primary);" />
           </div>
           <div>
             <label style="display:block; font-size:12px; margin-bottom:4px; color:var(--text-secondary);">Tuổi</label>
-            <input type="number" id="eq-user-age" placeholder="Ví dụ: 20" min="1" max="120" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:6px; color:#fff;" />
+            <input type="number" id="eq-user-age" placeholder="Ví dụ: 20" min="1" max="120" style="width:100%; padding:10px; background:var(--bg-card); border:1px solid var(--border); border-radius:6px; color:var(--text-primary);" />
           </div>
         </div>
 

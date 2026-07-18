@@ -590,3 +590,58 @@
 .cal-btn-add:active {
   transform: translateY(0);
 }
+
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .cal-hero {
+  border-color: var(--border);
+}
+:root[data-theme="light"] .cal-hero-solar {
+  border-right-color: var(--border);
+  background: linear-gradient(145deg, rgba(96,165,250,0.04) 0%, rgba(34,211,238,0.02) 100%);
+}
+:root[data-theme="light"] .cal-hero-lunar {
+  background: linear-gradient(145deg, rgba(251,191,36,0.04) 0%, rgba(251,146,60,0.02) 100%);
+}
+:root[data-theme="light"] .cal-hero-divider {
+  background: rgba(0, 0, 0, 0.01);
+}
+:root[data-theme="light"] .cal-hero-divider-line {
+  background: var(--border);
+}
+:root[data-theme="light"] .cal-mini-wrap {
+  background: var(--bg-secondary);
+}
+:root[data-theme="light"] .mini-cal-btn {
+  background: var(--bg-card);
+}
+:root[data-theme="light"] .mini-cal-btn:hover {
+  background: var(--bg-card-hover);
+}
+:root[data-theme="light"] .mini-cal-day:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+:root[data-theme="light"] .cal-modal-content {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+  box-shadow: var(--shadow-lg);
+}
+:root[data-theme="light"] .cal-detail-card {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .cal-events-wrap {
+  background: var(--bg-secondary);
+}
+:root[data-theme="light"] .cal-events-header {
+  border-bottom-color: var(--border);
+}
+:root[data-theme="light"] .cal-event-row {
+  background: var(--bg-card);
+}
+:root[data-theme="light"] .cal-event-row:hover {
+  background: var(--bg-card-hover);
+}
+:root[data-theme="light"] .cal-event-badge.far {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.05);
+}

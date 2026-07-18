@@ -285,3 +285,66 @@
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .astro-card {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+  box-shadow: var(--shadow-md);
+}
+:root[data-theme="light"] .astro-tabs {
+  border-bottom-color: var(--border);
+}
+:root[data-theme="light"] .astro-tab-btn {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .astro-tab-btn:hover {
+  background: rgba(139, 92, 246, 0.08);
+}
+:root[data-theme="light"] .astro-table-container {
+  border-color: var(--border);
+}
+:root[data-theme="light"] .astro-table th {
+  background: rgba(0, 0, 0, 0.02);
+}
+:root[data-theme="light"] .astro-table th, 
+:root[data-theme="light"] .astro-table td {
+  border-bottom-color: var(--border);
+}
+:root[data-theme="light"] .declination-container {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .declination-axis {
+  border-top-color: var(--border);
+  border-bottom-color: var(--border);
+}
+:root[data-theme="light"] .declination-axis::after {
+  background: var(--border);
+}
+:root[data-theme="light"] .declination-node .node-line {
+  background: var(--border);
+}
+:root[data-theme="light"] .aspect-grid-cell {
+  border-color: var(--border);
+}
+:root[data-theme="light"] .aspect-grid-cell.header {
+  background: rgba(0, 0, 0, 0.02);
+  color: #b58900;
+}
+:root[data-theme="light"] .reading-card {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .reading-card-title {
+  color: #b58900;
+}
+:root[data-theme="light"] .chart-canvas-wrap {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] #natal-chart-canvas-hd {
+  background: #f8fafc !important;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.08) !important;
+}

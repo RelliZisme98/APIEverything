@@ -357,4 +357,70 @@
 /* sidebar-toggle: defined in mobile.css */
 .sidebar-toggle { display: none; }
 
+/* ── Sidebar Theme Toggle Button ── */
+.sidebar-theme-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--accent-blue);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s var(--ease-out);
+  font-family: var(--font-sans);
+  box-shadow: var(--shadow-sm);
+  margin-top: 8px;
+}
+
+.sidebar-theme-btn:hover {
+  background: rgba(94, 106, 210, 0.08);
+  border-color: rgba(94, 106, 210, 0.3);
+  box-shadow: 0 0 12px rgba(94, 106, 210, 0.06);
+  transform: translateY(-1px);
+}
+
+.sidebar-theme-btn:active {
+  transform: translateY(0);
+}
+
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .sidebar {
+  background: var(--bg-secondary);
+  border-right-color: var(--border);
+}
+:root[data-theme="light"] .sidebar-clock {
+  background: rgba(0, 0, 0, 0.01);
+  border-bottom-color: var(--border);
+}
+:root[data-theme="light"] .sidebar-clock-time {
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .sidebar-nav-item {
+  color: var(--text-secondary);
+}
+:root[data-theme="light"] .sidebar-nav-item:hover {
+  background: rgba(0, 0, 0, 0.03);
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .sidebar-nav-item.active {
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0.01) 100%);
+  color: var(--accent-blue);
+  border-left-color: var(--accent-blue);
+}
+:root[data-theme="light"] .sidebar-nav-item:hover .nav-icon {
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .sidebar-nav-item.active .nav-icon {
+  color: var(--accent-blue);
+}
+:root[data-theme="light"] .sidebar-search-wrap::after {
+  background: rgba(0, 0, 0, 0.03);
+}
+
 

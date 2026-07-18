@@ -147,3 +147,20 @@
   font-family: 'JetBrains Mono', monospace;
   color: var(--text-muted);
 }
+
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .ft-box,
+:root[data-theme="light"] .ft-file-item {
+  background: var(--bg-card);
+}
+:root[data-theme="light"] .ft-dropzone {
+  border-color: var(--border);
+  background: var(--bg-secondary);
+}
+:root[data-theme="light"] .ft-dropzone:hover {
+  border-color: var(--accent-blue);
+  background: rgba(96, 165, 250, 0.04);
+}
+:root[data-theme="light"] .ft-settings {
+  background: var(--bg-secondary);
+}

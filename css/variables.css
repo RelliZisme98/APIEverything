@@ -35,6 +35,16 @@
   --accent-yellow:  #ffca28; /* Premium Amber/Yellow */
   --accent-orange:  #ff7043; /* Premium Orange */
 
+  /* Linear system legacy variables mapped to design system variables */
+  --ink:             var(--text-primary);
+  --ink-subtle:      var(--text-secondary);
+  --surface-1:       var(--bg-primary);
+  --surface-2:       var(--bg-card);
+  --surface-3:       var(--bg-card-hover);
+  --hairline:        var(--border);
+  --hairline-strong: var(--border-hover);
+  --accent-primary:  var(--accent-blue);
+
   /* Shadows / Glows (Linear stacked shadows + bevel) */
   --shadow-sm:   0 1px 2px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   --shadow-md:   0 4px 12px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -53,6 +63,65 @@
   /* Gradients */
   --gradient-brand: linear-gradient(135deg, #5e6ad2, #828fff);
   --gradient-glow:  linear-gradient(135deg, rgba(94, 106, 210, 0.15), rgba(130, 143, 255, 0.15));
+}
+
+/* ── Light Theme Overrides ── */
+:root[data-theme="light"] {
+  --bg-primary:    #f3f4f6; /* Light gray canvas */
+  --bg-secondary:  #ffffff; /* White sidebar & sections */
+  --bg-card:       #ffffff; /* White card */
+  --bg-card-hover: #f9fafb; /* Off-white hovered card */
+  --bg-popover:    #ffffff; /* White dropdowns */
+
+  --border:        #e5e7eb; /* Light border */
+  --border-hover:  #d1d5db; /* Darker light border */
+  --border-glow:   rgba(94, 106, 210, 0.15);
+
+  --text-primary:   #111827; /* Dark slate text */
+  --text-secondary: #374151; /* Muted dark text */
+  --text-muted:     #6b7280; /* Light muted text */
+
+  --shadow-sm:   0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-lg:   0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --gradient-glow: linear-gradient(135deg, rgba(94, 106, 210, 0.05), rgba(130, 143, 255, 0.05));
+}
+
+/* Light theme specific component overrides */
+:root[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+}
+:root[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+:root[data-theme="light"] .card::before {
+  background: linear-gradient(90deg, 
+    rgba(0, 0, 0, 0.005), 
+    rgba(0, 0, 0, 0.03) 20%, 
+    rgba(0, 0, 0, 0.03) 80%, 
+    rgba(0, 0, 0, 0.005)
+  );
+}
+:root[data-theme="light"] select.field-input,
+:root[data-theme="light"] select.po-select,
+:root[data-theme="light"] select.wc-add-dropdown,
+:root[data-theme="light"] select option,
+:root[data-theme="light"] select optgroup {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+}
+
+[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme="light"] textarea,
+[data-theme="light"] select {
+  color: var(--text-primary) !important;
+  background: var(--bg-card) !important;
+  border-color: var(--border) !important;
+}
+
+[data-theme="light"] input:not([type="checkbox"]):not([type="radio"])::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: var(--text-muted) !important;
 }
 
 

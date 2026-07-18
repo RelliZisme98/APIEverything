@@ -376,3 +376,37 @@
   color: #38bdf8;
   box-shadow: 0 0 10px rgba(56, 189, 248, 0.1);
 }
+
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .weather-city-chip {
+  background: var(--bg-card);
+}
+:root[data-theme="light"] .weather-desc-badge {
+  background: rgba(0, 0, 0, 0.05);
+}
+:root[data-theme="light"] .wstat2 {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .wstat2:hover {
+  background: var(--bg-card-hover);
+}
+:root[data-theme="light"] .wf-card {
+  background: var(--bg-secondary);
+}
+:root[data-theme="light"] .wf-card:hover {
+  background: var(--bg-card-hover);
+}
+:root[data-theme="light"] .wh-card {
+  background: var(--bg-secondary);
+}
+:root[data-theme="light"] .wh-card:hover {
+  background: var(--bg-card-hover);
+}
+:root[data-theme="light"] .windy-tab-btn {
+  background: var(--bg-card);
+}
+:root[data-theme="light"] .windy-tab-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+}

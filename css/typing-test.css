@@ -384,3 +384,45 @@
     font-size: 28px;
   }
 }
+
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .tt-toolbar {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .tt-stat-item {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .tt-typing-container {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .tt-focus-prompt {
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .tt-result-screen {
+  background: rgba(255, 255, 255, 0.9);
+}
+:root[data-theme="light"] .tt-result-card {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+  box-shadow: var(--shadow-lg);
+}
+:root[data-theme="light"] .tt-r-item {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .tt-r-item:hover {
+  border-color: var(--border-hover);
+}
+:root[data-theme="light"] .tt-words-wrapper::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.02);
+}
+:root[data-theme="light"] .tt-words-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+}
+:root[data-theme="light"] .tt-words-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}

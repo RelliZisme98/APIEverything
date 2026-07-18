@@ -1639,11 +1639,11 @@ async function handleIQEQ(request, env) {
         const poolHard = pool.filter(p => p.difficulty === 'hard');
         const poolVeryHard = pool.filter(p => p.difficulty === 'very_hard');
 
-        // Select randomly: 5 Easy, 7 Medium, 7 Hard, 6 Very Hard (Total 25 questions)
-        const selEasy = poolEasy.sort(() => 0.5 - Math.random()).slice(0, 5);
-        const selMedium = poolMedium.sort(() => 0.5 - Math.random()).slice(0, 7);
-        const selHard = poolHard.sort(() => 0.5 - Math.random()).slice(0, 7);
-        const selVeryHard = poolVeryHard.sort(() => 0.5 - Math.random()).slice(0, 6);
+        // Select randomly: 6 Easy, 6 Medium, 6 Hard, 7 Very Hard (Total 25 questions - distributed evenly)
+        const selEasy = poolEasy.sort(() => 0.5 - Math.random()).slice(0, 6);
+        const selMedium = poolMedium.sort(() => 0.5 - Math.random()).slice(0, 6);
+        const selHard = poolHard.sort(() => 0.5 - Math.random()).slice(0, 6);
+        const selVeryHard = poolVeryHard.sort(() => 0.5 - Math.random()).slice(0, 7);
 
         const selectedQuestions = [...selEasy, ...selMedium, ...selHard, ...selVeryHard];
         selectedQuestions.sort((a, b) => a.q_idx - b.q_idx);
@@ -1709,8 +1709,8 @@ async function handleIQEQ(request, env) {
             rawCorrect += weight;
           }
         });
-        // Max weight có thể đạt: 5*1.0 + 7*1.3 + 7*1.7 + 6*2.2 = 5.0 + 9.1 + 11.9 + 13.2 = 39.2
-        const scorePct = Math.min(rawCorrect / 39.2, 1);
+        // Max weight có thể đạt: 6*1.0 + 6*1.3 + 6*1.7 + 7*2.2 = 6.0 + 7.8 + 10.2 + 15.4 = 39.4
+        const scorePct = Math.min(rawCorrect / 39.4, 1);
         finalScore = Math.round(70 + (scorePct * 75)); // Thang điểm từ 70 đến 145
 
         let classification, desc;
