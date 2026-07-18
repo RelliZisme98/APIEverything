@@ -135,3 +135,32 @@
   border-radius: 14px;
   padding: 16px;
 }
+
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .qr-panel-controls,
+:root[data-theme="light"] .qr-panel-preview,
+:root[data-theme="light"] .qr-history-section {
+  background: var(--bg-card);
+}
+:root[data-theme="light"] #qrCanvasContainer {
+  border-color: var(--border);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+:root[data-theme="light"] .qr-accordion-sec {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .qr-accordion-title {
+  background: rgba(0, 0, 0, 0.02);
+  border-bottom-color: var(--border);
+}
+:root[data-theme="light"] .qr-preset-btn {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+:root[data-theme="light"] .qr-preset-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}

@@ -111,16 +111,16 @@
   color: var(--text-primary);
 }
 
-:root[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="image"]):not([type="reset"]),
-:root[data-theme="light"] textarea,
-:root[data-theme="light"] select {
+[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme="light"] textarea,
+[data-theme="light"] select {
   color: var(--text-primary) !important;
-  background-color: var(--bg-card) !important;
+  background: var(--bg-card) !important;
   border-color: var(--border) !important;
 }
 
-:root[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="image"]):not([type="reset"])::placeholder,
-:root[data-theme="light"] textarea::placeholder {
+[data-theme="light"] input:not([type="checkbox"]):not([type="radio"])::placeholder,
+[data-theme="light"] textarea::placeholder {
   color: var(--text-muted) !important;
 }
 

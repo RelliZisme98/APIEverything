@@ -198,7 +198,7 @@ function buildUI(container) {
           <div id="shortenResult" style="display: none; margin-top: 18px; padding: 14px; background: rgba(52, 211, 153, 0.08); border: 1px solid rgba(52, 211, 153, 0.25); border-radius: 8px;">
             <label class="tax-label" style="color: #34d399;">Kết quả rút gọn thành công:</label>
             <div style="display: flex; gap: 8px; margin-top: 6px;">
-              <input type="text" id="shortenOutputUrl" class="tax-input" style="flex: 1; background: rgba(0,0,0,0.2); font-weight: 700; color: #fff;" readonly />
+              <input type="text" id="shortenOutputUrl" class="tax-input" style="flex: 1; background: var(--bg-card); font-weight: 700; color: var(--text-primary);" readonly />
               <button type="button" class="btn-primary" id="btnCopyShort" style="background: #10b981; padding: 8px 16px;">Copy</button>
             </div>
             <div style="margin-top: 10px; display: flex; justify-content: flex-end; gap: 8px;">

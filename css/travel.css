@@ -316,3 +316,37 @@
 .airline-quick-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin:14px 0; }
 .airline-quick-card { padding:12px; border:1px solid var(--border); border-radius:10px; cursor:pointer; text-align:center; transition:all .2s; }
 .airline-quick-card:hover { transform:translateY(-2px); filter:brightness(1.1); }
+
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .travel-estimator,
+:root[data-theme="light"] .flight-tracker,
+:root[data-theme="light"] .travel-mode-card {
+  background: var(--bg-card);
+}
+:root[data-theme="light"] .travel-mode-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+}
+:root[data-theme="light"] .travel-tab {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+:root[data-theme="light"] .travel-tab:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .travel-swap-btn {
+  background: var(--bg-secondary);
+}
+:root[data-theme="light"] .flight-progress-line {
+  background: rgba(0, 0, 0, 0.08);
+}
+:root[data-theme="light"] .flight-details-grid,
+:root[data-theme="light"] .sched-flight-row:hover {
+  background: var(--bg-secondary);
+}
+:root[data-theme="light"] .sched-flight-row,
+:root[data-theme="light"] .sched-book-row {
+  border-top-color: var(--border);
+}

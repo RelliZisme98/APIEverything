@@ -528,3 +528,62 @@
   background: rgba(251, 191, 36, 0.1);
   border: 1px solid rgba(251, 191, 36, 0.2);
 }
+
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .fb-league-tab,
+:root[data-theme="light"] .fb-date-btn {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .fb-league-tab:hover,
+:root[data-theme="light"] .fb-date-btn:hover {
+  background: var(--bg-card-hover);
+}
+:root[data-theme="light"] .fb-tab:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+:root[data-theme="light"] .fb-date-header {
+  background: var(--bg-secondary);
+  border-left-color: var(--border);
+}
+:root[data-theme="light"] .fb-match {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .fb-match:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+}
+:root[data-theme="light"] .fb-team-btn:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+:root[data-theme="light"] .fb-score-box {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .fb-match-detail {
+  border-top-color: var(--border);
+}
+:root[data-theme="light"] .fb-stats-container,
+:root[data-theme="light"] .fb-timeline-item,
+:root[data-theme="light"] .fb-player-item,
+:root[data-theme="light"] .fb-scorers-container,
+:root[data-theme="light"] .fb-leader-row {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .fb-stats-bar-container {
+  background: rgba(0, 0, 0, 0.05);
+}
+:root[data-theme="light"] .fb-team-panel {
+  background: var(--bg-card);
+  border-left-color: var(--border);
+}
+:root[data-theme="light"] .fb-tp-header,
+:root[data-theme="light"] .fb-tp-desc,
+:root[data-theme="light"] .fb-tp-match {
+  border-bottom-color: var(--border);
+}
+:root[data-theme="light"] .fb-tp-close {
+  background: var(--bg-secondary);
+}

@@ -229,3 +229,20 @@
   background: rgba(255, 255, 255, 0.04);
   border-color: rgba(96, 165, 250, 0.2);
 }
+
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .lk-tab-btn {
+  background: rgba(0, 0, 0, 0.03);
+}
+:root[data-theme="light"] .lk-tab-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+:root[data-theme="light"] .lk-gov-card,
+:root[data-theme="light"] .gps-card,
+:root[data-theme="light"] .lk-result-box {
+  background: var(--bg-card);
+}
+:root[data-theme="light"] .lk-gov-card:hover,
+:root[data-theme="light"] .gps-card:hover {
+  background: var(--bg-card-hover);
+}

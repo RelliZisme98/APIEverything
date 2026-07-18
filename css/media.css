@@ -205,3 +205,18 @@
 .game-platform--ps { background: rgba(167, 139, 250, 0.15); color: #c084fc; }
 .game-platform--xbox { background: rgba(16, 185, 129, 0.15); color: #34d399; }
 .game-platform--nintendo { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .media-card {
+  background: var(--bg-card);
+}
+:root[data-theme="light"] .media-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+}
+:root[data-theme="light"] .trailer-content {
+  background: var(--bg-card);
+}
+:root[data-theme="light"] .game-platform {
+  background: rgba(0, 0, 0, 0.04);
+}
