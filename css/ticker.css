@@ -147,6 +147,10 @@
   color: var(--text-primary) !important;
 }
 
+:root[data-theme="light"] .ticker-item .val {
+  color: #0284c7 !important;
+}
+
 :root[data-theme="light"] .ticker-clock {
   background: var(--bg-card) !important;
   color: var(--text-secondary) !important;
