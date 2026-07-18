@@ -357,4 +357,36 @@
 /* sidebar-toggle: defined in mobile.css */
 .sidebar-toggle { display: none; }
 
+/* ── Sidebar Theme Toggle Button ── */
+.sidebar-theme-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--accent-blue);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s var(--ease-out);
+  font-family: var(--font-sans);
+  box-shadow: var(--shadow-sm);
+  margin-top: 8px;
+}
+
+.sidebar-theme-btn:hover {
+  background: rgba(94, 106, 210, 0.08);
+  border-color: rgba(94, 106, 210, 0.3);
+  box-shadow: 0 0 12px rgba(94, 106, 210, 0.06);
+  transform: translateY(-1px);
+}
+
+.sidebar-theme-btn:active {
+  transform: translateY(0);
+}
+
 

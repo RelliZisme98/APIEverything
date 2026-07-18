@@ -511,6 +511,34 @@ window.addEventListener('popstate', (e) => {
 // INIT
 // ════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
+  // ── Initialize Theme ──
+  const themeToggleBtn = document.getElementById('themeToggleBtn');
+  const themeToggleIcon = document.getElementById('themeToggleIcon');
+  const themeToggleText = document.getElementById('themeToggleText');
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    if (theme === 'light') {
+      if (themeToggleIcon) themeToggleIcon.className = 'fas fa-moon';
+      if (themeToggleText) themeToggleText.textContent = 'Chế độ tối';
+    } else {
+      if (themeToggleIcon) themeToggleIcon.className = 'fas fa-sun';
+      if (themeToggleText) themeToggleText.textContent = 'Chế độ sáng';
+    }
+  }
+
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  applyTheme(savedTheme);
+
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      applyTheme(newTheme);
+    });
+  }
+
   renderFinance();
   _rendered.add('finance');
   renderCalendar();

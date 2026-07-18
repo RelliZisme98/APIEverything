@@ -2,6 +2,12 @@
 <html lang="vi">
 
 <head>
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rellia's Dashboard – Everything you need to know</title>
@@ -224,6 +230,10 @@
             <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
           </svg>
           Làm Mới Dữ Liệu
+        </button>
+        <button class="sidebar-theme-btn" id="themeToggleBtn">
+          <i class="fas fa-sun" id="themeToggleIcon"></i>
+          <span id="themeToggleText">Chế độ sáng</span>
         </button>
         <div class="sidebar-auto-refresh">
           <span class="status-dot dot-green"></span>
