@@ -595,9 +595,6 @@ function drawHDNatalChart(chartData) {
     ctx.fillText(`${p.degree}°`, px, py + 12);
   });
 }
-    ctx.fillText(`${p.degree}°`, px, py + 12);
-  });
-}
 
 // Helper color parsing
 function hexToRgba(hex, alpha = 1) {
