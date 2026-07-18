@@ -423,4 +423,68 @@
   background: rgba(0, 0, 0, 0.03);
 }
 
+/* ── Sidebar Live Clock Widget ── */
+.sidebar-clock-widget {
+  margin: 0 14px 12px;
+  padding: 14px 16px;
+  background: rgba(99, 102, 241, 0.07);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 14px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar-clock-widget::before {
+  content: '';
+  position: absolute;
+  top: -30px; left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 60px;
+  background: radial-gradient(ellipse, rgba(99, 102, 241, 0.18), transparent 70%);
+  pointer-events: none;
+}
+
+.scw-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #a5b4fc;
+  line-height: 1;
+  margin-bottom: 6px;
+  text-shadow: 0 0 18px rgba(165, 180, 252, 0.35);
+  font-variant-numeric: tabular-nums;
+}
+
+.scw-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: rgba(148, 163, 184, 0.8);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.scw-sep {
+  color: rgba(99, 102, 241, 0.5);
+  font-size: 8px;
+}
+
+/* Light Mode */
+:root[data-theme="light"] .sidebar-clock-widget {
+  background: rgba(99, 102, 241, 0.06);
+  border-color: rgba(99, 102, 241, 0.18);
+}
+:root[data-theme="light"] .scw-time {
+  color: #4f46e5;
+  text-shadow: 0 0 12px rgba(79, 70, 229, 0.15);
+}
+:root[data-theme="light"] .scw-meta {
+  color: var(--text-muted);
+}
 

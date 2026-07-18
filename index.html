@@ -71,6 +71,7 @@
   <link rel="stylesheet" href="css/bookmarks.css" media="print" onload="this.media='all'" />
   <link rel="stylesheet" href="css/typing-test.css" media="print" onload="this.media='all'" />
   <link rel="stylesheet" href="css/hardware-test.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" id="focus-css" href="css/focus.css" media="print" onload="this.media='all'" />
 </head>
 
 <body>
@@ -91,6 +92,16 @@
         <div>
           <div class="sidebar-logo-text">Rellia<span> Đại</span></div>
           <div class="sidebar-logo-sub">Thông tin cần thiết hàng ngày</div>
+        </div>
+      </div>
+
+      <!-- Sidebar Live Clock -->
+      <div class="sidebar-clock-widget" id="sidebarClockWidget">
+        <div class="scw-time" id="scwTime">00:00:00</div>
+        <div class="scw-meta">
+          <span class="scw-date" id="scwDate">--/--/----</span>
+          <span class="scw-sep">•</span>
+          <span class="scw-day" id="scwDay">---</span>
         </div>
       </div>
 
