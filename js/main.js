@@ -515,20 +515,28 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateTickerClock() {
     const timeEl = document.getElementById('ticker-time');
     const dateEl = document.getElementById('ticker-date');
-    if (!timeEl || !dateEl) return;
-    
+    const scwTime = document.getElementById('scwTime');
+    const scwDate = document.getElementById('scwDate');
+    const scwDay  = document.getElementById('scwDay');
+
     const now = new Date();
     const hh = now.getHours().toString().padStart(2, '0');
     const mm = now.getMinutes().toString().padStart(2, '0');
     const ss = now.getSeconds().toString().padStart(2, '0');
-    timeEl.textContent = `${hh}:${mm}:${ss}`;
+    const timeStr = `${hh}:${mm}:${ss}`;
 
     const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
     const dayName = days[now.getDay()];
     const dateStr = now.getDate().toString().padStart(2, '0');
     const monthStr = (now.getMonth() + 1).toString().padStart(2, '0');
     const yearStr = now.getFullYear();
-    dateEl.textContent = `${dayName}, ${dateStr}/${monthStr}/${yearStr}`;
+    const fullDate = `${dateStr}/${monthStr}/${yearStr}`;
+
+    if (timeEl) timeEl.textContent = timeStr;
+    if (dateEl) dateEl.textContent = `${dayName}, ${fullDate}`;
+    if (scwTime) scwTime.textContent = timeStr;
+    if (scwDate) scwDate.textContent = fullDate;
+    if (scwDay)  scwDay.textContent  = dayName;
   }
   updateTickerClock();
   setInterval(updateTickerClock, 1000);
