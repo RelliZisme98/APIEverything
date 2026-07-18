@@ -389,4 +389,38 @@
   transform: translateY(0);
 }
 
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .sidebar {
+  background: var(--bg-secondary);
+  border-right-color: var(--border);
+}
+:root[data-theme="light"] .sidebar-clock {
+  background: rgba(0, 0, 0, 0.01);
+  border-bottom-color: var(--border);
+}
+:root[data-theme="light"] .sidebar-clock-time {
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .sidebar-nav-item {
+  color: var(--text-secondary);
+}
+:root[data-theme="light"] .sidebar-nav-item:hover {
+  background: rgba(0, 0, 0, 0.03);
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .sidebar-nav-item.active {
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0.01) 100%);
+  color: var(--accent-blue);
+  border-left-color: var(--accent-blue);
+}
+:root[data-theme="light"] .sidebar-nav-item:hover .nav-icon {
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .sidebar-nav-item.active .nav-icon {
+  color: var(--accent-blue);
+}
+:root[data-theme="light"] .sidebar-search-wrap::after {
+  background: rgba(0, 0, 0, 0.03);
+}
+
 

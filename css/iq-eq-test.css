@@ -659,3 +659,44 @@
   padding: 12px;
 }
 
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .iqeq-progress-bar {
+  background: rgba(0, 0, 0, 0.06);
+}
+:root[data-theme="light"] .iqeq-option-btn {
+  background: var(--bg-card);
+}
+:root[data-theme="light"] .iqeq-option-btn:hover:not(:disabled) {
+  background: rgba(94, 106, 210, 0.05);
+}
+:root[data-theme="light"] .iqeq-likert-btn {
+  background: var(--bg-card);
+}
+:root[data-theme="light"] .iqeq-likert-btn:hover:not(:disabled) {
+  background: rgba(34, 211, 238, 0.05);
+}
+:root[data-theme="light"] .iqeq-score-ring-bg {
+  stroke: rgba(0, 0, 0, 0.06);
+}
+:root[data-theme="light"] .iqeq-score-card::before {
+  background: radial-gradient(ellipse at top, var(--glow-color, rgba(96,165,250,0.03)), transparent 70%);
+}
+:root[data-theme="light"] .iqeq-q-grid-item {
+  background: var(--bg-card);
+}
+:root[data-theme="light"] .iqeq-q-grid-item:hover {
+  background: rgba(94, 106, 210, 0.05);
+}
+:root[data-theme="light"] .iqeq-svg-diagram {
+  background: rgba(0, 0, 0, 0.01);
+}
+:root[data-theme="light"] .iqeq-dim-bar-wrap {
+  background: rgba(0, 0, 0, 0.06);
+}
+:root[data-theme="light"] .iqeq-meta-chip {
+  background: rgba(0, 0, 0, 0.03);
+}
+:root[data-theme="light"] .iqeq-intro-card {
+  background: rgba(0, 0, 0, 0.01);
+}
+

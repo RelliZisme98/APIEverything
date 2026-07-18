@@ -479,3 +479,52 @@
   .todo-view-tabs { gap: 4px; }
   .todo-view-tab { font-size: 11px; padding: 5px 10px; }
 }
+
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .todo-sync-panel {
+  background: var(--bg-secondary);
+}
+:root[data-theme="light"] .todo-column {
+  background: var(--bg-secondary);
+}
+:root[data-theme="light"] .todo-col-header {
+  border-bottom-color: var(--border);
+}
+:root[data-theme="light"] .todo-col-count {
+  background: rgba(0, 0, 0, 0.05);
+}
+:root[data-theme="light"] .todo-card {
+  background: var(--bg-card);
+}
+:root[data-theme="light"] .todo-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+}
+:root[data-theme="light"] .todo-quick-add {
+  background: var(--bg-secondary);
+}
+:root[data-theme="light"] .todo-view-tab:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+:root[data-theme="light"] .todo-stats-bar {
+  background: var(--bg-secondary);
+}
+:root[data-theme="light"] .todo-stat-progress-bar {
+  background: rgba(0, 0, 0, 0.05);
+}
+:root[data-theme="light"] .todo-count-badge {
+  background: rgba(0, 0, 0, 0.05);
+}
+:root[data-theme="light"] .todo-list-item {
+  background: var(--bg-card);
+}
+:root[data-theme="light"] .todo-list-item:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+}
+:root[data-theme="light"] .todo-status-sel {
+  background: var(--bg-card);
+}
+:root[data-theme="light"] .todo-card-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}

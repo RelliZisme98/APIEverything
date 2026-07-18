@@ -222,6 +222,7 @@ html, body {
 
   /* Ticker smaller */
   .ticker-item { font-size: 11px; }
+  .ticker-clock #ticker-date { display: none; }
 
   /* Sidebar sections */
   .sidebar-logo-text { font-size: 16px; }

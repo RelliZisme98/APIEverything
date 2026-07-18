@@ -400,3 +400,33 @@
   border-color: var(--border);
   font-weight: 600;
 }
+
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .news-tab:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+:root[data-theme="light"] .news-card {
+  background: var(--bg-secondary);
+}
+:root[data-theme="light"] .news-card:hover {
+  background: var(--bg-card-hover);
+}
+:root[data-theme="light"] .news-thumb {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+:root[data-theme="light"] .nr-close-btn {
+  background: var(--bg-card);
+}
+:root[data-theme="light"] .nr-thumb {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+:root[data-theme="light"] .nr-excerpt {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .news-cat-tab:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+:root[data-theme="light"] .news-cat-tab.active {
+  background: rgba(0, 0, 0, 0.05);
+}

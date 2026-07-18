@@ -355,3 +355,44 @@
   align-items: center;
 }
 
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .bookmarks-sidebar {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .category-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+}
+:root[data-theme="light"] .category-item:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+:root[data-theme="light"] .category-count {
+  background: rgba(0, 0, 0, 0.05);
+}
+:root[data-theme="light"] .bookmarks-search-bar input {
+  background: var(--bg-card);
+}
+:root[data-theme="light"] .bookmarks-search-bar input:focus {
+  background: var(--bg-card-hover);
+}
+:root[data-theme="light"] .bookmark-card {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .bookmark-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
+}
+:root[data-theme="light"] .bookmark-favicon {
+  background: rgba(0, 0, 0, 0.04);
+}
+:root[data-theme="light"] .bookmark-card-bottom {
+  border-top-color: var(--border);
+}
+:root[data-theme="light"] .bookmark-modal {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+  box-shadow: var(--shadow-lg);
+}
+

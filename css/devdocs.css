@@ -221,7 +221,131 @@
   color: var(--text-primary);
 }
 
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .devdocs-sidebar {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .devdocs-search-input {
+  background: var(--bg-card);
+}
+:root[data-theme="light"] .devdocs-node-header:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+:root[data-theme="light"] .devdocs-node-children {
+  border-left-color: rgba(0, 0, 0, 0.08);
+}
+:root[data-theme="light"] .devdocs-content-area {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .devdocs-content-header {
+  border-bottom-color: var(--border);
+}
+:root[data-theme="light"] .devdocs-doc-title {
+  color: var(--accent-blue);
+}
+:root[data-theme="light"] .devdocs-doc-tabs {
+  border-bottom-color: var(--border);
+}
+:root[data-theme="light"] .devdocs-doc-tab-btn:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+:root[data-theme="light"] .devdocs-node-header.active {
+  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.08);
+}
+:root[data-theme="light"] .devdocs-doc-tab-btn.active {
+  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.08);
+}
+:root[data-theme="light"] .devdocs-code-block {
+  background: #f8fafc;
+  border-color: var(--border);
+  color: #0f172a;
+}
+
 @keyframes devdocsFadeIn {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Light Mode Ebook Overrides ── */
+:root[data-theme="light"] .ebook-sidebar {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .ebook-book-selector {
+  background: var(--bg-card);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .ebook-toc-item {
+  color: var(--text-secondary);
+}
+:root[data-theme="light"] .ebook-toc-item:hover {
+  background: rgba(0, 0, 0, 0.03);
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .ebook-toc-item.active {
+  background: rgba(124, 58, 237, 0.08);
+  color: #7c3aed;
+  border-left-color: #7c3aed;
+}
+:root[data-theme="light"] .ebook-reader-card {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+  box-shadow: var(--shadow-md);
+}
+:root[data-theme="light"] .ebook-progress-container {
+  background: rgba(0, 0, 0, 0.05);
+}
+:root[data-theme="light"] .ebook-body h1, 
+:root[data-theme="light"] .ebook-body h2, 
+:root[data-theme="light"] .ebook-body h3, 
+:root[data-theme="light"] .ebook-body h4 {
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .ebook-body pre {
+  background: #f8fafc;
+  border: 1px solid var(--border);
+}
+:root[data-theme="light"] .ebook-body pre code {
+  color: #0f172a;
+}
+:root[data-theme="light"] .ebook-body code {
+  color: #e11d48;
+  background: rgba(225, 29, 72, 0.05);
+}
+:root[data-theme="light"] .ebook-callout.note {
+  background: rgba(124, 58, 237, 0.04);
+  border-left-color: #7c3aed;
+}
+:root[data-theme="light"] .ebook-pagination {
+  border-top-color: var(--border);
+}
+:root[data-theme="light"] .ebook-notepad-title {
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .ebook-notepad-textarea {
+  background: var(--bg-card);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .download-banner {
+  background: rgba(124, 58, 237, 0.04);
+  border-color: rgba(124, 58, 237, 0.15);
+}
+:root[data-theme="light"] .ebook-sidebar div[style*="border-top"] {
+  border-top-color: var(--border) !important;
+}
+:root[data-theme="light"] .ebook-reader-card h2[style*="color:#ffd700"] {
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+:root[data-theme="light"] .download-banner div[style*="color:#ffd700"] {
+  color: var(--text-primary) !important;
+}
+:root[data-theme="light"] .ebook-reader-card div[style*="color:#a78bfa"] {
+  color: #7c3aed !important;
 }

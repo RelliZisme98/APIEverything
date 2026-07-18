@@ -361,3 +361,39 @@
   user-select: none;
 }
 
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .crypto-item {
+  background: var(--bg-secondary);
+}
+:root[data-theme="light"] .crypto-item:hover {
+  background: var(--bg-card-hover);
+  box-shadow: var(--shadow-sm);
+}
+:root[data-theme="light"] .crypto-item.active {
+  background: var(--bg-card) !important;
+}
+:root[data-theme="light"] #cryptoTable tbody tr {
+  border-bottom-color: var(--border);
+}
+:root[data-theme="light"] #cryptoTable tbody tr:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+:root[data-theme="light"] .crypto-chart-wrap {
+  background: rgba(0, 0, 0, 0.015);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .chart-hover-line {
+  stroke: rgba(0, 0, 0, 0.25);
+}
+:root[data-theme="light"] .crypto-converter-card {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .crypto-conv-row {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .crypto-conv-label-wrap {
+  border-left-color: var(--border);
+}
+

@@ -12,6 +12,13 @@
 
 // Trạng thái thông tin người dùng
 let userAstroData = null; 
+let currentChartData = null;
+
+document.addEventListener('themeChanged', () => {
+  if (currentChartData && document.getElementById('natal-chart-canvas-hd')) {
+    drawHDNatalChart(currentChartData);
+  }
+});
 
 const PLANETS = [
   { id: 'sun', name: 'Mặt Trời', sym: '☉', color: '#ffea00' },
@@ -133,6 +140,7 @@ function renderAstrologyDashboard(container) {
   const lifePath = calculateLifePathNumber(userAstroData.date);
   // Sinh dữ liệu tọa độ hành tinh và góc chiếu dựa trên ngày sinh (deterministic seed)
   const chartData = generateAstrologyData(userAstroData, lifePath);
+  currentChartData = chartData;
 
   container.innerHTML = `
     <div class="astro-wrapper">
@@ -419,6 +427,15 @@ function drawHDNatalChart(chartData) {
   const canvas = document.getElementById('natal-chart-canvas-hd');
   if (!canvas) return;
 
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const bgColor = isLight ? '#f8fafc' : '#060512';
+  const strokeColorMain = isLight ? '#cbd5e1' : '#3b2f80';
+  const strokeColorSub = isLight ? '#e2e8f0' : 'rgba(255, 255, 255, 0.08)';
+  const strokeColorDivider = isLight ? '#94a3b8' : '#513b9c';
+  const strokeColorDividerSub = isLight ? '#cbd5e1' : '#272054';
+  const textDarkMuted = isLight ? '#64748b' : 'rgba(255, 255, 255, 0.25)';
+  const textLightMuted = isLight ? '#475569' : 'rgba(255,255,255,0.6)';
+
   const ctx = canvas.getContext('2d');
   const w = canvas.width;
   const h = canvas.height;
@@ -431,10 +448,10 @@ function drawHDNatalChart(chartData) {
   // 1. Draw outermost background circle space
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  ctx.fillStyle = '#060512';
+  ctx.fillStyle = bgColor;
   ctx.fill();
   ctx.lineWidth = 2;
-  ctx.strokeStyle = '#3b2f80';
+  ctx.strokeStyle = strokeColorMain;
   ctx.stroke();
 
   // 2. Draw 12 Zodiac segments on outer ring
@@ -452,7 +469,7 @@ function drawHDNatalChart(chartData) {
     ctx.beginPath();
     ctx.moveTo(cx + Math.cos(startAngle) * innerRingR2, cy + Math.sin(startAngle) * innerRingR2);
     ctx.lineTo(cx + Math.cos(startAngle) * outerRingR, cy + Math.sin(startAngle) * outerRingR);
-    ctx.strokeStyle = '#3b2f80';
+    ctx.strokeStyle = strokeColorMain;
     ctx.stroke();
 
     // Fill zodiac backgrounds with subtle colored opacity
@@ -461,7 +478,7 @@ function drawHDNatalChart(chartData) {
     ctx.lineTo(cx + Math.cos(endAngle) * innerRingR1, cy + Math.sin(endAngle) * innerRingR1);
     ctx.arc(cx, cy, innerRingR1, endAngle, startAngle, true);
     ctx.closePath();
-    ctx.fillStyle = hexToRgba(z.color, 0.08);
+    ctx.fillStyle = hexToRgba(z.color, isLight ? 0.05 : 0.08);
     ctx.fill();
 
     // Draw zodiac symbols in center of each segment
@@ -479,12 +496,12 @@ function drawHDNatalChart(chartData) {
   // Circular ring boundary lines
   ctx.beginPath();
   ctx.arc(cx, cy, innerRingR1, 0, Math.PI * 2);
-  ctx.strokeStyle = '#3b2f80';
+  ctx.strokeStyle = strokeColorMain;
   ctx.stroke();
 
   ctx.beginPath();
   ctx.arc(cx, cy, innerRingR2, 0, Math.PI * 2);
-  ctx.strokeStyle = '#3b2f80';
+  ctx.strokeStyle = strokeColorMain;
   ctx.stroke();
 
   // Degree subdivision markings
@@ -495,7 +512,7 @@ function drawHDNatalChart(chartData) {
     ctx.beginPath();
     ctx.moveTo(cx + Math.cos(angle) * innerRingR2, cy + Math.sin(angle) * innerRingR2);
     ctx.lineTo(cx + Math.cos(angle) * (innerRingR2 - len), cy + Math.sin(angle) * (innerRingR2 - len));
-    ctx.strokeStyle = isMajor ? '#513b9c' : '#272054';
+    ctx.strokeStyle = isMajor ? strokeColorDivider : strokeColorDividerSub;
     ctx.stroke();
   }
 
@@ -505,7 +522,7 @@ function drawHDNatalChart(chartData) {
     ctx.beginPath();
     ctx.moveTo(cx + Math.cos(angle) * centerRadius, cy + Math.sin(angle) * centerRadius);
     ctx.lineTo(cx + Math.cos(angle) * innerRingR3, cy + Math.sin(angle) * innerRingR3);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.strokeStyle = strokeColorSub;
     ctx.lineWidth = 1;
     ctx.stroke();
 
@@ -514,14 +531,14 @@ function drawHDNatalChart(chartData) {
     const labelX = cx + Math.cos(houseMidAngle) * (centerRadius + 20);
     const labelY = cy + Math.sin(houseMidAngle) * (centerRadius + 20);
     
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.fillStyle = textDarkMuted;
     ctx.font = '10px monospace';
     ctx.fillText(`${hIndex + 1}`, labelX, labelY);
   }
 
   ctx.beginPath();
   ctx.arc(cx, cy, centerRadius, 0, Math.PI * 2);
-  ctx.strokeStyle = 'rgba(139, 92, 246, 0.25)';
+  ctx.strokeStyle = isLight ? 'rgba(124, 58, 237, 0.25)' : 'rgba(139, 92, 246, 0.25)';
   ctx.stroke();
 
   // 4. Draw aspect lines inside the central circle
@@ -549,7 +566,7 @@ function drawHDNatalChart(chartData) {
     ctx.beginPath();
     ctx.moveTo(ax, ay);
     ctx.lineTo(bx, by);
-    ctx.strokeStyle = hexToRgba(color, 0.55);
+    ctx.strokeStyle = hexToRgba(color, isLight ? 0.65 : 0.55);
     ctx.lineWidth = a.orb < 2 ? 1.8 : 0.8;
     ctx.stroke();
   });
@@ -573,8 +590,11 @@ function drawHDNatalChart(chartData) {
     ctx.textAlign = 'center';
     ctx.fillText(p.sym, px, py - 10);
 
-    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.fillStyle = textLightMuted;
     ctx.font = '9px monospace';
+    ctx.fillText(`${p.degree}°`, px, py + 12);
+  });
+}
     ctx.fillText(`${p.degree}°`, px, py + 12);
   });
 }

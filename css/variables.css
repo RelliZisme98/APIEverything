@@ -35,6 +35,16 @@
   --accent-yellow:  #ffca28; /* Premium Amber/Yellow */
   --accent-orange:  #ff7043; /* Premium Orange */
 
+  /* Linear system legacy variables mapped to design system variables */
+  --ink:             var(--text-primary);
+  --ink-subtle:      var(--text-secondary);
+  --surface-1:       var(--bg-primary);
+  --surface-2:       var(--bg-card);
+  --surface-3:       var(--bg-card-hover);
+  --hairline:        var(--border);
+  --hairline-strong: var(--border-hover);
+  --accent-primary:  var(--accent-blue);
+
   /* Shadows / Glows (Linear stacked shadows + bevel) */
   --shadow-sm:   0 1px 2px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
   --shadow-md:   0 4px 12px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -92,8 +102,13 @@
     rgba(0, 0, 0, 0.005)
   );
 }
-:root[data-theme="light"] select.field-input {
+:root[data-theme="light"] select.field-input,
+:root[data-theme="light"] select.po-select,
+:root[data-theme="light"] select.wc-add-dropdown,
+:root[data-theme="light"] select option,
+:root[data-theme="light"] select optgroup {
   background-color: var(--bg-card);
+  color: var(--text-primary);
 }
 
 

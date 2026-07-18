@@ -457,4 +457,57 @@
   padding: 0 2px;
 }
 
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .conv-body {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .conv-input {
+  background: var(--bg-card);
+}
+:root[data-theme="light"] .conv-input:focus {
+  background: var(--bg-card-hover);
+}
+:root[data-theme="light"] .tz-header {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .tz-now-btn {
+  color: var(--accent-blue);
+  background: rgba(94, 106, 210, 0.06);
+}
+:root[data-theme="light"] .tz-now-btn:hover {
+  background: rgba(94, 106, 210, 0.12);
+}
+:root[data-theme="light"] .tz-card {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .tz-card:hover {
+  background: var(--bg-card-hover);
+}
+:root[data-theme="light"] .tz-date-same {
+  background: rgba(0, 0, 0, 0.04);
+}
+:root[data-theme="light"] .conv-ref-table tr:hover td {
+  background: rgba(0, 0, 0, 0.02);
+}
+:root[data-theme="light"] .conv-ref-table td {
+  border-bottom-color: var(--border);
+}
+:root[data-theme="light"] .bmi-card {
+  background: var(--bg-secondary);
+  border-color: var(--border);
+}
+:root[data-theme="light"] .bmi-gender-btn {
+  background: var(--bg-card);
+}
+:root[data-theme="light"] .bmi-gender-btn:hover {
+  background: var(--bg-card-hover);
+}
+:root[data-theme="light"] .bmi-circle {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.05);
+}
+
 

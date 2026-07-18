@@ -511,6 +511,28 @@ window.addEventListener('popstate', (e) => {
 // INIT
 // ════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
+  // ── Global Live Ticker Clock ──
+  function updateTickerClock() {
+    const timeEl = document.getElementById('ticker-time');
+    const dateEl = document.getElementById('ticker-date');
+    if (!timeEl || !dateEl) return;
+    
+    const now = new Date();
+    const hh = now.getHours().toString().padStart(2, '0');
+    const mm = now.getMinutes().toString().padStart(2, '0');
+    const ss = now.getSeconds().toString().padStart(2, '0');
+    timeEl.textContent = `${hh}:${mm}:${ss}`;
+
+    const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+    const dayName = days[now.getDay()];
+    const dateStr = now.getDate().toString().padStart(2, '0');
+    const monthStr = (now.getMonth() + 1).toString().padStart(2, '0');
+    const yearStr = now.getFullYear();
+    dateEl.textContent = `${dayName}, ${dateStr}/${monthStr}/${yearStr}`;
+  }
+  updateTickerClock();
+  setInterval(updateTickerClock, 1000);
+
   // ── Initialize Theme ──
   const themeToggleBtn = document.getElementById('themeToggleBtn');
   const themeToggleIcon = document.getElementById('themeToggleIcon');
@@ -526,6 +548,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (themeToggleIcon) themeToggleIcon.className = 'fas fa-sun';
       if (themeToggleText) themeToggleText.textContent = 'Chế độ sáng';
     }
+    document.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme } }));
   }
 
   const savedTheme = localStorage.getItem('theme') || 'dark';

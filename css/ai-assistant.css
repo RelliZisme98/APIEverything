@@ -361,3 +361,54 @@
   transform: scale(1.1);
 }
 
+/* ── Light Mode Overrides ── */
+:root[data-theme="light"] .ai-chatbox {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+:root[data-theme="light"] .ai-chatbox-header {
+  background: rgba(243, 244, 246, 0.85);
+}
+:root[data-theme="light"] .ai-chatbox-title {
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .ai-chat-close {
+  color: var(--text-secondary);
+}
+:root[data-theme="light"] .ai-chat-close:hover {
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .ai-msg--system {
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--text-secondary);
+  border-color: rgba(0, 0, 0, 0.04);
+}
+:root[data-theme="light"] .ai-msg--assistant {
+  background: rgba(0, 0, 0, 0.03);
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .ai-chatbox-footer {
+  background: rgba(243, 244, 246, 0.85);
+}
+:root[data-theme="light"] .ai-footer-btn {
+  color: var(--text-secondary);
+}
+:root[data-theme="light"] .ai-footer-btn:hover {
+  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.04);
+}
+:root[data-theme="light"] .ai-bubble::after {
+  background: rgba(255, 255, 255, 0.98);
+  color: var(--text-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+:root[data-theme="light"] .ai-mute-btn {
+  color: var(--text-secondary);
+}
+:root[data-theme="light"] .ai-mute-btn:hover {
+  color: var(--text-primary);
+}
+:root[data-theme="light"] .ai-msg strong {
+  color: var(--accent-blue);
+}
+
