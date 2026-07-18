@@ -259,7 +259,7 @@ export function renderIQ(containerId = 'iqContent') {
             <div style="background: rgba(255,255,255,0.015); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); line-height: 1.5;">
  <strong style="color: #60a5fa;">Ý nghĩa kết quả IQ:</strong>
               <div style="margin-top: 6px; color: var(--text-secondary);">
-                Điểm số được tính toán dựa trên khả năng giải quyết 25 câu hỏi thuộc 3 mức độ khó tăng dần (Dễ, Trung bình, Khó) tương ứng với các kỹ năng logic, toán học và hình học không gian.
+                Điểm số được tính toán dựa trên khả năng giải quyết 25 câu hỏi thuộc 4 mức độ khó tăng dần (Dễ, Trung bình, Khó, Rất khó) tương ứng với các kỹ năng logic, toán học và hình học không gian.
               </div>
             </div>
           </div>
