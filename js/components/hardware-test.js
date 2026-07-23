@@ -752,7 +752,9 @@ function initKeyboardTest() {
 }
 
 function handleKeyDown(e) {
-  // Only intercept keys when Keyboard Tab is active
+  // Only intercept keys when Keyboard Tab is active and hardware-test section is visible
+  const section = document.getElementById('section-hardware-test');
+  if (!section || !section.classList.contains('active')) return;
   if (activeTab !== 'keyboard') return;
   
   // Prevent browser shortcuts (like F5, F11, Ctrl+P, Backspace, Space, etc.)
@@ -778,6 +780,8 @@ function handleKeyDown(e) {
 
 // Global keyup handler
 function handleKeyUp(e) {
+  const section = document.getElementById('section-hardware-test');
+  if (!section || !section.classList.contains('active')) return;
   if (activeTab !== 'keyboard') return;
   
   e.preventDefault();

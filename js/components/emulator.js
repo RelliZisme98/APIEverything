@@ -658,6 +658,8 @@ function setupGamepadInput() {
   };
 
   const onKeyDown = (e) => {
+    const section = document.getElementById('section-emulator');
+    if (!section || !section.classList.contains('active')) return;
     if (!nesBrowser) return;
     const button = keyMap[e.key];
     if (button !== undefined) {
@@ -675,6 +677,8 @@ function setupGamepadInput() {
   };
 
   const onKeyUp = (e) => {
+    const section = document.getElementById('section-emulator');
+    if (!section || !section.classList.contains('active')) return;
     if (!nesBrowser) return;
     const button = keyMap[e.key];
     if (button !== undefined) {
