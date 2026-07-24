@@ -49,6 +49,8 @@ import { renderHardwareTest } from './components/hardware-test.js';
 import { renderAstrology } from './components/astrology.js';
 import { renderDevDocs } from './components/devdocs.js';
 import { renderCVReviewer } from './components/cv-reviewer.js';
+import { renderEducationQuiz } from './components/education-quiz.js';
+import { renderJobSearch } from './components/job-search.js';
 
 // ── Render Components ──
 import { initAIAssistant }     from './components/ai-assistant.js?v=1.0.4';
@@ -385,7 +387,9 @@ const sectionToPathMap = {
   'hardware-test': '/hardware-test',
   'astrology': '/astrology',
   'devdocs': '/devdocs',
-  'cv-reviewer': '/cv-reviewer'
+  'cv-reviewer': '/cv-reviewer',
+  'education-quiz': '/education-quiz',
+  'job-search': '/job-search'
 };
 
 const pathToSectionMap = {
@@ -417,7 +421,9 @@ const pathToSectionMap = {
   '/hardware-test': 'hardware-test',
   '/astrology': 'astrology',
   '/devdocs': 'devdocs',
-  '/cv-reviewer': 'cv-reviewer'
+  '/cv-reviewer': 'cv-reviewer',
+  '/education-quiz': 'education-quiz',
+  '/job-search': 'job-search'
 };
 
 function getPathnameClean() {
@@ -485,6 +491,8 @@ window.switchSection = (id, updateHistory = true) => {
     if (id === 'astrology')     renderAstrology();
     if (id === 'devdocs')       renderDevDocs();
     if (id === 'cv-reviewer')   renderCVReviewer();
+    if (id === 'education-quiz') renderEducationQuiz();
+    if (id === 'job-search')    renderJobSearch();
   }
 
   // Push state to browser history if navigating via client click
