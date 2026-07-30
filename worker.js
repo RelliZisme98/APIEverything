@@ -3441,6 +3441,80 @@ async function handleShorten(request, env) {
 }
 
 // ─── /api/education-quiz ───────────────────────────────────────────────
+async function generateQuestionsWithAI(env, grade, subject, existingQuestions) {
+  if (!env.AI) return [];
+
+  const subjectNames = {
+    toan: 'Toán học',
+    ly: 'Vật lý',
+    hoa: 'Hóa học',
+    sinh: 'Sinh học',
+    van: 'Ngữ văn',
+    anh: 'Tiếng Anh',
+    su: 'Lịch sử',
+    dia: 'Địa lý',
+    gdcd: 'Giáo dục công dân (GDCD)',
+    tin: 'Tin học'
+  };
+
+  const subjectName = subjectNames[subject] || subject;
+  const existingList = existingQuestions.map((q, idx) => `${idx + 1}. ${q}`).join('\n');
+
+  const systemPrompt = `Bạn là chuyên gia biên soạn đề thi trắc nghiệm học thuật chuẩn của Bộ Giáo dục và Đào tạo Việt Nam.
+Hãy biên soạn 10 câu hỏi trắc nghiệm hoàn toàn mới, đa dạng chủ đề và đúng phân phối chương trình Lớp ${grade}, môn ${subjectName}.
+
+Yêu cầu định dạng đầu ra phải là một JSON object có trường "questions" chứa mảng 10 câu hỏi, mỗi câu hỏi có cấu trúc:
+{
+  "question": "Nội dung câu hỏi trắc nghiệm...",
+  "options": ["Phương án A", "Phương án B", "Phương án C", "Phương án D"],
+  "answer": 0, // chỉ số đáp án đúng (từ 0 đến 3)
+  "difficulty": "easy" | "medium" | "hard",
+  "explanation": "Giải thích ngắn gọn lý do vì sao chọn đáp án đó..."
+}
+
+Yêu cầu nghiêm ngặt:
+1. KHÔNG trùng lặp hoặc lặp lại ý tưởng/nội dung của các câu hỏi sau:
+${existingList}
+2. Mỗi câu hỏi phải là một dạng bài/kiến thức hoàn toàn khác biệt. Tránh việc chỉ thay đổi số hay vài kí tự của câu khác.
+3. Không trả về bất kỳ văn bản giải thích hay lời nói đầu nào ngoài chuỗi JSON đúng cấu trúc.`;
+
+  try {
+    const result = await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Hãy tạo 10 câu hỏi trắc nghiệm Lớp ${grade} môn ${subjectName} dạng JSON.` }
+      ],
+      temperature: 0.8,
+      max_tokens: 3000,
+      response_format: { type: 'json_object' }
+    });
+
+    let data = null;
+    if (result && typeof result.response === 'object' && result.response !== null) {
+      data = result.response;
+    } else {
+      const rawText = result.response || result.result || (typeof result === 'string' ? result : '');
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        data = JSON.parse(jsonMatch[0]);
+      }
+    }
+
+    if (data && Array.isArray(data.questions)) {
+      return data.questions.map(q => ({
+        question: q.question,
+        options: Array.isArray(q.options) ? q.options : [],
+        answer: typeof q.answer === 'number' ? q.answer : 0,
+        difficulty: q.difficulty || 'medium',
+        explanation: q.explanation || null
+      }));
+    }
+  } catch (err) {
+    console.error('[AI Question Generator] Error:', err);
+  }
+  return [];
+}
+
 async function handleEducationQuiz(request, env) {
   if (request.method === 'OPTIONS') return preflight();
 
@@ -3481,18 +3555,56 @@ async function handleEducationQuiz(request, env) {
 
     const pool = await res.json();
 
-    // Shuffle and take 10 questions max
-    const shuffled = pool.sort(() => 0.5 - Math.random());
+    // Deduplicate by grouping questions with the same base text (ignoring 'Bộ câu hỏi luyện tập' suffixes)
+    const baseQuestionMap = new Map();
+    for (const q of pool) {
+      const baseText = q.question.replace(/\s*-\s*Bộ câu hỏi luyện tập\s*#\d+\??/gi, '').trim().toLowerCase();
+      if (!baseQuestionMap.has(baseText)) {
+        baseQuestionMap.set(baseText, []);
+      }
+      baseQuestionMap.get(baseText).push(q);
+    }
+
+    const isAiRequested = searchParams.get('ai') === 'true';
+    const isPoolSmall = baseQuestionMap.size < 15;
+
+    if (env.AI && (isAiRequested || isPoolSmall)) {
+      // Get the existing base questions to prevent duplication
+      const existingList = Array.from(baseQuestionMap.keys()).map(text => {
+        // Clean any residual suffix
+        return text.replace(/\s*-\s*bộ câu hỏi luyện tập\s*#\d+\??/gi, '').trim();
+      });
+      const aiQuestions = await generateQuestionsWithAI(env, grade, subject, existingList);
+      if (aiQuestions && aiQuestions.length > 0) {
+        return cors(JSON.stringify(aiQuestions), 200);
+      }
+    }
+
+    // Fallback: Pick one representative randomly from each group
+    const uniqueRepresentatives = [];
+    for (const group of baseQuestionMap.values()) {
+      const randomItem = group[Math.floor(Math.random() * group.length)];
+      uniqueRepresentatives.push(randomItem);
+    }
+
+    // Shuffle the unique questions and pick up to 10
+    const shuffled = uniqueRepresentatives.sort(() => 0.5 - Math.random());
     const selected = shuffled.slice(0, 10);
 
-    // Return safe questions (include answer since we validate client-side for this quiz)
-    const safe = selected.map(q => ({
-      question: q.question,
-      options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options,
-      answer: q.answer,
-      difficulty: q.difficulty || 'medium',
-      explanation: q.explanation || null
-    }));
+    // Return safe questions and strip the mock suffixes for a clean user interface
+    const safe = selected.map(q => {
+      let cleanedQuestion = q.question.replace(/\s*-\s*Bộ câu hỏi luyện tập\s*#\d+\??/gi, '').trim();
+      if (q.question.endsWith('?') && !/[?:.]$/.test(cleanedQuestion)) {
+        cleanedQuestion += '?';
+      }
+      return {
+        question: cleanedQuestion,
+        options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options,
+        answer: q.answer,
+        difficulty: q.difficulty || 'medium',
+        explanation: q.explanation || null
+      };
+    });
 
     return cors(JSON.stringify(safe), 200);
   } catch (err) {

@@ -47,6 +47,7 @@ let _state = {
   answers: [],   // user answers per question index
   answered: false, // whether current question has been answered
   history: JSON.parse(localStorage.getItem('edu_quiz_history') || '[]'),
+  useAI: JSON.parse(localStorage.getItem('edu_quiz_use_ai') || 'false'),
 };
 
 function _el(id) { return document.getElementById(id); }
@@ -142,6 +143,15 @@ function _renderSubjects(root) {
 
     <div class="edu-section-header">
       <div class="edu-section-title"><i class="fas fa-book-open"></i> Môn Học — Lớp ${grade}</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:13px;font-weight:500;color:var(--text-muted);display:flex;align-items:center;gap:4px;">
+          <i class="fas fa-magic" style="color:#a855f7;"></i> Tạo câu hỏi AI (Không trùng lặp)
+        </span>
+        <label class="edu-switch">
+          <input type="checkbox" id="eduAIChangeToggle" ${_state.useAI ? 'checked' : ''} onchange="window._eduToggleAI(this.checked)">
+          <span class="edu-slider"></span>
+        </label>
+      </div>
     </div>
 
     <div class="edu-subject-grid">
@@ -373,7 +383,8 @@ function _renderResults(root) {
    ═══════════════════════════════════════════ */
 async function _fetchQuestions(grade, subject) {
   try {
-    const res = await fetch(`/api/education-quiz?grade=${grade}&subject=${subject}`);
+    const aiParam = _state.useAI ? '&ai=true' : '';
+    const res = await fetch(`/api/education-quiz?grade=${grade}&subject=${subject}${aiParam}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (data.error) throw new Error(data.error);
@@ -501,6 +512,11 @@ window._eduClearHistory = function() {
   _state.history = [];
   localStorage.removeItem('edu_quiz_history');
   _renderView(_el('educationQuizContent'));
+};
+
+window._eduToggleAI = function(checked) {
+  _state.useAI = checked;
+  localStorage.setItem('edu_quiz_use_ai', JSON.stringify(checked));
 };
 
 /* ═══════════════════════════════════════════
