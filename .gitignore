@@ -30,5 +30,8 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 
-# Chặn file chứa đáp án câu hỏi
+# Chặn file chứa đáp án câu hỏi & SQL migrations
 supabase_questions_migration.sql
+supabase_education_migration.sql
+supabase_edu_part*.sql
+

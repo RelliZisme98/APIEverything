@@ -70,6 +70,8 @@
   <link rel="stylesheet" href="css/cv-reviewer.css" media="print" onload="this.media='all'" />
   <link rel="stylesheet" href="css/typing-test.css" media="print" onload="this.media='all'" />
   <link rel="stylesheet" href="css/hardware-test.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/education-quiz.css" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="css/job-search.css" media="print" onload="this.media='all'" />
   <link rel="stylesheet" id="focus-css" href="css/focus.css" media="print" onload="this.media='all'" />
 </head>
 
@@ -127,6 +129,10 @@
         <button class="sidebar-nav-item" data-section="news" onclick="switchSection('news')">
           <i class="nav-icon fas fa-newspaper"></i>
           <span class="nav-label">Tin Tức 24h</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="job-search" onclick="switchSection('job-search')">
+          <i class="nav-icon fas fa-briefcase"></i>
+          <span class="nav-label">Tìm Việc Làm</span>
         </button>
 
         <!-- Nav: Tiện ích -->
@@ -201,6 +207,10 @@
         <button class="sidebar-nav-item" data-section="cv-reviewer" onclick="switchSection('cv-reviewer')">
           <i class="nav-icon fas fa-file-invoice"></i>
           <span class="nav-label">Review CV bằng AI</span>
+        </button>
+        <button class="sidebar-nav-item" data-section="education-quiz" onclick="switchSection('education-quiz')">
+          <i class="nav-icon fas fa-graduation-cap"></i>
+          <span class="nav-label">Câu Hỏi Môn Học</span>
         </button>
         <button class="sidebar-nav-item" data-section="lottery" onclick="switchSection('lottery')">
           <i class="nav-icon fas fa-ticket-alt"></i>
@@ -602,6 +612,34 @@
       <section class="content-section" id="section-focus">
         <div class="page-title">Chế Độ Tập Trung</div>
         <div id="focusContent"></div>
+      </section>
+
+      <!-- ════════ SECTION: EDUCATION QUIZ ════════ -->
+      <section class="content-section" id="section-education-quiz">
+        <div class="page-title">Câu Hỏi Trắc Nghiệm Các Môn Học</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Luyện Tập Theo Lớp · Toán · Lý · Hóa · Sinh · Văn · Anh · Sử · Địa</div>
+            <span class="card-badge" style="background:rgba(94,106,210,.12);color:var(--accent-blue);border-color:rgba(94,106,210,.25);">HỌC TẬP</span>
+          </div>
+          <div id="educationQuizContent">
+            <div class="skeleton skel-big"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════ SECTION: JOB SEARCH ════════ -->
+      <section class="content-section" id="section-job-search">
+        <div class="page-title">Tra Cứu Thông Tin Tuyển Dụng</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Tìm Việc Làm Từ 10+ Nguồn Tuyển Dụng Hàng Đầu</div>
+            <span class="card-badge" style="background:rgba(39,166,68,.12);color:var(--accent-green);border-color:rgba(39,166,68,.25);">TUYỂN DỤNG</span>
+          </div>
+          <div id="jobSearchContent">
+            <div class="skeleton skel-big"></div>
+          </div>
+        </div>
       </section>
 
       <!-- Footer -->

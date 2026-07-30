@@ -1632,7 +1632,7 @@ async function handleIQEQ(request, env) {
       const type = searchParams.get('type') || 'IQ';
       if (type === 'IQ') {
         const pool = await fetchQuestionsFromSupabase('iq_questions', url, key);
-        
+
         // Filter dynamically by difficulty column
         const poolEasy = pool.filter(p => p.difficulty === 'easy');
         const poolMedium = pool.filter(p => p.difficulty === 'medium');
@@ -1659,7 +1659,7 @@ async function handleIQEQ(request, env) {
         return cors(JSON.stringify(safeQuestions), 200);
       } else {
         const pool = await fetchQuestionsFromSupabase('eq_questions', url, key);
-        
+
         // Filter dynamically by dimension column
         const empathyPool = pool.filter(p => p.dim === 'empathy');
         const selfRegPool = pool.filter(p => p.dim === 'selfReg');
@@ -3440,8 +3440,786 @@ async function handleShorten(request, env) {
   }
 }
 
+// ─── /api/education-quiz ───────────────────────────────────────────────
+async function saveQuestionsToDb(url, key, grade, subject, questions) {
+  try {
+    const payload = questions.map(q => ({
+      grade: grade,
+      subject: subject,
+      question: q.question,
+      options: JSON.stringify(q.options),
+      answer: q.answer,
+      difficulty: q.difficulty,
+      explanation: q.explanation
+    }));
+
+    const res = await fetch(`${url}/rest/v1/education_questions`, {
+      method: 'POST',
+      headers: {
+        'apikey': key,
+        'Authorization': `Bearer ${key}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.warn('[Education Quiz] Failed to save generated questions to DB:', errText);
+    }
+  } catch (err) {
+    console.error('[Education Quiz] Error saving questions to DB:', err);
+  }
+}
+
+async function generateQuestionsWithAI(env, grade, subject, existingQuestions) {
+  if (!env.AI) return [];
+
+  const subjectNames = {
+    toan: 'Toán học',
+    ly: 'Vật lý',
+    hoa: 'Hóa học',
+    sinh: 'Sinh học',
+    van: 'Ngữ văn',
+    anh: 'Tiếng Anh',
+    su: 'Lịch sử',
+    dia: 'Địa lý',
+    gdcd: 'Giáo dục công dân (GDCD)',
+    tin: 'Tin học'
+  };
+
+  const subjectName = subjectNames[subject] || subject;
+  const existingList = existingQuestions.map((q, idx) => `${idx + 1}. ${q}`).join('\n');
+
+  const systemPrompt = `Bạn là chuyên gia biên soạn đề thi trắc nghiệm học thuật chuẩn của Bộ Giáo dục và Đào tạo Việt Nam.
+Hãy biên soạn 10 câu hỏi trắc nghiệm hoàn toàn mới, đa dạng chủ đề và đúng phân phối chương trình Lớp ${grade}, môn ${subjectName}.
+
+Yêu cầu định dạng đầu ra phải là một JSON object có trường "questions" chứa mảng 10 câu hỏi, mỗi câu hỏi có cấu trúc:
+{
+  "question": "Nội dung câu hỏi trắc nghiệm...",
+  "options": ["Phương án A", "Phương án B", "Phương án C", "Phương án D"],
+  "answer": 0, // chỉ số đáp án đúng (từ 0 đến 3)
+  "difficulty": "easy" | "medium" | "hard",
+  "explanation": "Giải thích ngắn gọn lý do vì sao chọn đáp án đó..."
+}
+
+Yêu cầu nghiêm ngặt:
+1. KHÔNG trùng lặp hoặc lặp lại ý tưởng/nội dung của các câu hỏi sau:
+${existingList}
+2. Mỗi câu hỏi phải là một dạng bài/kiến thức hoàn toàn khác biệt. Tránh việc chỉ thay đổi số hay vài kí tự của câu khác.
+3. Không trả về bất kỳ văn bản giải thích hay lời nói đầu nào ngoài chuỗi JSON đúng cấu trúc.`;
+
+  try {
+    const result = await env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Hãy tạo 10 câu hỏi trắc nghiệm Lớp ${grade} môn ${subjectName} dạng JSON.` }
+      ],
+      temperature: 0.8,
+      max_tokens: 3000,
+      response_format: { type: 'json_object' }
+    });
+
+    let data = null;
+    if (result && typeof result.response === 'object' && result.response !== null) {
+      data = result.response;
+    } else {
+      const rawText = result.response || result.result || (typeof result === 'string' ? result : '');
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        data = JSON.parse(jsonMatch[0]);
+      }
+    }
+
+    if (data && Array.isArray(data.questions)) {
+      return data.questions.map(q => ({
+        question: q.question,
+        options: Array.isArray(q.options) ? q.options : [],
+        answer: typeof q.answer === 'number' ? q.answer : 0,
+        difficulty: q.difficulty || 'medium',
+        explanation: q.explanation || null
+      }));
+    }
+  } catch (err) {
+    console.error('[AI Question Generator] Error:', err);
+  }
+  return [];
+}
+
+async function handleEducationQuiz(request, env, ctx) {
+  if (request.method === 'OPTIONS') return preflight();
+
+  const url = env.SUPABASE_URL ? env.SUPABASE_URL.trim().replace(/^['\"]|['\"]$/g, '') : '';
+  const key = env.SUPABASE_KEY ? env.SUPABASE_KEY.trim().replace(/^['\"]|['\"]$/g, '') : '';
+  const hasDb = !!(url && key);
+
+  if (!hasDb) return cors(JSON.stringify({ error: 'Database is not configured' }), 500);
+
+  const { searchParams } = new URL(request.url);
+  const grade = parseInt(searchParams.get('grade') || '0');
+  const subject = searchParams.get('subject') || '';
+
+  if (grade < 1 || grade > 12) return cors(JSON.stringify({ error: 'Invalid grade (1-12)' }), 400);
+  if (!subject) return cors(JSON.stringify({ error: 'Subject is required' }), 400);
+
+  // Validate subject against whitelist
+  const VALID_SUBJECTS = ['toan', 'ly', 'hoa', 'sinh', 'van', 'anh', 'su', 'dia', 'gdcd', 'tin'];
+  if (!VALID_SUBJECTS.includes(subject)) return cors(JSON.stringify({ error: 'Invalid subject' }), 400);
+
+  try {
+    // Fetch from Supabase with filtering
+    const res = await fetch(
+      `${url}/rest/v1/education_questions?select=id,question,options,answer,difficulty,explanation&grade=eq.${grade}&subject=eq.${encodeURIComponent(subject)}&order=id.asc`,
+      {
+        headers: {
+          'apikey': key,
+          'Authorization': `Bearer ${key}`
+        }
+      }
+    );
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.warn('[Education Quiz] Supabase error:', errText);
+      return cors(JSON.stringify({ error: 'Failed to fetch questions' }), 500);
+    }
+
+    const pool = await res.json();
+
+    // Deduplicate by grouping questions with the same base text (ignoring 'Bộ câu hỏi luyện tập' suffixes)
+    const baseQuestionMap = new Map();
+    for (const q of pool) {
+      const baseText = q.question.replace(/\s*-\s*Bộ câu hỏi luyện tập\s*#\d+\??/gi, '').trim().toLowerCase();
+      if (!baseQuestionMap.has(baseText)) {
+        baseQuestionMap.set(baseText, []);
+      }
+      baseQuestionMap.get(baseText).push(q);
+    }
+
+    const isAiRequested = searchParams.get('ai') === 'true';
+    const isPoolSmall = baseQuestionMap.size < 15;
+
+    if (env.AI && (isAiRequested || isPoolSmall)) {
+      // Get the existing base questions to prevent duplication
+      const existingList = Array.from(baseQuestionMap.keys()).map(text => {
+        // Clean any residual suffix
+        return text.replace(/\s*-\s*bộ câu hỏi luyện tập\s*#\d+\??/gi, '').trim();
+      });
+      const aiQuestions = await generateQuestionsWithAI(env, grade, subject, existingList);
+      if (aiQuestions && aiQuestions.length > 0) {
+        // Cache generated questions back to Supabase in the background
+        if (ctx && typeof ctx.waitUntil === 'function') {
+          ctx.waitUntil(saveQuestionsToDb(url, key, grade, subject, aiQuestions));
+        } else {
+          saveQuestionsToDb(url, key, grade, subject, aiQuestions).catch(e => console.error(e));
+        }
+        return cors(JSON.stringify(aiQuestions), 200);
+      }
+    }
+
+    // Fallback: Pick one representative randomly from each group
+    const uniqueRepresentatives = [];
+    for (const group of baseQuestionMap.values()) {
+      const randomItem = group[Math.floor(Math.random() * group.length)];
+      uniqueRepresentatives.push(randomItem);
+    }
+
+    // Shuffle the unique questions and pick up to 10
+    const shuffled = uniqueRepresentatives.sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, 10);
+
+    // Return safe questions and strip the mock suffixes for a clean user interface
+    const safe = selected.map(q => {
+      let cleanedQuestion = q.question.replace(/\s*-\s*Bộ câu hỏi luyện tập\s*#\d+\??/gi, '').trim();
+      if (q.question.endsWith('?') && !/[?:.]$/.test(cleanedQuestion)) {
+        cleanedQuestion += '?';
+      }
+      return {
+        question: cleanedQuestion,
+        options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options,
+        answer: q.answer,
+        difficulty: q.difficulty || 'medium',
+        explanation: q.explanation || null
+      };
+    });
+
+    return cors(JSON.stringify(safe), 200);
+  } catch (err) {
+    return cors(JSON.stringify({ error: err.message }), 500);
+  }
+}
+
+// ─── /api/job-search ──────────────────────────────────────────────────
+// Aggregate job listings from multiple Vietnamese platforms
+const JOB_SEARCH_SOURCES = {
+  topcv: {
+    name: 'TopCV',
+    searchUrl: (q, loc) => `https://www.topcv.vn/tim-viec-lam-${encodeURIComponent(q.replace(/\s+/g, '-').toLowerCase())}${loc ? `?province=${loc}` : ''}`,
+    rssUrl: null,
+  },
+  vietnamworks: {
+    name: 'VietnamWorks',
+    searchUrl: (q) => `https://www.vietnamworks.com/tim-viec-lam/${encodeURIComponent(q.replace(/\s+/g, '-').toLowerCase())}`,
+    rssUrl: null,
+  },
+  careerviet: {
+    name: 'CareerViet',
+    searchUrl: (q) => `https://careerviet.vn/viec-lam/${encodeURIComponent(q.replace(/\s+/g, '-').toLowerCase())}-kw.html`,
+    rssUrl: null,
+  },
+  itviec: {
+    name: 'ITviec',
+    searchUrl: (q) => `https://itviec.com/it-jobs/${encodeURIComponent(q.replace(/\s+/g, '-').toLowerCase())}`,
+    rssUrl: null,
+  },
+  vieclam24h: {
+    name: 'ViecLam24h',
+    searchUrl: (q) => `https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?q=${encodeURIComponent(q)}`,
+    rssUrl: null,
+  },
+  jobsgo: {
+    name: 'JobsGo',
+    searchUrl: (q) => `https://jobsgo.vn/viec-lam.html?keyword=${encodeURIComponent(q)}`,
+    rssUrl: null,
+  },
+  topdev: {
+    name: 'TopDev',
+    searchUrl: (q) => `https://topdev.vn/viec-lam-it/${encodeURIComponent(q.replace(/\s+/g, '-').toLowerCase())}`,
+    rssUrl: null,
+  },
+  careerlink: {
+    name: 'CareerLink',
+    searchUrl: (q) => `https://www.careerlink.vn/vieclam/list?keyword=${encodeURIComponent(q)}`,
+    rssUrl: null,
+  },
+};
+
+async function handleJobSearch(request) {
+  if (request.method === 'OPTIONS') return preflight();
+
+  const { searchParams } = new URL(request.url);
+  const query = searchParams.get('q') || '';
+  const location = searchParams.get('location') || '';
+
+  if (!query.trim()) {
+    return cors(JSON.stringify({ jobs: [], total: 0 }), 200);
+  }
+
+  const allJobs = [];
+
+  // Scrape from multiple sources in parallel
+  const scrapers = [
+    _scrapeTopCV(query, location),
+    _scrapeCareerViet(query, location),
+    _scrapeVietnamWorks(query, location),
+    _scrapeITviec(query, location),
+    _scrapeViecLam24h(query, location),
+    _scrapeJobsGo(query, location),
+    _scrapeTopDev(query, location),
+    _scrapeCareerLink(query, location),
+  ];
+
+  const results = await Promise.allSettled(scrapers);
+
+  for (const result of results) {
+    if (result.status === 'fulfilled' && Array.isArray(result.value)) {
+      allJobs.push(...result.value);
+    }
+  }
+
+  return cors(JSON.stringify({ jobs: allJobs, total: allJobs.length }), 200);
+}
+
+// ── TopCV Scraper ──
+async function _scrapeTopCV(query, location) {
+  try {
+    const slug = query.trim().replace(/\s+/g, '-').toLowerCase();
+    const url = `https://www.topcv.vn/tim-viec-lam-${encodeURIComponent(slug)}`;
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Accept': 'text/html', 'Accept-Language': 'vi-VN,vi;q=0.9' },
+    });
+    if (!res.ok) return [];
+    const html = await res.text();
+    return _parseTopCVHtml(html);
+  } catch { return []; }
+}
+
+function _parseTopCVHtml(html) {
+  const jobs = [];
+  // Match job listing blocks
+  const titleRegex = /class="[^"]*title[^"]*"[^>]*>\s*<a[^>]*href="([^"]*)"[^>]*>\s*<span[^>]*>([^<]*)<\/span>/gi;
+  const companyRegex = /class="[^"]*company[^"]*"[^>]*>([^<]*)/gi;
+  const salaryRegex = /class="[^"]*salary[^"]*"[^>]*>([^<]*)/gi;
+  const locationRegex = /class="[^"]*location[^"]*"[^>]*>([^<]*)/gi;
+
+  // Simplified extraction using common patterns
+  const blocks = html.split(/job-item|job-list-item|data-job-id/i);
+  for (let i = 1; i < Math.min(blocks.length, 16); i++) {
+    const block = blocks[i];
+    const titleMatch = block.match(/title[^>]*>\s*(?:<a[^>]*href="([^"]*)"[^>]*>)?\s*(?:<[^>]*>)*([^<]{5,})/i);
+    const companyMatch = block.match(/company[^>]*>\s*(?:<[^>]*>)*\s*([^<]{3,})/i);
+    const salaryMatch = block.match(/salary[^>]*>\s*(?:<[^>]*>)*\s*([^<]{3,})/i);
+    const locMatch = block.match(/address|location[^>]*>\s*(?:<[^>]*>)*\s*([^<]{3,})/i);
+
+    if (titleMatch) {
+      jobs.push({
+        title: _cleanText(titleMatch[2]),
+        url: titleMatch[1] || '',
+        company: companyMatch ? _cleanText(companyMatch[1]) : '',
+        salary: salaryMatch ? _cleanText(salaryMatch[1]) : 'Thỏa thuận',
+        location: locMatch ? _cleanText(locMatch[1]) : '',
+        source: 'topcv',
+        date: 'Mới cập nhật',
+      });
+    }
+  }
+  return jobs;
+}
+
+// ── CareerViet Scraper ──
+async function _scrapeCareerViet(query, location) {
+  try {
+    const slug = query.trim().replace(/\s+/g, '-').toLowerCase();
+    const url = `https://careerviet.vn/viec-lam/${encodeURIComponent(slug)}-kw.html`;
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Accept': 'text/html', 'Accept-Language': 'vi-VN,vi;q=0.9' },
+    });
+    if (!res.ok) return [];
+    const html = await res.text();
+    return _parseGenericJobHtml(html, 'careerviet');
+  } catch { return []; }
+}
+
+// ── VietnamWorks Scraper ──
+async function _scrapeVietnamWorks(query, location) {
+  try {
+    const url = `https://www.vietnamworks.com/viec-lam?q=${encodeURIComponent(query)}`;
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Accept': 'text/html', 'Accept-Language': 'vi-VN,vi;q=0.9' },
+    });
+    if (!res.ok) return [];
+    const html = await res.text();
+    return _parseGenericJobHtml(html, 'vietnamworks');
+  } catch { return []; }
+}
+
+// ── ITviec Scraper ──
+async function _scrapeITviec(query, location) {
+  try {
+    const url = `https://itviec.com/it-jobs?query=${encodeURIComponent(query)}`;
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7'
+      },
+    });
+    if (!res.ok) return [];
+    const html = await res.text();
+    return _parseITviecHtml(html);
+  } catch (err) {
+    console.warn('[ITviec Scraper]', err);
+    return [];
+  }
+}
+
+// ── ViecLam24h Scraper ──
+async function _scrapeViecLam24h(query, location) {
+  try {
+    const url = `https://vieclam24h.vn/tim-kiem-viec-lam-nhanh?q=${encodeURIComponent(query)}`;
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7'
+      },
+    });
+    if (!res.ok) return [];
+    const html = await res.text();
+    return _parseViecLam24hHtml(html);
+  } catch (err) {
+    console.warn('[ViecLam24h Scraper]', err);
+    return [];
+  }
+}
+
+// ── JobsGo Scraper ──
+async function _scrapeJobsGo(query, location) {
+  try {
+    const url = `https://jobsgo.vn/viec-lam.html?keyword=${encodeURIComponent(query)}`;
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Accept': 'text/html', 'Accept-Language': 'vi-VN,vi;q=0.9' },
+    });
+    if (!res.ok) return [];
+    const html = await res.text();
+    return _parseGenericJobHtml(html, 'jobsgo');
+  } catch { return []; }
+}
+
+// ── TopDev Scraper ──
+async function _scrapeTopDev(query, location) {
+  try {
+    const slug = query.trim().replace(/\s+/g, '-').toLowerCase();
+    const url = `https://topdev.vn/viec-lam-it/${encodeURIComponent(slug)}`;
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7'
+      },
+    });
+    if (!res.ok) return [];
+    const html = await res.text();
+    return _parseTopDevHtml(html);
+  } catch (err) {
+    console.warn('[TopDev Scraper]', err);
+    return [];
+  }
+}
+
+// ── CareerLink Scraper ──
+async function _scrapeCareerLink(query, location) {
+  try {
+    const url = `https://www.careerlink.vn/vieclam/list?keyword=${encodeURIComponent(query)}`;
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7'
+      },
+    });
+    if (!res.ok) return [];
+    const html = await res.text();
+    return _parseCareerLinkHtml(html);
+  } catch (err) {
+    console.warn('[CareerLink Scraper]', err);
+    return [];
+  }
+}
+
+// ── ViecLam24h Parser ──
+function _parseViecLam24hHtml(html) {
+  const jobs = [];
+  try {
+    const nextMatch = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/i);
+    if (nextMatch) {
+      const data = JSON.parse(nextMatch[1]);
+      const items = data.props?.initialProps?.pageProps?.jobsResponse?.items ||
+        data.props?.initialState?.api?.getJobList?.data?.items || [];
+      for (const item of items) {
+        let salary = 'Thỏa thuận';
+        if (item.salary_min && item.salary_max) {
+          const min = Math.round(item.salary_min / 1000000);
+          const max = Math.round(item.salary_max / 1000000);
+          salary = `${min} - ${max} triệu`;
+        } else if (item.salary_min) {
+          salary = `Từ ${Math.round(item.salary_min / 1000000)} triệu`;
+        }
+
+        jobs.push({
+          title: _cleanText(item.title || ''),
+          company: _cleanText(item.employer_info?.name || ''),
+          salary: salary,
+          location: _cleanText(item.employer_info?.province_name || ''),
+          url: item.title_slug ? `https://vieclam24h.vn/${item.title_slug}-${item.id}.html` : '',
+          type: '',
+          date: 'Mới cập nhật',
+          source: 'vieclam24h'
+        });
+      }
+    }
+  } catch (err) {
+    console.warn('[ViecLam24h Parser Error]', err);
+  }
+  return jobs.slice(0, 15);
+}
+
+// ── ITviec Parser ──
+function _parseITviecHtml(html) {
+  const jobs = [];
+  try {
+    const blocks = html.split(/class=['"]job-card/i);
+    for (let i = 1; i < blocks.length; i++) {
+      const block = blocks[i];
+
+      const urlMatch = block.match(/href=['"](https:\/\/itviec\.com\/it-jobs\/[a-zA-Z0-9_-]+|\/it-jobs\/[a-zA-Z0-9_-]+)/i);
+      const titleMatch = block.match(/data-search--job-selection-target=['"]jobTitle['"][^>]*>\s*<a[^>]*>([\s\S]*?)<\/a>/i) ||
+        block.match(/<h3[^>]*>\s*<a[^>]*>([\s\S]*?)<\/a>/i);
+
+      if (!titleMatch) continue;
+
+      const title = _cleanText(titleMatch[1]);
+      let url = urlMatch ? urlMatch[1] : '';
+      if (url && !url.startsWith('http')) {
+        url = `https://itviec.com${url}`;
+      }
+
+      const companyMatch = block.match(/class=['"]text-rich-grey['"][^>]*>([\s\S]*?)<\/a>/i) ||
+        block.match(/class=['"]text-rich-grey[^'"]*['"][^>]*>([\s\S]*?)<\/a>/i) ||
+        block.match(/<a[^>]*href=['"]\/companies\/[^'"]*['"][^>]*>([\s\S]*?)<\/a>/i);
+      const company = companyMatch ? _cleanText(companyMatch[1]) : '';
+
+      const locMatch = block.match(/#map-pin['"]><\/use><\/svg>\s*<div[^>]*title=['"]([^'"]+)['"]/i) ||
+        block.match(/#map-pin['"]><\/use><\/svg>\s*<div[^>]*>([\s\S]*?)<\/div>/i) ||
+        block.match(/title=['"](Ha Noi|Ho Chi Minh|Da Nang|Remote|Binh Duong|Dong Nai)['"]/i);
+      const location = locMatch ? _cleanText(locMatch[1]) : '';
+
+      let salary = 'Thỏa thuận';
+      if (block.includes('sign-in-view-salary')) {
+        salary = 'Thương lượng';
+      } else {
+        const salaryMatch = block.match(/class=['"]salary[^'"]*['"][^>]*>([\s\S]*?)<\/div>/i);
+        if (salaryMatch) {
+          salary = _cleanText(salaryMatch[1]);
+        }
+      }
+
+      const logoMatch = block.match(/<img[^>]*data-src=['"]([^'"]+)['"]/i) ||
+        block.match(/<img[^>]*src=['"]([^'"]+)['"]/i);
+      const logo = logoMatch ? logoMatch[1] : '';
+
+      if (!jobs.some(j => j.title === title)) {
+        jobs.push({
+          title,
+          url,
+          company,
+          salary,
+          location,
+          logo,
+          source: 'itviec',
+          date: 'Mới cập nhật'
+        });
+      }
+    }
+  } catch (err) {
+    console.warn('[ITviec Parser Error]', err);
+  }
+  return jobs.slice(0, 15);
+}
+
+// ── TopDev Parser ──
+function _parseTopDevHtml(html) {
+  const jobs = [];
+  try {
+    const blocks = html.split(/href=["']\/detail-jobs\//i);
+    for (let i = 1; i < blocks.length; i++) {
+      const block = blocks[i];
+
+      const urlMatch = block.match(/^([^"'?]+)/);
+      if (!urlMatch) continue;
+      const slug = urlMatch[1];
+      const url = `https://topdev.vn/detail-jobs/${slug}`;
+
+      const titleMatch = block.match(/^[^>]*>([^<]+)<\/a>/i);
+      if (!titleMatch) continue;
+      const title = _cleanText(titleMatch[1]);
+
+      const companyMatch = block.match(/class="[^"]*text-text-500[^"]*">([^<]+)<\/span>/i);
+      const company = companyMatch ? _cleanText(companyMatch[1]) : '';
+
+      let salary = 'Thỏa thuận';
+      const salaryMatch = block.match(/class="[^"]*text-brand-600[^"]*">\s*<span[^>]*>([^<]+)<\/span>/i) ||
+        block.match(/class="[^"]*text-brand-600[^"]*">([^<]+)<\/span>/i) ||
+        block.match(/Login to view salary/gi);
+      if (salaryMatch) {
+        const text = _cleanText(salaryMatch[0] || salaryMatch[1]);
+        if (text.toLowerCase().includes('login to view salary')) {
+          salary = 'Thương lượng';
+        } else {
+          salary = text;
+        }
+      }
+
+      const locMatch = block.match(/<span class="line-clamp-1">\s*([^<]+)<\/span>/i);
+      const location = locMatch ? _cleanText(locMatch[1]) : '';
+
+      const typeMatch = block.match(/<\/svg>\s*<!--\s*-->\s*([^<]+)<\/span>/i) ||
+        block.match(/<\/svg>\s*([^<]+)<\/span>/i);
+      const type = typeMatch ? _cleanText(typeMatch[1]) : '';
+
+      if (!jobs.some(j => j.title === title)) {
+        jobs.push({
+          title,
+          url,
+          company,
+          salary,
+          location,
+          type,
+          source: 'topdev',
+          date: 'Mới cập nhật'
+        });
+      }
+    }
+  } catch (err) {
+    console.warn('[TopDev Parser Error]', err);
+  }
+  return jobs.slice(0, 15);
+}
+
+// ── CareerLink Parser ──
+function _parseCareerLinkHtml(html) {
+  const jobs = [];
+  try {
+    const ldMatch = html.match(/<script[^>]*type=['"]application\/ld\+json['"][^>]*>([\s\S]*?)<\/script>/gi);
+    if (ldMatch) {
+      for (const script of ldMatch) {
+        const content = script.replace(/<script[^>]*>|<\/script>/gi, '').trim();
+        if (content.includes('SearchResultsPage')) {
+          const data = JSON.parse(content);
+          const items = data.mainEntity?.itemListElement || [];
+
+          for (const item of items) {
+            const itemUrl = item.item?.url || '';
+            const itemName = item.item?.name || '';
+            if (!itemUrl) continue;
+
+            const jobIdMatch = itemUrl.match(/\/(\d+)(\?|$)/);
+            if (!jobIdMatch) continue;
+            const jobId = jobIdMatch[1];
+
+            const blockIndex = html.lastIndexOf(jobId);
+            if (blockIndex !== -1 && blockIndex > 10000) {
+              const nearHtml = html.substring(blockIndex - 300, blockIndex + 1200);
+
+              const companyMatch = nearHtml.match(/class=['"]text-dark job-company[^'"]*['"][^>]*title=['"]([^'"]+)['"]/i) ||
+                nearHtml.match(/class=['"]text-dark job-company[^>]*title=['"]([^'"]+)['"]/i) ||
+                nearHtml.match(/job-company[^>]*>([\s\S]*?)<\/a>/i);
+              const company = companyMatch ? _cleanText(companyMatch[1]) : '';
+
+              const locMatch = nearHtml.match(/class=['"]job-location[^>]*>\s*<i[^>]*><\/i>\s*<div[^>]*>\s*<a[^>]*>([^<]+)<\/a>/i) ||
+                nearHtml.match(/class=['"]job-location[^>]*>[\s\S]*?href=['"]\/tim-viec-lam-tai\/[^'"]*['"][^>]*>([^<]+)<\/a>/i) ||
+                nearHtml.match(/class=['"]text-reset['"][^>]*>([^<]+)<\/a>/i) ||
+                nearHtml.match(/job-location[^>]*>([\s\S]*?)<\/div>/i);
+              const location = locMatch ? _cleanText(locMatch[1]) : '';
+
+              const salaryContainerMatch = nearHtml.match(/class=['"]job-salary[^'"]*['"][^>]*>([\s\S]*?)<\/span>\s*<span class=['"]text-muted/i) ||
+                nearHtml.match(/class=['"]job-salary[^'"]*['"][^>]*>([\s\S]*?)<\/span>\s*<\/div>/i) ||
+                nearHtml.match(/class=['"]job-salary[^'"]*['"][^>]*>([\s\S]*?)<\/span>/i);
+              let salary = salaryContainerMatch ? _cleanText(salaryContainerMatch[1]) : 'Thương lượng';
+              if (salary.includes('Thương lượng')) salary = 'Thỏa thuận';
+
+              jobs.push({
+                title: itemName,
+                url: itemUrl,
+                company,
+                location,
+                salary,
+                source: 'careerlink',
+                date: 'Mới cập nhật'
+              });
+            } else {
+              jobs.push({
+                title: itemName,
+                url: itemUrl,
+                company: '',
+                location: '',
+                salary: 'Thỏa thuận',
+                source: 'careerlink',
+                date: 'Mới cập nhật'
+              });
+            }
+          }
+          break;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[CareerLink Parser Error]', err);
+  }
+  return jobs.slice(0, 15);
+}
+
+// ── Generic HTML Job Parser (Fallback) ──
+// Uses common HTML patterns across Vietnamese job sites
+function _parseGenericJobHtml(html, source) {
+  const jobs = [];
+
+  // Strategy 1: Extract from JSON-LD structured data
+  const jsonLdMatches = html.match(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi);
+  if (jsonLdMatches) {
+    for (const match of jsonLdMatches) {
+      try {
+        const jsonStr = match.replace(/<script[^>]*>|<\/script>/gi, '').trim();
+        const data = JSON.parse(jsonStr);
+        const postings = Array.isArray(data) ? data : (data['@graph'] || [data]);
+        for (const posting of postings) {
+          if (posting['@type'] === 'JobPosting' || posting['@type']?.includes?.('JobPosting')) {
+            jobs.push({
+              title: _cleanText(posting.title || ''),
+              company: _cleanText(posting.hiringOrganization?.name || ''),
+              salary: posting.baseSalary?.value?.value ||
+                (posting.baseSalary?.value?.minValue && posting.baseSalary?.value?.maxValue ?
+                  `${posting.baseSalary.value.minValue} - ${posting.baseSalary.value.maxValue}` : '') ||
+                'Thỏa thuận',
+              location: _cleanText(
+                posting.jobLocation?.address?.addressLocality ||
+                posting.jobLocation?.address?.addressRegion ||
+                (typeof posting.jobLocation === 'string' ? posting.jobLocation : '') || ''
+              ),
+              url: posting.url || '',
+              type: posting.employmentType || '',
+              date: posting.datePosted || 'Mới cập nhật',
+              experience: posting.experienceRequirements || '',
+              source,
+            });
+          }
+        }
+      } catch { /* ignore parse errors */ }
+    }
+  }
+
+  // Strategy 2: Parse common HTML patterns if JSON-LD didn't yield results
+  if (jobs.length === 0) {
+    // Look for common job card patterns
+    const patterns = [
+      // Pattern: <a> with title containing job keywords inside a card/list-item
+      /<a[^>]*href="([^"]*)"[^>]*title="([^"]{10,})"[^>]*class="[^"]*(?:job|title|name)[^"]*"/gi,
+      // Pattern: h2/h3 with a > link inside job cards
+      /<(?:h[2-4]|div)[^>]*class="[^"]*(?:job|title|name)[^"]*"[^>]*>\s*<a[^>]*href="([^"]*)"[^>]*>([^<]{5,})<\/a>/gi,
+    ];
+
+    for (const pattern of patterns) {
+      let m;
+      while ((m = pattern.exec(html)) !== null && jobs.length < 15) {
+        const jobUrl = m[1];
+        const jobTitle = _cleanText(m[2]);
+        if (jobTitle.length > 5 && !jobTitle.includes('đăng nhập') && !jobTitle.includes('trang chủ')) {
+          // Try to find company name near this match
+          const nearbyHtml = html.substring(Math.max(0, m.index - 200), Math.min(html.length, m.index + 500));
+          const companyMatch = nearbyHtml.match(/company[^>]*>\s*(?:<[^>]*>)*\s*([^<]{3,60})/i)
+            || nearbyHtml.match(/employer[^>]*>\s*(?:<[^>]*>)*\s*([^<]{3,60})/i);
+          const salaryMatch = nearbyHtml.match(/salary[^>]*>\s*(?:<[^>]*>)*\s*([^<]{3,60})/i)
+            || nearbyHtml.match(/lương[^>]*>\s*(?:<[^>]*>)*\s*([^<]{3,60})/i);
+          const locMatch = nearbyHtml.match(/location[^>]*>\s*(?:<[^>]*>)*\s*([^<]{3,60})/i)
+            || nearbyHtml.match(/address[^>]*>\s*(?:<[^>]*>)*\s*([^<]{3,60})/i);
+
+          // Avoid duplicates
+          if (!jobs.some(j => j.title === jobTitle)) {
+            jobs.push({
+              title: jobTitle,
+              url: jobUrl.startsWith('http') ? jobUrl : `https://${JOB_SEARCH_SOURCES[source]?.searchUrl ? new URL(JOB_SEARCH_SOURCES[source].searchUrl('test')).hostname : ''}${jobUrl}`,
+              company: companyMatch ? _cleanText(companyMatch[1]) : '',
+              salary: salaryMatch ? _cleanText(salaryMatch[1]) : 'Thỏa thuận',
+              location: locMatch ? _cleanText(locMatch[1]) : '',
+              source,
+              date: 'Mới cập nhật',
+            });
+          }
+        }
+      }
+    }
+  }
+
+  return jobs.slice(0, 15);
+}
+
+function _cleanText(text) {
+  if (!text) return '';
+  return text.replace(/<[^>]+>/g, '').replace(/&[a-z0-9#]+;/gi, ' ').replace(/\s+/g, ' ').trim();
+}
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const { pathname } = new URL(request.url);
 
     // ── Diagnostic Endpoint ──
@@ -3487,6 +4265,8 @@ export default {
     if (pathname === '/api/cv-coverletter') return handleCVCoverLetter(request, env);
     if (pathname === '/api/tts') return handleTTS(request);
     if (pathname === '/api/shorten') return handleShorten(request, env);
+    if (pathname === '/api/education-quiz') return handleEducationQuiz(request, env, ctx);
+    if (pathname === '/api/job-search') return handleJobSearch(request);
 
 
 
