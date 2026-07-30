@@ -1632,7 +1632,7 @@ async function handleIQEQ(request, env) {
       const type = searchParams.get('type') || 'IQ';
       if (type === 'IQ') {
         const pool = await fetchQuestionsFromSupabase('iq_questions', url, key);
-        
+
         // Filter dynamically by difficulty column
         const poolEasy = pool.filter(p => p.difficulty === 'easy');
         const poolMedium = pool.filter(p => p.difficulty === 'medium');
@@ -1659,7 +1659,7 @@ async function handleIQEQ(request, env) {
         return cors(JSON.stringify(safeQuestions), 200);
       } else {
         const pool = await fetchQuestionsFromSupabase('eq_questions', url, key);
-        
+
         // Filter dynamically by dimension column
         const empathyPool = pool.filter(p => p.dim === 'empathy');
         const selfRegPool = pool.filter(p => p.dim === 'selfReg');
@@ -3441,6 +3441,37 @@ async function handleShorten(request, env) {
 }
 
 // ─── /api/education-quiz ───────────────────────────────────────────────
+async function saveQuestionsToDb(url, key, grade, subject, questions) {
+  try {
+    const payload = questions.map(q => ({
+      grade: grade,
+      subject: subject,
+      question: q.question,
+      options: JSON.stringify(q.options),
+      answer: q.answer,
+      difficulty: q.difficulty,
+      explanation: q.explanation
+    }));
+
+    const res = await fetch(`${url}/rest/v1/education_questions`, {
+      method: 'POST',
+      headers: {
+        'apikey': key,
+        'Authorization': `Bearer ${key}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.warn('[Education Quiz] Failed to save generated questions to DB:', errText);
+    }
+  } catch (err) {
+    console.error('[Education Quiz] Error saving questions to DB:', err);
+  }
+}
+
 async function generateQuestionsWithAI(env, grade, subject, existingQuestions) {
   if (!env.AI) return [];
 
@@ -3515,7 +3546,7 @@ ${existingList}
   return [];
 }
 
-async function handleEducationQuiz(request, env) {
+async function handleEducationQuiz(request, env, ctx) {
   if (request.method === 'OPTIONS') return preflight();
 
   const url = env.SUPABASE_URL ? env.SUPABASE_URL.trim().replace(/^['\"]|['\"]$/g, '') : '';
@@ -3576,6 +3607,12 @@ async function handleEducationQuiz(request, env) {
       });
       const aiQuestions = await generateQuestionsWithAI(env, grade, subject, existingList);
       if (aiQuestions && aiQuestions.length > 0) {
+        // Cache generated questions back to Supabase in the background
+        if (ctx && typeof ctx.waitUntil === 'function') {
+          ctx.waitUntil(saveQuestionsToDb(url, key, grade, subject, aiQuestions));
+        } else {
+          saveQuestionsToDb(url, key, grade, subject, aiQuestions).catch(e => console.error(e));
+        }
         return cors(JSON.stringify(aiQuestions), 200);
       }
     }
@@ -3867,8 +3904,8 @@ function _parseViecLam24hHtml(html) {
     const nextMatch = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/i);
     if (nextMatch) {
       const data = JSON.parse(nextMatch[1]);
-      const items = data.props?.initialProps?.pageProps?.jobsResponse?.items || 
-                    data.props?.initialState?.api?.getJobList?.data?.items || [];
+      const items = data.props?.initialProps?.pageProps?.jobsResponse?.items ||
+        data.props?.initialState?.api?.getJobList?.data?.items || [];
       for (const item of items) {
         let salary = 'Thỏa thuận';
         if (item.salary_min && item.salary_max) {
@@ -3878,7 +3915,7 @@ function _parseViecLam24hHtml(html) {
         } else if (item.salary_min) {
           salary = `Từ ${Math.round(item.salary_min / 1000000)} triệu`;
         }
-        
+
         jobs.push({
           title: _cleanText(item.title || ''),
           company: _cleanText(item.employer_info?.name || ''),
@@ -3904,29 +3941,29 @@ function _parseITviecHtml(html) {
     const blocks = html.split(/class=['"]job-card/i);
     for (let i = 1; i < blocks.length; i++) {
       const block = blocks[i];
-      
+
       const urlMatch = block.match(/href=['"](https:\/\/itviec\.com\/it-jobs\/[a-zA-Z0-9_-]+|\/it-jobs\/[a-zA-Z0-9_-]+)/i);
       const titleMatch = block.match(/data-search--job-selection-target=['"]jobTitle['"][^>]*>\s*<a[^>]*>([\s\S]*?)<\/a>/i) ||
-                         block.match(/<h3[^>]*>\s*<a[^>]*>([\s\S]*?)<\/a>/i);
-      
+        block.match(/<h3[^>]*>\s*<a[^>]*>([\s\S]*?)<\/a>/i);
+
       if (!titleMatch) continue;
-      
+
       const title = _cleanText(titleMatch[1]);
       let url = urlMatch ? urlMatch[1] : '';
       if (url && !url.startsWith('http')) {
         url = `https://itviec.com${url}`;
       }
-      
+
       const companyMatch = block.match(/class=['"]text-rich-grey['"][^>]*>([\s\S]*?)<\/a>/i) ||
-                           block.match(/class=['"]text-rich-grey[^'"]*['"][^>]*>([\s\S]*?)<\/a>/i) ||
-                           block.match(/<a[^>]*href=['"]\/companies\/[^'"]*['"][^>]*>([\s\S]*?)<\/a>/i);
+        block.match(/class=['"]text-rich-grey[^'"]*['"][^>]*>([\s\S]*?)<\/a>/i) ||
+        block.match(/<a[^>]*href=['"]\/companies\/[^'"]*['"][^>]*>([\s\S]*?)<\/a>/i);
       const company = companyMatch ? _cleanText(companyMatch[1]) : '';
-      
+
       const locMatch = block.match(/#map-pin['"]><\/use><\/svg>\s*<div[^>]*title=['"]([^'"]+)['"]/i) ||
-                       block.match(/#map-pin['"]><\/use><\/svg>\s*<div[^>]*>([\s\S]*?)<\/div>/i) ||
-                       block.match(/title=['"](Ha Noi|Ho Chi Minh|Da Nang|Remote|Binh Duong|Dong Nai)['"]/i);
+        block.match(/#map-pin['"]><\/use><\/svg>\s*<div[^>]*>([\s\S]*?)<\/div>/i) ||
+        block.match(/title=['"](Ha Noi|Ho Chi Minh|Da Nang|Remote|Binh Duong|Dong Nai)['"]/i);
       const location = locMatch ? _cleanText(locMatch[1]) : '';
-      
+
       let salary = 'Thỏa thuận';
       if (block.includes('sign-in-view-salary')) {
         salary = 'Thương lượng';
@@ -3936,11 +3973,11 @@ function _parseITviecHtml(html) {
           salary = _cleanText(salaryMatch[1]);
         }
       }
-      
+
       const logoMatch = block.match(/<img[^>]*data-src=['"]([^'"]+)['"]/i) ||
-                        block.match(/<img[^>]*src=['"]([^'"]+)['"]/i);
+        block.match(/<img[^>]*src=['"]([^'"]+)['"]/i);
       const logo = logoMatch ? logoMatch[1] : '';
-      
+
       if (!jobs.some(j => j.title === title)) {
         jobs.push({
           title,
@@ -3967,23 +4004,23 @@ function _parseTopDevHtml(html) {
     const blocks = html.split(/href=["']\/detail-jobs\//i);
     for (let i = 1; i < blocks.length; i++) {
       const block = blocks[i];
-      
+
       const urlMatch = block.match(/^([^"'?]+)/);
       if (!urlMatch) continue;
       const slug = urlMatch[1];
       const url = `https://topdev.vn/detail-jobs/${slug}`;
-      
+
       const titleMatch = block.match(/^[^>]*>([^<]+)<\/a>/i);
       if (!titleMatch) continue;
       const title = _cleanText(titleMatch[1]);
-      
+
       const companyMatch = block.match(/class="[^"]*text-text-500[^"]*">([^<]+)<\/span>/i);
       const company = companyMatch ? _cleanText(companyMatch[1]) : '';
-      
+
       let salary = 'Thỏa thuận';
       const salaryMatch = block.match(/class="[^"]*text-brand-600[^"]*">\s*<span[^>]*>([^<]+)<\/span>/i) ||
-                          block.match(/class="[^"]*text-brand-600[^"]*">([^<]+)<\/span>/i) ||
-                          block.match(/Login to view salary/gi);
+        block.match(/class="[^"]*text-brand-600[^"]*">([^<]+)<\/span>/i) ||
+        block.match(/Login to view salary/gi);
       if (salaryMatch) {
         const text = _cleanText(salaryMatch[0] || salaryMatch[1]);
         if (text.toLowerCase().includes('login to view salary')) {
@@ -3992,14 +4029,14 @@ function _parseTopDevHtml(html) {
           salary = text;
         }
       }
-      
+
       const locMatch = block.match(/<span class="line-clamp-1">\s*([^<]+)<\/span>/i);
       const location = locMatch ? _cleanText(locMatch[1]) : '';
-      
+
       const typeMatch = block.match(/<\/svg>\s*<!--\s*-->\s*([^<]+)<\/span>/i) ||
-                        block.match(/<\/svg>\s*([^<]+)<\/span>/i);
+        block.match(/<\/svg>\s*([^<]+)<\/span>/i);
       const type = typeMatch ? _cleanText(typeMatch[1]) : '';
-      
+
       if (!jobs.some(j => j.title === title)) {
         jobs.push({
           title,
@@ -4030,37 +4067,37 @@ function _parseCareerLinkHtml(html) {
         if (content.includes('SearchResultsPage')) {
           const data = JSON.parse(content);
           const items = data.mainEntity?.itemListElement || [];
-          
+
           for (const item of items) {
             const itemUrl = item.item?.url || '';
             const itemName = item.item?.name || '';
             if (!itemUrl) continue;
-            
+
             const jobIdMatch = itemUrl.match(/\/(\d+)(\?|$)/);
             if (!jobIdMatch) continue;
             const jobId = jobIdMatch[1];
-            
+
             const blockIndex = html.lastIndexOf(jobId);
             if (blockIndex !== -1 && blockIndex > 10000) {
               const nearHtml = html.substring(blockIndex - 300, blockIndex + 1200);
-              
+
               const companyMatch = nearHtml.match(/class=['"]text-dark job-company[^'"]*['"][^>]*title=['"]([^'"]+)['"]/i) ||
-                                   nearHtml.match(/class=['"]text-dark job-company[^>]*title=['"]([^'"]+)['"]/i) ||
-                                   nearHtml.match(/job-company[^>]*>([\s\S]*?)<\/a>/i);
+                nearHtml.match(/class=['"]text-dark job-company[^>]*title=['"]([^'"]+)['"]/i) ||
+                nearHtml.match(/job-company[^>]*>([\s\S]*?)<\/a>/i);
               const company = companyMatch ? _cleanText(companyMatch[1]) : '';
-              
+
               const locMatch = nearHtml.match(/class=['"]job-location[^>]*>\s*<i[^>]*><\/i>\s*<div[^>]*>\s*<a[^>]*>([^<]+)<\/a>/i) ||
-                               nearHtml.match(/class=['"]job-location[^>]*>[\s\S]*?href=['"]\/tim-viec-lam-tai\/[^'"]*['"][^>]*>([^<]+)<\/a>/i) ||
-                               nearHtml.match(/class=['"]text-reset['"][^>]*>([^<]+)<\/a>/i) ||
-                               nearHtml.match(/job-location[^>]*>([\s\S]*?)<\/div>/i);
+                nearHtml.match(/class=['"]job-location[^>]*>[\s\S]*?href=['"]\/tim-viec-lam-tai\/[^'"]*['"][^>]*>([^<]+)<\/a>/i) ||
+                nearHtml.match(/class=['"]text-reset['"][^>]*>([^<]+)<\/a>/i) ||
+                nearHtml.match(/job-location[^>]*>([\s\S]*?)<\/div>/i);
               const location = locMatch ? _cleanText(locMatch[1]) : '';
-              
+
               const salaryContainerMatch = nearHtml.match(/class=['"]job-salary[^'"]*['"][^>]*>([\s\S]*?)<\/span>\s*<span class=['"]text-muted/i) ||
-                                           nearHtml.match(/class=['"]job-salary[^'"]*['"][^>]*>([\s\S]*?)<\/span>\s*<\/div>/i) ||
-                                           nearHtml.match(/class=['"]job-salary[^'"]*['"][^>]*>([\s\S]*?)<\/span>/i);
+                nearHtml.match(/class=['"]job-salary[^'"]*['"][^>]*>([\s\S]*?)<\/span>\s*<\/div>/i) ||
+                nearHtml.match(/class=['"]job-salary[^'"]*['"][^>]*>([\s\S]*?)<\/span>/i);
               let salary = salaryContainerMatch ? _cleanText(salaryContainerMatch[1]) : 'Thương lượng';
               if (salary.includes('Thương lượng')) salary = 'Thỏa thuận';
-              
+
               jobs.push({
                 title: itemName,
                 url: itemUrl,
@@ -4111,9 +4148,9 @@ function _parseGenericJobHtml(html, source) {
               title: _cleanText(posting.title || ''),
               company: _cleanText(posting.hiringOrganization?.name || ''),
               salary: posting.baseSalary?.value?.value ||
-                      (posting.baseSalary?.value?.minValue && posting.baseSalary?.value?.maxValue ?
-                        `${posting.baseSalary.value.minValue} - ${posting.baseSalary.value.maxValue}` : '') ||
-                      'Thỏa thuận',
+                (posting.baseSalary?.value?.minValue && posting.baseSalary?.value?.maxValue ?
+                  `${posting.baseSalary.value.minValue} - ${posting.baseSalary.value.maxValue}` : '') ||
+                'Thỏa thuận',
               location: _cleanText(
                 posting.jobLocation?.address?.addressLocality ||
                 posting.jobLocation?.address?.addressRegion ||
@@ -4182,7 +4219,7 @@ function _cleanText(text) {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const { pathname } = new URL(request.url);
 
     // ── Diagnostic Endpoint ──
@@ -4228,7 +4265,7 @@ export default {
     if (pathname === '/api/cv-coverletter') return handleCVCoverLetter(request, env);
     if (pathname === '/api/tts') return handleTTS(request);
     if (pathname === '/api/shorten') return handleShorten(request, env);
-    if (pathname === '/api/education-quiz') return handleEducationQuiz(request, env);
+    if (pathname === '/api/education-quiz') return handleEducationQuiz(request, env, ctx);
     if (pathname === '/api/job-search') return handleJobSearch(request);
 
 
