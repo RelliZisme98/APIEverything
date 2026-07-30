@@ -47,7 +47,7 @@ let _state = {
   answers: [],   // user answers per question index
   answered: false, // whether current question has been answered
   history: JSON.parse(localStorage.getItem('edu_quiz_history') || '[]'),
-  useAI: JSON.parse(localStorage.getItem('edu_quiz_use_ai') || 'false'),
+  useAI: JSON.parse(localStorage.getItem('edu_quiz_use_ai') || 'true'),
 };
 
 function _el(id) { return document.getElementById(id); }
@@ -445,6 +445,7 @@ window._eduSelectSubject = async function(subject) {
 window._eduSelectAnswer = function(idx) {
   if (_state.answered) return;
   _state.answers[_state.currentIndex] = idx;
+  _state.answered = true; // Auto-confirm the answer immediately
   _renderView(_el('educationQuizContent'));
 };
 
