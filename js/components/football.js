@@ -139,7 +139,10 @@ async function loadLeagueData(silent = false) {
   try {
     const params = { league: leagueId, type };
     if (type === 'statistics' || type === 'table') {
-      params.season = _league === 'wc' ? '2026' : '2025';
+      if (_league === 'wc') {
+        params.season = '2026';
+      }
+      // For club leagues (EPL, La Liga, Serie A, UCL), omit hardcoded season so ESPN automatically serves the current active season
     }
     if (type === 'scoreboard') {
       const base = new Date();
@@ -176,7 +179,12 @@ function renderFixtureList(el, data) {
   const events = data.events || [];
 
   if (!events.length) {
- el.innerHTML = `<div class="fb-empty">Hiện chưa có trận đấu nào trong vòng này.</div>`;
+    const base = new Date();
+    base.setDate(base.getDate() + _dateOffset);
+    const rangeStart = new Date(base); rangeStart.setDate(rangeStart.getDate() - 3);
+    const rangeEnd   = new Date(base); rangeEnd.setDate(rangeEnd.getDate() + 3);
+    const rangeText = `${rangeStart.toLocaleDateString('vi-VN', {day:'2-digit', month:'2-digit'})} – ${rangeEnd.toLocaleDateString('vi-VN', {day:'2-digit', month:'2-digit'})}`;
+    el.innerHTML = `<div class="fb-empty">Hiện chưa có trận đấu nào trong khoảng ${rangeText}.<br><span style="font-size:12px;color:var(--text-muted);margin-top:6px;display:inline-block;">Bạn có thể bấm "Tuần trước" hoặc "Tuần sau" để xem lịch thi đấu các vòng khác.</span></div>`;
     return;
   }
 

@@ -218,7 +218,10 @@ function _renderJobView(root) {
    RENDER HELPERS
    ═══════════════════════════════════════════ */
 function _renderJobCard(job) {
-  const initials = (job.company || '?').charAt(0).toUpperCase();
+  const compName = (job.company || '').trim();
+  const companyName = compName || 'Doanh nghiệp tuyển dụng';
+  const fallbackInit = (JOB_SOURCES[job.source]?.name || 'J').charAt(0).toUpperCase();
+  const initials = compName ? compName.charAt(0).toUpperCase() : fallbackInit;
   const sourceClass = JOB_SOURCES[job.source] ? job.source : 'default';
 
   return `
@@ -229,7 +232,7 @@ function _renderJobCard(job) {
         </div>
         <div class="job-card-info">
           <div class="job-title">${_escJobHtml(job.title)}</div>
-          <div class="job-company">${_escJobHtml(job.company)}</div>
+          <div class="job-company">${_escJobHtml(companyName)}</div>
         </div>
       </div>
 
@@ -281,7 +284,17 @@ async function _searchJobs(keyword, location) {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    return data.jobs || [];
+    const jobs = data.jobs || [];
+
+    // Client-side sanitization: filter out any invalid/broken jobs
+    return jobs.filter(j => {
+      if (!j || typeof j !== 'object') return false;
+      const title = (j.title || '').trim();
+      if (title.length < 3 || title === '?' || /^[\?\.\,\-\_\s]+$/.test(title)) return false;
+      if (/^\d+\s*năm\s*kinh\s*nghiệm/i.test(title) || /^kinh\s*nghiệm/i.test(title)) return false;
+      if (/^(thỏa thuận|thương lượng|xem chi tiết|đăng nhập)$/i.test(title)) return false;
+      return true;
+    });
   } catch (err) {
     console.warn('[Job Search]', err);
     return [];
