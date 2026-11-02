@@ -816,6 +816,77 @@ async function handleFootball(request) {
   const type = searchParams.get('type') ?? 'scoreboard';
   const id = searchParams.get('id') ?? '';
 
+  // 1. Support multi-day date range for soccer scoreboard (e.g. dates=20261030-20261105)
+  // ESPN soccer API returns 400 when dates contains a range with hyphen,
+  // so we fetch each day in the range in parallel and merge the results.
+  const datesParam = searchParams.get('dates');
+  if (type === 'scoreboard' && datesParam && datesParam.includes('-')) {
+    const [startStr, endStr] = datesParam.split('-');
+    if (startStr && endStr && startStr.length === 8 && endStr.length === 8) {
+      const sY = parseInt(startStr.slice(0, 4), 10);
+      const sM = parseInt(startStr.slice(4, 6), 10) - 1;
+      const sD = parseInt(startStr.slice(6, 8), 10);
+      const eY = parseInt(endStr.slice(0, 4), 10);
+      const eM = parseInt(endStr.slice(4, 6), 10) - 1;
+      const eD = parseInt(endStr.slice(6, 8), 10);
+
+      const startDate = new Date(Date.UTC(sY, sM, sD));
+      const endDate = new Date(Date.UTC(eY, eM, eD));
+
+      const days = [];
+      const cur = new Date(startDate);
+      while (cur <= endDate && days.length < 14) {
+        const y = cur.getUTCFullYear();
+        const m = String(cur.getUTCMonth() + 1).padStart(2, '0');
+        const d = String(cur.getUTCDate()).padStart(2, '0');
+        days.push(`${y}${m}${d}`);
+        cur.setUTCDate(cur.getUTCDate() + 1);
+      }
+
+      const dayPromises = days.map(async (day) => {
+        try {
+          const dayUrl = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/scoreboard?dates=${day}`;
+          const res = await fetch(dayUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+          if (!res.ok) return null;
+          return await res.json();
+        } catch {
+          return null;
+        }
+      });
+
+      const dayResults = await Promise.all(dayPromises);
+      const allEvents = [];
+      const seenEventIds = new Set();
+      let firstValidPayload = null;
+
+      for (const resData of dayResults) {
+        if (!resData) continue;
+        if (!firstValidPayload) firstValidPayload = resData;
+        if (Array.isArray(resData.events)) {
+          for (const ev of resData.events) {
+            if (ev?.id && !seenEventIds.has(ev.id)) {
+              seenEventIds.add(ev.id);
+              allEvents.push(ev);
+            }
+          }
+        }
+      }
+
+      allEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      const finalPayload = {
+        leagues: firstValidPayload?.leagues || [],
+        season: firstValidPayload?.season || {},
+        day: firstValidPayload?.day || null,
+        events: allEvents,
+      };
+
+      return new Response(JSON.stringify(finalPayload), {
+        headers: { 'Content-Type': 'application/json; charset=utf-8', ...CORS, 'Cache-Control': 'public,max-age=60' },
+      });
+    }
+  }
+
   const forwardParams = new URLSearchParams();
   for (const [key, value] of searchParams.entries()) {
     if (key !== 'league' && key !== 'type' && key !== 'id') {
@@ -3694,6 +3765,65 @@ const JOB_SEARCH_SOURCES = {
   },
 };
 
+function _normalizeSearchText(str) {
+  if (!str) return '';
+  return str
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'd')
+    .replace(/[^\w\s\+\#\.]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function _isValidJob(job) {
+  if (!job || typeof job !== 'object') return false;
+  const title = (job.title || '').trim();
+  if (title.length < 3) return false;
+  // Discard pure punctuation, question marks, ellipsis
+  if (/^[\?\.\,\-\_\s]+$/.test(title)) return false;
+  // Discard experience labels accidentally parsed as titles
+  if (/^\d+\s*năm\s*kinh\s*nghiệm/i.test(title)) return false;
+  if (/^kinh\s*nghiệm/i.test(title)) return false;
+  if (/^(thỏa thuận|thương lượng|xem chi tiết|đăng nhập)$/i.test(title)) return false;
+  if (title === '?') return false;
+  return true;
+}
+
+function _isJobRelevant(job, query) {
+  if (!query || !query.trim()) return true;
+  const normQuery = _normalizeSearchText(query);
+  if (!normQuery) return true;
+
+  const normTitle = _normalizeSearchText(job.title);
+  const normCompany = _normalizeSearchText(job.company);
+  const normSkills = _normalizeSearchText(job.skills || job.type || '');
+  const normUrl = _normalizeSearchText(job.url);
+
+  // Exact phrase match in title (highest relevance)
+  if (normTitle.includes(normQuery)) return true;
+
+  // Exact phrase match in skills or URL
+  if (normSkills.includes(normQuery) || normUrl.includes(normQuery)) return true;
+
+  // Word-by-word match
+  const words = normQuery.split(' ').filter(w => w.length > 1);
+  if (words.length === 0) return true;
+
+  if (words.length <= 2) {
+    if (words.length === 1) {
+      return normTitle.includes(words[0]) || normSkills.includes(words[0]) || normUrl.includes(words[0]);
+    }
+    return words.some(w => normTitle.includes(w)) || (normCompany.includes(words[0]) && normCompany.includes(words[1]));
+  }
+
+  // 3+ words: at least 50% must appear
+  const matchCount = words.filter(w => normTitle.includes(w) || normSkills.includes(w)).length;
+  return matchCount >= Math.ceil(words.length * 0.5);
+}
+
 async function handleJobSearch(request) {
   if (request.method === 'OPTIONS') return preflight();
 
@@ -3727,16 +3857,55 @@ async function handleJobSearch(request) {
     }
   }
 
-  return cors(JSON.stringify({ jobs: allJobs, total: allJobs.length }), 200);
+  // Strict relevance filtering, sanitization & deduplication
+  const validJobs = [];
+  const seenUrls = new Set();
+  const seenSignatures = new Set();
+
+  for (const job of allJobs) {
+    if (!_isValidJob(job)) continue;
+
+    // Deduplicate by URL if URL exists
+    if (job.url && seenUrls.has(job.url)) continue;
+    if (job.url) seenUrls.add(job.url);
+
+    // Deduplicate by title + company
+    const sig = `${_normalizeSearchText(job.title)}__${_normalizeSearchText(job.company)}`;
+    if (seenSignatures.has(sig)) continue;
+    seenSignatures.add(sig);
+
+    // Relevance check against search query
+    if (!_isJobRelevant(job, query)) continue;
+
+    validJobs.push(job);
+  }
+
+  // Sort: exact matches in title appear first
+  const normQuery = _normalizeSearchText(query);
+  validJobs.sort((a, b) => {
+    const aTitle = _normalizeSearchText(a.title);
+    const bTitle = _normalizeSearchText(b.title);
+    const aHasQuery = aTitle.includes(normQuery);
+    const bHasQuery = bTitle.includes(normQuery);
+
+    if (aHasQuery && !bHasQuery) return -1;
+    if (!aHasQuery && bHasQuery) return 1;
+    return 0;
+  });
+
+  return cors(JSON.stringify({ jobs: validJobs, total: validJobs.length }), 200);
 }
 
 // ── TopCV Scraper ──
 async function _scrapeTopCV(query, location) {
   try {
-    const slug = query.trim().replace(/\s+/g, '-').toLowerCase();
-    const url = `https://www.topcv.vn/tim-viec-lam-${encodeURIComponent(slug)}`;
+    const url = `https://www.topcv.vn/tim-viec-lam?keyword=${encodeURIComponent(query)}`;
     const res = await fetch(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Accept': 'text/html', 'Accept-Language': 'vi-VN,vi;q=0.9' },
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7'
+      },
     });
     if (!res.ok) return [];
     const html = await res.text();
@@ -3746,34 +3915,79 @@ async function _scrapeTopCV(query, location) {
 
 function _parseTopCVHtml(html) {
   const jobs = [];
-  // Match job listing blocks
-  const titleRegex = /class="[^"]*title[^"]*"[^>]*>\s*<a[^>]*href="([^"]*)"[^>]*>\s*<span[^>]*>([^<]*)<\/span>/gi;
-  const companyRegex = /class="[^"]*company[^"]*"[^>]*>([^<]*)/gi;
-  const salaryRegex = /class="[^"]*salary[^"]*"[^>]*>([^<]*)/gi;
-  const locationRegex = /class="[^"]*location[^"]*"[^>]*>([^<]*)/gi;
-
-  // Simplified extraction using common patterns
-  const blocks = html.split(/job-item|job-list-item|data-job-id/i);
-  for (let i = 1; i < Math.min(blocks.length, 16); i++) {
-    const block = blocks[i];
-    const titleMatch = block.match(/title[^>]*>\s*(?:<a[^>]*href="([^"]*)"[^>]*>)?\s*(?:<[^>]*>)*([^<]{5,})/i);
-    const companyMatch = block.match(/company[^>]*>\s*(?:<[^>]*>)*\s*([^<]{3,})/i);
-    const salaryMatch = block.match(/salary[^>]*>\s*(?:<[^>]*>)*\s*([^<]{3,})/i);
-    const locMatch = block.match(/address|location[^>]*>\s*(?:<[^>]*>)*\s*([^<]{3,})/i);
-
-    if (titleMatch) {
-      jobs.push({
-        title: _cleanText(titleMatch[2]),
-        url: titleMatch[1] || '',
-        company: companyMatch ? _cleanText(companyMatch[1]) : '',
-        salary: salaryMatch ? _cleanText(salaryMatch[1]) : 'Thỏa thuận',
-        location: locMatch ? _cleanText(locMatch[1]) : '',
-        source: 'topcv',
-        date: 'Mới cập nhật',
-      });
+  try {
+    // Strategy 1: JSON-LD structured data
+    const ldMatch = html.match(/<script[^>]*type=['"]application\/ld\+json['"][^>]*>([\s\S]*?)<\/script>/gi);
+    if (ldMatch) {
+      for (const script of ldMatch) {
+        try {
+          const content = script.replace(/<script[^>]*>|<\/script>/gi, '').trim();
+          const data = JSON.parse(content);
+          const items = Array.isArray(data) ? data : (data['@graph'] || [data]);
+          for (const item of items) {
+            if (item['@type'] === 'JobPosting' && item.title) {
+              const title = _cleanText(item.title);
+              if (_isValidJob({ title })) {
+                jobs.push({
+                  title,
+                  url: item.url || '',
+                  company: _cleanText(item.hiringOrganization?.name || ''),
+                  salary: item.baseSalary?.value?.value || 'Thỏa thuận',
+                  location: _cleanText(item.jobLocation?.address?.addressLocality || item.jobLocation?.address?.addressRegion || ''),
+                  source: 'topcv',
+                  date: 'Mới cập nhật'
+                });
+              }
+            }
+          }
+        } catch { }
+      }
     }
+
+    // Strategy 2: HTML card parsing
+    if (jobs.length === 0) {
+      const itemBlocks = html.split(/class=['"][^'"]*job-item/i);
+      for (let i = 1; i < Math.min(itemBlocks.length, 25); i++) {
+        const block = itemBlocks[i];
+
+        const titleMatch = block.match(/<h[2-4][^>]*class=['"][^'"]*title[^'"]*['"][^>]*>\s*<a[^>]*href=['"]([^'"]+)['"][^>]*>([\s\S]*?)<\/a>/i) ||
+          block.match(/<a[^>]*class=['"][^'"]*job-item__title[^'"]*['"][^>]*href=['"]([^'"]+)['"][^>]*>([\s\S]*?)<\/a>/i) ||
+          block.match(/<a[^>]*href=['"](https:\/\/www\.topcv\.vn\/viec-lam\/[^'"]+)['"][^>]*title=['"]([^'"]+)['"]/i);
+
+        if (!titleMatch) continue;
+
+        const url = titleMatch[1];
+        const title = _cleanText(titleMatch[2]);
+
+        if (!_isValidJob({ title })) continue;
+
+        const companyMatch = block.match(/class=['"][^'"]*company[^'"]*['"][^>]*>([\s\S]*?)<\/a>/i) ||
+          block.match(/class=['"][^'"]*company[^'"]*['"][^>]*>([\s\S]*?)<\//i);
+        const company = companyMatch ? _cleanText(companyMatch[1]) : '';
+
+        const salaryMatch = block.match(/class=['"][^'"]*salary[^'"]*['"][^>]*>([\s\S]*?)<\//i) ||
+          block.match(/class=['"][^'"]*title-salary[^'"]*['"][^>]*>([\s\S]*?)<\//i);
+        const salary = salaryMatch ? _cleanText(salaryMatch[1]) : 'Thỏa thuận';
+
+        const locMatch = block.match(/class=['"][^'"]*address[^'"]*['"][^>]*>([\s\S]*?)<\//i) ||
+          block.match(/class=['"][^'"]*location[^'"]*['"][^>]*>([\s\S]*?)<\//i);
+        const location = locMatch ? _cleanText(locMatch[1]) : '';
+
+        jobs.push({
+          title,
+          url,
+          company,
+          salary,
+          location,
+          source: 'topcv',
+          date: 'Mới cập nhật'
+        });
+      }
+    }
+  } catch (err) {
+    console.warn('[TopCV Parser Error]', err);
   }
-  return jobs;
+  return jobs.slice(0, 15);
 }
 
 // ── CareerViet Scraper ──
@@ -3859,8 +4073,7 @@ async function _scrapeJobsGo(query, location) {
 // ── TopDev Scraper ──
 async function _scrapeTopDev(query, location) {
   try {
-    const slug = query.trim().replace(/\s+/g, '-').toLowerCase();
-    const url = `https://topdev.vn/viec-lam-it/${encodeURIComponent(slug)}`;
+    const url = `https://topdev.vn/jobs/search?keyword=${encodeURIComponent(query)}`;
     const res = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',

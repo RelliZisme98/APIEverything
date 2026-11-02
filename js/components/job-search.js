@@ -2,15 +2,15 @@
 /* Tra cứu thông tin tuyển dụng từ nhiều nguồn */
 
 const JOB_SOURCES = {
-  all:          { name: 'Tất cả', icon: 'fas fa-globe' },
-  topcv:        { name: 'TopCV', icon: 'fas fa-briefcase', domain: 'topcv.vn' },
+  all: { name: 'Tất cả', icon: 'fas fa-globe' },
+  topcv: { name: 'TopCV', icon: 'fas fa-briefcase', domain: 'topcv.vn' },
   vietnamworks: { name: 'VietnamWorks', icon: 'fas fa-building', domain: 'vietnamworks.com' },
-  careerviet:   { name: 'CareerViet', icon: 'fas fa-user-tie', domain: 'careerviet.vn' },
-  itviec:       { name: 'ITviec', icon: 'fas fa-code', domain: 'itviec.com' },
-  vieclam24h:   { name: 'ViecLam24h', icon: 'fas fa-clock', domain: 'vieclam24h.vn' },
-  jobsgo:       { name: 'JobsGo', icon: 'fas fa-rocket', domain: 'jobsgo.vn' },
-  topdev:       { name: 'TopDev', icon: 'fas fa-laptop-code', domain: 'topdev.vn' },
-  careerlink:   { name: 'CareerLink', icon: 'fas fa-link', domain: 'careerlink.vn' },
+  careerviet: { name: 'CareerViet', icon: 'fas fa-user-tie', domain: 'careerviet.vn' },
+  itviec: { name: 'ITviec', icon: 'fas fa-code', domain: 'itviec.com' },
+  vieclam24h: { name: 'ViecLam24h', icon: 'fas fa-clock', domain: 'vieclam24h.vn' },
+  jobsgo: { name: 'JobsGo', icon: 'fas fa-rocket', domain: 'jobsgo.vn' },
+  topdev: { name: 'TopDev', icon: 'fas fa-laptop-code', domain: 'topdev.vn' },
+  careerlink: { name: 'CareerLink', icon: 'fas fa-link', domain: 'careerlink.vn' },
 };
 
 const POPULAR_SEARCHES = [
@@ -218,7 +218,10 @@ function _renderJobView(root) {
    RENDER HELPERS
    ═══════════════════════════════════════════ */
 function _renderJobCard(job) {
-  const initials = (job.company || '?').charAt(0).toUpperCase();
+  const compName = (job.company || '').trim();
+  const companyName = compName || 'Doanh nghiệp tuyển dụng';
+  const fallbackInit = (JOB_SOURCES[job.source]?.name || 'J').charAt(0).toUpperCase();
+  const initials = compName ? compName.charAt(0).toUpperCase() : fallbackInit;
   const sourceClass = JOB_SOURCES[job.source] ? job.source : 'default';
 
   return `
@@ -229,7 +232,7 @@ function _renderJobCard(job) {
         </div>
         <div class="job-card-info">
           <div class="job-title">${_escJobHtml(job.title)}</div>
-          <div class="job-company">${_escJobHtml(job.company)}</div>
+          <div class="job-company">${_escJobHtml(companyName)}</div>
         </div>
       </div>
 
@@ -281,7 +284,17 @@ async function _searchJobs(keyword, location) {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    return data.jobs || [];
+    const jobs = data.jobs || [];
+
+    // Client-side sanitization: filter out any invalid/broken jobs
+    return jobs.filter(j => {
+      if (!j || typeof j !== 'object') return false;
+      const title = (j.title || '').trim();
+      if (title.length < 3 || title === '?' || /^[\?\.\,\-\_\s]+$/.test(title)) return false;
+      if (/^\d+\s*năm\s*kinh\s*nghiệm/i.test(title) || /^kinh\s*nghiệm/i.test(title)) return false;
+      if (/^(thỏa thuận|thương lượng|xem chi tiết|đăng nhập)$/i.test(title)) return false;
+      return true;
+    });
   } catch (err) {
     console.warn('[Job Search]', err);
     return [];
@@ -328,7 +341,7 @@ function _applyFilters() {
 /* ═══════════════════════════════════════════
    USER ACTIONS
    ═══════════════════════════════════════════ */
-window._jobSearch = async function() {
+window._jobSearch = async function () {
   const input = _jel('jobKeywordInput');
   const keyword = input ? input.value.trim() : '';
   _jobState.keyword = keyword;
@@ -352,30 +365,30 @@ window._jobSearch = async function() {
   _renderJobView(root);
 };
 
-window._jobQuickSearch = function(keyword) {
+window._jobQuickSearch = function (keyword) {
   _jobState.keyword = keyword;
   const input = _jel('jobKeywordInput');
   if (input) input.value = keyword;
   window._jobSearch();
 };
 
-window._jobSetLocation = function(value) {
+window._jobSetLocation = function (value) {
   _jobState.location = value;
 };
 
-window._jobFilterSource = function(source) {
+window._jobFilterSource = function (source) {
   _jobState.source = source;
   _applyFilters();
   _renderJobView(_jel('jobSearchContent'));
 };
 
-window._jobFilterSalary = function(salary) {
+window._jobFilterSalary = function (salary) {
   _jobState.salary = _jobState.salary === salary ? '' : salary;
   _applyFilters();
   _renderJobView(_jel('jobSearchContent'));
 };
 
-window._jobPage = function(page) {
+window._jobPage = function (page) {
   const totalPages = Math.ceil(_jobState.results.length / _jobState.perPage);
   if (page < 1 || page > totalPages) return;
   _jobState.page = page;
@@ -384,7 +397,7 @@ window._jobPage = function(page) {
   _jel('jobSearchContent')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
-window._jobOpenDetail = function(idx) {
+window._jobOpenDetail = function (idx) {
   const job = _jobState.allResults[idx];
   if (!job) return;
 
