@@ -9,18 +9,18 @@ const API = (params) => `/football?${new URLSearchParams(params)}`;
 const VN_TZ = 'Asia/Ho_Chi_Minh';
 
 const LEAGUES = {
-  wc: { id: 'fifa.world', label: 'World Cup 2026', color: '#fb923c' },
-  pl: { id: 'eng.1', label: '󠁧󠁢󠁥󠁮󠁧󠁿 Premier League', color: '#60a5fa' },
-  laliga: { id: 'esp.1', label: 'La Liga', color: '#fbbf24' },
-  seriea: { id: 'ita.1', label: 'Serie A', color: '#34d399' },
-  ucl: { id: 'uefa.champs', label: 'Champions League', color: '#a78bfa' },
+ wc: { id: 'fifa.world', label: 'World Cup 2026', color: '#fb923c' },
+ pl: { id: 'eng.1', label: '󠁧󠁢󠁥󠁮󠁧󠁿 Premier League', color: '#60a5fa' },
+ laliga: { id: 'esp.1', label: 'La Liga', color: '#fbbf24' },
+ seriea: { id: 'ita.1', label: 'Serie A', color: '#34d399' },
+ ucl: { id: 'uefa.champs', label: 'Champions League', color: '#a78bfa' },
 };
 
 // ── State ──────────────────────────────────────────────────────────
-let _league = 'wc';
-let _tab = 'fixtures'; // fixtures | table
-let _cache = {};
-let _timer = null;
+let _league   = 'wc';
+let _tab      = 'fixtures'; // fixtures | table
+let _cache    = {};
+let _timer    = null;
 let _expanded = null;
 let _teamPanelId = null;
 let _dateOffset = 0; // days offset from today for fixtures (-7=past week, 0=current, 7=next week)
@@ -29,14 +29,14 @@ let _dateOffset = 0; // days offset from today for fixtures (-7=past week, 0=cur
 function toVN(dateStr) {
   try {
     return new Date(dateStr).toLocaleString('vi-VN', {
-      weekday: 'short', day: '2-digit', month: '2-digit',
-      hour: '2-digit', minute: '2-digit', timeZone: VN_TZ
+      weekday:'short', day:'2-digit', month:'2-digit',
+      hour:'2-digit', minute:'2-digit', timeZone: VN_TZ
     });
   } catch { return dateStr; }
 }
 
 function toVNTime(dateStr) {
-  try { return new Date(dateStr).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', timeZone: VN_TZ }); }
+  try { return new Date(dateStr).toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit', timeZone: VN_TZ }); }
   catch { return dateStr; }
 }
 
@@ -51,11 +51,11 @@ function isToday(dateKey) {
 
 function fmtDateHeader(dateKey) {
   return new Date(dateKey + 'T00:00:00+07:00').toLocaleDateString('vi-VN', {
-    weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric'
+    weekday:'long', day:'2-digit', month:'2-digit', year:'numeric'
   });
 }
 
-function badge(url, size = 22) {
+function badge(url, size=22) {
   return url ? `<img src="${url}" alt="" style="width:${size}px;height:${size}px;object-fit:contain;flex-shrink:0;" loading="lazy" onerror="this.style.display='none'">` : '';
 }
 
@@ -77,25 +77,25 @@ export function renderFootball(containerId = 'footballContent') {
 function buildShell(el) {
   const lg = LEAGUES[_league];
   const leagueTabs = Object.entries(LEAGUES).map(([key, l]) =>
-    `<button class="fb-league-tab ${key === _league ? 'active' : ''}" onclick="window._fbLeague('${key}')"
-       style="${key === _league ? `border-color:${l.color}50;background:${l.color}12;color:${l.color};` : ''}">
+    `<button class="fb-league-tab ${key===_league?'active':''}" onclick="window._fbLeague('${key}')"
+       style="${key===_league?`border-color:${l.color}50;background:${l.color}12;color:${l.color};`:''}">
        ${l.label}</button>`
   ).join('');
 
   const tabs = [
-    { key: 'fixtures', label: 'Trận Đấu' },
-    { key: 'table', label: 'Bảng Xếp Hạng' },
-    { key: 'stats', label: 'Thống Kê' },
+ { key:'fixtures', label:'Trận Đấu' },
+ { key:'table', label:'Bảng Xếp Hạng' },
+ { key:'stats', label:'Thống Kê' },
   ].map(t =>
-    `<button class="fb-tab ${t.key === _tab ? 'active' : ''}" onclick="window._fbTab('${t.key}')"
-       style="${t.key === _tab ? `border-color:${lg.color}40;color:${lg.color};background:${lg.color}0d;` : ''}">${t.label}</button>`
+    `<button class="fb-tab ${t.key===_tab?'active':''}" onclick="window._fbTab('${t.key}')"
+       style="${t.key===_tab?`border-color:${lg.color}40;color:${lg.color};background:${lg.color}0d;`:''}">${t.label}</button>`
   ).join('');
 
   // Date navigation for fixtures tab
   const dateNav = `
-    <div class="fb-date-nav" id="fbDateNav" style="${_tab !== 'fixtures' ? 'display:none;' : ''}">
+    <div class="fb-date-nav" id="fbDateNav" style="${_tab!=='fixtures'?'display:none;':''}">
       <button class="fb-date-btn" onclick="window._fbDateShift(-7)">◀ Tuần trước</button>
-      <button class="fb-date-btn ${_dateOffset === 0 ? 'active' : ''}" onclick="window._fbDateShift(0,'reset')">Hiện tại</button>
+      <button class="fb-date-btn ${_dateOffset===0?'active':''}" onclick="window._fbDateShift(0,'reset')">Hiện tại</button>
       <button class="fb-date-btn" onclick="window._fbDateShift(7)">Tuần sau ▶</button>
     </div>`;
 
@@ -113,10 +113,10 @@ function buildShell(el) {
       <span class="fb-live-badge"><span class="dot-green"></span> Tự động làm mới 60s</span>
     </div>`;
 
-  window._fbLeague = (key) => { _league = key; _tab = 'fixtures'; _expanded = null; _dateOffset = 0; buildShell(el); loadLeagueData(); };
-  window._fbTab = (key) => { _tab = key; buildShell(el); loadLeagueData(); };
-  window._fbExpand = (id) => { _expanded = _expanded === id ? null : id; renderMain(); };
-  window._fbTeam = openTeamPanel;
+  window._fbLeague = (key) => { _league=key; _tab='fixtures'; _expanded=null; _dateOffset=0; buildShell(el); loadLeagueData(); };
+  window._fbTab    = (key) => { _tab=key; buildShell(el); loadLeagueData(); };
+  window._fbExpand = (id)  => { _expanded=_expanded===id?null:id; renderMain(); };
+  window._fbTeam   = openTeamPanel;
   window._fbCloseTeam = closeTeamPanel;
   window._fbDateShift = (delta, mode) => {
     if (mode === 'reset') _dateOffset = 0;
@@ -134,7 +134,7 @@ async function loadLeagueData(silent = false) {
   const main = document.getElementById('fbMain');
   if (!main) return;
 
-  if (!silent) main.innerHTML = `<div class="fb-loading">Đang tải dữ liệu bóng đá...</div>`;
+ if (!silent) main.innerHTML = `<div class="fb-loading">Đang tải dữ liệu bóng đá...</div>`;
 
   try {
     const params = { league: leagueId, type };
@@ -150,15 +150,15 @@ async function loadLeagueData(silent = false) {
       // ESPN scoreboard supports dates param for range
       const fmt = (d) => `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
       const rangeStart = new Date(base); rangeStart.setDate(rangeStart.getDate() - 3);
-      const rangeEnd = new Date(base); rangeEnd.setDate(rangeEnd.getDate() + 3);
+      const rangeEnd   = new Date(base); rangeEnd.setDate(rangeEnd.getDate() + 3);
       params.dates = `${fmt(rangeStart)}-${fmt(rangeEnd)}`;
     }
-    const res = await fetch(API(params));
+    const res  = await fetch(API(params));
     const data = await res.json();
     _cache[cacheKey] = data;
     renderMain();
   } catch (err) {
-    if (!silent) main.innerHTML = `<div class="error-msg">️ Lỗi tải dữ liệu: ${err.message}</div>`;
+ if (!silent) main.innerHTML = `<div class="error-msg">️ Lỗi tải dữ liệu: ${err.message}</div>`;
   }
 }
 
@@ -167,7 +167,7 @@ function renderMain() {
   if (!main) return;
   const type = _tab === 'fixtures' ? 'scoreboard' : _tab === 'table' ? 'table' : 'statistics';
   const data = _cache[`${_league}_${type}_${_dateOffset}`];
-  if (!data) { main.innerHTML = `<div class="fb-loading">Đang tải...</div>`; return; }
+ if (!data) { main.innerHTML = `<div class="fb-loading">Đang tải...</div>`; return; }
 
   if (_tab === 'table') renderTable(main, data);
   else if (_tab === 'stats') renderStats(main, data);
@@ -182,8 +182,8 @@ function renderFixtureList(el, data) {
     const base = new Date();
     base.setDate(base.getDate() + _dateOffset);
     const rangeStart = new Date(base); rangeStart.setDate(rangeStart.getDate() - 3);
-    const rangeEnd = new Date(base); rangeEnd.setDate(rangeEnd.getDate() + 3);
-    const rangeText = `${rangeStart.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })} – ${rangeEnd.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })}`;
+    const rangeEnd   = new Date(base); rangeEnd.setDate(rangeEnd.getDate() + 3);
+    const rangeText = `${rangeStart.toLocaleDateString('vi-VN', {day:'2-digit', month:'2-digit'})} – ${rangeEnd.toLocaleDateString('vi-VN', {day:'2-digit', month:'2-digit'})}`;
     el.innerHTML = `<div class="fb-empty">Hiện chưa có trận đấu nào trong khoảng ${rangeText}.<br><span style="font-size:12px;color:var(--text-muted);margin-top:6px;display:inline-block;">Bạn có thể bấm "Tuần trước" hoặc "Tuần sau" để xem lịch thi đấu các vòng khác.</span></div>`;
     return;
   }
@@ -220,31 +220,31 @@ function renderFixtureList(el, data) {
 function renderMatchCard(e, lg) {
   const isExpanded = _expanded === e.id;
   const status = e.status?.type;
-
+  
   // States: pre (scheduled), in (live), post (finished)
   const isLive = status?.state === 'in';
   const isPre = status?.state === 'pre';
   const isPost = status?.state === 'post';
-
+  
   const competition = e.competitions?.[0];
   const competitors = competition?.competitors || [];
-
+  
   const home = competitors.find(c => c.homeAway === 'home') || {};
   const away = competitors.find(c => c.homeAway === 'away') || {};
-
+  
   const homeName = home.team?.displayName || 'Home Team';
   const homeBadge = home.team?.logos?.[0]?.href || home.team?.logo || '';
   const homeScore = home.score ?? 0;
-
+  
   const awayName = away.team?.displayName || 'Away Team';
   const awayBadge = away.team?.logos?.[0]?.href || away.team?.logo || '';
   const awayScore = away.score ?? 0;
-
+  
   const homeWinner = home.winner === true;
   const awayWinner = away.winner === true;
-
+  
   let scoreStr = !isPre ? `${homeScore} – ${awayScore}` : 'vs';
-
+  
   // Handle penalty shootout scores if they exist
   let homeShootout = home.shootoutScore;
   let awayShootout = away.shootoutScore;
@@ -257,7 +257,7 @@ function renderMatchCard(e, lg) {
   if (homeShootout !== undefined && awayShootout !== undefined && homeShootout !== null && awayShootout !== null) {
     scoreStr = `${homeScore} – ${awayScore} (${homeShootout} - ${awayShootout} pen)`;
   }
-
+  
   const vnTime = toVNTime(e.date);
   const statusText = status?.detail || vnTime;
   const venue = competition?.venue?.fullName || '';
@@ -282,11 +282,11 @@ function renderMatchCard(e, lg) {
 
         <!-- Center: Score / Time -->
         <div class="fb-score-col">
-          ${isLive
-      ? `<div class="fb-score-box fb-score-live">${scoreStr}</div><div class="fb-live-pill">● ${statusText}</div>`
-      : isPre
-        ? `<div class="fb-time-box" style="color: ${lg.color}">${vnTime}</div><div class="fb-result-note">Lịch thi đấu</div>`
-        : `<div class="fb-score-box">${scoreStr}</div><div class="fb-result-note">Đã kết thúc</div>`}
+          ${isLive 
+            ? `<div class="fb-score-box fb-score-live">${scoreStr}</div><div class="fb-live-pill">● ${statusText}</div>`
+            : isPre 
+              ? `<div class="fb-time-box" style="color: ${lg.color}">${vnTime}</div><div class="fb-result-note">Lịch thi đấu</div>`
+              : `<div class="fb-score-box">${scoreStr}</div><div class="fb-result-note">Đã kết thúc</div>`}
         </div>
 
         <!-- Right: Away team -->
@@ -315,7 +315,7 @@ async function loadMatchDetail(eventId, lg) {
     const data = await res.json();
     renderMatchDetail(container, data, lg);
   } catch (err) {
-    container.innerHTML = `<div class="error-msg" style="padding:10px 0;">️ Lỗi tải chi tiết: ${err.message}</div>`;
+ container.innerHTML = `<div class="error-msg" style="padding:10px 0;">️ Lỗi tải chi tiết: ${err.message}</div>`;
   }
 }
 
@@ -326,7 +326,7 @@ function renderMatchDetail(el, data, lg) {
   if (teams.length === 2) {
     const homeStats = teams[0].statistics || [];
     const awayStats = teams[1].statistics || [];
-
+    
     // Core statistics mapping to match actual ESPN API keys
     const statKeys = [
       { name: 'possessionPct', label: 'Kiểm soát bóng (%)' },
@@ -347,7 +347,7 @@ function renderMatchDetail(el, data, lg) {
       const hVal = parseFloat(hStat?.displayValue || 0);
       const aVal = parseFloat(aStat?.displayValue || 0);
       const total = hVal + aVal;
-
+      
       let hPct = 50;
       let aPct = 50;
       if (total > 0) {
@@ -384,11 +384,11 @@ function renderMatchDetail(el, data, lg) {
       const time = ev.clock?.displayValue || '';
       const text = ev.text || '';
       const type = ev.type?.text || 'Sự kiện';
-
-      let icon = '';
-      if (type.includes('Yellow')) icon = '';
-      else if (type.includes('Red')) icon = '';
-      else if (type.includes('Substitution')) icon = '';
+      
+ let icon = '';
+ if (type.includes('Yellow')) icon = '';
+ else if (type.includes('Red')) icon = '';
+ else if (type.includes('Substitution')) icon = '';
 
       // Skip event descriptions that are blank
       if (!text && !time) return '';
@@ -427,7 +427,7 @@ function renderMatchDetail(el, data, lg) {
     const subIns = getVal('subIns');
     const subbedIn = player.subbedIn;
     const starter = player.starter;
-
+    
     // If did not play, return null
     if (!starter && !subbedIn && appearances === 0 && subIns === 0) {
       return null;
@@ -518,7 +518,7 @@ function renderMatchDetail(el, data, lg) {
     const teamId = teamRoster.team?.id;
     const comp = competitors.find(c => c.team?.id === teamId) || (side === 'home' ? homeComp : awayComp);
     const opponentComp = competitors.find(c => c.team?.id !== teamId) || (side === 'home' ? awayComp : homeComp);
-
+    
     const teamWon = comp.winner === true;
     const teamConceded = parseInt(opponentComp.score) || 0;
 
@@ -553,26 +553,26 @@ function renderMatchDetail(el, data, lg) {
     const yc = getVal('yellowCards');
     const rc = getVal('redCards');
     const saves = getVal('saves');
-
+    
     const badges = [];
-    if (goals > 0) badges.push(`${goals > 1 ? `x${goals}` : ''}`);
-    if (assists > 0) badges.push(`️${assists > 1 ? `x${assists}` : ''}`);
-    if (rc > 0) badges.push('');
-    else if (yc > 0) badges.push('');
-    if (saves > 0 && player.position?.abbreviation === 'G') badges.push(`${saves}`);
-
+ if (goals > 0) badges.push(`${goals > 1 ? `x${goals}` : ''}`);
+ if (assists > 0) badges.push(`️${assists > 1 ? `x${assists}` : ''}`);
+ if (rc > 0) badges.push('');
+ else if (yc > 0) badges.push('');
+ if (saves > 0 && player.position?.abbreviation === 'G') badges.push(`${saves}`);
+    
     if (player.subbedIn) badges.push('⬆️');
     if (player.subbedOut) badges.push('⬇️');
 
     return badges.length ? `<span class="fb-player-badges">${badges.join(' ')}</span>` : '';
   };
-
+  
   const getRoster = (side) => {
     const teamData = rostersList.find(r => r.homeAway === side) || {};
     const teamId = teamData.team?.id;
     const comp = competitors.find(c => c.team?.id === teamId) || (side === 'home' ? homeComp : awayComp);
     const opponentComp = competitors.find(c => c.team?.id !== teamId) || (side === 'home' ? awayComp : homeComp);
-
+    
     const teamWon = comp.winner === true;
     const teamConceded = parseInt(opponentComp.score) || 0;
 
@@ -584,14 +584,14 @@ function renderMatchDetail(el, data, lg) {
     const renderPlayer = (p) => {
       const statBadges = formatPlayerStats(p);
       const rating = calculatePlayerRating(p, teamWon, teamConceded);
-      const ratingHtml = rating
+      const ratingHtml = rating 
         ? `<span class="fb-player-rating" style="background:${parseFloat(rating) >= 7.0 ? 'rgba(74,222,128,0.15)' : parseFloat(rating) >= 6.0 ? 'rgba(251,146,60,0.15)' : 'rgba(248,113,113,0.15)'};color:${parseFloat(rating) >= 7.0 ? '#4ade80' : parseFloat(rating) >= 6.0 ? '#fb923c' : '#f87171'};border:1px solid ${parseFloat(rating) >= 7.0 ? 'rgba(74,222,128,0.3)' : parseFloat(rating) >= 6.0 ? 'rgba(251,146,60,0.3)' : 'rgba(248,113,113,0.3)'};">${rating}</span>`
         : '';
 
       const isPOTM = potmPlayer && p.athlete?.id === potmPlayer.id;
-      const potmCrown = isPOTM ? '' : '';
+ const potmCrown = isPOTM ? '' : '';
       const potmStyle = isPOTM ? 'style="background: rgba(251, 191, 36, 0.06); border: 1px solid rgba(251, 191, 36, 0.2) !important;"' : '';
-
+        
       return `
         <div class="fb-player-item ${p.starter ? '' : 'fb-player-item--sub'}" ${potmStyle}>
           <div class="fb-player-name-col">
@@ -648,7 +648,7 @@ function renderMatchDetail(el, data, lg) {
     if (type.startsWith('goal') || ev.scoringPlay === true) {
       const time = ev.clock?.displayValue || '';
       const rawName = ev.participants?.[0]?.athlete?.displayName || ev.shortText || '';
-
+      
       let displayPlayer = rawName;
       if (rawName.includes(' Goal')) {
         displayPlayer = rawName.split(' Goal')[0];
@@ -712,9 +712,9 @@ function renderMatchDetail(el, data, lg) {
 
   // 5. Info Card
   const info = data.gameInfo || {};
-  const ref = info.referee?.displayName ? ` · ️ Trọng tài: ${info.referee.displayName}` : '';
+ const ref = info.referee?.displayName ? ` · ️ Trọng tài: ${info.referee.displayName}` : '';
   const venue = [info.venue?.fullName, info.venue?.address?.city].filter(Boolean).join(' - ');
-  const venueStr = venue ? `Sân: ${venue}` : '';
+ const venueStr = venue ? `Sân: ${venue}` : '';
 
   el.innerHTML = `
     <div style="font-size:11px;color:var(--text-muted);margin-bottom:12px;padding:4px 0;">
@@ -730,13 +730,13 @@ function renderMatchDetail(el, data, lg) {
 // ── Standings table ────────────────────────────────────────────────
 function renderTable(el, data) {
   const lg = LEAGUES[_league];
-
+  
   // Standard leagues have 1 child in data.children
   // Cup group stages (World Cup) have multiple children (one for each group)
   const children = data.children || [];
 
   if (!children.length) {
-    el.innerHTML = `<div class="fb-empty">Hiện chưa có dữ liệu bảng xếp hạng.</div>`;
+ el.innerHTML = `<div class="fb-empty">Hiện chưa có dữ liệu bảng xếp hạng.</div>`;
     return;
   }
 
@@ -747,11 +747,11 @@ function renderTable(el, data) {
     // Sort entries: points DESC → GD DESC → GF DESC
     const entries = [...(group.standings?.entries || [])].sort((a, b) => {
       const getStat = (e, name) => e.stats?.find(s => s.name === name)?.value ?? 0;
-      const ptsDiff = getStat(b, 'points') - getStat(a, 'points');
+      const ptsDiff = getStat(b,'points') - getStat(a,'points');
       if (ptsDiff !== 0) return ptsDiff;
-      const gdDiff = getStat(b, 'pointDifferential') - getStat(a, 'pointDifferential');
+      const gdDiff = getStat(b,'pointDifferential') - getStat(a,'pointDifferential');
       if (gdDiff !== 0) return gdDiff;
-      return getStat(b, 'goalsFor') - getStat(a, 'goalsFor');
+      return getStat(b,'goalsFor') - getStat(a,'goalsFor');
     });
     const hasGroupName = children.length > 1;
 
@@ -776,22 +776,22 @@ function renderTable(el, data) {
     const tbody = entries.map((entry, index) => {
       const teamName = entry.team?.displayName || 'Team';
       const teamBadge = entry.team?.logos?.[0]?.href || entry.team?.logo || '';
-
+      
       const rank = entry.stats?.find(s => s.name === 'rank' || s.name === 'position')?.value ?? (index + 1);
       const played = entry.stats?.find(s => s.name === 'gamesPlayed')?.value ?? 0;
       const wins = entry.stats?.find(s => s.name === 'wins')?.value ?? 0;
       const draws = entry.stats?.find(s => s.name === 'ties')?.value ?? 0;
       const losses = entry.stats?.find(s => s.name === 'losses')?.value ?? 0;
-
+      
       const goalsFor = entry.stats?.find(s => s.name === 'goalsFor')?.value ?? 0;
       const goalsAgainst = entry.stats?.find(s => s.name === 'goalsAgainst')?.value ?? 0;
-
+      
       const gd = entry.stats?.find(s => s.name === 'pointDifferential')?.value ?? 0;
       const gdStr = gd > 0 ? `+${gd}` : String(gd);
       const gdClr = gd > 0 ? '#4ade80' : gd < 0 ? '#f87171' : '#94a3b8';
 
       const pts = entry.stats?.find(s => s.name === 'points')?.value ?? 0;
-
+      
       // Form string like W-D-L-W-W
       const formStr = entry.stats?.find(s => s.name === 'summary')?.displayValue || '';
       const formHtml = formStr ? formStr.split('-').map(char => {
@@ -803,7 +803,7 @@ function renderTable(el, data) {
       // Border highlight for Champions League / Relegation in PL
       let borderLeftStyle = '';
       if (_league === 'pl') {
-        if (rank <= 4) borderLeftStyle = 'border-left:3px solid #60a5fa;'; // UCL
+        if (rank <= 4)  borderLeftStyle = 'border-left:3px solid #60a5fa;'; // UCL
         else if (rank === 5) borderLeftStyle = 'border-left:3px solid #fb923c;'; // UEL
         else if (rank >= 18) borderLeftStyle = 'border-left:3px solid #f87171;'; // Relegation
       }
@@ -844,8 +844,8 @@ function renderTable(el, data) {
 // ── Team panel ─────────────────────────────────────────────────────
 async function openTeamPanel(teamId, teamName, teamBadgeUrl) {
   _teamPanelId = teamId;
-  const panel = document.getElementById('fbTeamPanel');
-  const inner = document.getElementById('fbTeamPanelInner');
+  const panel   = document.getElementById('fbTeamPanel');
+  const inner   = document.getElementById('fbTeamPanelInner');
   const overlay = document.getElementById('fbTeamOverlay');
   if (!panel || !inner) return;
 
@@ -883,7 +883,7 @@ async function openTeamPanel(teamId, teamName, teamBadgeUrl) {
 
     renderTeamDetails(teamData, schedData, teamName);
   } catch (err) {
-    document.getElementById('fbTeamSchedule').innerHTML = `<div class="error-msg">️ Lỗi tải: ${err.message}</div>`;
+ document.getElementById('fbTeamSchedule').innerHTML = `<div class="error-msg">️ Lỗi tải: ${err.message}</div>`;
   }
 }
 
@@ -894,7 +894,7 @@ function renderTeamDetails(teamData, schedData, teamName) {
   const schedEl = document.getElementById('fbTeamSchedule');
 
   if (metaEl) {
-    const location = team.venue?.fullName ? `️ ${team.venue.fullName}` : 'Sân vận động';
+ const location = team.venue?.fullName ? `️ ${team.venue.fullName}` : 'Sân vận động';
     metaEl.innerHTML = `${location}`;
   }
 
@@ -912,11 +912,11 @@ function renderTeamDetails(teamData, schedData, teamName) {
     schedEl.innerHTML = events.slice(0, 8).map(e => {
       const status = e.status?.type;
       const isPost = status?.state === 'post';
-
+      
       const competitor = e.competitions?.[0]?.competitors || [];
       const home = competitor.find(c => c.homeAway === 'home') || {};
       const away = competitor.find(c => c.homeAway === 'away') || {};
-
+      
       const homeName = home.team?.displayName || '';
       const awayName = away.team?.displayName || '';
 
@@ -928,7 +928,7 @@ function renderTeamDetails(teamData, schedData, teamName) {
       const oppBadge = isHome ? (away.team?.logos?.[0]?.href || away.team?.logo) : (home.team?.logos?.[0]?.href || home.team?.logo);
       const isWin = isPost && ((isHome && home.score > away.score) || (!isHome && away.score > home.score));
       const isLoss = isPost && ((isHome && home.score < away.score) || (!isHome && away.score < home.score));
-
+      
       const resChar = isPost ? (isWin ? 'T' : isLoss ? 'B' : 'H') : '—';
       const resCls = isPost ? (isWin ? 'fb-tp-w' : isLoss ? 'fb-tp-l' : 'fb-tp-d') : 'fb-tp-d';
 
@@ -950,9 +950,9 @@ function renderTeamDetails(teamData, schedData, teamName) {
 
 function closeTeamPanel() {
   _teamPanelId = null;
-  const panel = document.getElementById('fbTeamPanel');
+  const panel   = document.getElementById('fbTeamPanel');
   const overlay = document.getElementById('fbTeamOverlay');
-  if (panel) panel.classList.remove('open');
+  if (panel)   panel.classList.remove('open');
   if (overlay) overlay.classList.remove('visible');
 }
 
@@ -962,7 +962,7 @@ function renderStats(el, data) {
   const statsList = data.stats || [];
 
   if (!statsList.length) {
-    el.innerHTML = `<div class="fb-empty">Hiện chưa có dữ liệu thống kê cá nhân.</div>`;
+ el.innerHTML = `<div class="fb-empty">Hiện chưa có dữ liệu thống kê cá nhân.</div>`;
     return;
   }
 
@@ -973,10 +973,10 @@ function renderStats(el, data) {
     const athlete = ldr.athlete || {};
     const team = athlete.team || {};
     const teamLogo = team.logos?.[0]?.href || '';
-
+    
     // Find player image or default to jersey
     const athleteImg = athlete.jerseyImage?.[0]?.href || athlete.headshot || '';
-    const imgHtml = athleteImg
+    const imgHtml = athleteImg 
       ? `<img src="${athleteImg}" alt="" style="width:28px;height:28px;object-fit:contain;border-radius:50%;background:rgba(255,255,255,0.05);margin-right:8px;border:1px solid rgba(255,255,255,0.1)" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2228%22 height=%2228%22><rect width=%22100%%22 height=%22100%%22 fill=%22%232a2a2a%22/><text x=%2250%%22 y=%2260%%22 font-size=%2210%22 fill=%22%23666%22 font-family=%22sans-serif%22 font-weight=%22bold%22 text-anchor=%22middle%22>${athlete.jersey || '-'}</text></svg>'">`
       : `<div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--text-muted);margin-right:8px;">${athlete.jersey || '-'}</div>`;
 
@@ -999,7 +999,7 @@ function renderStats(el, data) {
   const renderCol = (title, icon, dataObj) => {
     const leaders = dataObj?.leaders || [];
     const listHtml = leaders.slice(0, 15).map((ldr, idx) => renderLeaderRow(ldr, idx)).join('');
-
+    
     return `
       <div class="fb-leader-col">
         <h3 class="fb-leader-title">

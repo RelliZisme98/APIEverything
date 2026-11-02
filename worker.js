@@ -3940,7 +3940,7 @@ function _parseTopCVHtml(html) {
               }
             }
           }
-        } catch { }
+        } catch {}
       }
     }
 
@@ -3951,8 +3951,8 @@ function _parseTopCVHtml(html) {
         const block = itemBlocks[i];
 
         const titleMatch = block.match(/<h[2-4][^>]*class=['"][^'"]*title[^'"]*['"][^>]*>\s*<a[^>]*href=['"]([^'"]+)['"][^>]*>([\s\S]*?)<\/a>/i) ||
-          block.match(/<a[^>]*class=['"][^'"]*job-item__title[^'"]*['"][^>]*href=['"]([^'"]+)['"][^>]*>([\s\S]*?)<\/a>/i) ||
-          block.match(/<a[^>]*href=['"](https:\/\/www\.topcv\.vn\/viec-lam\/[^'"]+)['"][^>]*title=['"]([^'"]+)['"]/i);
+                           block.match(/<a[^>]*class=['"][^'"]*job-item__title[^'"]*['"][^>]*href=['"]([^'"]+)['"][^>]*>([\s\S]*?)<\/a>/i) ||
+                           block.match(/<a[^>]*href=['"](https:\/\/www\.topcv\.vn\/viec-lam\/[^'"]+)['"][^>]*title=['"]([^'"]+)['"]/i);
 
         if (!titleMatch) continue;
 
@@ -3962,15 +3962,15 @@ function _parseTopCVHtml(html) {
         if (!_isValidJob({ title })) continue;
 
         const companyMatch = block.match(/class=['"][^'"]*company[^'"]*['"][^>]*>([\s\S]*?)<\/a>/i) ||
-          block.match(/class=['"][^'"]*company[^'"]*['"][^>]*>([\s\S]*?)<\//i);
+                             block.match(/class=['"][^'"]*company[^'"]*['"][^>]*>([\s\S]*?)<\//i);
         const company = companyMatch ? _cleanText(companyMatch[1]) : '';
 
         const salaryMatch = block.match(/class=['"][^'"]*salary[^'"]*['"][^>]*>([\s\S]*?)<\//i) ||
-          block.match(/class=['"][^'"]*title-salary[^'"]*['"][^>]*>([\s\S]*?)<\//i);
+                            block.match(/class=['"][^'"]*title-salary[^'"]*['"][^>]*>([\s\S]*?)<\//i);
         const salary = salaryMatch ? _cleanText(salaryMatch[1]) : 'Thỏa thuận';
 
         const locMatch = block.match(/class=['"][^'"]*address[^'"]*['"][^>]*>([\s\S]*?)<\//i) ||
-          block.match(/class=['"][^'"]*location[^'"]*['"][^>]*>([\s\S]*?)<\//i);
+                         block.match(/class=['"][^'"]*location[^'"]*['"][^>]*>([\s\S]*?)<\//i);
         const location = locMatch ? _cleanText(locMatch[1]) : '';
 
         jobs.push({
